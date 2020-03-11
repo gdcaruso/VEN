@@ -1,0 +1,2798 @@
+--------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\wb563583\Documents\GitHub\ENCOVI-2019\data_management\management
+> \3. cleaning\daniel.log
+  log type:  text
+ opened on:  11 Mar 2020, 15:45:43
+
+. 
+. 
+. qui levelsof bien, local(foodlist)
+
+. local fname: value label bien
+
+. 
+. foreach f of local foodlist {
+  2. 
+.         local vf: label `fname' `f'
+  3.                 
+.         qui levelsof unidad_medida if bien ==`f', local(units)
+  4.         local uname: value label unidad_medida
+  5.                 
+.                         foreach u of local units {
+  6.                         local vu: label `uname' `u'
+  7.                         
+.                         //Levels of sizes
+.                                 qui levelsof tamano if bien ==`f' & unidad_medida==`
+> u' , local(tamanos)
+  8.                                 local tname: value label tamano
+  9.                                 local tcounts : list sizeof tamanos
+ 10.                         
+.                                 // Unidades de medida de la encuesta
+.                                 if "`vu'" != "Otro" {
+ 11.                                 
+.                                                                         if `tcounts'
+>  == 0 {
+ 12.                                                                         display "
+> food = `vf' (`f')"
+ 13.                                                                         display "
+> unit = `vu' (`u')"
+ 14.                                                                         display "
+> size = no size"
+ 15.                                                                         tab canti
+> dad if (bien ==`f' & unidad_medida==`u'), mi
+ 16.                                                                            }
+ 17.                                                                         else {
+ 18.                                                                         foreach t
+>  of local tamanos{
+ 19.                                                                         local vt:
+>  label `tname' `t'
+ 20.                                                                         display "
+> food = `vf' (`f')"
+ 21.                                                                         display "
+> unit = `vu' (`u')"     
+ 22.                                                                         display "
+> size = `vt' (`t')"      
+ 23.                                                                         tab canti
+> dad if (bien ==`f' & unidad_medida==`u'), mi
+ 24.                                                                                  
+>        }
+ 25.                                                                                 }
+ 26.                                                                         }
+ 27.                                 //Otras unidades de medida                       
+>                
+.                                 else                            {
+ 28.                                 //Local de las otras unidades de medida
+.                                 qui levelsof unidad_medida_ot if bien ==`f' & unidad
+> _medida ==`u', local(units_ot)
+ 29.                                 
+.                                 //Para cada 
+.                                 foreach o of local units_ot {
+ 30.                                 
+.                                 qui levelsof tamano if bien ==`f' & unidad_medida==`
+> u' & unidad_medida_ot=="`o'", local(tamanos_ot)
+ 31.                                 local tnamet: value label tamano
+ 32.                                 local tcountst : list sizeof tamanos
+ 33.                                 
+.                                                                                 if `
+> tcountst' == 0 {
+ 34.                                                                                 d
+> isplay "food = `vf' (`f')"
+ 35.                                                                                 d
+> isplay "unit = `vu' (`u')"
+ 36.                                                                                 d
+> isplay "unit_ot = `o'"
+ 37.                                                                                 t
+> ab cantidad if (bien ==`f' & unidad_medida ==`u' & unidad_medida_ot=="`o'"), mi
+ 38.                                                                                  
+>                                 }
+ 39.                                                                                 e
+> lse {
+ 40.                                                                                 f
+> oreach k of local tamanos_ot {
+ 41.                                                                                 l
+> ocal vk: label `tnamet' `k'
+ 42.                                                                                 d
+> isplay "food = `vf' (`f')"
+ 43.                                                                                 d
+> isplay "unit = `vu' (`u')"
+ 44.                                                                                 d
+> isplay "unit_ot = `o'"
+ 45.                                                                                 t
+> ab cantidad if (bien ==`f' & unidad_medida ==`u' & unidad_medida_ot=="`o'" & tamano=
+> =`k'), mi
+ 46.                                                                                 
+.                                                                                     
+>                                                             }
+ 47.                                                                                 }
+ 48.                                 
+.                                         
+.                                                                                     
+>     }
+ 49.                                                                         }
+ 50.                                 }
+ 51.                         }
+food = Arroz (1)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        388       93.27       93.27
+          3 |          2        0.48       93.75
+          5 |          2        0.48       94.23
+         10 |          3        0.72       94.95
+         12 |          1        0.24       95.19
+         20 |          6        1.44       96.63
+         24 |          1        0.24       96.87
+         29 |          1        0.24       97.12
+         30 |          2        0.48       97.60
+         48 |          1        0.24       97.84
+         60 |          1        0.24       98.08
+         80 |          2        0.48       98.56
+        100 |          2        0.48       99.04
+        150 |          1        0.24       99.28
+        300 |          1        0.24       99.52
+        500 |          1        0.24       99.76
+      75000 |          1        0.24      100.00
+------------+-----------------------------------
+      Total |        416      100.00
+food = Arroz (1)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        500 |          5      100.00      100.00
+------------+-----------------------------------
+      Total |          5      100.00
+food = Harina de arroz (2)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         43       89.58       89.58
+          8 |          1        2.08       91.67
+         20 |          2        4.17       95.83
+         36 |          1        2.08       97.92
+        500 |          1        2.08      100.00
+------------+-----------------------------------
+      Total |         48      100.00
+food = Harina de arroz (2)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1        1.41        1.41
+        100 |          1        1.41        2.82
+        200 |          6        8.45       11.27
+        250 |          4        5.63       16.90
+        300 |          1        1.41       18.31
+        400 |         20       28.17       46.48
+        445 |          1        1.41       47.89
+        450 |         17       23.94       71.83
+        500 |         11       15.49       87.32
+        800 |          1        1.41       88.73
+        900 |          8       11.27      100.00
+------------+-----------------------------------
+      Total |         71      100.00
+food = Harina de maiz (7)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        377       92.63       92.63
+          2 |          2        0.49       93.12
+          3 |          1        0.25       93.37
+          4 |          1        0.25       93.61
+         10 |          1        0.25       93.86
+         15 |          1        0.25       94.10
+         20 |          6        1.47       95.58
+         24 |          1        0.25       95.82
+         30 |          3        0.74       96.56
+         39 |          1        0.25       96.81
+         40 |          2        0.49       97.30
+         48 |          2        0.49       97.79
+         53 |          1        0.25       98.03
+         55 |          1        0.25       98.28
+         60 |          1        0.25       98.53
+        100 |          1        0.25       98.77
+        200 |          1        0.25       99.02
+        216 |          1        0.25       99.26
+        300 |          1        0.25       99.51
+        600 |          1        0.25       99.75
+       1000 |          1        0.25      100.00
+------------+-----------------------------------
+      Total |        407      100.00
+food = Harina de maiz (7)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          2       66.67       66.67
+        500 |          1       33.33      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Harina de maiz (7)
+unit = Pieza de pan (40)
+size = Grande (campesino) (4)
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Harina de maiz (7)
+unit = Pieza de pan (40)
+size = Mediano ( canilla) (5)
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Harina de maiz (7)
+unit = Pieza de pan (40)
+size = Pequeño (Francés) (6)
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Pan de trigo (9)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          8       88.89       88.89
+         35 |          1       11.11      100.00
+------------+-----------------------------------
+      Total |          9      100.00
+food = Pan de trigo (9)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          4       36.36       36.36
+        100 |          1        9.09       45.45
+        150 |          1        9.09       54.55
+        180 |          1        9.09       63.64
+        300 |          1        9.09       72.73
+        350 |          1        9.09       81.82
+        500 |          2       18.18      100.00
+------------+-----------------------------------
+      Total |         11      100.00
+food = Pan de trigo (9)
+unit = Pieza de pan (40)
+size = Grande (campesino) (4)
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        155       92.81       92.81
+          2 |          1        0.60       93.41
+          6 |          2        1.20       94.61
+         10 |          2        1.20       95.81
+         12 |          1        0.60       96.41
+         30 |          5        2.99       99.40
+         72 |          1        0.60      100.00
+------------+-----------------------------------
+      Total |        167      100.00
+food = Pan de trigo (9)
+unit = Pieza de pan (40)
+size = Mediano ( canilla) (5)
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        155       92.81       92.81
+          2 |          1        0.60       93.41
+          6 |          2        1.20       94.61
+         10 |          2        1.20       95.81
+         12 |          1        0.60       96.41
+         30 |          5        2.99       99.40
+         72 |          1        0.60      100.00
+------------+-----------------------------------
+      Total |        167      100.00
+food = Pan de trigo (9)
+unit = Pieza de pan (40)
+size = Pequeño (Francés) (6)
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        155       92.81       92.81
+          2 |          1        0.60       93.41
+          6 |          2        1.20       94.61
+         10 |          2        1.20       95.81
+         12 |          1        0.60       96.41
+         30 |          5        2.99       99.40
+         72 |          1        0.60      100.00
+------------+-----------------------------------
+      Total |        167      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = De Sandwich
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = Paquete de acemitas
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         15 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = Unidad
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = bolsa de 10 panes
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = bolsa de 10 panes pequeños
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = pan canilla
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = paquete
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = paquete
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         10 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = paquete de 10 unidades
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = paquete de dos panes canilla
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pan de trigo (9)
+unit = Otro (60)
+unit_ot = pieza de pan dulce
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Pasta (fideos) (10)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        204       86.81       86.81
+          2 |          1        0.43       87.23
+          3 |          1        0.43       87.66
+          4 |          1        0.43       88.09
+          5 |          1        0.43       88.51
+          6 |          1        0.43       88.94
+         10 |          1        0.43       89.36
+         12 |          2        0.85       90.21
+         15 |          1        0.43       90.64
+         20 |          2        0.85       91.49
+         24 |          1        0.43       91.91
+         25 |          1        0.43       92.34
+         30 |          3        1.28       93.62
+         40 |          2        0.85       94.47
+         60 |          1        0.43       94.89
+         72 |          1        0.43       95.32
+        100 |          1        0.43       95.74
+        400 |          1        0.43       96.17
+        450 |          1        0.43       96.60
+        500 |          8        3.40      100.00
+------------+-----------------------------------
+      Total |        235      100.00
+food = Pasta (fideos) (10)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          9        5.70        5.70
+         30 |          1        0.63        6.33
+         36 |          2        1.27        7.59
+         96 |          1        0.63        8.23
+        180 |          1        0.63        8.86
+        200 |          1        0.63        9.49
+        250 |          6        3.80       13.29
+        360 |          1        0.63       13.92
+        400 |          2        1.27       15.19
+        450 |          6        3.80       18.99
+        500 |        127       80.38       99.37
+      50000 |          1        0.63      100.00
+------------+-----------------------------------
+      Total |        158      100.00
+food = Carne de res (bistec) (12)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         75       92.59       92.59
+         30 |          1        1.23       93.83
+         50 |          4        4.94       98.77
+        300 |          1        1.23      100.00
+------------+-----------------------------------
+      Total |         81      100.00
+food = Carne de res (bistec) (12)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        250 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Carne de res (molida) (13)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         85       93.41       93.41
+         20 |          1        1.10       94.51
+         30 |          1        1.10       95.60
+         40 |          1        1.10       96.70
+         50 |          2        2.20       98.90
+        400 |          1        1.10      100.00
+------------+-----------------------------------
+      Total |         91      100.00
+food = Carne de res (molida) (13)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        250 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Carne de res (para esmechar) (14)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         56       90.32       90.32
+         20 |          1        1.61       91.94
+         30 |          1        1.61       93.55
+         40 |          1        1.61       95.16
+         50 |          2        3.23       98.39
+        400 |          1        1.61      100.00
+------------+-----------------------------------
+      Total |         62      100.00
+food = Hueso de res, pata de res, pata de pollo (19)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         43       93.48       93.48
+         20 |          1        2.17       95.65
+         50 |          1        2.17       97.83
+        140 |          1        2.17      100.00
+------------+-----------------------------------
+      Total |         46      100.00
+food = Hueso de res, pata de res, pata de pollo (19)
+unit = Pieza (bistec,chuleta, similares) (30)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Hueso de res, pata de res, pata de pollo (19)
+unit = Otro (60)
+unit_ot = Unidad
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Chorizo, jamón, mortaleda y otros embutidos (20)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        119       94.44       94.44
+         10 |          1        0.79       95.24
+         15 |          1        0.79       96.03
+         20 |          1        0.79       96.83
+         35 |          1        0.79       97.62
+         50 |          1        0.79       98.41
+         70 |          1        0.79       99.21
+     270000 |          1        0.79      100.00
+------------+-----------------------------------
+      Total |        126      100.00
+food = Chorizo, jamón, mortaleda y otros embutidos (20)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1        5.00        5.00
+         10 |          1        5.00       10.00
+         15 |          1        5.00       15.00
+         48 |          1        5.00       20.00
+        150 |          1        5.00       25.00
+        200 |          1        5.00       30.00
+        250 |          2       10.00       40.00
+        500 |          5       25.00       65.00
+        650 |          1        5.00       70.00
+        750 |          1        5.00       75.00
+        800 |          2       10.00       85.00
+        850 |          2       10.00       95.00
+        900 |          1        5.00      100.00
+------------+-----------------------------------
+      Total |         20      100.00
+food = Chorizo, jamón, mortaleda y otros embutidos (20)
+unit = Pieza (bistec,chuleta, similares) (30)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          5      100.00      100.00
+------------+-----------------------------------
+      Total |          5      100.00
+food = Chorizo, jamón, mortaleda y otros embutidos (20)
+unit = Otro (60)
+unit_ot = 1
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Chorizo, jamón, mortaleda y otros embutidos (20)
+unit = Otro (60)
+unit_ot = Unidad
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Chorizo, jamón, mortaleda y otros embutidos (20)
+unit = Otro (60)
+unit_ot = pasta de chorizo
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        250 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Chorizo, jamón, mortaleda y otros embutidos (20)
+unit = Otro (60)
+unit_ot = unidad de Salchicha
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Chorizo, jamón, mortaleda y otros embutidos (20)
+unit = Otro (60)
+unit_ot = unidad de salchicha
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Carne de pollo/gallina (22)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         78       91.76       91.76
+         30 |          1        1.18       92.94
+         50 |          1        1.18       94.12
+         70 |          1        1.18       95.29
+        100 |          2        2.35       97.65
+        200 |          1        1.18       98.82
+        500 |          1        1.18      100.00
+------------+-----------------------------------
+      Total |         85      100.00
+food = Carne de pollo/gallina (22)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1       25.00       25.00
+        400 |          1       25.00       50.00
+        600 |          1       25.00       75.00
+        700 |          1       25.00      100.00
+------------+-----------------------------------
+      Total |          4      100.00
+food = Sardinas frescas/congeladas (24)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          5      100.00      100.00
+------------+-----------------------------------
+      Total |          5      100.00
+food = Sardinas frescas/congeladas (24)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          3 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Sardinas frescas/congeladas (24)
+unit = Lata (80)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          4      100.00      100.00
+------------+-----------------------------------
+      Total |          4      100.00
+food = Pescado fresco (26)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         13      100.00      100.00
+------------+-----------------------------------
+      Total |         13      100.00
+food = Pescado fresco (26)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Leche en polvo, completa o descremada (29)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         59       95.16       95.16
+          5 |          1        1.61       96.77
+         10 |          1        1.61       98.39
+        500 |          1        1.61      100.00
+------------+-----------------------------------
+      Total |         62      100.00
+food = Leche en polvo, completa o descremada (29)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          2        2.67        2.67
+         20 |          1        1.33        4.00
+         96 |          1        1.33        5.33
+        100 |         10       13.33       18.67
+        120 |          1        1.33       20.00
+        125 |          5        6.67       26.67
+        170 |          1        1.33       28.00
+        200 |          2        2.67       30.67
+        250 |          2        2.67       33.33
+        400 |         21       28.00       61.33
+        500 |         19       25.33       86.67
+        600 |          1        1.33       88.00
+        800 |          5        6.67       94.67
+        900 |          4        5.33      100.00
+------------+-----------------------------------
+      Total |         75      100.00
+food = Leche en polvo, completa o descremada (29)
+unit = Litros (3)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Leche en polvo, completa o descremada (29)
+unit = Otro (60)
+unit_ot = Teta
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Leche en polvo, completa o descremada (29)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Queso blanco (31)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        285       91.35       91.35
+          8 |          2        0.64       91.99
+         10 |          4        1.28       93.27
+         15 |          2        0.64       93.91
+         16 |          2        0.64       94.55
+         20 |          4        1.28       95.83
+         30 |          4        1.28       97.12
+         40 |          1        0.32       97.44
+         50 |          3        0.96       98.40
+        100 |          2        0.64       99.04
+        200 |          1        0.32       99.36
+        250 |          1        0.32       99.68
+     260000 |          1        0.32      100.00
+------------+-----------------------------------
+      Total |        312      100.00
+food = Queso blanco (31)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          4 |          1       14.29       14.29
+        100 |          1       14.29       28.57
+        150 |          1       14.29       42.86
+        200 |          1       14.29       57.14
+        250 |          1       14.29       71.43
+        500 |          2       28.57      100.00
+------------+-----------------------------------
+      Total |          7      100.00
+food = Queso blanco (31)
+unit = Litros (3)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Queso blanco (31)
+unit = Cartón (91)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Queso blanco (31)
+unit = Medio cartón (92)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Queso blanco (31)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Huevos (unidades) (34)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Huevos (unidades) (34)
+unit = Otro (60)
+unit_ot = Mini cartón de 6 unidades
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        126 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Huevos (unidades) (34)
+unit = Cartón (91)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        104       83.20       83.20
+          2 |          1        0.80       84.00
+          3 |          1        0.80       84.80
+          6 |          1        0.80       85.60
+          8 |          2        1.60       87.20
+         10 |          1        0.80       88.00
+         12 |          2        1.60       89.60
+         20 |          1        0.80       90.40
+         24 |          1        0.80       91.20
+         30 |          7        5.60       96.80
+         36 |          2        1.60       98.40
+        100 |          1        0.80       99.20
+        120 |          1        0.80      100.00
+------------+-----------------------------------
+      Total |        125      100.00
+food = Huevos (unidades) (34)
+unit = Medio cartón (92)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         25       62.50       62.50
+         15 |         10       25.00       87.50
+         24 |          1        2.50       90.00
+         30 |          2        5.00       95.00
+         35 |          1        2.50       97.50
+         48 |          1        2.50      100.00
+------------+-----------------------------------
+      Total |         40      100.00
+food = Huevos (unidades) (34)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        174       97.75       97.75
+          3 |          2        1.12       98.88
+         30 |          1        0.56       99.44
+         36 |          1        0.56      100.00
+------------+-----------------------------------
+      Total |        178      100.00
+food = Aceite (35)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         33       97.06       97.06
+        900 |          1        2.94      100.00
+------------+-----------------------------------
+      Total |         34      100.00
+food = Aceite (35)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          4       44.44       44.44
+        100 |          2       22.22       66.67
+        500 |          2       22.22       88.89
+        900 |          1       11.11      100.00
+------------+-----------------------------------
+      Total |          9      100.00
+food = Aceite (35)
+unit = Litros (3)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        277       90.23       90.23
+          2 |          2        0.65       90.88
+          4 |          1        0.33       91.21
+          5 |          2        0.65       91.86
+          6 |          2        0.65       92.51
+         10 |          3        0.98       93.49
+         12 |          2        0.65       94.14
+         15 |          2        0.65       94.79
+         20 |          4        1.30       96.09
+         24 |          1        0.33       96.42
+         40 |          1        0.33       96.74
+         48 |          2        0.65       97.39
+        100 |          1        0.33       97.72
+        144 |          1        0.33       98.05
+        180 |          1        0.33       98.37
+        300 |          1        0.33       98.70
+        480 |          1        0.33       99.02
+        500 |          2        0.65       99.67
+        900 |          1        0.33      100.00
+------------+-----------------------------------
+      Total |        307      100.00
+food = Aceite (35)
+unit = Mililitros (4)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          6       11.32       11.32
+         15 |          1        1.89       13.21
+         50 |          1        1.89       15.09
+        100 |          7       13.21       28.30
+        130 |          1        1.89       30.19
+        150 |          2        3.77       33.96
+        200 |          2        3.77       37.74
+        250 |          1        1.89       39.62
+        500 |          8       15.09       54.72
+        900 |         24       45.28      100.00
+------------+-----------------------------------
+      Total |         53      100.00
+food = Aceite (35)
+unit = Otro (60)
+unit_ot = 3/4  de franco de compota
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Aceite (35)
+unit = Otro (60)
+unit_ot = Teta
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          5      100.00      100.00
+------------+-----------------------------------
+      Total |          5      100.00
+food = Margarina/Mantequilla (36)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         43       81.13       81.13
+          3 |          1        1.89       83.02
+          5 |          1        1.89       84.91
+          6 |          1        1.89       86.79
+         10 |          1        1.89       88.68
+         12 |          2        3.77       92.45
+         20 |          2        3.77       96.23
+      48000 |          1        1.89       98.11
+     240000 |          1        1.89      100.00
+------------+-----------------------------------
+      Total |         53      100.00
+food = Margarina/Mantequilla (36)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         20        6.51        6.51
+         10 |          2        0.65        7.17
+         12 |          1        0.33        7.49
+         20 |          3        0.98        8.47
+         24 |          1        0.33        8.79
+         35 |          1        0.33        9.12
+         36 |          1        0.33        9.45
+        100 |          1        0.33        9.77
+        125 |          4        1.30       11.07
+        150 |          1        0.33       11.40
+        200 |         13        4.23       15.64
+        240 |          2        0.65       16.29
+        250 |         83       27.04       43.32
+        350 |          1        0.33       43.65
+        400 |          4        1.30       44.95
+        450 |          5        1.63       46.58
+        454 |          1        0.33       46.91
+        500 |        157       51.14       98.05
+        900 |          3        0.98       99.02
+       3000 |          1        0.33       99.35
+      45000 |          1        0.33       99.67
+     250000 |          1        0.33      100.00
+------------+-----------------------------------
+      Total |        307      100.00
+food = Margarina/Mantequilla (36)
+unit = Otro (60)
+unit_ot = barra
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        120 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Margarina/Mantequilla (36)
+unit = Otro (60)
+unit_ot = barrita
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Margarina/Mantequilla (36)
+unit = Otro (60)
+unit_ot = lata
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          8      100.00      100.00
+------------+-----------------------------------
+      Total |          8      100.00
+food = Cambur (38)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        118       94.40       94.40
+          5 |          1        0.80       95.20
+         10 |          1        0.80       96.00
+         20 |          3        2.40       98.40
+         30 |          1        0.80       99.20
+         50 |          1        0.80      100.00
+------------+-----------------------------------
+      Total |        125      100.00
+food = Cambur (38)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Platanos (40)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        107       95.54       95.54
+          4 |          1        0.89       96.43
+         15 |          1        0.89       97.32
+         50 |          1        0.89       98.21
+        110 |          1        0.89       99.11
+        300 |          1        0.89      100.00
+------------+-----------------------------------
+      Total |        112      100.00
+food = Platanos (40)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        500 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Platanos (40)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         75       91.46       91.46
+         20 |          2        2.44       93.90
+         50 |          1        1.22       95.12
+         70 |          1        1.22       96.34
+        100 |          1        1.22       97.56
+       7000 |          1        1.22       98.78
+      12000 |          1        1.22      100.00
+------------+-----------------------------------
+      Total |         82      100.00
+food = Lechosa (41)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         37       94.87       94.87
+          5 |          1        2.56       97.44
+         10 |          1        2.56      100.00
+------------+-----------------------------------
+      Total |         39      100.00
+food = Tomates (43)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        128       96.97       96.97
+          3 |          1        0.76       97.73
+          5 |          1        0.76       98.48
+         10 |          2        1.52      100.00
+------------+-----------------------------------
+      Total |        132      100.00
+food = Tomates (43)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1       50.00       50.00
+        100 |          1       50.00      100.00
+------------+-----------------------------------
+      Total |          2      100.00
+food = Tomates (43)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          9      100.00      100.00
+------------+-----------------------------------
+      Total |          9      100.00
+food = Aji dulce, pimentón, pimiento (45)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        100       95.24       95.24
+          3 |          1        0.95       96.19
+          9 |          1        0.95       97.14
+         10 |          1        0.95       98.10
+         30 |          1        0.95       99.05
+        100 |          1        0.95      100.00
+------------+-----------------------------------
+      Total |        105      100.00
+food = Aji dulce, pimentón, pimiento (45)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          2       13.33       13.33
+          2 |          1        6.67       20.00
+        100 |          5       33.33       53.33
+        200 |          2       13.33       66.67
+        250 |          3       20.00       86.67
+        500 |          2       13.33      100.00
+------------+-----------------------------------
+      Total |         15      100.00
+food = Aji dulce, pimentón, pimiento (45)
+unit = Otro (60)
+unit_ot = Bolsita
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Aji dulce, pimentón, pimiento (45)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          6       66.67       66.67
+          3 |          2       22.22       88.89
+          5 |          1       11.11      100.00
+------------+-----------------------------------
+      Total |          9      100.00
+food = Cebolla (46)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        152       95.60       95.60
+          3 |          1        0.63       96.23
+          9 |          1        0.63       96.86
+         10 |          2        1.26       98.11
+         20 |          1        0.63       98.74
+         30 |          1        0.63       99.37
+        100 |          1        0.63      100.00
+------------+-----------------------------------
+      Total |        159      100.00
+food = Cebolla (46)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          2       22.22       22.22
+          6 |          1       11.11       33.33
+        100 |          4       44.44       77.78
+        200 |          1       11.11       88.89
+        500 |          1       11.11      100.00
+------------+-----------------------------------
+      Total |          9      100.00
+food = Cebolla (46)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          9      100.00      100.00
+------------+-----------------------------------
+      Total |          9      100.00
+food = Auyama (47)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         68       95.77       95.77
+          8 |          1        1.41       97.18
+         10 |          1        1.41       98.59
+         65 |          1        1.41      100.00
+------------+-----------------------------------
+      Total |         71      100.00
+food = Auyama (47)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1       50.00       50.00
+        150 |          1       50.00      100.00
+------------+-----------------------------------
+      Total |          2      100.00
+food = Zanahorias (50)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         70       95.89       95.89
+          2 |          1        1.37       97.26
+          8 |          1        1.37       98.63
+         10 |          1        1.37      100.00
+------------+-----------------------------------
+      Total |         73      100.00
+food = Zanahorias (50)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        100 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Zanahorias (50)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Cebollin, ajoporro. (51)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         84       95.45       95.45
+          3 |          1        1.14       96.59
+          5 |          1        1.14       97.73
+         10 |          2        2.27      100.00
+------------+-----------------------------------
+      Total |         88      100.00
+food = Cebollin, ajoporro. (51)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          2       10.53       10.53
+         50 |          2       10.53       21.05
+        100 |          5       26.32       47.37
+        200 |          5       26.32       73.68
+        250 |          2       10.53       84.21
+        400 |          1        5.26       89.47
+        500 |          2       10.53      100.00
+------------+-----------------------------------
+      Total |         19      100.00
+food = Cebollin, ajoporro. (51)
+unit = Otro (60)
+unit_ot = Bolsita
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Cebollin, ajoporro. (51)
+unit = Otro (60)
+unit_ot = rama
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Cebollin, ajoporro. (51)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          2      100.00      100.00
+------------+-----------------------------------
+      Total |          2      100.00
+food = Cilantro (52)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         64       95.52       95.52
+          2 |          1        1.49       97.01
+          5 |          1        1.49       98.51
+         10 |          1        1.49      100.00
+------------+-----------------------------------
+      Total |         67      100.00
+food = Cilantro (52)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |          1        3.85        3.85
+          1 |          4       15.38       19.23
+         10 |          1        3.85       23.08
+         50 |          1        3.85       26.92
+        100 |          9       34.62       61.54
+        200 |          5       19.23       80.77
+        250 |          2        7.69       88.46
+        300 |          1        3.85       92.31
+        400 |          1        3.85       96.15
+         .a |          1        3.85      100.00
+------------+-----------------------------------
+      Total |         26      100.00
+food = Cilantro (52)
+unit = Otro (60)
+unit_ot = Bolsita
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Cilantro (52)
+unit = Otro (60)
+unit_ot = paquete
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Cilantro (52)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Caraotas (53)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        143       92.86       92.86
+         10 |          4        2.60       95.45
+         11 |          1        0.65       96.10
+         15 |          1        0.65       96.75
+         24 |          1        0.65       97.40
+         70 |          1        0.65       98.05
+        100 |          1        0.65       98.70
+        120 |          1        0.65       99.35
+      90000 |          1        0.65      100.00
+------------+-----------------------------------
+      Total |        154      100.00
+food = Caraotas (53)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         13       20.31       20.31
+         18 |          1        1.56       21.88
+         20 |          2        3.13       25.00
+         25 |          1        1.56       26.56
+        100 |          2        3.13       29.69
+        200 |          2        3.13       32.81
+        250 |          1        1.56       34.38
+        340 |          1        1.56       35.94
+        500 |         40       62.50       98.44
+     250000 |          1        1.56      100.00
+------------+-----------------------------------
+      Total |         64      100.00
+food = Frijoles (54)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         86       96.63       96.63
+         10 |          2        2.25       98.88
+        200 |          1        1.12      100.00
+------------+-----------------------------------
+      Total |         89      100.00
+food = Frijoles (54)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         10       23.81       23.81
+         20 |          1        2.38       26.19
+         30 |          1        2.38       28.57
+         60 |          1        2.38       30.95
+        150 |          1        2.38       33.33
+        250 |          3        7.14       40.48
+        400 |          1        2.38       42.86
+        500 |         23       54.76       97.62
+        800 |          1        2.38      100.00
+------------+-----------------------------------
+      Total |         42      100.00
+food = Lentejas (55)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         46       95.83       95.83
+         11 |          1        2.08       97.92
+         90 |          1        2.08      100.00
+------------+-----------------------------------
+      Total |         48      100.00
+food = Lentejas (55)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          8       12.50       12.50
+         20 |          2        3.13       15.63
+        200 |          1        1.56       17.19
+        250 |          6        9.38       26.56
+        500 |         45       70.31       96.88
+       2000 |          1        1.56       98.44
+     250000 |          1        1.56      100.00
+------------+-----------------------------------
+      Total |         64      100.00
+food = Yuca (61)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         70       92.11       92.11
+          2 |          1        1.32       93.42
+          3 |          1        1.32       94.74
+         10 |          2        2.63       97.37
+         45 |          1        1.32       98.68
+         60 |          1        1.32      100.00
+------------+-----------------------------------
+      Total |         76      100.00
+food = Yuca (61)
+unit = Torta (casabe) (160)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Papas (62)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        135       95.74       95.74
+          3 |          1        0.71       96.45
+          8 |          1        0.71       97.16
+         10 |          2        1.42       98.58
+         40 |          1        0.71       99.29
+        250 |          1        0.71      100.00
+------------+-----------------------------------
+      Total |        141      100.00
+food = Papas (62)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        100 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Papas (62)
+unit = Otro (60)
+unit_ot = Unidad
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Azúcar (66)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        364       92.15       92.15
+          3 |          1        0.25       92.41
+          5 |          1        0.25       92.66
+          6 |          1        0.25       92.91
+          8 |          1        0.25       93.16
+         15 |          1        0.25       93.42
+         20 |          8        2.03       95.44
+         24 |          2        0.51       95.95
+         25 |          1        0.25       96.20
+         30 |          4        1.01       97.22
+         40 |          2        0.51       97.72
+         50 |          1        0.25       97.97
+         55 |          1        0.25       98.23
+         60 |          1        0.25       98.48
+         80 |          1        0.25       98.73
+        120 |          1        0.25       98.99
+        380 |          1        0.25       99.24
+        480 |          1        0.25       99.49
+       1000 |          1        0.25       99.75
+      85000 |          1        0.25      100.00
+------------+-----------------------------------
+      Total |        395      100.00
+food = Azúcar (66)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          6 |          1        3.33        3.33
+         50 |          2        6.67       10.00
+         70 |          1        3.33       13.33
+        100 |         14       46.67       60.00
+        125 |          1        3.33       63.33
+        150 |          1        3.33       66.67
+        200 |          2        6.67       73.33
+        250 |          2        6.67       80.00
+        300 |          1        3.33       83.33
+        500 |          5       16.67      100.00
+------------+-----------------------------------
+      Total |         30      100.00
+food = Azúcar (66)
+unit = Otro (60)
+unit_ot = Teta
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          6 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Papelón (67)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         64       94.12       94.12
+          8 |          1        1.47       95.59
+         15 |          1        1.47       97.06
+         20 |          1        1.47       98.53
+        500 |          1        1.47      100.00
+------------+-----------------------------------
+      Total |         68      100.00
+food = Papelón (67)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          4        4.08        4.08
+         30 |          1        1.02        5.10
+        100 |          1        1.02        6.12
+        250 |          4        4.08       10.20
+        400 |         10       10.20       20.41
+        445 |          1        1.02       21.43
+        450 |          2        2.04       23.47
+        500 |         71       72.45       95.92
+        800 |          1        1.02       96.94
+        900 |          1        1.02       97.96
+       8000 |          1        1.02       98.98
+     500000 |          1        1.02      100.00
+------------+-----------------------------------
+      Total |         98      100.00
+food = Papelón (67)
+unit = Otro (60)
+unit_ot = Panela
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          4       80.00       80.00
+         25 |          1       20.00      100.00
+------------+-----------------------------------
+      Total |          5      100.00
+food = Papelón (67)
+unit = Otro (60)
+unit_ot = Unidad
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         15       88.24       88.24
+          6 |          1        5.88       94.12
+         12 |          1        5.88      100.00
+------------+-----------------------------------
+      Total |         17      100.00
+food = Papelón (67)
+unit = Otro (60)
+unit_ot = pieza
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          4      100.00      100.00
+------------+-----------------------------------
+      Total |          4      100.00
+food = Papelón (67)
+unit = Otro (60)
+unit_ot = pieza pequeña
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Café (71)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         41       75.93       75.93
+          3 |          1        1.85       77.78
+          6 |          1        1.85       79.63
+         10 |          1        1.85       81.48
+         12 |          3        5.56       87.04
+         15 |          2        3.70       90.74
+         20 |          2        3.70       94.44
+        250 |          2        3.70       98.15
+        500 |          1        1.85      100.00
+------------+-----------------------------------
+      Total |         54      100.00
+food = Café (71)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         17        5.17        5.17
+          4 |          1        0.30        5.47
+          6 |          1        0.30        5.78
+         10 |          2        0.61        6.38
+         12 |          1        0.30        6.69
+         15 |          2        0.61        7.29
+         19 |          1        0.30        7.60
+         20 |          5        1.52        9.12
+         24 |          1        0.30        9.42
+         25 |          3        0.91       10.33
+         35 |          1        0.30       10.64
+         40 |          1        0.30       10.94
+         45 |          1        0.30       11.25
+         48 |          1        0.30       11.55
+         50 |          9        2.74       14.29
+         60 |          1        0.30       14.59
+         72 |          2        0.61       15.20
+         80 |          1        0.30       15.50
+         90 |          1        0.30       15.81
+        100 |         41       12.46       28.27
+        125 |          6        1.82       30.09
+        150 |          1        0.30       30.40
+        180 |          1        0.30       30.70
+        200 |         70       21.28       51.98
+        240 |          1        0.30       52.28
+        250 |         94       28.57       80.85
+        290 |          1        0.30       81.16
+        300 |          1        0.30       81.46
+        400 |          5        1.52       82.98
+        500 |         51       15.50       98.48
+       2000 |          1        0.30       98.78
+     200000 |          1        0.30       99.09
+     250000 |          3        0.91      100.00
+------------+-----------------------------------
+      Total |        329      100.00
+food = Café (71)
+unit = Mililitros (4)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         20 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Café (71)
+unit = Taza (20)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Café (71)
+unit = Otro (60)
+unit_ot = Teta
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          6       75.00       75.00
+         10 |          1       12.50       87.50
+         50 |          1       12.50      100.00
+------------+-----------------------------------
+      Total |          8      100.00
+food = Café (71)
+unit = Otro (60)
+unit_ot = Teticas
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          2       66.67       66.67
+         50 |          1       33.33      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Café (71)
+unit = Otro (60)
+unit_ot = bolsa de 200 grs.
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Café (71)
+unit = Otro (60)
+unit_ot = bulto
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         50 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Café (71)
+unit = Otro (60)
+unit_ot = de cuarto de kilo
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          6 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Café (71)
+unit = Otro (60)
+unit_ot = paquetito (teta)
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Café (71)
+unit = Bolsa (130)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          8       88.89       88.89
+         50 |          1       11.11      100.00
+------------+-----------------------------------
+      Total |          9      100.00
+food = Sal (74)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        331       94.03       94.03
+          3 |          1        0.28       94.32
+          4 |          1        0.28       94.60
+          5 |          1        0.28       94.89
+         10 |          5        1.42       96.31
+         12 |          2        0.57       96.87
+         15 |          1        0.28       97.16
+         20 |          5        1.42       98.58
+         24 |          1        0.28       98.86
+         25 |          1        0.28       99.15
+         30 |          1        0.28       99.43
+         36 |          1        0.28       99.72
+         80 |          1        0.28      100.00
+------------+-----------------------------------
+      Total |        352      100.00
+food = Sal (74)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         12       25.00       25.00
+         12 |          1        2.08       27.08
+         20 |          2        4.17       31.25
+         50 |          2        4.17       35.42
+         60 |          1        2.08       37.50
+        100 |          7       14.58       52.08
+        200 |          7       14.58       66.67
+        240 |          1        2.08       68.75
+        250 |          3        6.25       75.00
+        400 |          2        4.17       79.17
+        500 |          9       18.75       97.92
+       5000 |          1        2.08      100.00
+------------+-----------------------------------
+      Total |         48      100.00
+food = Sal (74)
+unit = Otro (60)
+unit_ot = Bolsita
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Sal (74)
+unit = Otro (60)
+unit_ot = Teta
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Sal (74)
+unit = Otro (60)
+unit_ot = bulto
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Sal (74)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          4      100.00      100.00
+------------+-----------------------------------
+      Total |          4      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Kilogramos (1)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1       50.00       50.00
+         20 |          1       50.00      100.00
+------------+-----------------------------------
+      Total |          2      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Gramos (2)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         10        8.77        8.77
+          3 |          1        0.88        9.65
+          5 |          3        2.63       12.28
+          6 |          2        1.75       14.04
+         10 |         35       30.70       44.74
+         13 |          2        1.75       46.49
+         15 |         13       11.40       57.89
+         16 |          1        0.88       58.77
+         20 |          4        3.51       62.28
+         24 |          2        1.75       64.04
+         25 |          3        2.63       66.67
+         30 |         10        8.77       75.44
+         40 |          3        2.63       78.07
+         50 |          3        2.63       80.70
+         57 |          1        0.88       81.58
+         96 |          1        0.88       82.46
+        100 |          8        7.02       89.47
+        120 |          1        0.88       90.35
+        140 |          1        0.88       91.23
+        200 |          7        6.14       97.37
+        250 |          3        2.63      100.00
+------------+-----------------------------------
+      Total |        114      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Mililitros (4)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         10 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = Bolsita
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          3      100.00      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = Caja
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         25 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = Frasco
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         20 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = Papeletas
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        180 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = SOBRE
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = Sobresitos
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        100 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = onza
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = pote
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         53 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = sobre
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          2       66.67       66.67
+        100 |          1       33.33      100.00
+------------+-----------------------------------
+      Total |          3      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = sobre 100 gr
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Otro (60)
+unit_ot = sobresito
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         70 |          1       50.00       50.00
+        200 |          1       50.00      100.00
+------------+-----------------------------------
+      Total |          2      100.00
+food = Condimentos (comino, pimienta, curry, cubitos) (75)
+unit = Unidad (110)
+size = no size
+
+   9. ¿Cuál |
+      es la |
+cantidad de |
+ [ARTÍCULO] |
+          ? |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        163       90.56       90.56
+         15 |          2        1.11       91.67
+         20 |          1        0.56       92.22
+         24 |          1        0.56       92.78
+         30 |          1        0.56       93.33
+         48 |          1        0.56       93.89
+         50 |          4        2.22       96.11
+         60 |          1        0.56       96.67
+         72 |          1        0.56       97.22
+        100 |          2        1.11       98.33
+        200 |          2        1.11       99.44
+        240 |          1        0.56      100.00
+------------+-----------------------------------
+      Total |        180      100.00
+
+. 
+.         // To list the places where prices were observed
+.                 tab s2q1_os
+
+      1_oth. other source of collection |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+                                 ABASTO |         13        0.79        0.79
+                     ABASTO Y LICORERIA |         12        0.73        1.52
+                                 Abasto |        152        9.26       10.79
+                                BODEGON |         12        0.73       11.52
+                                Bodegon |         80        4.88       16.39
+                                Bodegón |         25        1.52       17.92
+                        CASA DE FAMILIA |         10        0.61       18.53
+                             Carnicería |          5        0.30       18.83
+               Carnicería / Mini Market |         31        1.89       20.72
+                      Carnicería/Abasto |         21        1.28       22.00
+                 Carnicería/Mini Market |         26        1.58       23.58
+                              Comercial |         70        4.27       27.85
+Distribuidora, venta al mayor y detal.. |         11        0.67       28.52
+                         Distribuidora. |          8        0.49       29.01
+                    Feria de Hortalizas |         18        1.10       30.10
+                            Frigorífico |         29        1.77       31.87
+                                 Galpon |         18        1.10       32.97
+                            Inversiones |         72        4.39       37.36
+                              Licoreria |          3        0.18       37.54
+        Licorería, abasto y Charcuteria |         13        0.79       38.33
+                              MARKETING |         13        0.79       39.12
+                            Mini Abasto |         28        1.71       40.83
+                            Mini Market |        100        6.09       46.92
+               Mini abasto y carniceria |         17        1.04       47.96
+                             MiniMarket |         14        0.85       48.81
+                             Minimarket |         69        4.20       53.02
+                  Multicomercializadora |         12        0.73       53.75
+                              PANADERIA |         13        0.79       54.54
+                              PANADERÍA |         26        1.58       56.12
+                               PANDERIA |         12        0.73       56.86
+                              Panaderia |         47        2.86       59.72
+               Panaderia y supermercado |         16        0.98       60.69
+                              Panadería |         66        4.02       64.72
+Puesto de vegetales, verduras, frutas.. |         15        0.91       65.63
+                   Tienda al aire libre |         11        0.67       66.30
+                               Un Local |          8        0.49       66.79
+                                 abasto |         77        4.69       71.48
+                        casa de familia |         61        3.72       75.20
+                   charcutería y bodega |         15        0.91       76.11
+                              comercial |         19        1.16       77.27
+                       comercializadora |         15        0.91       78.18
+                          fotocopiadora |         18        1.10       79.28
+                               frutería |         18        1.10       80.38
+            frutería y venta de víveres |         28        1.71       82.08
+                            inversiones |         15        0.91       83.00
+                                 kiosco |         10        0.61       83.61
+                                 kiosko |         10        0.61       84.22
+                              licorería |         16        0.98       85.19
+                             minamarket |         23        1.40       86.59
+                            mini Market |         23        1.40       88.00
+                            mini abasto |          9        0.55       88.54
+                             minimarket |         13        0.79       89.34
+                   minimarket fruterías |         10        0.61       89.95
+                             mininarket |         14        0.85       90.80
+negocio establecido en el porche de l.. |         18        1.10       91.90
+                              panaderia |         70        4.27       96.16
+                       panaderia Abasto |         13        0.79       96.95
+                              panadería |         32        1.95       98.90
+                           panificadora |          8        0.49       99.39
+tráiler transformado en local para ve.. |         10        0.61      100.00
+----------------------------------------+-----------------------------------
+                                  Total |      1,641      100.00
+
+. log close
+      name:  <unnamed>
+       log:  C:\Users\wb563583\Documents\GitHub\ENCOVI-2019\data_management\management
+> \3. cleaning\daniel.log
+  log type:  text
+ closed on:  11 Mar 2020, 15:45:44
+--------------------------------------------------------------------------------------

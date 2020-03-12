@@ -1,11 +1,11 @@
 /*===========================================================================
 Country name:		Venezuela
-Year:			2019
+Year:			2018
 Survey:			ECNFT
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Malena Acuna, Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
+Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
 
 Dependencies:		CEDLAS/UNLP -- The World Bank
 Creation Date:		January, 2020
@@ -15,7 +15,6 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-
 	    * User 1: Trini
 		global trini 1
 		
@@ -40,22 +39,16 @@ Note:
 				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
 		}
 		if $trini   {
-		        global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\ENCOVI-2019"      
-				*global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				*global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
-				*global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
+				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
+				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
 		}
 		if $male   {
-		        global rootpath "C:\Users\wb550905\Github\ENCOVI-2019"
-				*global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				*global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
-				*global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
+				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
+				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
 		}
 
-
-// Set output data path
-global dataofficial "$rootpath\data_management\output\merged"
-/*
 global dataofficial "$rootpath\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
 global data2014 "$dataofficial\ENCOVI 2014\Data"
 global data2015 "$dataofficial\ENCOVI 2015\Data"
@@ -64,7 +57,7 @@ global data2017 "$dataofficial\ENCOVI 2017\Data"
 global data2018 "$dataofficial\ENCOVI 2018\Data"
 global datafinalharm "$rootpath\ENCOVI 2014 - 2018\Data\FINAL_DATA_BASES\ENCOVI harmonized data"
 global datafinalimp "$rootpath\ENCOVI 2014 - 2018\Data\FINAL_DATA_BASES\ENCOVI imputation data"
-*/
+
 
 ********************************************************************************
 
@@ -74,10 +67,10 @@ global datafinalimp "$rootpath\ENCOVI 2014 - 2018\Data\FINAL_DATA_BASES\ENCOVI i
 version 14
 drop _all
 set more off
-*quietly include "$aux_do\cuantiles.do"
+quietly include "$aux_do\cuantiles.do"
 
 local country  "VEN"    // Country ISO code
-local year     "2019"   // Year of the survey
+local year     "2018"   // Year of the survey
 local survey   "ENCOVI"  // Survey acronym
 local vm       "01"     // Master version
 local va       "01"     // Alternative version
@@ -89,75 +82,107 @@ local vsp      "00"	// version ASPIRE
 *include "${rootdatalib}/_git_sedlac-03/_aux/sedlac_hardcode.do"
 
 /*==================================================================================================================================================
-								1: Data preparation: First Order Variables
+								1: Data preparation: First-Order Variables
 ==================================================================================================================================================*/
 
+
 /*(************************************************************************************************************************************************* 
-*-------------------------------------------------------------	1.0: Opening data base  ---------------------------------------------------------
+*-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 
-* Open "output" database
-use "$dataofficial\individual.dta", clear
-merge m:1 interview__key interview__id quest using "$dataofficial\household.dta"
+* Opening official database
+use "$data2018\VACUNACION.dta", clear
+rename LINVACU LIN
+tempfile vacu
+save `vacu'
+use "$data2018\PERSONAS ENCOVI 2018.dta", clear
+merge m:1 ENNUM using "$data2018\HOGARES ENCOVI 2018.dta"
 drop _merge
-* I drop those who do not collaborate in the survey
-drop if colabora_entrevista==2
-*Obs: there are still 2 observations which do not merge. Maybe they are people who started to answer but then stopped answering
+tab CMHP19 if EP96==1 // inconsistency: males reporting being pregnant
+/*
+    El sexo |
+   de...es: |      Freq.     Percent        Cum.
+------------+-----------------------------------
+  Masculino |        140       48.28       48.28
+   Femenino |        150       51.72      100.00
+------------+-----------------------------------
+      Total |        290      100.00
+*/
+merge 1:1 ENNUM LIN using "$data2018\Antropometria_2018.dta"
+drop _merge
+merge 1:1 ENNUM LIN using `vacu' 
+tab CMHP18 if _merge==3 // hay dos observacions con edad mayor a 2, aunque las respuestas estas codificadas como NA
+*brow if _merge==3 & CMHP18>2
+drop _merge
+/*
+merge 1:1 ENNUM LIN using "$data2018\MIGRACION.dta" //NO ME QUEDA CLARO SI SE PUEDE HACER EL CRUCE (no hay identificador unico)
+drop _merge
+*/
 
-*Change names to lower cases
 rename _all, lower
-order interview__key interview__id quest miembro__id
-sort interview__key interview__id quest miembro__id
 
 /*(************************************************************************************************************************************************* 
-*-------------------------------------------------------------	1.1: Identifiers  --------------------------------------------------
+*-------------------------------------------------------------	1.1: Identification Variables  --------------------------------------------------
 *************************************************************************************************************************************************)*/
-global id_SEDLAC pais ano encuesta id com pondera strata psu
 
-* Country identifier:                         pais
-gen pais = "VEN"
+* Country identifier: country
+gen country = "VEN"
 
-* Country identifier:                         ano
+* Year identifier: year
 capture drop ano
-gen ano = 2019
+gen year = 2018
 
-* Survey identifier:                          encuesta
-gen encuesta = "ENCOVI - 2019"
+* Survey identifier: survey
+gen survey = "ENCOVI - 2018"
 
-* Household identifier:                       id      
-egen id = group(interview__key interview__id quest)
+* Household identifier: id    
+gen id = ennum
 
-* Member identifier: com
-bysort id: gen com =_n
-duplicates report id com 
+* Component identifier: com
+gen com  = lin
+duplicates report id com
 
-* Weights:                                    pondera
-*Old: gen pondera = pesoper  //round(pesoper)
-*How to do this? We only have the "peso del segmento" till now...
+gen double pid = lin
+notes pid: original variable used was: lin
 
-* Strata: strata //PREGUNTAR A DANIEL SI SABE A QUE CORRESPONDE CADA ESTRATO
-*Old: gen strata = estrato
-*How to do this? Is it "segmento"?
+* Weights: pondera
+gen pondera = pesoper  //round(pesoper)
 
-* Primary sample unit: psu  
-* UPM: Unidad Primaria de Muestreo
-*Old: gen psu = .
-*Which one is it? Ask Daniel? 
+* Strata: strata
+gen strata = .
+*La variable "estrato" en la base refiere a un muestreo no probabilístico (para el cual se seleccionaron áreas geográficas, grupos de edad y grupos de estrato socioeconómico de la A la F). Esto no es lo mismo que el "strata" al que se refiere CEDLAS 
+/* ESTRATO_ENCUESTA
+     Estrato |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         AB |      3,920       18.11       18.11
+          C |      5,283       24.40       42.51
+          D |      4,686       21.64       64.15
+         EF |      7,761       35.85      100.00
+------------+-----------------------------------
+      Total |     21,650      100.00        	
+*/
+
+* Primary Sample Unit: psu   
+gen psu = .
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global demo_SEDLAC relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua
-* Relation to the head:	relacion
+global demo_ENCOVI reltohead sex age agegroup country_birth 
+* Relation to the head:	reltohead
 /* Categories of the new harmonized variable:
-		1:  Jefe		
-		2:  Cónyuge/Pareja
-		3:  Hijo/Hija		(Hijastro/Hijastra)		
-		4:  Padre/Madre		
-		5:  Hermano/Hermana
-		6:  Nieto/Nieta	
-		7:  Otros familiares	
-		8:  Otros no familiares	
-* RELACION_EN (s6q2): Variable identifying the relation to the head in the survey
+		01 = Jefe del Hogar	
+		02 = Esposa(o) o Compañera(o)
+		03 = Hijo(a)/Hijastro(a)
+		04 = Nieto(a)		
+		05 = Yerno, nuera, suegro (a)
+		06 = Padre, madre       
+		07 = Hermano(a)
+		08 = Cunado(a)         
+		09 = Sobrino(a)
+		10 = Otro pariente      
+		11 = No pariente
+		12 = Servicio Domestico	
+* RELACION_EN (cmhp17): Variable identifying the relation to the head in the survey
 		01 = Jefe del Hogar	
 		02 = Esposa(o) o Compañera(o)
 		03 = Hijo(a)		
@@ -172,22 +197,26 @@ global demo_SEDLAC relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro
 		12 = No pariente
 		13 = Servicio Domestico
 */
-clonevar relacion_en = s6q2
-gen     relacion = 1		if  relacion_en==1
-replace relacion = 2		if  relacion_en==2
-replace relacion = 3		if  relacion_en==3  | relacion_en==4
-replace relacion = 4		if  relacion_en==7  
-replace relacion = 5		if  relacion_en==8 
-replace relacion = 6		if  relacion_en==5
-replace relacion = 7		if  relacion_en==6  | relacion_en==9  | relacion_en==10 | relacion_en==11 
-replace relacion = 8		if  relacion_en==12 | relacion_en==13
+clonevar relacion_en = cmhp17
+gen     reltohead = 1		if  relacion_en==1
+replace reltohead = 2		if  relacion_en==2
+replace reltohead = 3		if  relacion_en==3  | relacion_en==4
+replace reltohead = 4		if  relacion_en==5  
+replace reltohead = 5		if  relacion_en==6 
+replace reltohead = 6		if  relacion_en==7
+replace reltohead = 7		if  relacion_en==8  
+replace reltohead = 8		if  relacion_en==9
+replace reltohead = 9		if  relacion_en==10
+replace reltohead = 10		if  relacion_en==11
+replace reltohead = 11		if  relacion_en==12
+replace reltohead = 12		if  relacion_en==13
 
-label def relacion 1 "Jefe" 2 "Cónyuge/Pareja" 3 "Hijo(a)/Hijastro(a)" 4 "Padre/Madre" ///		
-		              5 "Hermano/Hermana"  6 "Nieto/Nieta"	7 "Otros familiares" 8 "Otros no familiares"
-label value relacion relacion
+label def reltohead 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
+		            6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"	
+label value reltohead reltohead
 
-* Household identifier: hogar
-gen hogar = (relacion==1)	
+* Identificador de hogares: hogar
+gen hogar = (reltohead==1)	
 
 * Miembros de hogares secundarios (seleccionando personal doméstico): hogarsec 
 gen hogarsec =.
@@ -199,7 +228,7 @@ tempvar aux
 egen `aux' = sum(hogarsec), by(id)
 gen       presec = 0
 replace   presec = 1  if  `aux'>0  
-replace   presec = .  if  relacion!=1
+replace   presec = .  if  relacion~=1
 drop `aux'
 
 * Numero de miembros del hogar (de la familia principal): miembros 
@@ -207,47 +236,47 @@ tempvar uno
 gen `uno' = 1
 egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
 
-* Dummy de hombre: hombre 
-/* SEXO (s6q3): El sexo de ... es
+* Sex 
+/* SEXO (cmhp19): El sexo de ... es
 	1 = Masculino
 	2 = Femenino
 */
-clonevar sexo = s6q3
-gen 	hombre = 0 if sexo==2
-replace hombre = 1 if sexo==1
+clonevar sex = cmhp19
+label define sex 1 "Male" 2 "Female"
+label value sex sex
 
-* Años cumplidos: edad
-* EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
-gen     edad = s6q5
-notes   edad: range of the variable: 0-97
+* Age
+* EDAD_ENCUESTA (cmhp18): Cuantos años cumplidos tiene?
+notes   edad: range of the variable: 0-99
+gen age = cmhp18
 
-* Grupo de edad: gedad1
+* Age group: agegroup
 /* 1 = individuos de 14 anos o menos
    2 = individuos entre 15 y 24 
    3 = individuos entre 25 y 40
    4 = individuos entre 41 y 64
    5 = individuos mayores a 65
 */
-gen gedad1 = .
-replace gedad1 = 1 if edad<=14
-replace gedad1 = 2 if edad>=15 & edad<=24
-replace gedad1 = 3 if edad>=25 & edad<=40
-replace gedad1 = 4 if edad>=41 & edad<=64
-replace gedad1 = 5 if edad>=65 & edad!=.
+gen agegroup = .
+replace agegroup = 1 if age<=14
+replace agegroup = 2 if age>=15 & age<=24
+replace agegroup = 3 if age>=25 & age<=40
+replace agegroup = 4 if age>=41 & age<=64
+replace agegroup = 5 if age>=65 & age!=.
 
 * Identificador de miembros del hogar
-gen     jefe = (relacion==1)
-gen     conyuge = (relacion==2)
-gen     hijo = (relacion==3)
+gen     jefe = (reltohead==1)
+gen     conyuge = (reltohead==2)
+gen     hijo = (reltohead==3)
 
 * Numero de hijos menores de 18
 tempvar aux
-gen `aux' = (hijo==1 & edad<=18)
+gen `aux' = (hijo==1 & age<=18)
 egen      nro_hijos = count(`aux'), by(id)
 replace   nro_hijos = .  if  jefe!=1 & conyuge!=1
 
-* Dummy de estado civil 1: casado/unido
-/* ESTADO_CIVIL_ENCUESTA (s6q13): Cual es su situacion conyugal
+* Marital status
+/* ESTADO_CIVIL_ENCUESTA (cmhp22): Cual es su situacion conyugal
        1 = casado con conyuge residente  
 	   2 = casado con conyuge no residente
        3 = unido con conyuge residente            
@@ -258,41 +287,37 @@ replace   nro_hijos = .  if  jefe!=1 & conyuge!=1
 	   8 = soltero /nunca unido		
 	   98 = No aplica
 	   99 = NS/NR 
+* Marital status
+	   1 = married
+	   2 = never married
+	   3 = living together
+	   4 = divorced/separated
+	   5 = widowed	
 */
-gen estado_civil_encuesta = s6q13 if (s6q13!=98 & s6q13!=99)
-gen     casado = 0		if  estado_civil_encuesta>=5 & estado_civil_encuesta<=8
-replace casado = 1		if  estado_civil_encuesta>=1 & estado_civil_encuesta<=4
+clonevar estado_civil_encuesta = cmhp22 if (cmhp22!=98 & cmhp22!=99)
 
-* Dummy de estado civil 2: soltero 
-gen     soltero = 0		if  estado_civil_encuesta>=1 & estado_civil_encuesta<=7
-replace soltero = 1		if  estado_civil_encuesta==8
+gen     marital_status = 1	if  estado_civil_encuesta==1 | estado_civil_encuesta==2
+replace marital_status = 2	if  estado_civil_encuesta==8 
+replace marital_status = 3	if  estado_civil_encuesta==3 | estado_civil_encuesta==4
+replace marital_status = 4	if  estado_civil_encuesta==5 | estado_civil_encuesta==6
+replace marital_status = 5	if  estado_civil_encuesta==7
+label def marital_status 1 "Married" 2 "Never married" 3 "Living together" 4 "Divorced/Separated" 5 "Widowed"
+label value marital_status marital_status
 
-* Estado Civil: estado_civil
-/* 1 = married
-   2 = never married
-   3 = living together
-   4 = divorced/separated
-   5 = widowed									
-*/
-gen     estado_civil = 1	if  estado_civil_encuesta==1 | estado_civil_encuesta==2
-replace estado_civil = 2	if  estado_civil_encuesta==8 
-replace estado_civil = 3	if  estado_civil_encuesta==3 | estado_civil_encuesta==4
-replace estado_civil = 4	if  estado_civil_encuesta==5 | estado_civil_encuesta==6
-replace estado_civil = 5	if  estado_civil_encuesta==7
+gen     married = 0		if  estado_civil_encuesta>=5 & estado_civil_encuesta<=8
+replace married = 1		if  estado_civil_encuesta>=1 & estado_civil_encuesta<=4
+gen     single = estado_civil_encuesta==8 if estado_civil_encuesta!=.
 
-label def estado_civil 1 "Married" 2 "Never married" 3 "Living together" 4 "Divorced/Separated" 5 "Widowed"
-label value estado_civil estado_civil
+rename  estado_civil_encuesta marital_status_survey
 
-* Raza o etnicidad:	raza 
-gen     raza = .
-notes   raza: the survey does not include information to define this variable
+*** Number of sons/daughters born alive
+gen     children_born_alive = smhp25 if (smhp25!=98 & smhp25!=99)
 
-* Lengua: lengua
-gen     lengua = .
-notes   lengua: the survey does not include information to define this variable
+*** From the total of sons/daughters born alive, how many are currently alive?
+gen     children_alive = smhp26 if smhp25!=0 & smhp26<=smhp25 & (smhp26!=98 & smhp26!=99)
 
 /*(*************************************************************************************************************************************************
-*-------------------------------------------------------------	1.3: Variables regionales  ---------------------------------------------------------
+*-------------------------------------------------------------	1.3: Regional variables  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/
 * Creación de Variable Geográficas Desagregadas
 	
@@ -335,49 +360,26 @@ notes   lengua: the survey does not include information to define this variable
         24 Vargas
         25 Dependencias Federales
  */
-tab entidad, nolab
-/*
-      1. ENTIDAD |
-         FEDERAL |      Freq.     Percent        Cum.
------------------+-----------------------------------
-      Anzoategui |        627       11.66       11.66
-           Apure |         69        1.28       12.94
-          Aragua |        421        7.83       20.77
-         Bolivar |        134        2.49       23.26
-         Cojedes |         53        0.99       24.24
-          Falcon |         52        0.97       25.21
-         Guarico |        210        3.90       29.11
-            Lara |        141        2.62       31.73
-         Miranda |         83        1.54       33.28
-         Monagas |        219        4.07       37.35
-   Nueva Esparta |        773       14.37       51.72
-      Portuguesa |         69        1.28       53.00
-           Sucre |        758       14.09       67.09
-         Tachira |        964       17.92       85.02
-         Yaracuy |        419        7.79       92.81
-           Zulia |        387        7.19      100.00
------------------+-----------------------------------
-           Total |      5,379      100.00
-*/
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   //Region Central
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital
+
+gen     region_est1 =  1 if enti==5 | enti==8 | enti==9                //Region Central
+replace region_est1 =  2 if enti==12 | enti==4                         // Region de los LLanos
+replace region_est1 =  3 if enti==11 | enti==13 | enti==18 | enti==22  // Region Centro-Occidental
+replace region_est1 =  4 if enti==23                                   // Region Zuliana
+replace region_est1 =  5 if enti==6 | enti==14 | enti==20 | enti==21   // Region de los Andes
+replace region_est1 =  6 if enti==3 | enti==16 | enti==19              // Region Nor-Oriental
+replace region_est1 =  7 if enti==17 | enti==25                        // Region Insular
+replace region_est1 =  8 if enti==7 | enti==2 | enti==10               // Region Guayana
+replace region_est1 =  9 if enti==15 | enti==24 | enti==1              // Region Capital
 
 label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
           5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
 label value region_est1 region_est1
 
 * Desagregación 2 (Estados): region_est2
-clonevar region_est2 = entidad
+clonevar region_est2 = enti
 
 * Desagregación 3 (Municipios): region_est3
-clonevar region_est3 = municipio
+clonevar region_est3 = muni
 
 * Dummy urbano-rural: urbano  //REVISAR SI SE PUEDE CONSTRUIR ESTA VARIABLE
 /* : area de residencia
@@ -456,102 +458,26 @@ replace   capital = 0 if enti!=15 & enti!=24 & enti!=1 & enti!=.
 gen       nuevareg = .
 * Por el momento no se detectaron cambios 
 
-***************************************************************************************************************************************************
-* Migrante:	migrante
-/*      0 = si nacio en el municipio donde reside actualmente
-        1 = nacio en un municipio distinto de donde vive actualmente
-RESIDE_EN (s6q7): En septiembre de 2018 residia en:
-       1 = En este mismo municipio
-	   2 = En otro municipio
-	   3 = En otro pais
-	   4 = No habia nacido
-*/
-clonevar reside_en = s6q7
-gen migrante = (reside_en==2 | reside_en==3) 
-
-* Migrantes extranjeros: migra_ext 
-/*      0 = migrante pero no es del extranjero
-        1 = inmigrante de un pais extranjero
-*/
-gen migra_ext = (reside_en==3) if migrante==1
-
-* Migrantes internos (urbano-rural): migra_rur
-/*      1 = si la persona es migrante nacido en zona rural y ahora esta viviendo en zonas urbanas
-        0 = si es nacido en zonas urbanas y ahora vive en rural, y missing si no es migrante, o no se puede saber si migro del campo a la ciudad o viceversa
-*/
-gen migra_rur = .
-notes   migra_rur: the survey does not include information to define this variable
-	
-* Años en el actual lugar de residencia de un migrante: anios_residencia
-gen   anios_residencia = .
-notes anios_residencia: the survey does not include information to define this variable
-
-
-* Migrante reciente (definida solo para los migrantes): migra_rec
-/*      1 = si la persona migro hace tres años o menos
-        0 = si la persona migro hace mas de tres años
-		. = si no es migrante o no sabe cuando migro
-*/
-gen   migra_rec = .
-notes migra_rec: the survey does not include information to define this variable
-
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global dwell_SEDLAC propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici 
-* Propiedad de la vivienda:	propieta
-/* TENENCIA_VIVIENDA (s5q7): régimen de  de la vivienda  
-		1 = Propia pagada		
-		2 = Propia pagandose
-		3 = Alquilada
-		4 = Alquilada parte de la vivienda
-		5 = Adjudicada pagandose Gran Mision Vivienda
-		6 = Adjudicada Gran Mision Vivienda
-		7 = Cedida por razones de trabajo
-		8 = Prestada por familiar o amigo
-		9 = Tomada
-		10 = Otra
-		.
-*/
+global dwell_ENCOVI flooring_material exterior_wall_malterial roofing_material dwelling_type water_supply frecuencia_agua tipo_sanitario servicio_electrico interr_serv_electrico $dwell_SEDLAC 
 
-clonevar tenencia_vivienda = s5q7 if (s5q7!=. & s5q7!=.a)
-gen     propieta = 1		if  tenencia_vivienda==1 | tenencia_vivienda==2 // ask Daniel if we should include 5 and 6 
-replace propieta = 0		if  tenencia_vivienda>=3 & tenencia_vivienda<=10
-replace propieta = .		if  relacion!=1
-
-* Habitaciones, contando baño y cocina: habita 
-gen     habita = .
-notes   habita: the survey does not include information to define this variable
-
-* Dormitorios de uso exclusivo: dormi
-* NDORMITORIOS (s5q1): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
-clonevar ndormitorios = s5q1 if (s5q1!=. & s5q1!=.a)
-gen     dormi = ndormitorios 
-replace dormi =. if relacion!=1
- 
-* Vivienda en lugar precario: precaria
-/* TIPO_VIVIENDA (s4q4): Tipo de Vivienda 
-		1 = Casa Quinta
-		2 = Casa
-		3 = Apartamento en edificio
-		4 = Anexo en casaquinta
-		5 = Vivienda rustica (rancho)
-		6 = Habitacion en vivienda o local de trabajo
-		7 = Rancho campesino
-*/
-clonevar tipo_vivienda = s4q4 if (s4q4!=. & s4q4!=.a)
-gen     precaria = 0		if  (tipo_vivienda>=1 & tipo_vivienda<=4) | tipo_vivienda==6
-replace precaria = 1		if  tipo_vivienda==5  | tipo_vivienda==7   
-replace precaria = .		if  relacion!=1
-
-* Material de construcción precario: matpreca
-/* MATERIAL_PISO (s4q1)
+*** Type of flooring material
+/* MATERIAL_PISO (vsp1)
 		 1 = Mosaico, granito, vinil, ladrillo, ceramica, terracota, parquet y similares
 		 2 = Cemento   
 		 3 = Tierra		
 		 4 = Tablas 
-			 
-   MATERIAL_PARED_EXTERIOR (s4q2)
+		 5 = Otros		
+*/
+gen  flooring_material = vsp1            if (vsp1!=98 & vsp1!=99)
+label def flooring_material 1 "Mosaic,granite,vynil, brick.." 2 "Cement" 3 "Tierra" 4 "Boards" 5 "Other"
+label value flooring_material flooring_material
+
+*** Type of exterior wall material			 
+/* MATERIAL_PARED_EXTERIOR (vsp2)
 		1 = Bloque, ladrillo frisado	
 		2 = Bloque ladrillo sin frisar  
 		3 = Concreto	
@@ -560,55 +486,102 @@ replace precaria = .		if  relacion!=1
 		6 = Adobe, tapia o bahareque frisado
 		7 = Adobe, tapia o bahareque sin frisado
 		8 = Otros (laminas de zinc, carton, tablas, troncos, piedra, paima, similares)  
+*/
+gen  exterior_wall_material = vsp2  if (vsp2!=98 & vsp2!=99)
+label def exterior_wall_material 1 "Frieze brick" 2 "Non frieze brick" 3 "Concrete"
+label value exterior_wall_material exterior_wall_material
 
-   MATERIAL_TECHO (s4q3)
+*** Type of roofing material
+/* MATERIAL_TECHO (vsp3)
 		 1 = Platabanda (concreto o tablones)		
 		 2 = Tejas o similar  
 		 3 = Lamina asfaltica		
 		 4 = Laminas metalicas (zinc, aluminio y similares)    
 		 5 = Materiales de desecho (tablon, tablas o similares, palma)
-
-   APARIENCIA_VIVIENDA (no se pregunta) 
 */
-gen  material_piso = s4q1            if (s4q1!=. & s4q1!=.a)
-gen  material_pared_exterior = s4q2  if (s4q2!=. & s4q2!=.a)
-gen  material_techo = s4q3           if (s4q3!=. & s4q3!=.a)
+gen  roofing_material = vsp3           if (vsp3!=98 & vsp3!=99)
 
-gen     matpreca = 0        
-replace matpreca = 1		if  material_pared_exterior>=5 & material_pared_exterior<=8 
-replace matpreca = 1		if  material_techo==5
-replace matpreca = 1		if  material_piso>=3 & material_piso<=5
-replace matpreca = .        if  material_piso==. & material_pared_exterior==. & material_techo==.
-replace matpreca = .		if  relacion!=1
+*** Type of dwelling
+/* TIPO_VIVIENDA (vsp4): Tipo de Vivienda 
+		1 = Casa Quinta
+		2 = Casa
+		3 = Apartamento en edificio
+		4 = Anexo en casaquinta
+		5 = Vivienda rustica (rancho)
+		6 = Habitacion en vivienda o local de trabajo
+		7 = Rancho campesino
+*/
+clonevar dwelling_type = vsp4 if (vsp4!=98 & vsp4!=99)
 
-* Instalacion de agua corriente: agua
-/* ACCESO_AGUA (s4q5): Cuales han sido las principales fuentes de suministro de agua en esta vivienda?
+*** Water supply
+/* SUMINISTRO_AGUA (vsp5): A esta vivienda el agua llega normalmente por (no se puede identificar si el acceso es dentro del terreno o vivienda)
 		1 = Acueducto
 		2 = Pila o estanque
 		3 = Camion Cisterna
 		4 = Pozo con bomba
 		5 = Pozo protegido
 		6 = Otros medios
-   FREC_AGUA (s4q6): Con que frecuencia ha llegado el agua del acueducto a esta vivienda?
+*/	
+gen     water_supply = vsp5==1 | vsp5==2 if (vsp5!=98 & vsp5!=99)
+label def water_supply 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Pozo con bomba" 5 "Pozo protegido" 6 "Otros medios"
+label value water_supply water_supply
+
+*** Frequency of water supply
+/* FRECUENCIA_AGUA (vsp6): Con que frecuencia ha llegado el agua del acueducto a esta vivienda?
         1 = Todos los dias
 		2 = Algunos dias de la semana
 		3 = Una vez por semana
 		4 = Una vez cada 15 dias
 		5 = Nunca
 */
-gen     acceso_agua = 1 if  s4q5__1==1
-replace acceso_agua = 2 if  s4q5__2==1
-replace acceso_agua = 3 if  s4q5__3==1
-replace acceso_agua = 4 if  s4q5__4==1
-replace acceso_agua = 5 if  s4q5__5==1
-replace acceso_agua = 6 if  s4q5__6==1	
-clonevar frec_agua = s4q6 if (s4q6!=. & s4q6!=.a)	
-gen     agua = (acceso_agua==1 | acceso_agua==2) if acceso_agua!=.
-replace agua = 0 if agua==1 & frec_agua==5
+clonevar frequency_water = vsp6 if (vsp6!=98 & vsp6!=99)	
+
+*** Electricity
+
+
+* Propiedad de la vivienda:	propieta
+/* TENENCIA_VIVIENDA (dhp15): régimen de  de la vivienda  
+		1 = Propia pagada		
+		2 = Propia pagandose
+		3 = Alquilada
+		4 = Prestada	
+		5 = Invadida
+		6 = De algun programa de gobierno (con titulo de propiedad)
+		7 = De algun programa de gobierno (sin titulo de propiedad)
+		8 = Otra
+		99 = NS/NR								
+*/
+
+clonevar tenencia_vivienda = dhp15 if (dhp15!=98 & dhp15!=99)
+gen     propieta = 1		if  tenencia_vivienda==1 | tenencia_vivienda==2
+replace propieta = 0		if  tenencia_vivienda>=3 & tenencia_vivienda<=8
+replace propieta = .		if  relacion!=1
+
+
+* Dormitorios de uso exclusivo: dormi
+* NDORMITORIOS (dhp10): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
+clonevar ndormitorios = dhp10 if (dhp10!=98 & dhp10!=99)
+gen     dormi = ndormitorios 
+replace dormi =. if relacion!=1
+ 
+
+
+
+* Instalacion de agua corriente: agua
+/* ACCESO_AGUA (vsp5): A esta vivienda el agua llega normalmente por (no se puede identificar si el acceso es dentro del terreno o vivienda)
+		1 = Acueducto
+		2 = Pila o estanque
+		3 = Camion Cisterna
+		4 = Pozo con bomba
+		5 = Pozo protegido
+		6 = Otros medios
+*/	
+gen     agua = vsp5==1 | vsp5==2 if (vsp5!=98 & vsp5!=99)
+replace agua = 0 if agua==1 & vsp6==5
 replace agua= .		if  relacion!=1		
 
 * Baño con arrastre de agua: banio
-/* TIPO_SANITARIO (s4q9): esta vivienda tiene 
+/* TIPO_SANITARIO (vsp8): esta vivienda tiene 
 		1 = Poceta a cloaca
 		2 = Pozo septico
 		3 = Poceta sin conexion (tubo)
@@ -616,7 +589,7 @@ replace agua= .		if  relacion!=1
 		5 = No tiene poceta o excusado
 		99 = NS/NR
 */
-gen tipo_sanitario = s4q9 if (s4q9!=. & s4q9!=.a)
+gen tipo_sanitario = vsp8 if (vsp8!=98 & vsp8!=99)
 gen     banio = (tipo_sanitario>=1 & tipo_sanitario<=3) if tipo_sanitario!=.
 replace banio = .		if  relacion!=1
 
@@ -625,20 +598,16 @@ gen     cloacas = (tipo_sanitario==1) if tipo_sanitario!=.
 replace cloacas = .		if  relacion!=1
 
 * Electricidad en la vivienda: elect
-/* (s4q7) : En los ultimos 3 meses, el servicio electrico ha sido suministrado por?
-            s4q7_1 = La red publica
-			s4q7_2 = Planta electrica privada
-			s4q7_3 = Otra forma
-			s4q7_4 = No tiene servicio electrico
-* INTERR_SERV_ELECTRICO (s4q8): En esta vivienda el servicio electrico se interrumpe
+/* SERVICIO_ELECTRICO (vsp7): En esta vivienda el servicio electrico se interrumpe
 			1 = Diariamente por varias horas
 			2 = Alguna vez a la semana por varias horas
 			3 = Alguna vez al mes
-			4 = Nunca se interrumpe			
+			4 = Nunca se interrumpe
+			5 = No tiene servicio electrico
+			99 = NS/NR					
 */
-clonevar interr_serv_electrico = s4q8 if (s4q8!=. & s4q8!=.a)
-replace interr_serv_electrico = 5 if s4q7__4==1
-gen      elect = (s4q7__1==1 | s4q7__2==1 | s4q7__3==1)  if (s4q7__1!=. & s4q7__1!=.a & s4q7__2!=. & s4q7__2!=.a & s4q7__3!=. & s4q7__3!=.a)
+gen servicio_electrico = vsp7 if (vsp7!=98 & vsp7!=99)
+gen     elect = (servicio_electrico>=1 & servicio_electrico<=4) if servicio_electrico!=.
 replace elect = .		if  relacion!=1
 
 * Teléfono:	telef
@@ -647,68 +616,39 @@ gen	telef =.
 notes   telef: the survey does not include information to define this variable
 
 /*(************************************************************************************************************************************************* 
-*--------------------------------------------------------- 1.5: Durables goods  --------------------------------------------------------
+*--------------------------------------------------------- 1.5: Bienes durables y servicios --------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-* Heladera (s5q6__1): ¿Posee este hogar nevera?
-gen     heladera = s5q6__1==1 if (s5q6__1!=. & s5q6__1!=.a)
+* Heladera (con o sin freezer): heladera
+* NEVERA (dhp14n): ¿Posee este hogar nevera?
+gen nevera = dhp14n if (dhp14n!=98 & dhp14n!=99)
+gen     heladera = 0		if  nevera==2
+replace heladera = 1		if  nevera==1
 replace heladera = .		if  relacion!=1 
 
-* Lavarropas (s5q6__2): ¿Posee este hogar lavadora?
-gen     lavarropas = s5q6__2==1 if (s5q6__2!=. & s5q6__2!=.a)
+* Lavarropas: lavarropas
+* LAVADORA (dhp14l): ¿Posee este hogar lavadora?
+gen lavadora = dhp14l if (dhp14l!=98 & dhp14l!=99)
+gen     lavarropas = 0		if  lavadora==2
+replace lavarropas = 1		if  lavadora==1
 replace lavarropas = .		if  relacion!=1 
 
-* Secadora (s5q6__3): ¿Posee este hogar secadora? 
-gen     secadora = s5q6__3==1 if (s5q6__3!=. & s5q6__3!=.a)
-replace secadora = .		if  relacion!=1 
+* Aire acondicionado: aire
+* AIRE_ACONDICIONADO (dhp14a): ¿Posee este hogar aire acondicionado?
+gen aire_acondicionado = dhp14a if (dhp14a!=98 & dhp14a!=99)
+gen     aire = 0		    if  aire_acondicionado==2
+replace aire = 1		    if  aire_acondicionado==1
+replace aire = .		    if  relacion!=1 
 
-* Computadora (s5q6__4): ¿Posee este hogar computadora?
-gen computadora = s5q6__4==1 if (s5q6__4!=. & s5q6__4!=.a)
-replace computadora = .		if  relacion!=1 
-
-* Internet (s5q6__5): ¿Posee este hogar internet?
-gen     internet_casa = s5q6__5==1 if (s5q6__5!=. & s5q6__5!=.a)
-replace internet_casa = .	if  relacion!=1 
-
-* Uso de Internet: uso_internet
-gen   uso_internet = .
-notes uso_internet: the survey does not include information to define this variable
-
-* Televisor (s5q6__6): ¿Posee este hogar televisor?
-gen     televisor = s5q6__6==1 if (s5q6__6!=. & s5q6__6!=.a)
-replace televisor = .	if  relacion!=1 
-
-* Radio (s5q6__7): ¿Posee este hogar radio? 
-gen     radio = s5q6__7==1 if (s5q6__7!=. & s5q6__7!=.a)
-replace radio = .		if  relacion!=1 
-
-* Calentador (s5q6__8): ¿Posee este hogar calentador? //NO COMPARABLE CON CALEFACCION FIJA
-gen     calentador = s5q6__8==1 if (s5q6__8!=. & s5q6__8!=.a)
-replace calentador = .		if  relacion!=1 
-
-* Calefacción fija : calefaccion_fija
+* Calefacción fija: calefaccion_fija
+* CALENTADOR (dhp14o): ¿Posee este hogar calentador? //NO COMPARABLE CON CALEFACCION FIJA
+gen calentador = dhp14o if (dhp14o!=98 & dhp14o!=99)
 gen     calefaccion_fija = .
 notes calefaccion_fija: the survey does not include information to define this variable
 
-* Aire acondicionado (s5q6__9): ¿Posee este hogar aire acondicionado?
-gen     aire = s5q6__9==1 if (s5q6__9!=. & s5q6__9!=.a)
-replace aire = .		    if  relacion!=1 
-
-* TV por cable o satelital (s5q6__10): ¿Posee este hogar TV por cable?
-gen     tv_cable = s5q6__10==1 if (s5q6__10!=. & s5q6__10!=.a)
-replace tv_cable = .		if  relacion!=1
-
-* VCR o DVD: video 
-gen     video = .		
-notes   video: the survey does not include information to define this variable
-
-* Horno microonada (s5q6__11): ¿Posee este hogar horno microonda?
-gen     microonda = s5q6__11==1 if (s5q6__11!=. & s5q6__11!=.a)
-replace microonda = .		if  relacion!=1
-
-* Teléfono fijo (s5q6__12): telefono_fijo
-gen     telefono_fijo = s5q6__12==1 if (s5q6__12!=. & s5q6__12!=.a)
-replace telefono_fijo = .		    if  relacion!=1 
+* Teléfono fijo: telefono_fijo
+gen     telefono_fijo = .
+notes telefono_fijo: the survey does not include information to define this variable
 
 * Telefono celular: celular
 gen     celular = .
@@ -718,13 +658,48 @@ notes   celular: the survey does not include information to define this variable
 gen     celular_ind = .
 notes   celular_ind: the survey does not include information to define this variable
 
-* Auto (s5q4): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
-gen     auto = s5q4==1		if  s5q4!=. & s5q4!=.a
-replace auto = .		if  relacion!=1 
+* Televisor: televisor
+* TELEVISOR (dhp14t): ¿Posee este hogar televisor?
+gen televisor_encuesta = dhp14t if (dhp14t!=98 & dhp14t!=99)
+gen     televisor = 0		if  televisor_encuesta==2
+replace televisor = 1		if  televisor_encuesta==1
+replace televisor = .		if  relacion!=1 
 
-* NCARROS (s5q4a) : ¿Cuantos carros de uso familiar tiene este hogar?
-gen     ncarros = s5q4a if (s5q4a!=. & s5q4a!=.a)
-replace ncarros = .		if  relacion!=1 
+* TV por cable o satelital:		tv_cable
+* TVCABLE_ENCUESTA (dhp14v): ¿Posee este hogar TV por cable?
+gen tvcable_encuesta = dhp14v if (dhp14v!=98 & dhp14v!=99)
+gen     tv_cable = 0		if  tvcable_encuesta==2
+replace tv_cable = 1		if  tvcable_encuesta==1
+replace tv_cable = .		if  relacion!=1 
+
+* VCR o DVD: video 
+gen     video = .		
+notes   video: the survey does not include information to define this variable
+
+* Computadora: computadora
+* COMPUTADOR (dhp14c): ¿Posee este hogar computadora?
+gen computador = dhp14c if (dhp14c!=98 & dhp14c!=99)
+gen     computadora = 0		if  computador==2 
+replace computadora = 1		if  computador==1 
+replace computadora = .		if  relacion!=1 
+
+* Conexión a Internet en el hogar: internet_casa
+* INTERNET (dhp14i): ¿Posee este hogar internet?
+gen internet = dhp14i if (dhp14i!=98 & dhp14i!=99)
+gen     internet_casa = 0	if  internet==2
+replace internet_casa = 1	if  internet==1
+replace internet_casa = .	if  relacion!=1 
+
+* Uso de Internet: uso_internet
+gen   uso_internet = .
+notes uso_internet: the survey does not include information to define this variable
+
+* Auto: auto 
+* NCARROS (dhp13) : ¿Cuantos carros de uso familiar tiene este hogar?
+gen ncarros = dhp13 if (dhp13!=98 & dhp13!=99)
+gen     auto = 0		if  ncarros==0
+replace auto = 1		if  ncarros>=1 & ncarros!=.
+replace auto = .		if  relacion!=1 
 
 * Antiguedad del auto (en años): ant_auto
 gen   ant_auto = .
@@ -742,28 +717,13 @@ notes moto: the survey does not include information to define this variable
 * Bicicleta: bici
 gen   bici = .
 notes bici: the survey does not include information to define this variable
-
+;
 /*(************************************************************************************************************************************************* 
-*---------------------------------------------------------- 1.6: Education --------------------------------------------------------------
+*---------------------------------------------------------- 1.6: Variables educativas --------------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global educ_SEDLAC alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp
-/* NIVEL_EDUC_EN (s7q4): ¿Cual es el nivel educativo al que asiste en este periodo 2019-2020:  // this question is only asked to those who are currently attending. What happens with those who already finished?
-		1 = Ninguno		
-        2 = Preescolar
-		5 = Regimen actual: Primaria (1-6)		
-		6 = Regimen actual: Media (1-6)
-		7 = Tecnico (TSU)		
-		8 = Universitario
-		9 = Postgrado			
-		99 = NS/NR
-* A_EDUC (s7q4a): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Primaria y Media)
-        Primaria: 1-6to
-        Media: 1-6to
-* S_EDUC (emhp27a): ¿Cuál es el último semestre que aprobó? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
-		Tecnico: 1-10 semestres
-		Universitario: 1-12 semestres
-		Postgrado: 1-12
-* NIVEL_EDUC: ¿Cual fue el ultimo grado o año aprobado y de que nivel educativo: 
+
+* Alfabeto:	alfabeto (si no existe la pregunta sobre si la persona sabe leer y escribir, consideramos que un individuo esta alfabetizado si ha recibido al menos dos años de educacion formal)
+/* NIVEL_EDUC (emhp27n): ¿Cual fue el ultimo grado o año aprobado y de que nivel educativo: 
 		1 = Ninguno		
         2 = Preescolar
 		3 = Primaria		
@@ -772,93 +732,92 @@ global educ_SEDLAC alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc
 		6 = Universitario
 		7 = Postgrado			
 		99 = NS/NR
+* A_EDUC (emhp27a): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Preescolar, Primaria y Media)
+        Primaria: 1-6to
+        Media: 1-6to
+* S_EDUC (emhp27a): ¿Cuál es el último semestre que aprobó? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
+		Tecnico: 1-10 semestres
+		Universitario: 1-12 semestres
+		Postgrado: 1-12
 */
-clonevar nivel_educ_en = s7q4 if (s7q4!=. & s7q4!=.a) //only available for those who are currently attending
-gen nivel_educ = 1 if nivel_educ_en==1
-replace nivel_educ = 2 if nivel_educ_en==2
-replace nivel_educ = 3 if nivel_educ_en==5
-replace nivel_educ = 4 if nivel_educ_en==6
-replace nivel_educ = 5 if nivel_educ_en==7
-replace nivel_educ = 6 if nivel_educ_en==8
-replace nivel_educ = 7 if nivel_educ_en==9
-label def nivel_educ 1 "Ninguno" 2 "Preescolar" 3 "Primaria" 4 "Media" 5 "Tecnico (TSU)" 6 "Universitario" 7 "Postgrado"
-label value nivel_educ nivel_educ
-gen g_educ = s7q4a    if (s7q4==5 | s7q4==6) & (s7q4a!=. & s7q4a!=.a) // for those attending either primary or secondary education
-replace g_educ = s7q4c if (s7q4==5 | s7q4==6) & (s7q4c!=. & s7q4c!=.a) // wrongly codified in s7q4c intead of s7q4a
-replace g_educ = s7q4d if (s7q4==5 | s7q4==6) & (s7q4d!=. & s7q4d!=.a) // wrongly codified in s7q4d intead of s7q4a
-gen a_educ = s7q4c    if (s7q4==7 | s7q4==8 | s7q4==9) & s7q4b==1 & (s7q4c!=. & s7q4c!=.a) //for those attending tertiary annually
-gen s_educ = s7q4d    if (s7q4==7 | s7q4==8 | s7q4==9) & s7q4b==2 & (s7q4d!=. & s7q4d!=.a) //for those attending tertiary on biannually
-gen t_educ = s7q4e    if (s7q4==7 | s7q4==8 | s7q4==9) & (s7q4b==3 | s7q4b==5) & (s7q4e!=. & s7q4e!=.a) //for those attending tertiary on quarterly
-
-* Alfabeto:	alfabeto (si no existe la pregunta sobre si la persona sabe leer y escribir, consideramos que un individuo esta alfabetizado si ha recibido al menos dos años de educacion formal)
-// check since educational attainment was only asked to those currently studying
+clonevar nivel_educ = emhp27n if (emhp27n!=98 & emhp27n!=99)
+gen a_educ = emhp27a     if (emhp27a!=98 & emhp27a!=99)
+gen s_educ = emhp27s     if (emhp27s!=98 & emhp27s!=99)
 gen     alfabeto = 0 if nivel_educ!=.	
-replace alfabeto = 1 if (nivel_educ==3 & (g_educ>=2 & g_educ<=6)) | (nivel_educ>=4 & nivel_educ<=7)
+replace alfabeto = 1 if (nivel_educ==3 & (a_educ>=2 & a_educ<=6)) | (nivel_educ>=4 & nivel_educ<=7)
 notes   alfabeto: variable defined for all individuals
 
 * Asiste a la educación formal:	asiste
-/*ASISTE_ENCUESTA (s7q3): ¿Durante este periodo escolar 2019-2020, asiste regularmente a un centro educativo como estudiante? 
+* ASISTE_ENCUESTA (emhp28): ¿asiste regularmente a un centro educativo como estudiante? 
+/* ASISTE_ENCUESTA (emhp29): ¿asiste regularmente a un centro educativo como estudiante? 
         1 = Si
 		2 = No
+		3 = Nunca asistio
+		98 = No aplica
+		99 = NS/NR
 */
-clonevar asiste_encuesta = s7q3  if (s7q3!=. & s7q3!=.a)                                             
-gen     asiste = asiste_encuesta==1 if asiste_encuesta!=.
+gen asiste_encuesta = emhp28  if (emhp28!=98 & emhp28!=99)                                             
+gen     asiste = 1	if  asiste_encuesta==1 
+replace asiste = 0	if (asiste_encuesta==2 | asiste_encuesta==3)
 replace asiste = .  if  edad<3
 notes   asiste: variable defined for individuals aged 3 and older
 
 * Establecimiento educativo público: edu_pub
-/* TIPO_CENTRO_EDUC (s7q5): ¿el centro de educacion donde estudia es:
+/* TIPO_CENTRO_EDUC (emhp31): ¿el centro de educacion donde estudia es:
 		1 = Privado
 		2 = Publico
-		.
-		.a
+		98 = No aplica
+		3 = NS/NR								
 */
-gen tipo_centro_educ = s7q5 if (s7q5!=. & s7q5!=.a)
+gen tipo_centro_educ = emhp31 if (emhp31!=98 & emhp31!=99)
 gen     edu_pub = 1	if  tipo_centro_educ==2  
 replace edu_pub = 0	if  tipo_centro_educ==1
 replace edu_pub = . if  edad<3
 
-* Educación en años: aedu //only for those who are currently attending
+* Educación en años: aedu 
 
 gen     aedu = 0	if  nivel_educ==1 | nivel_educ==2
-replace aedu = 0	if  nivel_educ==3 & g_educ==0
+replace aedu = 0	if  nivel_educ==3 & a_educ==0
 
-replace aedu = 1	if  nivel_educ==3 & g_educ==1
-replace aedu = 2	if  nivel_educ==3 & g_educ==2
-replace aedu = 3	if  nivel_educ==3 & g_educ==3
-replace aedu = 4	if  nivel_educ==3 & g_educ==4
-replace aedu = 5	if  nivel_educ==3 & g_educ==5
-replace aedu = 6	if  nivel_educ==3 & g_educ==6
-replace aedu = 6	if  nivel_educ==4 & g_educ==0
+replace aedu = 1	if  nivel_educ==3 & a_educ==1
+replace aedu = 2	if  nivel_educ==3 & a_educ==2
+replace aedu = 3	if  nivel_educ==3 & a_educ==3
+replace aedu = 4	if  nivel_educ==3 & a_educ==4
+replace aedu = 5	if  nivel_educ==3 & a_educ==5
+replace aedu = 6	if  nivel_educ==3 & a_educ==6
+replace aedu = 6	if  nivel_educ==4 & a_educ==0
 
-replace aedu = 7	if  nivel_educ==4 & g_educ==1
-replace aedu = 8	if  nivel_educ==4 & g_educ==2
-replace aedu = 9	if  nivel_educ==4 & g_educ==3
-replace aedu = 10	if  nivel_educ==4 & g_educ==4
-replace aedu = 11	if  nivel_educ==4 & g_educ==5
-replace aedu = 12	if  nivel_educ==4 & g_educ==6
-replace aedu = 12	if (nivel_educ==5 | nivel_educ==6 ) & (a_educ==0 | s_educ<=1 | t_educ<=2)	 
-
-replace aedu = 13	if  nivel_educ==5 & (a_educ==1 | (s_educ>=2 & s_educ<=3) | (t_educ>=3 & t_educ<=5))
-replace aedu = 14	if  nivel_educ==5 & (a_educ==2 | (s_educ>=4 & s_educ<=5) | (t_educ>=6 & t_educ<=8))
-replace aedu = 15	if  nivel_educ==5 & (a_educ==3 | s_educ==6 | t_educ==9)
+replace aedu = 7	if  nivel_educ==4 & a_educ==1
+replace aedu = 8	if  nivel_educ==4 & a_educ==2
+replace aedu = 9	if  nivel_educ==4 & a_educ==3
+replace aedu = 10	if  nivel_educ==4 & a_educ==4
+replace aedu = 11	if  nivel_educ==4 & a_educ==5
+replace aedu = 12	if  nivel_educ==4 & a_educ==6
+replace aedu = 12	if  nivel_educ==5 & s_educ==1
+replace aedu = 12	if  nivel_educ==6 & s_educ==1
+	 
+replace aedu = 13	if  nivel_educ==5 & (s_educ==2 | s_educ==3)
+replace aedu = 14	if  nivel_educ==5 & (s_educ==4 | s_educ==5)
+replace aedu = 15	if  nivel_educ==5 & (s_educ==6 | s_educ==7)
+replace aedu = 16	if  nivel_educ==5 & (s_educ==8 | s_educ==9)
+replace aedu = 17	if  nivel_educ==5 &  s_educ==10
                
-replace aedu = 13	if  nivel_educ==6 & (a_educ==1 | (s_educ>=2 & s_educ<=3) | (t_educ>=3 & t_educ<=5))
-replace aedu = 14	if  nivel_educ==6 & (a_educ==2 | (s_educ>=4 & s_educ<=5) | (t_educ>=6 & t_educ<=8))
-replace aedu = 15	if  nivel_educ==6 & (a_educ==3 | (s_educ>=6 & s_educ<=7) | (t_educ>=9 & t_educ<=11))
-replace aedu = 16	if  nivel_educ==6 & (a_educ==4 | (s_educ>=8 & s_educ<=9) | (t_educ>=12 & t_educ<=14))
-replace aedu = 17	if  nivel_educ==6 & (a_educ==5 | (s_educ>=10 & s_educ<=11) | (t_educ>=15 & t_educ<=17))
-replace aedu = 18	if  nivel_educ==6 & (a_educ==6 | (s_educ>=12 & s_educ<=13) | (t_educ>=18 & t_educ<=20))
-replace aedu = 19	if  nivel_educ==6 & (a_educ==7 | s_educ==14 | t_educ==21)
+replace aedu = 13	if  nivel_educ==6 & (s_educ==2 | s_educ==3)
+replace aedu = 14	if  nivel_educ==6 & (s_educ==4 | s_educ==5)
+replace aedu = 15	if  nivel_educ==6 & (s_educ==6 | s_educ==7)
+replace aedu = 16	if  nivel_educ==6 & (s_educ==8 | s_educ==9)
+replace aedu = 17	if  nivel_educ==6 & (s_educ==10 | s_educ==11)
+replace aedu = 18	if  nivel_educ==6 &  s_educ==12
 
-replace aedu = 17   if  nivel_educ==7 & (a_educ==0 | s_educ<=1 | t_educ<=2) //consideramos promedio de educacion superior 5 anos 
-replace aedu = 18   if  nivel_educ==7 & (a_educ==1 | (s_educ>=2 & s_educ<=3) | (t_educ>=3 & t_educ<=5))
-replace aedu = 19	if  nivel_educ==7 & (a_educ==2 | (s_educ>=4 & s_educ<=5) | (t_educ>=6 & t_educ<=8))
-replace aedu = 20	if  nivel_educ==7 & (a_educ==3 | (s_educ>=6 & s_educ<=7) | (t_educ>=9 & t_educ<=11))
-replace aedu = 21	if  nivel_educ==7 & (a_educ==4 | (s_educ>=8 & s_educ<=9) | (t_educ>=12 & t_educ<=14))
-replace aedu = 22	if  nivel_educ==7 & (a_educ==5 | (s_educ>=10 & s_educ<=11) | (t_educ>=15 & t_educ<=17))
-replace aedu = 23	if  nivel_educ==7 & (a_educ==6 | s_educ==12 | t_educ==18)
+replace aedu = 17   if  nivel_educ==7 &  s_educ==1 //consideramos promedio de educacion superior 5 anos 
+replace aedu = 18   if  nivel_educ==7 &  (s_educ==2 | s_educ==3)
+replace aedu = 19	if  nivel_educ==7 & (s_educ==4 | s_educ==5)
+replace aedu = 20	if  nivel_educ==7 & (s_educ==6 | s_educ==7)
+replace aedu = 21	if  nivel_educ==7 & (s_educ==8 | s_educ==9)
+replace aedu = 22	if  nivel_educ==7 & (s_educ==10 | s_educ==11)
+replace aedu = 23	if  nivel_educ==7 &  s_educ==12
 notes aedu: variable defined for individuals aged 3 and older
+*brow id pid nivel_educ a_educ s_educ if nivel!=. & aedu==. // se pierden 165 obs que reportan nivel_educ, pero no reportan a_educ o s_educ segun corresponde
 
 * Nivel educativo: nivel 
 /*   0 = Nunca asistió      
@@ -870,37 +829,38 @@ notes aedu: variable defined for individuals aged 3 and older
      6 = Superior completo						
 */
 gen     nivel = 0	if  nivel_educ==1 | nivel_educ==2
-replace nivel = 1	if  nivel_educ==3 & g_educ<=5
-replace nivel = 2	if  nivel_educ==3 & g_educ==6 
-replace nivel = 3	if  nivel_educ==4 & g_educ<=5
-replace nivel = 4	if  nivel_educ==4 & g_educ==6
-replace nivel = 5   if  (nivel_educ==5 & a_educ<=2) | (nivel_educ==6 & s_educ<=9) // Consideramos tecnica completa si completo almenos 6 semestres y universitaria completa si completo al menos 10 semestres
-replace nivel = 6   if  (nivel_educ==5 & a_educ>=3 & a_educ!=.) | (nivel_educ==6 & s_educ>=10 & s_educ!=.) | nivel_educ==7
+replace nivel = 1	if  nivel_educ==3 & a_educ<=5
+replace nivel = 2	if  nivel_educ==3 & a_educ==6 
+replace nivel = 3	if  nivel_educ==4 & a_educ<=5
+replace nivel = 4	if  nivel_educ==4 & a_educ==6
+replace nivel = 5   if  (nivel_educ==5 & s_educ<=5) | (nivel_educ==6 & s_educ<=9) // Consideramos tecnica completa si completo almenos 6 semestres y universitaria completa si completo al menos 10 semestres
+replace nivel = 6   if  (nivel_educ==5 & s_educ>=6 & s_educ!=.) | (nivel_educ==6 & s_educ>=10 & s_educ!=.) | nivel_educ==7
 notes nivel: variable defined for individuals aged 3 and older 
 
 label def nivel 0 "Nunca asistio" 1 "Primario Incompleto" 2 "Primario Completo" 3 "Secundario Incompleto" 4 "Secundario Completo" ///
                 5 "Superior Incompleto" 6 "Superior Completo"
 label value nivel nivel
-
+/*
 tab nivel_educ
 sum aedu
-tab nivel
-*brow id pid nivel_educ g_educ a_educ s_educ if nivel!=. & aedu==. // se pierden 165 obs que reportan nivel_educ, pero no reportan a_educ o s_educ segun corresponde
+tan nivel
+brow id pid nivel_educ a_educ s_educ if nivel!=. & aedu==.
+*/
 
 * Nivel educativo: niveduc
 /*   0 = baja educacion  (menos de 9 años)      
      1 = media educacion (de 9 a 13 años)
      2 = alta educacion  (mas de 13 años) 
 */
-gen     nivedu = 0 if aedu<9
-replace nivedu = 1 if aedu>=9 & aedu<=13
-replace nivedu = 2 if aedu>13 & aedu!=.
+gen     nivedu = 1 if aedu<9
+replace nivedu = 2 if aedu>=9 & aedu<=13
+replace nivedu = 3 if aedu>13 & aedu!=.
 
-*label def nivedu 0 "Baja educacion (menos de 9 años)" 1 "Media educacion (de 9-13 años)" 2 "Alta educacion (mas de 13 años)"
+*label def nivedu 1 "Baja educacion (menos de 9 años)" 2 "Media educacion (de 9-13 años)" 3 "Alta educacion (mas de 13 años)"
 *label value nivedu nivedu
 
 * Dummies niveles de educacion
-gen     prii = (nivel==1) if nivel!=.
+gen     prii = (nivel==0 | nivel==1) if nivel!=.
 gen     pric = (nivel==2) if nivel!=.
 gen     seci = (nivel==3) if nivel!=.
 gen     secc = (nivel==4) if nivel!=.
@@ -914,8 +874,7 @@ replace exp = 0  if exp<0
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.7: Variables Salud ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
-global salud_SEDLAC seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
-enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
+
 * Seguro de salud: seguro_salud
 /* AFILIADO_SEGURO_SALUD (smhp24a-smhp24g): ¿está afiliado a algún seguro medico?
         1 = Instituto Venezolano de los Seguros Sociales (IVSS)
@@ -924,14 +883,16 @@ enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_c
 	    4 = Seguro medico contratado por institucion privada
 	    5 = Seguro medico privado contratado de forma particular
 	    6 = No tiene plan de seguro de atencion medica
+	    99 = NS/NR
 */
 
-gen afiliado_seguro_salud = s8q18   if  (s8q18!=. & s8q18!=.a) 
-replace afiliado_seguro_salud = 6 if s8q17==2
-label define afiliado_seguro_salud 1 "Instituto Venezolano de los Seguros Sociales (IVSS)" 2 "Instituto de prevision social publico (IPASME, IPSFA, otros)" ///
-3 "Seguro medico contratado por institucion publica" 4 "Seguro medico contratado por institucion privada" 5 "Seguro medico privado contratado de forma particular" ///
-6 "No tiene plan de seguro de atencion medica"
-label value afiliado_seguro_salud afiliado_seguro_salud
+gen afiliado_seguro_salud = 1     if smhp24a==1 
+replace afiliado_seguro_salud = 2 if smhp24b==2 
+replace afiliado_seguro_salud = 3 if smhp24c==3 
+replace afiliado_seguro_salud = 4 if smhp24d==4
+replace afiliado_seguro_salud = 5 if smhp24e==5
+replace afiliado_seguro_salud = 6 if smhp24f==6
+
 gen     seguro_salud = 1	if  afiliado_seguro_salud>=1 & afiliado_seguro_salud<=5
 replace seguro_salud = 0	if  afiliado_seguro_salud==6
 
@@ -940,7 +901,7 @@ replace seguro_salud = 0	if  afiliado_seguro_salud==6
         1 = si esta afiliado a algun seguro de salud privado
 */
 gen 	tipo_seguro = 0     if  (afiliado_seguro_salud>=1 & afiliado_seguro_salud<=4) 
-replace tipo_seguro = 1     if  afiliado_seguro_salud==5 
+replace tipo_seguro = 1     if  afiliado_seguro_salud==5 //SOLO 5 o 4 y 5?
 
 * Uso de metodos anticonceptivos: anticonceptivo
 gen     anticonceptivo = . 
@@ -961,16 +922,35 @@ notes mamografia: the survey does not include information to define this variabl
 * Control durante el embarazo: control_embarazo //SOLO PARA EMBARAZADAS O TAMBIEN PARA QUIENES TUVIERON HIJOS VIVOS PREVIAMENTE?
 /*      1 = si se realizo controles durante el embarazo
         0 = si no se realizo controles durante el embarazo
+* LUGAR_CONTROL_EMB (ep98): ¿Donde se controla el embarazo?
+        1 = Ambulatorio/clinica popular/CDI
+		2 = Hospital/maternidad del sector público
+		3 = Consultorio privado sin hospitalización
+		4 = Clinica/maternidad del sector privado
+		5 = Centro de salud privado sin fines de lucro
+		6 = Servicio medico de la empresa o institucion donde trabaja usted o alguien del hogar
+		7 = Otro centro de atencion medica
+		8 = No se controla el embarazo
+		98 = No aplica
+		99 NS/NR
 */		
-gen     control_embarazo = .
-notes control_embarazo: the survey does not include information to define this variable
+tab hombre ep96 //INCONSISTENCIA APARECEN HOMBRES CONTESTANDO ESTA PREGUNTA
+gen embarazada = (ep96==1) if (ep96!=98 & ep96!=99) 
+gen hijo_nacido_vivo = ep101 if (ep101!=98 & ep101!=99)
+clonevar lugar_control_emb = ep98 if (ep98!=98 & ep98!=99) & embarazada==1
+clonevar lugar_controlo_emb = ep106 if (ep106!=98 & ep106!=99) & (embarazada==0 & hijo_nacido_vivo==1)
+gen     control_embarazo = 1 if lugar_control_emb>=1 & lugar_control_emb<=7
+replace control_embarazo = 1 if lugar_controlo_emb>=1 & lugar_controlo_emb<=7
+replace control_embarazo = 0 if lugar_control_emb==8 
+replace control_embarazo = 0 if lugar_controlo_emb==8 
 
 * Lugar control del embarazo: lugar_control_embarazo
 /*      1 = si el control del embarazo fue en un lugar privado
         0 = si el control del embarazo fue en un lugar publico o vinculado al trabajo (obra social)
 */
-gen     lugar_control_embarazo = .
-notes lugar_control_embarazo: the survey does not include information to define this variable
+gen     lugar_control_embarazo = 1 if  (lugar_control_emb>=3 & lugar_control_emb<=5) | (lugar_controlo_emb>=3 & lugar_controlo_emb<=5)
+replace lugar_control_embarazo = 0 if  (lugar_control_emb==1 | lugar_control_emb==2 | lugar_control_emb==6 | lugar_control_emb==7 )
+replace lugar_control_embarazo = 0 if  (lugar_controlo_emb==1 | lugar_controlo_emb==2 | lugar_controlo_emb==6 | lugar_controlo_emb==7) // NO ESTOY SEGURA DONDE AGREGAR CATEG 7 
 
 * Lugar del parto: lugar_parto
 /*      1 = si el parto fue en un lugar privado
@@ -985,12 +965,10 @@ notes tiempo_pecho: the survey does not include information to define this varia
 
 * Vacunas
 *  ¿Ha recibido vacuna Anti-BCG (contra la tuberculosis): vacuna_bcg
-gen    vacuna_bcg = .
-notes vacuna_bcg: the survey does not include information to define this variable
+gen    vacuna_bcg = (vp108bcg==1) if (vp108bcg!=98 & vp108bcg!=99) & edad<=2 
 
 *  ¿Ha recibido vacuna Anti-hepatitis B: vacuna_hepatitis
-gen    vacuna_hepatitis = .
-notes vacuna_hepatitis: the survey does not include information to define this variable
+gen    vacuna_hepatitis = (vp108hb==2) if (vp108hb!=98 & vp108hb!=99) & edad<=2 
 
 *  ¿Ha recibido vacuna Cuadruple (contra la difteria, el tetanos y la influenza tipo b): vacuna_cuadruple
 gen    vacuna_cuadruple = .
@@ -1001,47 +979,39 @@ gen    vacuna_triple = .
 notes vacuna_triple: the survey does not include information to define this variable
 
 *  ¿Ha recibido vacuna Antihemophilus (contra la influenza tipo b): vacuna_hemo
-gen    vacuna_hemo = .
-notes vacuna_hemo: the survey does not include information to define this variable
+gen    vacuna_hemo = (vp108fl==5) if (vp108fl!=98 & vp108fl!=99) & edad<=2 
 
 *  ¿Ha recibido vacuna Sabin (contra la poliomielitis): vacuna_sabin
-gen    vacuna_sabin = .
-notes vacuna_sabin: the survey does not include information to define this variable
+gen    vacuna_sabin = (vp108ap==6 | vp108po==7) if (vp108ap!=98 & vp108ap!=99 & vp108po!=98 & vp108po!=99) & edad<=2 
 
 *  ¿Ha recibido vacuna Triple Viral (contra el sarampion, las paperas y la rubeola): vacuna_triple_viral
-gen    vacuna_triple_viral = . 
-notes vacuna_triple_viral: the survey does not include information to define this variable
+gen    vacuna_triple_viral = (vp108tri==10) if (vp108tri!=98 & vp108tri!=99) & edad<=2 
 
 *** ADICIONALES
 *  ¿Ha recibido vacuna Antirotavirus: vacuna_rotavirus
-gen    vacuna_rotavirus = . 
-notes vacuna_rotavirus: the survey does not include information to define this variable
+gen    vacuna_rotavirus = (vp108ro==3) if (vp108ro!=98 & vp108ro!=99) & edad<=2 
 
 *  ¿Ha recibido vacuna Pentavalente (contra la difteria, tos ferina, tetanos, hepatitis B, meningitis y neumonias por Hib): vacuna_pentavalente
-gen    vacuna_pentavalente = .
-notes vacuna_pentavalente: the survey does not include information to define this variable
+gen    vacuna_pentavalente = (vp108pt==4) if (vp108pt!=98 & vp108pt!=99) & edad<=2 
 
 *  ¿Ha recibido vacuna Anti-neumococo : vacuna_neumococo
-gen    vacuna_neumococo = .
-notes vacuna_neumococo: the survey does not include information to define this variable
+gen    vacuna_neumococo = (vp108ne==8) if (vp108ne!=98 & vp108ne!=99) & edad<=2 
 
 *  ¿Ha recibido vacuna Anti-amarilica (contra la fiebre amarilla) : vacuna_amarilica
-gen    vacuna_amarilica = .
-notes vacuna_amarilica: the survey does not include information to define this variable
+gen    vacuna_amarilica = (vp108ama==9) if (vp108ama!=98 & vp108ama!=99) & edad<=2 
 
 *  ¿Ha recibido vacuna contra la Varicela: vacuna_varicela
-gen    vacuna_varicela = .
-notes vacuna_varicela: the survey does not include information to define this variable
+gen    vacuna_varicela = (vp108var==11) if (vp108var!=98 & vp108var!=99) & edad<=2 
 
 * No ha recibido ninguna vacuna: vacuna_ninguna
-gen    vacuna_ninguna = . 
-notes vacuna_ninguna: the survey does not include information to define this variable
+gen    vacuna_ninguna = (vp108ning==12) if (vp108ning!=98 & vp108ning!=99) & edad<=2 
 
 * ¿Estuvo enfermo?: enfermo
 /*     1 = si estuvo enfermo o sintio malestar en el ultimo mes
        0 = si no estuvo enfermo ni sintio malestar en el ultimo mes
 */
-gen    enfermo = s8q1==1 if (s8q1!=. & s8q1!=.a)
+gen    enfermo = .
+notes enfermo: the survey does not include information to define this variable
 
 * ¿Interrumpio actividades por estar enfermo?: interrumpio
 /*      1 = si interrumpio sus actividades habituales por estar enfermo
@@ -1054,35 +1024,29 @@ notes interrumpio: the survey does not include information to define this variab
 /*     1 = si consulto al medico en las ultimas 4 semanas
        0 = si no consulto al medico en las ultimas 4 semanas
 */
-gen    visita = s8q3==1 if s8q1==1 & (s8q3!=. & s8q3!=.a)
+gen    visita = .
+notes visita: the survey does not include information to define this variable
 
 * ¿Por que no consulto al medico?: razon_no_medico
 /*     1 = si no consulto al medico por razones economicas
        0 = si no consulto al medico por razones no economicas
 */
-gen    razon_no_medico = s8q4==2 if s8q1==1 & s8q3==2 & (s8q4!=. & s8q4!=.a)
+gen    razon_no_medico = .
+notes razon_no_medico: the survey does not include information to define this variable
 
 * Lugar de ultima consulta: lugar_consulta
 /*     1 = si el lugar de la ultima consulta es privado
        0 = si el lugar de la ultima consulta es publico o vinculado al trabajo
-* LUGAR_ATENCION (s8q6): Donde acudio para su atencion?
-       1 = Ambulatorio/clinica popular/CDI
-	   2 = Hospital publico o del seguro social
-	   3 = Servicio privado sin hospitalizacion
-	   4 = Clinica privada
-	   5 = Centro de salud privado sin fines de lucro
-	   6 = Servicio medico en el lugar del trabajo
-	   7 = Farmacia
-	   8 = Otro
 */
-clonevar lugar_atencion = s8q6 if s8q1==1 & s8q3==1 & (s8q6!=. & s8q6!=.a)
-gen    lugar_consulta = (lugar_atencion==3 | lugar_atencion==4 | lugar_atencion==5) if lugar_atencion!=.
+gen    lugar_consulta = .
+notes lugar_consulta: the survey does not include information to define this variable
 
 * Pago de la ultima consulta: pago_consulta
 /*     1 = si el pago de la ultima consulta fue privado
        0 = si el pago de la ultima consulta es publico o vinculado al trabajo
 */
-gen    pago_consulta = lugar_consulta==1 if s8q1==1 & s8q3==1 & s8q7==1
+gen    pago_consulta = .
+notes pago_consulta: the survey does not include information to define this variable
 
 * Tiempo que tardo en llegar al medico medido en horas: tiempo_consulta
 gen    tiempo_consulta = .
@@ -1091,20 +1055,9 @@ notes tiempo_consulta: the survey does not include information to define this va
 * ¿Obtuvo remedios prescriptos?: obtuvo_remedio
 /*     1 = si obtuvo medicamentos prescriptos
        0 = si no obtuvo medicamentos prescriptos
-* RECETO_REMEDIO (s8q9): Se le receto algun medicamento?
-       1 = Si
-	   2 = No
-* RECIBIO_REMEDIO (s8q9): Como obtuvo los medicamentos?
-       1 = Los recibio todos gratis
-	   2 = Recibio algunos gratis y otros los compro
-	   3 = Los compro todos
-	   4 = Compro algunos
-	   5 = Recibio algunos gratis y otros no pudo comprarlos
-	   6 = No pudo obtener ninguno	   
 */
-gen     receto_remedio=s8q9==1 if s8q1==1 & s8q3==1 & (s8q9!=. & s8q9!=.a)
-clonevar  recibio_remedio = s8q10 if receto_remedio==1 & (s8q10!=. & s8q10!=.a) 
-gen     obtuvo_remedio = (recibio_remedio>=1 & recibio_remedio<=5) if receto_remedio==1 
+gen    obtuvo_remedio = .
+notes obtuvo_remedio: the survey does not include information to define this variable
 
 * ¿Por que no obtuvo remedios prescriptos?: razon_no_remedio
 /*     1 = si no obtuvo remedios por razones economicas
@@ -1126,7 +1079,7 @@ notes fumar: the survey does not include information to define this variable
 */
 gen    deporte = .
 notes deporte: the survey does not include information to define this variable
-;
+
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -1167,8 +1120,8 @@ gen labor_status = tmhp34 if (tmhp34!=98 & tmhp34!=99)
 gen categ_ocu = tmhp41    if (tmhp41!=98 & tmhp41!=99)
 gen     relab = .
 replace relab = 1 if (labor_status==1 | labor_status==2) & categ_ocu== 5  //employer 
-replace relab = 2 if (labor_status==1 | labor_status==2) & ((categ_ocu>=1 & categ_ocu<=4) | categ_ocu== 9) //employee
-replace relab = 3 if (labor_status==1 | labor_status==2) & (categ_ocu==6 | categ_ocu==7)  //self-employed
+replace relab = 2 if (labor_status==1 | labor_status==2) & ((categ_ocu>=1 & categ_ocu<=4) | categ_ocu== 9 | categ_ocu==7) // Employee - Obs: survey's CAPI1 defines the miembro de cooperativas as not self-employed
+replace relab = 3 if (labor_status==1 | labor_status==2) & (categ_ocu==6)  // Self-employed
 replace relab = 4 if (labor_status==1 | labor_status==2) & categ_ocu== 8 //unpaid family worker
 replace relab = 2 if (labor_status==1 | labor_status==2) & (categ_ocu== 8 & tmhp42bs>0 & tmhp42bs!=98 & tmhp42bs!=99) //paid family worker
 replace relab = 5 if (labor_status==3 | labor_status==4)
@@ -1185,6 +1138,7 @@ gen     relab_o =.
 		5 = No hizo diligencias
         99 = NS/NR
 */
+
 gen diligencias_bt = tmhp36 if (tmhp36!=98 & tmhp36!=99) // tambien la contesta gente que no esta desocupada
 /* tab relab if tmhp36!=.
       relab |      Freq.     Percent        Cum.
@@ -1202,7 +1156,7 @@ replace durades = 0.5   if relab==5 & diligencias_bt==1
 replace durades = 3 if relab==5 & diligencias_bt==2
 replace durades = 9  if relab==5 & diligencias_bt==3
 replace durades = 13  if relab==5 & diligencias_bt==4 //NO ESTOY SEGURA SI SE DEBE ASIGNAR ESTE VALOR
-*notes durades: the survey does not include information to define this variable
+*Assumption: we complete with 13 months when more than 12 months
 
 * Horas trabajadas totales y en ocupacion principal: hstrt y hstrp
 * NHORAST (tmhp45): ¿Cuantas horas en promedio trabajo la semana pasada? 
@@ -1557,6 +1511,7 @@ gen     ijubi_m = .
 replace ijubi_m = pmhp55bs if pmhp53j==1 // Jubilado (reportados 656)
 replace ijubi_m = pmhp55bs if pmhp53p==2 // Pensionado (reportados 1,669)
 replace ijubi_m = tmhp52bs if (ijubi==0|ijubi==.) & (ing_nlb_pv==1 | ing_nlb_pi==1 | ing_nlb_jt==1) & recibe==1
+
 
 * No monetario	
 gen     ijubi_nm=.

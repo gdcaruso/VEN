@@ -89,13 +89,13 @@ drop _merge
 gen miembro=1
 
 // collapses requirements by household
-collapse (sum) req_cal_ven req_prot_ven he_cal_ven he_prot_ven miembro, by(interview__key interview__id quest)
+collapse (sum) req_cal_col req_prot_ven he_cal_col he_prot_ven miembro, by(interview__key interview__id quest)
 sort interview__key interview__id quest
 
 
 // save dta
 compress
-save "$output/requerimets_ven.dta", replace
+save "$output/requerimets_col.dta", replace
 
 
 

@@ -1201,10 +1201,8 @@ notes deporte: the survey does not include information to define this variable
 	tab labor_status
 
 /* CATEG_OCUP (s9q15): En su trabajo se desempena como
-        1 = Empleado en el sector publico
-		2 = Obrero en el sector publico
-		3 = Empleado en empresa privada
-		4 = Obrero en empresa privada
+        1 = Empleado u obrero en el sector publico
+		3 = Empleado u obrero en empresa privada
 		5 = Patrono o empleador
 		6 = Trabajador por cuenta propia
 		7 = Miembro de cooperativas

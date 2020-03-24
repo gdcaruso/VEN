@@ -970,18 +970,18 @@ replace seguro_salud = 0	if  s8q17==2
         1 = si esta afiliado a algun seguro de salud privado
 	*/
 	
-gen afiliado_seguro_salud = 1     if s8q18==1 
-replace afiliado_seguro_salud = 2 if s8q18==2 
-replace afiliado_seguro_salud = 3 if s8q18==3 
-replace afiliado_seguro_salud = 4 if s8q18==4
-replace afiliado_seguro_salud = 5 if s8q18==5
-replace afiliado_seguro_salud = 6 if s8q17==2
-label define afiliado_seguro_salud 1 "Instituto Venezolano de los Seguros Sociales (IVSS)" 2 "Instituto de prevision social publico (IPASME, IPSFA, otros)" ///
+gen 	afiliado_segsalud = 1 if s8q18==1 
+replace afiliado_segsalud = 2 if s8q18==2 
+replace afiliado_segsalud = 3 if s8q18==3 
+replace afiliado_segsalud = 4 if s8q18==4
+replace afiliado_segsalud = 5 if s8q18==5
+replace afiliado_segsalud = 6 if s8q17==2
+label define afiliado_segsalud 1 "Instituto Venezolano de los Seguros Sociales (IVSS)" 2 "Instituto de prevision social publico (IPASME, IPSFA, otros)" ///
 3 "Seguro medico contratado por institucion publica" 4 "Seguro medico contratado por institucion privada" 5 "Seguro medico privado contratado de forma particular" ///
 6 "No tiene plan de seguro de atencion medica"
 
-gen 	tipo_seguro = 0     if  (afiliado_seguro_salud>=1 & afiliado_seguro_salud<=4) 
-replace tipo_seguro = 1     if  afiliado_seguro_salud==5 //SOLO 5 o 4 y 5?
+gen 	tipo_seguro = 0     if  (afiliado_segsalud>=1 & afiliado_segsalud<=4) 
+replace tipo_seguro = 1     if  afiliado_segsalud==5 //SOLO 5 o 4 y 5?
 
 * Uso de metodos anticonceptivos: anticonceptivo
 gen     anticonceptivo = . 
@@ -1231,18 +1231,18 @@ notes deporte: the survey does not include information to define this variable
 	gen relab_o = .
 	
 * Duracion del desempleo: durades (en meses)
-	/* DILIGENCIAS_BT (s9q8): ¿Cuándo fue la ultima vez que hizo diligencias para conseguir trabajo o establecer un negocio solo o asociado?
+	/* CUANDO_BUSCOTR (s9q8): ¿Cuándo fue la ultima vez que hizo diligencias para conseguir trabajo o establecer un negocio solo o asociado?
 			1 = En los últimos 2 meses
 			2 = En los últimos 12 meses
 			3 = Hace mas de un año
 			4 = No hizo diligencias
 	*/
-	gen diligencias_bt = s9q8 if (s9q6==2 & s9q7==2 & s9q3==2 & s9q1==2 & s9q2==3)
+	gen cuando_buscotr = s9q8 if (s9q6==2 & s9q7==2 & s9q3==2 & s9q1==2 & s9q2==3)
 
 	gen     durades = 0   if relab==5
-	replace durades = 1   if relab==5 & diligencias_bt==1
-	replace durades = 6 if relab==5 & diligencias_bt==2
-	replace durades = 13  if relab==5 & diligencias_bt==3 
+	replace durades = 1   if relab==5 & cuando_buscotr==1
+	replace durades = 6   if relab==5 & cuando_buscotr==2
+	replace durades = 13  if relab==5 & cuando_buscotr==3 
 	*Assumption: we complete with 13 months when more than 12 months
 
 * Horas trabajadas totales y en ocupacion principal: hstrt y hstrp
@@ -1258,18 +1258,18 @@ notes deporte: the survey does not include information to define this variable
 	*Problem: it should not be possible but there is at least one case in which the total hours worked appears to be greater than the hours worked for the main job
 
 * Deseo o busqueda de otro trabajo o mas horas: deseamas (el trabajador ocupado manifiesta el deseo de trabajar mas horas y/o cambiar de empleo (proxy de inconformidad con su estado ocupacional actual)
-	/* DMASHORAS (s9q31): ¿Preferiria trabajar mas de 35 horas por semana?
-	   BMASHORAS (s9q32): ¿Ha hecho algo parar trabajar mas horas?
-	   CAMBIO_EMPLEO (s9q34): ¿Ha cambiado de trabajo durante los últimos meses?
+	/* DESEAMASHS (s9q31): ¿Preferiria trabajar mas de 35 horas por semana?
+	   BUSCAMASHS (s9q32): ¿Ha hecho algo parar trabajar mas horas?
+	   CAMBIOTR (s9q34): ¿Ha cambiado de trabajo durante los últimos 12 meses?
 	*/
-	gen dmashoras = s9q31 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
-	gen bmashoras = s9q32 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen deseamashs = s9q31 if s9q18<35 & (s9q31!=. & s9q31!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen buscamashs = s9q32 if s9q18<35 & (s9q31!=. & s9q31!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
 	*Assumption: only part-time workers can want to work more
 	
-	gen cambio_empleo = s9q34 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active
+	gen cambiotr = s9q34 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active
 
 	gen     deseamas = 0 if (relab>=1 & relab<=4)
-	replace deseamas = 1 if dmashoras==1 | bmashoras==1 
+	replace deseamas = 1 if deseamashs==1 | buscamashs==1 
 
 * Antiguedad: antigue
 	gen     antigue = .
@@ -1406,7 +1406,7 @@ notes deporte: the survey does not include information to define this variable
 	gen     djubila = (s9q36==1) if relab==2 & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means means being economically active
 
 * Health insurance linked to employment: dsegsale
-gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2
+gen     dsegsale = (afiliado_segsalud==3 | afiliado_segsalud==4) if relab==2
 
 * Right to be paid 13 months a year (instead of 12): aguinaldo
 gen     aguinaldo = .

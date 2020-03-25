@@ -43,7 +43,7 @@ Note:
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
 	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\Desktop\ENCOVI-2019"
+				global rootpath "C:\Users\wb563365\OneDrive - WBG\Documents\GitHub\VEN\"
 		}
 
 // set raw data path
@@ -60,7 +60,7 @@ set more off
 
 // product-data setting
 global productdta "$datapath\product-hh.dta"
-use  $productdta, clear
+use  "$productdta", clear
 drop if grupo_bien != 1
 
 /*==============================================================================

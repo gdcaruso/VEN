@@ -44,7 +44,7 @@ Note:
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
 	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\OneDrive - WBG\Documents\GitHub\VEN"
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 		
 		

@@ -44,7 +44,7 @@ Note:
 				global rootpath "C:\Users\lauta\Documents\GitHub\VEN"
 		}
 	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\OneDrive - WBG\Documents\GitHub\VEN"
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 
 // set raw data path
@@ -75,10 +75,10 @@ set more off
 // merges with income data
 use "$cleaneddatapath/base_out_nesstar_cedlas_2019.dta", replace
 keep if interview_month==2
-collapse (mean)ipcf_mean=ipcf (max)ipcf_max=ipcf (max) miembros (max) entidad, by (interview__key interview__id quest)
+rename region_est2 entidad
+collapse (max)ipcf_max=ipcf (max) miembros (max) entidad, by (interview__key interview__id quest)
 
 rename ipcf_max ipcf
-drop ipcf_mean
 
 
 // keeps quantiles in poverty prior surrounding
@@ -136,7 +136,7 @@ drop _merge
 keep interview__key interview__id quest ipcf miembros entidad quant bien cantidad_h Energia_kcal_m Proteina_m
 
 
-// identify large outliars (testing)
+// identify large outliars and replacing them with mean
 gen cantidad_pc = cantidad_h/miembros
 bysort bien: egen outliars = pctile(cantidad_pc), p(99) 
 bysort bien: egen cantidad_media_pc = mean(cantidad_pc) if cantidad_pc<outliars 
@@ -189,6 +189,9 @@ gen shareintake = foodcalintake/totintake
 
 // filters of food
 keep if shareintake>0.01 | popularity>0.3
+
+// drop condimentos (no prices collected)
+drop if bien == 79
 
 
 // gen total intake after filters

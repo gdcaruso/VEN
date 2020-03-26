@@ -1305,7 +1305,7 @@ notes deporte: the survey does not include information to define this variable
 	
 	gen cambiotr = s9q34 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active
 
-	gen     deseamashs = 0 if (relab>=1 & relab<=4)
+	gen     deseamas = 0 if (relab>=1 & relab<=4)
 	replace deseamas = 1 if deseamashs==1 | buscamashs==1 
 
 * Antiguedad: antigue

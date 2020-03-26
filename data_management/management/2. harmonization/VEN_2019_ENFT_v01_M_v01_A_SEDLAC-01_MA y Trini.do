@@ -737,8 +737,9 @@ gen     ncarros = s5q4a if (s5q4a!=. & s5q4a!=.a)
 replace ncarros = .		if  relacion!=1 
 
 * Antiguedad del auto (en años): ant_auto
-gen   ant_auto = .
-notes ant_auto: the survey does not include information to define this variable
+gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
+gen   ant_auto = ano-anio_auto
+replace ant_auto= . if ant_auto<0
 
 * Auto nuevo (5 o menos años): auto_nuevo
 gen   auto_nuevo = .
@@ -943,7 +944,6 @@ replace exp = 0  if exp<0
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.7: Health Variables ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
-
 global salud_SEDLAC seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
 enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
 
@@ -1168,7 +1168,6 @@ notes fumar: the survey does not include information to define this variable
 */
 gen    deporte = .
 notes deporte: the survey does not include information to define this variable
-
 
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Labor Variables ---------------------------------------------------------------

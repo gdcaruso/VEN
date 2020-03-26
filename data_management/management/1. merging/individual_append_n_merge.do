@@ -28,10 +28,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   1
+		global lauta   0
 		
 		* User 3: Lautaro
-		global lauta2   0
+		global lauta2   1
 		
 		
 		* User 4: Malena
@@ -44,7 +44,7 @@ Note:
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
 	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\Desktop\ENCOVI-2019"
+				global rootpath "C:\Users\wb563365\GitHub\VEN\"
 		}
 
 		
@@ -57,7 +57,7 @@ Note:
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\03_04_20"
+global dataofficial "$rootpath\data_management\input\03_16_20"
 
 ********************************************************************************
 
@@ -115,12 +115,14 @@ drop if dupli >= 1
 
 keep interview* origina responsible__name quest date
 
+
 // formatting
 keep interview__key interview__id quest date
 replace date = subinstr(date, "-", "/",.)
-gen edate=date(date,"YMD")
-format edate %td
+gen approved_date=date(date,"YMD")
+format approved_date %td
 drop date
+
 
 // test if is id
 isid interview__key interview__id quest

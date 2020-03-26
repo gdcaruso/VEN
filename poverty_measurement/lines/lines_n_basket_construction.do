@@ -29,10 +29,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   1
+		global lauta   0
 		
 		* User 3: Lautaro
-		global lauta2   0
+		global lauta2   1
 		
 		
 		* User 4: Malena
@@ -45,7 +45,7 @@ Note:
 				global rootpath "C:\Users\lauta\Documents\GitHub\VEN"
 		}
 	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\Desktop\ENCOVI-2019"
+				global rootpath "C:\Users\wb563365\OneDrive - WBG\Documents\GitHub\VEN"
 		}
 
 // set raw data path
@@ -74,7 +74,7 @@ set more off
 
 use "$cleaneddatapath\product_hh_homogeneous.dta"
 rename bien COD_GASTO
-merge m:1 COD_GASTO using $foodcomposition
+merge m:1 COD_GASTO using "$foodcomposition"
 
 keep if _merge==3
 drop _merge
@@ -94,7 +94,7 @@ gen cal_intake = (((cantidad_h*Energia_kcal_m)/100)/7)
 gen prot_intake = (((cantidad_h*Proteina_m)/100)/7)
 
 compress
-save $baskets, replace
+save "$baskets", replace
 
 
 collapse (sum) cal_intake prot_intake consumio, by (interview__key interview__id quest)
@@ -166,7 +166,7 @@ tempfile ipcf
 preserve
 use "$cleaneddatapath/base_out_nesstar_cedlas_2019.dta", replace
 keep if interview_month==2
-collapse (mean)ipcf_mean=ipcf (max)ipcf_max=ipcf , by (interview__key interview__id quest)
+collapse (mean)ipcf_mean=ipcf (max)ipcf_max=ipcf (max) entidad , by (interview__key interview__id quest)
 tab interview__key if ipcf_max!=ipcf_mean
 save `ipcf'
 restore
@@ -229,12 +229,12 @@ replace obs = _n
 graph twoway (line prot_intake_pc obs, sort)(line prot_ref_ae obs, sort) if  prot_intake_pc<200
 */
 
-
+///////////PERCENTILES SECTION
 // define xtiles by income
 xtile quant = ipcf, nquantiles(100)
 
 compress
-save $intakes, replace
+save "$intakes", replace
 
 /*
 twoway line share_def quant, yaxis(1) yscale(range(0) axis(1)) ///
@@ -246,6 +246,53 @@ twoway line share_def quant, yaxis(1) yscale(range(0) axis(1)) ///
 graph
 */
 
+///////////OTHERTILES SECTION
+
+//gen q = ceil(quant/20)
+gen q = ceil(quant/5)
+bysort q: egen inc = mean(ipcf)
+bysort q: egen p01 = pctile(cal_intake_pce), p(1)
+bysort q: egen p30 = pctile(cal_intake_pce), p(30)
+bysort q: egen p40 = pctile(cal_intake_pce), p(40)
+bysort q: egen p50 = pctile(cal_intake_pce), p(50)
+bysort q: egen p60 = pctile(cal_intake_pce), p(60)
+bysort q: egen p70 = pctile(cal_intake_pce), p(70)
+bysort q: egen p99 = pctile(cal_intake_pce), p(99)
+bysort q: egen p95 = pctile(cal_intake_pce), p(95)
+bysort q: egen uncon_mean = mean(cal_intake_pce)
+bysort q: egen con_mean = mean(cal_intake_pce) if cal_intake_pce < p99 & cal_intake_pce > p01
+
+graph twoway line inc q if q<20, yaxis(1) lpattern("dash") ///
+  || line uncon_mean q if q<20, yaxis(2) lcolor("red") lpattern("dash")  ///
+  || line p40 q if q<20, yaxis(2) lcolor("black") lpattern("dash") ///
+  || line p50 q if q<20, yaxis(2) lcolor("black") ///
+  || line p60 q if q<20, yaxis(2) lcolor("black") lpattern("dash") ///
+  || line cal_ref_ae q if q<20, yaxis(2) lcolor("yellow") ///
+  || line con_mean q if q<20, yaxis(2) lcolor("red")
+  
+
+
+/// quantile analysis
+/// why are big peaks in q6/20, q16, q1 and valleys in q7 and q11???? 
+bysort q: egen uncon_sd = sd(cal_intake_pce)
+bysort q: egen con99_sd = sd(cal_intake_pce) if cal_intake_pce < p99
+bysort q: egen con95_sd = sd(cal_intake_pce) if cal_intake_pce < p95
+graph twoway line uncon_sd q if q<20, yaxis(1) ///
+  || line con99_sd q if q<20, yaxis(1) ///
+  || line con95_sd q if q<20, yaxis(1) ///
+  || line uncon_mean q if q<20, yaxis(2) lcolor("red") lpattern("dash")
+
+// where are they? q6 q16 q9 q13
+tab entidad q
+
+// what do they eat?
+merge 1:m interview__id interview__key quest using "$baskets"
+gen pico = 1 if quant == 6 | quant == 16 | quant == 9  | quant == 13  
+replace pico = 0 if pico !=1
+stop
+
+restore
+///////////QUANTILES MOV SECTION
 
 matrix R=J(81, 11, .)
 forvalues i = 0(1)80{
@@ -294,7 +341,9 @@ graph twoway line R2 R1 if R1<78, yaxis(1) lpattern("dash") ///
   || line R11 R1 if R1<78, yaxis(2) lcolor("orange")
 restore
 
-// sets quantile population reference
+
+
+
 
 
 /*(************************************************************************************************************************************************* 

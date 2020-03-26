@@ -48,7 +48,7 @@ Note:
 				global dataout "$rootpath\"
 		}
 
-	global dataofficial "$rootpath\data_management\input\03_10_20"
+	global dataofficial "$rootpath\data_management\input\03_19_20"
 	global dataout "$rootpath\data_management\output"
 	global dataint "$dataout\intermediate"
     // Set the  path for prices
@@ -369,62 +369,22 @@ Note:
 		drop if _merge==2
 		// Drop auxiliary variable
 		drop _merge
-
-*-------- Save prices dataset
-// save the product-household dataset
-//save "$rootpath\data_management\output\merged\prices.dta", replace
-
-/*-------- Some descriptive measures
-
-ESTAN HECHAS CON LA FECHA DE APROBACION NO DE LA ENCUESTA
-
-// Generate auxiliar variable to collapse and generate descriptive information
-	 // Generate a variable to identify the month
-	 gen month=substr(date,6,2)
-	 // Create identification for stata and month
-	 egen month_state=group(ENTIDAD month), label
-	 egen month_state_bien=group(ENTIDAD month bien), label
-	 
-	preserve
-	collapse (mean) m_p=precio (count) c_p=precio  (sd) sd_p=precio, by (bien ENTIDAD) 
-	export excel using "$dataout/precio_desc", sheet("Todo",replace) firstrow(varlabels) 
-	restore
-
-	preserve
-	collapse (mean) m_p=precio (count) c_p=precio  (sd) sd_p=precio, by (bien)
-	export excel using "$dataout/precio_desc", sheet("Bien",replace) firstrow(varlabels) 
-	restore
-
-	preserve
-	collapse (mean) m_p=precio (count) c_p=precio  (sd) sd_p=precio, by (ENTIDAD)
-	export excel using "$dataout/precio_desc", sheet("Entidad",replace) firstrow(varlabels) 
-	restore
-
-	preserve
-	collapse (mean) m_b=bien (count) c_b=bien (sd) sd_b=bien, by (ENTIDAD) 
-	export excel using "$dataout/precio_desc", sheet("Bien Entidad",replace) firstrow(varlabels) 
-	restore
-
-	preserve
-	collapse (mean) m_p=precio (count) c_p=precio  (sd) sd_p=precio, by (month_state)
-	export excel using "$dataout/precio_desc", sheet("Precio-Mes",replace) firstrow(varlabels) 
-	restore
-
-	preserve
-	collapse (mean) m_b=bien (count) c_b=bien (sd) sd_b=bien, by (month_state) 
-	export excel using "$dataout/precio_desc", sheet("Bien-Mes",replace) firstrow(varlabels) 
-	restore
-
-*/
+		
+*----------- Currency transformation
+*----------- Transform prices from euros, dollar & pesos colombianos to bolivares
+*----------- Using the monthly average exchange rate
+		gen precio_b=precio
+		replace precio_b=(precio*mean_moneda) if (moneda==2 | moneda==3 | moneda==4)
+		label var precio_b "Precios convertidos a Bolivares"
 
 
 /*(************************************************************************************************************************************************* 
-* Selection of items
+* 		Selection of items
 *************************************************************************************************************************************************)
   Select only items which we are going to use for the basket in the poverty lines
   This simplify the problem of units and measures correction 
 */
-
+	// Items selection
 		keep if bien== 1 | bien== 2 | bien== 7 | bien== 9 | bien== 10 | ///           
 		bien== 12 | bien== 13 | bien==  14 |  bien== 19 | bien==  20 | ///
 		bien== 22 | bien== 24 |  bien==  26 | bien== 29 | bien== 31 | ///
@@ -433,27 +393,34 @@ ESTAN HECHAS CON LA FECHA DE APROBACION NO DE LA ENCUESTA
 		bien== 53 | bien== 54 | bien== 55 | bien== 61 | bien== 62 | bien== 66 | ///                   
 		bien== 67 | bien== 71 | bien== 74 |  bien== 75 
 
+		
+	// Check on Units 	
+		tab unidad_medida
+		tab unidad_medida_ot
+		
 /*
 As a result we have the following list of units
 
-                           Unidad |      Freq.     Percent        Cum.
+					  
+					  Unidad      |      Freq.     Percent        Cum.
 ----------------------------------+-----------------------------------
-                       Kilogramos |      3,170       60.48       60.48
-                           Gramos |      1,116       21.29       81.78
-                           Litros |        230        4.39       86.17
-                       Mililitros |         34        0.65       86.82
-                             Taza |          2        0.04       86.85
-Pieza (bistec,chuleta, similares) |          4        0.08       86.93
-                     Pieza de pan |        123        2.35       89.28
-                             Otro |         76        1.45       90.73
-                             Lata |          2        0.04       90.77
-                           Cartón |         84        1.60       92.37
-                     Medio cartón |         29        0.55       92.92
-                           Unidad |        363        6.93       99.85
-                            Bolsa |          7        0.13       99.98
-                   Torta (casabe) |          1        0.02      100.00
+                       Kilogramos |      4,418       60.63       60.63
+                           Gramos |      1,550       21.27       81.90
+                           Litros |        309        4.24       86.14
+                       Mililitros |         55        0.75       86.89
+                             Taza |          2        0.03       86.92
+Pieza (bistec,chuleta, similares) |          6        0.08       87.00
+                     Pieza de pan |        170        2.33       89.34
+                             Otro |        114        1.56       90.90
+                             Lata |          4        0.05       90.96
+                           Cartón |        126        1.73       92.69
+                     Medio cartón |         41        0.56       93.25
+                           Unidad |        482        6.61       99.86
+                            Bolsa |          9        0.12       99.99
+                   Torta (casabe) |          1        0.01      100.00
 ----------------------------------+-----------------------------------
-                            Total |      5,241      100.00
+                            Total |      7,287      100.00
+
 
  Without taking into account other measures or sizes
  
@@ -481,13 +448,21 @@ Pieza (bistec,chuleta, similares) |          4        0.08       86.93
 	// First: standarized the names
 	replace unidad_medida_ot="Paquete" if (unidad_medida_ot=="PAQUETES") 
 	replace unidad_medida_ot="Paquete" if (unidad_medida_ot=="paquete")  
-	replace unidad_medida_ot="Paquete" if (unidad_medida_ot=="paquetes") 
+	replace unidad_medida_ot="Paquete" if (unidad_medida_ot=="paquetes")
+	replace unidad_medida_ot="Paquete" if (unidad_medida_ot=="De Sandwich")
+	// Replace the main variable for Unidad de Medida
+	replace unidad_medida=64 if (unidad_medida_ot=="Paquete")
 	
 //Unidad
 	*-----------
 	replace unidad_medida_ot="Unidad" if (unidad_medida_ot=="unidad de Oreo" & bien==4) // Galletas dulces
 	replace unidad_medida_ot="Unidad" if (unidad_medida_ot=="unidades") 
 	replace unidad_medida_ot="Unidad" if (unidad_medida_ot=="unidad") 
+	replace unidad_medida_ot="Unidad" if (unidad_medida_ot=="1")
+	replace unidad_medida_ot="Unidad" if (unidad_medida_ot=="unidad de Salchicha")  
+	replace unidad_medida_ot="Unidad" if (unidad_medida_ot=="unidad de salchicha")  
+	// Replace the main variable for Unidad de Medida
+	replace unidad_medida=110 if (unidad_medida_ot=="Unidad")
 	
  //Tetas
 	*-----------
@@ -499,26 +474,62 @@ Pieza (bistec,chuleta, similares) |          4        0.08       86.93
 	replace unidad_medida_ot="Teticas" if (unidad_medida_ot=="bolsita (teticas)") 
 
 //Bolsita
+	*-----------
 	replace unidad_medida_ot="Bolsita" if (unidad_medida_ot=="bosita")  
 	replace unidad_medida_ot="Bolsita" if (unidad_medida_ot=="bolsita")
 	replace unidad_medida_ot="Bolsita" if (unidad_medida_ot=="bolsitas")
 	replace unidad_medida_ot="Bolsita" if (unidad_medida_ot=="bolsistas")
 
-//Panela	
+//Panela
+	*-----------
 	replace unidad_medida_ot="Panela" if (unidad_medida_ot=="panela")  
 	replace unidad_medida_ot="Panela" if (unidad_medida_ot=="panelas") 	
 	
-//Sobrecito
+//Pieza	
+	*-----------
+	replace unidad_medida_ot="Pieza" if (unidad_medida_ot=="pieza")
+	// Replace the main variable: 30 "Pieza (bistec,chuleta, similares)"
+	replace unidad_medida=30 if (unidad_medida_ot=="Pieza" & (bien==12 | bien==14 | bien==19| bien==20))
+	// Replace the main variable: 40 "Pieza de pan" 
+	replace unidad_medida=40 if (unidad_medida_ot=="Pieza" & bien==9)
+	// Replace the main variable: 50 "Pieza (rueda, pescado entero)"
+	replace unidad_medida=50 if (unidad_medida_ot=="Pieza" & bien==26)
+	// Replace Pieza for Panela (Bien-COD:67)
+	replace unidad_medida_ot="Panela" if (bien==67 & unidad_medida==60 & unidad_medida_ot=="Pieza")
+	
+//Sobre
+	*-----------
 	replace unidad_medida_ot="Sobre" if (unidad_medida_ot=="Sobresitos")  
 	replace unidad_medida_ot="Sobre" if (unidad_medida_ot=="sobresito")
 	replace unidad_medida_ot="Sobre" if (unidad_medida_ot=="SOBRE")
 	replace unidad_medida_ot="Sobre" if (unidad_medida_ot=="sobre 100 gr")
+	replace unidad_medida_ot="Sobre" if (unidad_medida_ot=="sobre")  
+
+// Barra
+	*-----------
+	replace unidad_medida_ot="Barra" if (unidad_medida_ot=="barra")  
+	replace unidad_medida_ot="Barra" if (unidad_medida_ot=="barrita") 
+	// Replace the main variable for Unidad de Medida
+	replace unidad_medida=220 if (unidad_medida_ot=="Barra")
+	replace unidad_medida_ot="                " if (unidad_medida=220 & unidad_medida_ot=="Barra")
+// Pasta de chorizo changed as grams
+	*-----------
+	replace unidad_medida=2 if (unidad_medida_ot=="pasta de chorizo")
+	
+// Cuarto de kilo
+	*-----------	
+	replace unidad_medida=2 if (bien==71 & unidad_medida_ot=="un cuarto de kilo")
+	replace unidad_medida=2 if (bien==71 & unidad_medida_ot=="1/4 de kilo")
+	replace cantidad=250 if (bien==71 & unidad_medida_ot=="un cuarto de kilo")
+	replace cantidad=250 if (bien==71 & unidad_medida_ot=="1/4 de kilo")
+	replace unidad_medida_ot="              " if (bien==71 & unidad_medida_ot=="un cuarto de kilo")
+	replace unidad_medida_ot="              " if (bien==71 & unidad_medida_ot=="1/4 de kilo")
 
 /*(************************************************************************************************************************************************* 
 * 0: Assesment of errors (quantities)
 *************************************************************************************************************************************************)*/
 
-log using "$rootpath\data_management\management\3. cleaning\quantities_for_price_data", text replace
+log using "$rootpath\data_management\management\3. cleaning\quantities_for_price_data_v2", text replace
 
 
 qui levelsof bien, local(foodlist)
@@ -595,8 +606,24 @@ foreach f of local foodlist {
 
 	// To list the places where prices were observed
 		tab s2q1_os
+		
+
+	// Prices at good-unit-size level
+
 log close
+stop
+	preserve
+	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida tamano cantidad)
+	export excel using "$dataout/resumen_unidad", sheet("Unidad") firstrow(varlabels) replace
+	restore	
+
+	preserve
+	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
+	export excel using "$dataout/resumen_otro", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
+	restore	
 	
+
+
 /*(************************************************************************************************************************************************* 
 * 2: Measure correction 
 *************************************************************************************************************************************************)*/
@@ -611,26 +638,35 @@ For non sense measures:
 */
 
 *-----------
+// Auxiliar variables 
+*-----------
+	
+	* Price per kilo
+	//gen precio_k=(precio_b/cantidad) if unidad_medida==1
+	* Price per gram
+	//gen precio_g=(precio_b/cantidad) if unidad_medida==2
+
+*-----------
 // Change Units 
 *-----------
 	
 	// From kilos to grams 
-	replace unidad_medida=2 if (cantidad>=50 & unidad_medida==1)
+	//replace unidad_medida=2 if (cantidad>=50 & unidad_medida==1)
 	
 	// From grams to kilos	
-	replace unidad_medida=1	if (cantidad<50 & unidad_medida==2)
+	//replace unidad_medida=1	if (cantidad<50 & unidad_medida==2)
 	
 	// Fromo militers to liters
-	replace unidad_medida=4 if (cantidad>= 50 & unidad_medida==3)
+	//replace unidad_medida=4 if (cantidad>= 50 & unidad_medida==3)
 	
 	// From liters to militers
-	replace unidad_medida=3 if (cantidad<= 10 & unidad_medida==4)
+	//replace unidad_medida=3 if (cantidad<= 10 & unidad_medida==4)
 	
 	// From envases to milititers
-	replace unidad_medida=4 if (cantidad>=50 & unidad_medida==120)
+	//replace unidad_medida=4 if (cantidad>=50 & unidad_medida==120)
 	
 	// From lata to grams
-	replace unidad_medida=2 if (cantidad>=100 & unidad_medida==80)
+	//replace unidad_medida=2 if (cantidad>=100 & unidad_medida==80)
 	
 	
 *-----------	
@@ -638,16 +674,16 @@ For non sense measures:
 *-----------	
 
 	// To fix extreme quantities for kilos	
-	replace cantidad=(cantidad/10) if (cantidad>=20 & unidad_medida==1)
+	//replace cantidad=(cantidad/10) if (cantidad>=20 & unidad_medida==1)
 	
 	// To fix extreme quantities for grams	
-	replace cantidad=(cantidad/100) if (cantidad>=10000 & unidad_medida==2)
+	//replace cantidad=(cantidad/100) if (cantidad>=10000 & unidad_medida==2)
 	
 	// To fix extreme quantities for paquetes	
-	replace cantidad=(cantidad/1000) if (cantidad>=1000 & unidad_medida==60 & unidad_medida_ot=="Paquete")
+	//replace cantidad=(cantidad/1000) if (cantidad>=1000 & unidad_medida==60 & unidad_medida_ot=="Paquete")
 
 	// To fix extreme quatities for units
-    replace cantidad=(cantidad/100) if (cantidad>=1000 & unidad_medida==110)
+    //replace cantidad=(cantidad/100) if (cantidad>=1000 & unidad_medida==110)
 	
 /*(************************************************************************************************************************************************* 
 * 3: Units transformation
@@ -683,7 +719,7 @@ For non sense measures:
 	
 
 /*(************************************************************************************************************************************************* 
-* 4: Units trasnformation for specific products
+* 4: Units transformation for specific products
 *************************************************************************************************************************************************)
  This section address the problem of multiple presentations :
  
@@ -702,16 +738,21 @@ For non sense measures:
 	
 
 	// Aceite (COD:35)
-		// "Cucharada" "grande" (10g)
+		// "Cucharada" "grande" (15ml)
 		// based on Hernandez et al (2015)
 		replace cantidad_3 = cantidad*10 if (unidad_medida == 210 & bien == 35 & tamano==1)
-		// "Cucharada" "pequeña" (5g)
+		replace unidad_3 = 2 if (unidad_medida == 210 & bien == 35 & tamano==1)
+		// "Cucharada" "pequeña" (5ml)
 		// based on Hernandez et al (2015)
 		replace cantidad_3 = cantidad*5 if (unidad_medida == 210 & bien == 35 & tamano==3)
-		replace unidad_3 = 1 if (unidad_medida==210 & bien==35)
+		replace unidad_3 = 2 if (unidad_medida==210 & bien==35)
 		// Teta (between 200-500) --> we use "Teta" (1): 250ml
 		replace cantidad_3= cantidad*250 if (unidad_medida == 60 & bien == 35 & unidad_medida_ot=="Teta")
 		replace unidad_3= 2 if (unidad_medida == 60 & bien == 35 & unidad_medida_ot=="Teta")
+		// 3/4  de franco de compota
+	//	replace cantidad_3= cantidad* if (unidad_medida == 60 & bien == 35 & unidad_medida_ot=="3/4  de franco de compota")
+	//	replace unidad_3= 2 if (unidad_medida == 60 & bien == 35 & unidad_medida_ot=="3/4  de franco de compota")
+		
 	
 	// Aji dulce, primenton, pimiento (COD:45)
 		// Bolsita (1): 100g
@@ -737,7 +778,7 @@ For non sense measures:
 		replace unidad_3=1 if (unidad_medida ==110 & bien == 47)
 
 
-	// Azucar
+	// Azucar (COD:66) 
 		// Teta (between 200-500) --> we use "Teta" (1): 250gr
 		replace cantidad_3=cantidad*250	if (unidad_medida == 60 & bien == 66 & unidad_medida_ot=="Teta")
 		replace unidad_3=1 if (unidad_medida == 60 & bien == 66 & unidad_medida_ot=="Teta")
@@ -772,7 +813,7 @@ For non sense measures:
 		// Assume equal "Teta" (between 100-500 grams) --> we use "Teta" (1): 250g
 		replace cantidad_3=cantidad*250 if (unidad_medida == 60 & bien == 71 & unidad_medida_ot== "Bolsa")
 		replace unidad_3= 1 if (unidad_medida == 60 & bien == 71 & unidad_medida_ot== "Bolsa")
-
+		
 
 	// Cambur(COD:38)
 		// Unidad de medida is always either kilograms or grams
@@ -832,7 +873,13 @@ For non sense measures:
 		// Unidad (1): 100g
 	    replace cantidad_3=cantidad*100 if (unidad_medida == 60 & bien == 20 & unidad_medida_ot =="Unidad")
 		replace unidad_3=1 if (unidad_medida == 60 & bien == 20 & unidad_medida_ot =="Unidad")
-		
+		// Unidad de salchicha (1): 100g
+	    replace cantidad_3=cantidad*100 if (unidad_medida == 60 & bien == 20 & unidad_medida_ot =="Unidad de salchicha")
+		replace unidad_3=1 if (unidad_medida == 60 & bien == 20 & unidad_medida_ot =="Unidad de salchicha")
+		// Pasta de chorizo already defined as (250g) in survey
+		replace cantidad_3=cantidad if (unidad_medida == 60 & bien == 20 & unidad_medida_ot =="pasta de chorizo")
+		replace unidad_3=1 if (unidad_medida == 60 & bien == 20 & unidad_medida_ot =="pasta de chorizo")
+
 		
 	// Cilantro (COD:52)
 		// Bolsita (1): 120g
@@ -856,16 +903,21 @@ For non sense measures:
         //Papeletas
 		replace cantidad_3 = cantidad*100 if (unidad_medida == 60 & unidad_medida_ot== "Papeletas" & bien==75)
 		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "Papeletas" & bien==75)	
-        //Pote 
-		replace cantidad_3 = cantidad*100 if (unidad_medida == 60 & unidad_medida_ot== "pote" & bien==75)
-		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "pote" & bien==75)
-        //Sobresito
-		replace cantidad_3 = cantidad*100 if (unidad_medida == 60 & unidad_medida_ot== "sobresito" & bien==75)
-		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "sobresito" & bien==75)	
+        //Sobre
+		// When the quantity is reported
+		replace cantidad_3 = cantidad*100 if (unidad_medida == 60 & unidad_medida_ot== "Sobre" & bien==75 & cantidad==1)
+		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "Sobre" & bien==75 & cantidad==1)	
+		// Sobre 
+		// When grams are reported
+		replace cantidad_3 = cantidad if (unidad_medida == 60 & unidad_medida_ot== "Sobre" & bien==75 & cantidad>1)
+		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "Sobre" & bien==75 & cantidad>1)	
 		//Onza
 		replace cantidad_3 = cantidad*100 if (unidad_medida == 60 & unidad_medida_ot== "onza" & bien==75)
 		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "onza" & bien==75)
-
+		//Pote 
+		replace cantidad_3 = cantidad*100 if (unidad_medida == 60 & unidad_medida_ot== "pote" & bien==75)
+		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "pote" & bien==75)
+		
 		
 	//Frijoles (COD: 54)
 		// Unidad de medida is always either kilograms or grams
@@ -878,9 +930,6 @@ For non sense measures:
 		// Some extreme values fixed
 		// Date: 3/10/2020
 
-*************************
-*PROVISIORIO!!! CORREGIR PIEZA DE PAN (SE USARON LOS GRAMOS DE REBANADA)
-*************************			
 		
 	// Harina de maiz (COD: 7)
 		// Pieza de pan 
@@ -898,16 +947,17 @@ For non sense measures:
 
 	// Hueso de res, pata de res, pata de pollo	(COD:19)
 		// Pieza
-		// Pata de pollo (120-150g)
-		
-		// Otro (Unidad)
+		// Pata de pollo (120-150g) --> we use "Unidad" (1): 130g
+		// Otro (Unidad) --> we use "Unidad" (1): 130g
+		replace cantidad_3=cantidad*130 if (unidad_medida == 60 & bien==19 & unidad_medida_ot=="Unidad")
+		replace unidad_3 = 1 if (unidad_medida == 60 & bien==19 & unidad_medida_ot=="Unidad")
 	
 	
-	// "Huevos" in "carton" and "medio carton"
-		// "carton" (1) to unit (30)
-		replace cantidad_3= cantidad*30 if unidad_medida == 91 & (bien==34) 
-		// "medio carton" (1) to unit (15)
-		replace cantidad_3= cantidad*15 if unidad_medida == 92 & (bien==34) 
+	// "Huevos" (COD:34)
+		// "Carton" (1) to unit (30)
+		replace cantidad_3= cantidad*30 if (unidad_medida == 91 & bien==34) 
+		// "Medio carton" (1) to unit (15)
+		replace cantidad_3= cantidad*15 if (unidad_medida == 92 & bien==34) 
 		replace unidad_3= 3 if (unidad_medida == 91 | unidad_medida == 92) & bien== 34
 		// Carton de 6 unidades
 		replace cantidad_3=cantidad*6 if (unidad_medida==60 & bien==34 & unidad_medida_ot=="Mini cartón de 6 unidades")
@@ -917,123 +967,145 @@ For non sense measures:
 		replace unidad_3=3 if (unidad_medida==110 & bien==34 )
 
 	
-	//Leche en polvo, completa o descremada
+	//Leche en polvo, completa o descremada (COD:29)
 		// Unidad(1): 500g
 		replace cantidad_3=cantidad*500 if (unidad_medida == 110 & bien == 29 )
 		replace unidad_3= 1 if (unidad_medida == 110 & bien == 29 )
 		// Teta (between 100-500 grams) --> we use "Teta" (1): 250g
 		replace cantidad_3=cantidad*250 if (unidad_medida == 60 & bien == 29 & unidad_medida_ot== "Teta")
 		replace unidad_3= 1 if (unidad_medida == 60 & bien == 29 & unidad_medida_ot== "Teta")
-
 	
-*************************
-*PROVISIORIO!!! CORREGIR PIEZA DE PAN (SE USARON LOS GRAMOS DE REBANADA)
-*************************			
-	// Pan de trigo 
-		// Grande (campesino)
-		replace cantidad_3=cantidad*250 if (unidad_medida == 40 & bien==9 & tamano==4 )
-		replace unidad_3 = 1 if (unidad_medida == 40 & bien==9 & tamano==4)
-		// Mediano (canilla)
-		replace cantidad_3=cantidad*130 if (unidad_medida == 40 & bien==9 & tamano==5)
-		replace unidad_3 = 1 if (unidad_medida == 40 & bien==9 & tamano==5)
-		// Pequeno (frances)
-		replace cantidad_3=cantidad*50 if (unidad_medida == 40 & bien==9 & tamano==6)
-		replace unidad_3 = 1 if (unidad_medida == 40 & bien==9 & tamano==6)
-		// "Rebanada de pan" 23g
-		// using data from Hernandez et al (2015)
-		replace cantidad_3 = cantidad*23 if (unidad_medida == 40 & bien==9)
-		replace unidad_3 = 1 if (unidad_medida == 40 & bien==9)
-        // Otro "De Sandwich"
-		// We assume that it has 10 rebanadas
-		// "Rebanada de pan" 23g
-		replace cantidad_3 =cantidad*23*10 if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="De Sandwich")
-		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="De Sandwich")
-		// Otro	"Bolsa de 10 panes pequenos" 
-		// Pan (1): 23g
-        replace cantidad_3 = cantidad*50*10 if (unidad_medida == 60 & bien == 9 & unidad_medida_ot== "bolsa de 10 panes pequeños")
-		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="bolsa de 10 panes pequeños")
-		// Otro	"Paquete" 
-		// We assume that it has 10 rebanadas
-		// "Rebanada de pan" 23g
-        replace cantidad_3 = (cantidad*23*10) if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete") 
-		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete" )
-		// Otro	"Paqute de 10 panes pequenos" 	 
-        replace cantidad_3 = (cantidad*50*10) if (unidad_medida == 60 & bien == 9 & unidad_medida_ot==  "paquete de 10 unidades")
-		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete de 10 unidades")
-		// Otro	"paquete de dos panes canilla"	 
-        replace cantidad_3 = (cantidad*2*130) if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete de dos panes canilla")
-		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete de dos panes canilla")
-
-		
-	// Platanos
-		// Unidad (mediana sin piel): 80g
-		replace cantidad_3=cantidad*80 if (unidad_medida==110 & bien==40)
-		replace unidad_3=1 if (unidad_medida==110 & bien==40)
-
-		
-	// Papelon		
-		//Panela
-		// We assume #(1): 250g
-	    replace cantidad_3=cantidad*250 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Panela")
-		replace unidad_3=3 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Panela")
-		//Unidad
-		// We assume #(1): 250g
-	    replace cantidad_3=cantidad*250 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Unidad")
-		replace unidad_3=3 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Unidad")
-		//Pieza 
-		// We assume #(1): 250g
-		replace cantidad_3=cantidad*250 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Pieza")
-		replace unidad_3=3 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Pieza")
-		//Pieza pequena
-		// We assume #(1): 100g
-		replace cantidad_3=cantidad*250 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="pieza pequena")
-		replace unidad_3=3 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="pieza pequena")
+	
+	//Lechosa (COD:41)
+		// Unidad de medida is always either kilograms or grams
+		// Date: 3/12/2020
 		
 		
-	// Sardinas frescas/congeladas
-		// Lata (1): 120g
-		replace cantidad_3=cantidad*120 if (unidad_medida == 80 & bien == 24 & tamano==.)
-		replace unidad_3= 1 if (unidad_medida == 80 & bien == 24 & tamano==.)
-		
-
-		
-	//Tomate
-		// Unidad(1): 100g
-		replace cantidad_3=cantidad*100 if (unidad_medida == 110 & bien == 43 )
-		replace unidad_3= 1 if (unidad_medida == 110 & bien == 43 )
+	//Lentejas (COD:55)
+		// Unidad de medida is always either kilograms or grams
+		// Date: 3/12/2020
 		
 		
-	//Margarina/Mantequilla
+	//Margarina/Mantequilla (COD:36)
 		// "Margarina/Mantequilla" in "Lata"
 		// "lata" (1) to gram (360)
 		// using "Lactuario de Maracay mantequilla" standard size as benchmark
 		replace cantidad_3 = cantidad*360 if (unidad_medida == 60 & unidad_medida_ot== "lata" & bien==36)
 		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "lata" & bien==36)
 		// "Margarina/Mantequilla" in "Barra"
-		// "Barra" (1) to grams (200)
+		// "Barra" (1) to grams (120)
 		// based on brand Los Andes product "mantequilla en barra"
-		replace cantidad_3 = cantidad*200 if (unidad_medida==60 & unidad_medida_ot== "barra" & cantidad<10 & bien==36)
+		replace cantidad_3 = cantidad*120 if (unidad_medida==60 & unidad_medida_ot== "barra" & cantidad<10 & bien==36)
         replace unidad_3 = 1 if (unidad_medida==60 & unidad_medida_ot== "barra" & cantidad<10 & bien==36)
 		// "Margarina/Mantequilla" in "Barra" when the quantity reported is actually grams
 		replace cantidad_3 = cantidad if (unidad_medida==60 & unidad_medida_ot== "barra" & cantidad>100 & bien==36)
 		replace unidad_3 = 1 if (unidad_medida==60 & unidad_medida_ot== "barra" & cantidad>100 & bien==36)
+		
+			
+	// Pan de trigo (COD:9)
+		// Unidad
+		// Grande (campesino)
+		replace cantidad_3=cantidad*250 if (unidad_medida == 40 & bien==9 & tamano==4 )
+		replace unidad_3 = 1 if (unidad_medida == 40 & bien==9 & tamano==4)
+		// Unidad
+		// Mediano (canilla)
+		replace cantidad_3=cantidad*130 if (unidad_medida == 40 & bien==9 & tamano==5)
+		replace unidad_3 = 1 if (unidad_medida == 40 & bien==9 & tamano==5)
+		// Unidad
+		// Pequeno (frances)
+		replace cantidad_3=cantidad*50 if (unidad_medida == 40 & bien==9 & tamano==6)
+		replace unidad_3 = 1 if (unidad_medida == 40 & bien==9 & tamano==6)
+		
+		// "Rebanada de pan" 23g
+		// using data from Hernandez et al (2015)
+		replace cantidad_3 = cantidad*23 if (unidad_medida == 40 & bien==9)
+		replace unidad_3 = 1 if (unidad_medida == 40 & bien==9)
+        
+		// Otro "De Sandwich"
+		// Mediana (COD:2)
+		// Pequena (COD:3)
+
+		// We assume that it has 10 rebanadas
+		// "Rebanada de pan" 23g
+		replace cantidad_3 =cantidad*23*10 if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="De Sandwich")
+		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="De Sandwich")
+		// Otro	"Bolsa de 10 panes pequenos" 
+		// Pan (1): 50g
+        replace cantidad_3 = cantidad*50*10 if (unidad_medida == 60 & bien == 9 & unidad_medida_ot== "bolsa de 10 panes pequeños")
+		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="bolsa de 10 panes pequeños")
+		// Otro	"Paquete" 
+		// We assume that it has 10 rebanadas ---> "Rebanada de pan" 23g
+		// Mediana (COD:2)
+		// Pequena (COD:3)
+        replace cantidad_3 = (cantidad*23*10) if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete") 
+		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete" )
+		// Otro	"Paqute de 10 panes pequenos" 
+		// Mediana (COD:2)
+		// Pequena (COD:3)
+		
+        replace cantidad_3 = (cantidad*50*10) if (unidad_medida == 60 & bien == 9 & unidad_medida_ot==  "paquete de 10 unidades")
+		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete de 10 unidades")
+		// Otro	"paquete de dos panes canilla"
+		// Mediana (COD:2)
+		// Pequena (COD:3)
+        replace cantidad_3 = (cantidad*2*130) if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete de dos panes canilla")
+		replace unidad_3 =1	if (unidad_medida == 60 & bien == 9 & unidad_medida_ot=="paquete de dos panes canilla")
+		// Otro "Pieza de pan dulce"
+		// Mediana (COD:2)
+		// Pequena (COD:3)
+	
+	
+	//Papas (COD:62)
+		// Unidad (1): (150-200g) ---> we use 175g_
+		replace cantidad_3=cantidad*175 if (unidad_medida == 60 & bien == 62 & unidad_medida_ot == "Unidad" )
+		replace unidad_3= 1 if (unidad_medida == 60 & bien == 62 & unidad_medida_ot == "Unidad")
+		
+		
+	// Papelon (COD:67)	
+		//Panela
+		// We assume #(1): 1000g (1k)
+	    replace cantidad_3=cantidad*1000 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Panela")
+		replace unidad_3=1 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Panela")
+		//Unidad
+		// We assume #(1): 1000g (1k)
+	    replace cantidad_3=cantidad*1000 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Unidad")
+		replace unidad_3=1 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Unidad")
+		//Pieza 
+		// We assume #(1): 1000g (1k)
+		replace cantidad_3=cantidad*1000 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Pieza")
+		replace unidad_3=1 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="Pieza")
+		//Pieza pequena
+		// We assume #(1): 500g (1/2 k)
+		replace cantidad_3=cantidad*500 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="pieza pequena")
+		replace unidad_3=1 if (unidad_medida==60 & bien==67 & unidad_medida_ot=="pieza pequena")
+	
+	
+	// Pasta (fideos) (COD:10)
+		// Unidad de medida is always either kilograms or grams
+		// Date: 3/12/2020
 
 		
-	//Yuca
-		// "torta" (1) to gramos (283)
-		// based on torta casaba "Guarani 283 gr." (Dominicana)
-		replace cantidad_3 = cantidad*283 if (unidad_medida == 160 & bien==61)
-		replace unidad_3 = 1 if (unidad_medida == 160 & bien==61)
+	//Pescado fresco (COD:26)
+		// Unidad de medida is always either kilograms or grams
+		// Date: 3/12/2020
 
 		
-	// "Casabe" in "torta" 
-		// "torta" (1) to gramos (283)
-		// based on torta casaba "Guarani 283 gr." (Dominicana)
-		replace cantidad_3 = cantidad*283 if (unidad_medida == 160 & bien==65)
-		replace unidad_3 = 1 if (unidad_medida == 160 & bien==65)
+	// Platanos (COD:40)
+		// Unidad (mediana sin piel): 80g
+		replace cantidad_3=cantidad*80 if (unidad_medida==110 & bien==40)
+		replace unidad_3=1 if (unidad_medida==110 & bien==40)
 
-		
-	// Sal
+	// Queso blanco (COD:31)
+		// Litros (1): 1020g
+		replace cantidad_3=cantidad*1020 if (unidad_medida==3 & bien==31)
+		replace unidad_3=1 if (unidad_medida==3 & bien==31)
+		// Carton
+		// Medio carton
+		// Unidad (1): 400g
+		replace cantidad_3=cantidad*400 if (unidad_medida==110 & bien==31)
+		replace unidad_3=1 if (unidad_medida==110 & bien==31)
+
+	// Sal (COD:74)
 		// Bolsita
 		replace cantidad_3 = cantidad*100 if (unidad_medida == 60 & unidad_medida_ot== "Bolsita" & bien==74 & cantidad<10)
 		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "Bolsita" & bien==74 & cantidad<10)
@@ -1048,10 +1120,42 @@ For non sense measures:
 		// Bulto (1): 5kg : 5000g
 		replace cantidad_3 = cantidad*5000 if (unidad_medida == 60 & unidad_medida_ot== "bulto" & bien==74)
 		replace unidad_3 = 1 if (unidad_medida == 60 & unidad_medida_ot== "bulto" & bien==74)
+
+		
+	// Sardinas frescas/congeladas (COD:24)
+		// Lata (1): 120g
+		replace cantidad_3=cantidad*120 if (unidad_medida == 80 & bien == 24 & tamano==.)
+		replace unidad_3= 1 if (unidad_medida == 80 & bien == 24 & tamano==.)
+		
+		
+	//Tomate (COD:43)
+		// Unidad(1): 100g
+		replace cantidad_3=cantidad*100 if (unidad_medida == 110 & bien == 43 )
+		replace unidad_3= 1 if (unidad_medida == 110 & bien == 43 )
+		
+		
+	//Yuca (COD:61)
+		// "torta" (1) to gramos (283)
+		// based on torta casaba "Guarani 283 gr." (Dominicana)
+		replace cantidad_3 = cantidad*283 if (unidad_medida == 160 & bien==61)
+		replace unidad_3 = 1 if (unidad_medida == 160 & bien==61)
 	
+	
+	// Zanahorias (COD:50)
+		// Unidad(1): (40-100g) ----> we use 70g
+		replace cantidad_3=cantidad*70 if (unidad_medida == 110 & bien == 50 )
+		replace unidad_3= 1 if (unidad_medida == 110 & bien == 50 )
+		
 
 /*		
-//mm	//"Galletas"
+
+	// "Casabe" in "torta" 
+		// "torta" (1) to gramos (283)
+		// based on torta casaba "Guarani 283 gr." (Dominicana)
+		replace cantidad_3 = cantidad*283 if (unidad_medida == 160 & bien==65)
+		replace unidad_3 = 1 if (unidad_medida == 160 & bien==65)
+
+	//"Galletas"
 		// Based on Venezuelean famous brands' packaging
 		// "paquete pequeño" 25g
 		replace cantidad_3 = cantidad*25 if (unidad_medida == 60 & bien== 3 & tamano==3)
@@ -1063,7 +1167,7 @@ For non sense measures:
 		replace cantidad_3 = cantidad*240 if (unidad_medida == 60 & bien== 3 & tamano==1)
 		replace unidad_3 = 1 if (unidad_medida == 60 & bien== 3 & tamano==1)
 
-//mm	// "Pescado enlatado" 
+	// "Pescado enlatado" 
 		// "lata" (1) to gram (129)
 		// Atunmar standard size 
 		replace cantidad_3 = cantidad*129 if unidad_medida == 80 & bien==19
@@ -1075,75 +1179,335 @@ For non sense measures:
 		replace unidad_3 = 1 if unidad_medida == 80 & bien== 80 & inrange(bien,20, 23)
 	
 		 
-//mm		 //"Manteca"
-	// "Cucharada" "grande" (10g)
-	// "Cucharada" "pequeña" (5g)
-	// based on Hernandez et al (2015)
-	replace cantidad_3 = cantidad*10 if (unidad_medida == 210 & bien == 34 & tamano==1)
-	replace cantidad_3 = cantidad*5 if (unidad_medida == 210 & bien == 34 & tamano==3)
-	replace unidad_3 = 1 if (unidad_medida==210 & bien==34)
+	//"Manteca"
+		// "Cucharada" "grande" (10g)
+		// "Cucharada" "pequeña" (5g)
+		// based on Hernandez et al (2015)
+		replace cantidad_3 = cantidad*10 if (unidad_medida == 210 & bien == 34 & tamano==1)
+		replace cantidad_3 = cantidad*5 if (unidad_medida == 210 & bien == 34 & tamano==3)
+		replace unidad_3 = 1 if (unidad_medida==210 & bien==34)
 	
 
-//mm	// "Carne enlatada" in "lata" 
+	// "Carne enlatada" in "lata" 
 		// "lata" 340g
 		// based on SPAM standard size, a US brand with strong presence in Venezuela
 		replace cantidad_3 = cantidad*340 if (unidad_medida == 80 & bien==16)
 		replace unidad_3 = 1 if (unidad_medida == 80 & bien==16)
 
-//mm	//"Suero"
+	//"Suero"
 		// "envase de plastico" 900ml
 		replace cantidad_3 = cantidad*900 if (unidad_medida == 120 & bien == 30)
 		replace unidad_3 = 2 if (unidad_medida==120 & bien==30)
 	
 
-
 	//"Mayonesa"
-	// "Frasco" (445g)
-	// based on brand Dovo
-	replace cantidad_3 = cantidad*445 if (unidad_medida == 150 & bien == 35)
-	replace unidad_3 = 1 if (unidad_medida==150 & bien==35)
+		// "Frasco" (445g)
+		// based on brand Dovo
+		replace cantidad_3 = cantidad*445 if (unidad_medida == 150 & bien == 35)
+		replace unidad_3 = 1 if (unidad_medida==150 & bien==35)
 
 	//"Te"
-	// "caja" (20 u)
-	// based on brand Te Negro
-	replace cantidad_3 = cantidad*10 if (unidad_medida == 170 & bien == 75)
-	replace unidad_3 = 3 if (unidad_medida== 170 & bien==75)
+		// "caja" (20 u)
+		// based on brand Te Negro
+		replace cantidad_3 = cantidad*10 if (unidad_medida == 170 & bien == 75)
+		replace unidad_3 = 3 if (unidad_medida== 170 & bien==75)
 
 	//"Concentrados"
-	// "caja" (8 u)
-	// based on "caja cubitos 8 u) brand Maggi
-	replace cantidad_3 = cantidad*8 if (unidad_medida == 170 & bien == 80)
-	replace unidad_3 = 3 if (unidad_medida== 170 & bien==80)
+		// "caja" (8 u)
+		// based on "caja cubitos 8 u) brand Maggi
+		replace cantidad_3 = cantidad*8 if (unidad_medida == 170 & bien == 80)
+		replace unidad_3 = 3 if (unidad_medida== 170 & bien==80)
 
 	//"Concentrados"
-	// "sobre" (65 g)
-	// based on "sopa de pollo" (brand Maggi) 
-	replace cantidad_3 = cantidad*65 if (unidad_medida == 180 & bien == 80)
-	replace unidad_3 = 1 if (unidad_medida== 180 & bien==80)
+		// "sobre" (65 g)
+		// based on "sopa de pollo" (brand Maggi) 
+		replace cantidad_3 = cantidad*65 if (unidad_medida == 180 & bien == 80)
+		replace unidad_3 = 1 if (unidad_medida== 180 & bien==80)
 
 	//"Salsa de tomate"
-	// "frasco" (397g)
-	// based on brand Pampero
-	replace cantidad_3 = cantidad*397 if (unidad_medida == 150 & bien == 81)
-	replace unidad_3 = 1 if (unidad_medida== 150 & bien==81)
+		// "frasco" (397g)
+		// based on brand Pampero
+		replace cantidad_3 = cantidad*397 if (unidad_medida == 150 & bien == 81)
+		replace unidad_3 = 1 if (unidad_medida== 150 & bien==81)
 
 	//"Bebidas alcoholicas"
-	// "gavera o caja" (36 u)
-	// based on brand Polar
-	replace cantidad_3 = cantidad*36 if (unidad_medida == 190 & bien == 88)
-	replace unidad_3 = 3 if (unidad_medida== 190 & bien==88)
+		// "gavera o caja" (36 u)
+		// based on brand Polar
+		replace cantidad_3 = cantidad*36 if (unidad_medida == 190 & bien == 88)
+		replace unidad_3 = 3 if (unidad_medida== 190 & bien==88)
 
 	//"Mayonesa"
-	// "Cucharada" "grande" (10g)
-	// "Cucharada" "pequeña" (5g)
-	// based on Hernandez et al (2015)
-	replace cantidad_3 = cantidad*10 if (unidad_medida == 210 & bien == 35 & tamano==1)
-	replace cantidad_3 = cantidad*5 if (unidad_medida == 210 & bien == 35 & tamano==3)
-	replace unidad_3 = 1 if (unidad_medida==210 & bien==35)
+		// "Cucharada" "grande" (10g)
+		// "Cucharada" "pequeña" (5g)
+		// based on Hernandez et al (2015)
+		replace cantidad_3 = cantidad*10 if (unidad_medida == 210 & bien == 35 & tamano==1)
+		replace cantidad_3 = cantidad*5 if (unidad_medida == 210 & bien == 35 & tamano==3)
+		replace unidad_3 = 1 if (unidad_medida==210 & bien==35)
 */
 
 	tab bien unidad_medida if cantidad_3==. & unidad_3==.
 	tab bien unidad_medida if cantidad_3==. & unidad_3==., nolab
+/*(************************************************************************************************************************************************* 
+* 4: Quantities transformation: 
+*************************************************************************************************************************************************)*/
+
+	// Those goods with price equal 1 and strange quantity sre probably inverted
+	// We need to switch 
+		//replace precio=cantidad if (precio==1 & moneda==1)
+		//replace cantidad=1
+
+	// Aceite (COD:35)
+
+		
+	
+	// Aji dulce, primenton, pimiento (COD:45)
+	
+	
+	// Arroz (COD:1)
+		// From kilos to grams 
+		// For quantities between 100-900
+		replace unidad_medida=2 if (cantidad>=100 & cantidad<=900 & unidad_medida==1 & bien==1)
+		// For an article with price-quantity 
+		replace precio=75000 if (cantidad==75000 & unidad_medida==1 & bien==1)
+		replace cantidad=1 if (cantidad==75000 & precio==75000 & unidad_medida==1 & bien==1)
+		// From grams to kilos
+		replace unidad_medida=1 if (cantidad==1 & unidad_medida==2 & bien==1)
+	
+	// Auyama (COD:47)
+
+		
+	// Azucar (COD:66) 
+
+		
+	//Cafe (COD:71)
+		
+
+	// Cambur(COD:38)
+
+		
+	// Caraotas	(COD:53)
+		
+		
+	// Carne de pollo/gallina (COD:22)
+
+		
+	// Carne de res (bistec) (COD:12)
+
+		
+	// Carne de res (molida) (COD:13)
+		// From kilos to grams
+		replace unidad_medida=2 if (bien==13 & unidad_medida==1 & cantidad>=20 & cantidad<=50)
+		replace cantidad=(cantidad*10) if (bien==13 & unidad_medida==2 & cantidad>=20 & cantidad<=50)
+	
+	// Carne de res (para esmechar) (COD:14)
+		// From kilos to grams
+		replace unidad_medida=2 if (bien==14 & unidad_medida==1 & cantidad>=20 & cantidad<=50)
+		replace cantidad=(cantidad*10) if (bien==14 & unidad_medida==2 & cantidad>=20 & cantidad<=50)
+
+	
+	// Cebolla (COD:46)
+		
+		
+	// Cebollin/ ajoporro (COD:51)
+	
+	
+	// Chorizo, jamón, mortaleda y otros embut (COD:20)
+		// From kilos to grams 
+		replace unidad_medida=2 if (bien==20 & unidad_medida==1 & cantidad>=10 & cantidad<=70)
+		// Those grams to the right amount
+		//replace cantidad=(cantidad*10) if (bien==20 & unidad_medida==2 & cantidad>=10 & cantidad<=70)
+		// From grams to kilos
+		replace unidad_medida=1 if (bien==20 & unidad_medida==2 & cantidad==1)
+		// To fix grams
+		replace cantidad=(cantidad*10) if (bien==20 & unidad_medida==2 & cantidad>=1 & cantidad<=90)
+
+		
+	// Cilantro (COD:52)
+
+		
+	// Condimentos (COD:75)
+		
+		
+	//Frijoles (COD: 54)
+	
+	
+	// Harina de arroz (COD: 2)
+		// From kilos to grams 
+		// For quantities over/equal 100-900
+		replace unidad_medida=2 if (cantidad>=100 & unidad_medida==1 & bien==1)
+		// From grams to kilos
+		replace unidad_medida=1 if (cantidad<10 & unidad_medida==2 & bien==1)
+
+		
+	// Harina de maiz (COD: 7)
+		// From kilos to grams 
+		// For quantities over/equal 100-900
+		replace unidad_medida=2 if (cantidad>=100 & unidad_medida==1 & bien==7)
+		// For quntities between 10-60 ???
+		// From grams to kilos
+		replace unidad_medida=1 if (cantidad==1 & unidad_medida==2 & bien==7)
+		
+	// Hueso de res, pata de res, pata de pollo	(COD:19)
+		// From kilos to grams
+		replace unidad_medida=2 if (bien==19 & unidad_medida==1 & cantidad>=50)
+	
+	// "Huevos" (COD:34)
+
+	
+	//Leche en polvo, completa o descremada (COD:29)
+		// From kilos to grams
+		replace unidad_medida=2 if (bien==29 & unidad_medida==1 & cantidad==500)
+		// From grams to kilos
+		replace unidad_medida=1 if (bien==29 & unidad_medida==2 & cantidad==1)
+		replace cantidad=(cantidad*10) if (bien==29 & unidad_medida==2 & (cantidad==20 | cantidad==96))
+		// From units to kilos
+		replace precio_b=(precio_b*10) if (bien==29 & unidad_medida==110 & cantidad==1)
+		replace unidad_medida=1 if (bien==29 & unidad_medida==110)
+		
+	//Lechosa (COD:41)
+		// Kilos: 10 kilos shows prices according to mean and median prices
+		// 3/17/2020: no changes
+		
+	//Lentejas (COD:55)
+		// From kilos to grams 
+		//replace cantidad=(cantidad*10) if (bien==55 & unidad_medida==1 & (cantidad==11 | cantidad==90))
+		//replace unidad_medida=2 if (bien==55 & unidad_medida==1 & (cantidad==110 | cantidad==900))
+		// From grams to kilos
+		replace unidad_medida=1 if (bien==55 & unidad_medida==2 & cantidad==1)
+		replace cantidad=(cantidad*10) if (bien==55 & unidad_medida==2 & cantidad==20)
+		replace cantidad=(cantidad/10) if (bien==55 & unidad_medida==2 & cantidad==2000)
+		replace cantidad=(cantidad/1000) if (bien==55 & unidad_medida==2 & cantidad==250000)
+	
+	
+	//Margarina/Mantequilla (COD:36)
+		// From kilos to grams
+		replace cantidad=1 if (bien==36 & unidad_medida==1 & precio==54000 & cantidad==6)
+		replace cantidad=1 if (bien==36 & unidad_medida==1 & precio==48000 & cantidad==10)
+		replace cantidad=1 if (bien==36 & unidad_medida==1 & precio==150000 & cantidad==20)
+		// From 48000 and 240000 kilos to one kilo
+		replace cantidad=1 if (bien==36 & unidad_medida==1 & (cantidad==48000 | cantidad==240000))
+		// From kilos to grams (inverted price-quantity)
+		replace precio=45000 if (bien==36 & unidad_medida==2 & cantidad==45000)
+		replace cantidad=1 if (bien==36 & unidad_medida==2 & cantidad==45000)
+		// From grams to kilos (inverted price-quantity)
+		replace precio=45000 if (bien==36 & unidad_medida==2 & cantidad==45000)
+		replace cantidad=1 if (bien==36 & unidad_medida==2 & cantidad==45000)
+		// From grams to kilos
+		replace unidad_medida=1 if (bien==36 & unidad_medida==2 & cantidad==1)
+		// From 10-36 grams to 100-360 grams
+		replace cantidad=(cantidad*10) if (bien==36 & unidad_medida==2 & cantidad>=10 & cantidad<=36)
+		// From 250000 grams to 250 grams
+		replace cantidad=250 if (bien==36 & unidad_medida==2 & cantidad==250000)
+		
+		
+	// Pan de trigo (COD:9)
+		// To fix extreme quantities wich seem to be 1 kilo
+		replace cantidad=1 if (precio==1 & bien==9 & unidad_medida==1)
+		// From grams to kilos
+		replace unidad_medida=1 if (bien==9 & unidad_medida==2 & cantidad==1)
+		
+		
+	//Papas (COD:62)
+		// Kilos
+		replace cantidad=1 if (bien==62 & unidad_medida==1 & cantidad==8 & precio_b==30000)
+		replace cantidad=4 if (bien==62 & unidad_medida==1 & cantidad==40)
+		// From kilos to grams
+		replace unidad_medida=2 if (bien==62 & unidad_medida==1 & cantidad>200) 		
+		// From grams to units
+		replace unidad_medida=110 if (bien==62 & unidad_medida==2 & precio_b==5000)
+		replace cantidad=1 if (bien==62 & unidad_medida==110 & cantidad==100)
+		
+	// Papelon (COD:67)
+		// Kilos
+		replace cantidad=1 if (bien==67 & unidad_medida==1 & cantidad==8 & precio==50000)
+		replace cantidad=1 if (bien==67 & unidad_medida==1 & cantidad==15 & precio==38000)
+		// Kilos to grams
+		replace unidad_medida=2 if (bien==67 & unidad_medida==1 & cantidad>100)
+		// Grams
+		replace cantidad=(cantidad*10) if (bien==67 & unidad_medida==2 & cantidad==30 & precio==12000)
+		replace cantidad=800 if (bien==67 & unidad_medida==2 & cantidad==8000)
+		replace cantidad=1 if (bien==67 & unidad_medida==2 & cantidad==500000)
+		// Grams to kilos
+		replace unidad_medida=1 if (bien==67 & unidad_medida==2 & cantidad==1)
+		// Panela (usually equal a kilo): The price was for one kilo but quantity was 25
+		replace cantidad=1 if (bien==67 & unidad_medida==60 & unidad_medida_ot=="Panela" & cantidad==25 & precio==22000)
+		
+		
+		
+	// Pasta (fideos) (COD:10)
+		// From kilos to grams
+        replace unidad_medida=2 if (unidad_medida==1 & cantidad>=100 & bien==10)
+		// To fix kilos between 10-72
+		// From 3 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==3 & precio_b==100000)
+		// From 4 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==4 & precio_b==97000)
+		// From 10 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==10 & precio_b==55000)
+		// From 12 kilos to 1
+		// Something is wrong but i do not know how to fix it
+		// From 15 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==15 & precio_b==145000)
+		// From 20 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==20 & precio_b==100000)
+		// From 24 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==24 & precio_b==120000)
+		// From 25 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==25 & precio_b==110000)
+		// From 30 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==30 & precio_b==99000)
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==30 & precio_b==140000)
+		// From 40 kilos to 1
+		// Something is wrong but i do not know how to fix it
+		// From 60 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==60 & precio_b==108720)
+		// From 72 kilos to 1
+		replace cantidad= 1 if (bien==10 & unidad_medida==1 & cantidad==72 & precio_b==130000)
+		// Grams
+		replace cantidad=(cantidad*10) if (bien==10 & unidad_medida==2 & (cantidad==30 | cantidad==36 | cantidad==96))
+		// From 50000 to 500
+		replace cantidad=500 if (bien==10 & unidad_medida==2 & cantidad==50000)
+		// From grams to kilos 
+		replace unidad_medida=1 if (bien==10 & unidad_medida==2 & cantidad==1)
+
+		
+	//Pescado fresco (COD:26)
+		// From grams to kilos
+		replace unidad_medida=1 if (bien==26 & unidad_medida==2 & cantidad==1)
+	
+	// Platanos (COD:40)
+		// Kilos
+		// From 15 kilos to 1
+		replace cantidad=1 if (bien==40 & unidad_medida==1 & cantidad==15 & precio_b==32000)
+		// From 50 kilos to 1
+		replace cantidad=1 if (bien==40 & unidad_medida==1 & cantidad==50 & precio_b==40000)
+		// From kilos to grams
+		replace unidad_medida=2 if (bien==40 & unidad_medida==1 & (cantidad==110 | cantidad==300))
+		// Unidad
+		// Price instead of quantity
+		replace precio=cantidad if (bien==40 & unidad_medida==110 & (cantidad==7000 | cantidad==12000))
+		replace cantidad=1 if (bien==40 & unidad_medida==110 & (cantidad==7000 | cantidad==12000))
+	
+	// Queso blanco (COD:31)
+	// From kilos to grams
+	replace unidad_medida=2 if (bien==31 & unidad_medida==1 & (cantidad==100 | cantidad==200| cantidad==250))
+	// From grams to kilos
+	
+	// Sal (COD:74)
+
+		
+	// Sardinas frescas/congeladas (COD:24)
+		
+		
+	//Tomate (COD:43)
+		
+		
+	//Yuca (COD:61)
+	
+	
+	// Zanahorias (COD:50)
+	
+
 
 /*(************************************************************************************************************************************************* 
 * 4: Price transformation: From gram, liters or unit to grams
@@ -1154,23 +1518,26 @@ For non sense measures:
 	
 	// From mililiters to standarized grams 
 	// converts militiers into grams using density of liquids
+			// "Aceite" (COD:35)
+			// density = .92 gr/ml promedios https://www.aceitedelasvaldesas.com/faq/varios/densidad-del-aceite/
+			replace cantidad_h = cantidad_3*.92 if unidad_3==2 & bien==35
 
+	// Transform units to standarized grams 
+			// "Huevos"
+			// used mean between medium and large min bound size https://www.eggs.ca/eggs101/view/4/all-about-the-egg#
+			// weight = 52.5 gr/unit
+			replace cantidad_h = cantidad_3*52.5 if unidad_3==3 & bien==34
+	
+	// From mililiters to standarized grams 
+	// converts militiers into grams using density of liquids
 			// "Leche"
 			// density = 1.032 gr/ml https://es.wikipedia.org/wiki/Leche
 			replace cantidad_h = cantidad_3*1.032 if unidad_3==2 & bien==25
 
+/*			
 			// "Suero"
 			// density = 1.024 gr/ml http://www.actaf.co.cu/revistas/Revista%20ACPA/2009/REVISTA%2003/10%20SUERO%20QUESO.pdf
 			replace cantidad_h = cantidad_3*.92 if unidad_3==2 & bien==30
-
-			// "Aceite"
-			// density = .92 gr/ml promedios https://www.aceitedelasvaldesas.com/faq/varios/densidad-del-aceite/
-			replace cantidad_h = cantidad_3*.92 if unidad_3==2 & bien==33
-
-
-			// "Otros grasas y aceites"
-			// density = .92 gr/ml promedios https://www.aceitedelasvaldesas.com/faq/varios/densidad-del-aceite/
-			replace cantidad_h = cantidad_3*1.032 if unidad_3==2 & bien==36
 
 
 			// "Endulzante" 
@@ -1213,14 +1580,9 @@ For non sense measures:
 			// density = 1,10 gr/ml using mean of cervezas http://www.cervezadeargentina.com.ar/articulos/Uso%20del%20dens%C3%ADmetro.html
 			replace cantidad_h = cantidad_3*1.1 if unidad_3==2 & bien==88
 
+*/	
 	
-	// Transform units to grams
-	// "Huevos"
-	// used mean between medium and large min bound size https://www.eggs.ca/eggs101/view/4/all-about-the-egg#
-	// weight = 52.5 gr/unit
-	replace cantidad_h = cantidad_3*52.5 if unidad_3==3 & bien==34
 
-	
 /*(************************************************************************************************************************************************* 
 * 5: Price transformation
 *************************************************************************************************************************************************)
@@ -1232,6 +1594,7 @@ For non sense measures:
 // 5.1 Currency transformation
 *----------- Transform prices from euros, dollar & pesos colombianos to bolivares
 *----------- Using the monthly average exchange rate
+	drop precio_b
 	gen precio_b=precio
 	replace precio_b=(precio*mean_moneda) if (moneda==2 | moneda==3 | moneda==4)
 	

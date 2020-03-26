@@ -43,7 +43,7 @@ Note:
 		}
 		
 		if $male   {
-				global rootpath ""
+				global rootpath "C:\Users\wb550905\Github\VEN\data_management\management\1. merging\exchange rates"
 				global dataout "$rootpath\"
 		}
 		

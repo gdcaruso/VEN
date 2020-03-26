@@ -28,10 +28,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta   0
 		
 		* User 3: Lautaro
-		global lauta2   0
+		global lauta2   1
 		
 		
 		* User 4: Malena
@@ -44,7 +44,7 @@ Note:
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
 	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\Desktop\ENCOVI-2019"
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 
 // set raw data path
@@ -76,7 +76,7 @@ global individualdta  "$datapath\individual.dta"
 ****************************************************************************************************************
 
 // load food data
-use  $productdta, clear
+use  "$productdta", clear
 
 // drop if its not food
 drop if grupo_bien != 1
@@ -325,8 +325,16 @@ replace unidad_3 = 1 if unidad_medida == 80 & (bien==34)
 // "Huevos" in "carton" and "medio carton"
 // "carton" (1) to unit (30)
 // "medio carton" (1) to unit (15)
-replace cantidad_3 = cantidad*30 if unidad_medida == 91 & (bien==31)
-replace cantidad_3 = cantidad*15 if unidad_medida == 92 & (bien==31)
+replace cantidad_3 = cantidad*30 if unidad_medida == 91 & (bien==31) & cantidad<=10
+replace cantidad_3 = cantidad if unidad_medida == 91 & (bien==31) & cantidad>10
+
+replace cantidad_3 = cantidad*15 if unidad_medida == 92 & (bien==31) & cantidad<=10
+replace cantidad_3 = cantidad if unidad_medida == 92 & (bien==31) & cantidad>10
+
+replace cantidad_3 = cantidad*15 if unidad_medida == 100 & (bien==31) & cantidad<12
+replace cantidad_3 = cantidad*15 if unidad_medida == 100 & (bien==31) & cantidad>=12
+
+
 replace unidad_3 = 3 if (unidad_medida == 91|unidad_medida == 92) & bien== 31
 
 // "Casabe" in "torta" 

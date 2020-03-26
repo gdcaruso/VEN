@@ -16,13 +16,13 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
 		global male   0
@@ -32,7 +32,7 @@ Note:
 				global rootpath ""
 		}
 	    if $lauta {
-				global rootpath ""
+				global rootpath "C:\Users\wb563365\Github\VEN"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"  

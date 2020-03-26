@@ -31,11 +31,11 @@ Note:
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lauta2   1
+		global lautaa   0
 		
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
 				global rootpath ""
@@ -43,21 +43,20 @@ Note:
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
-	    if $lauta2 {
+	    if $lautaa {
 				global rootpath "C:\Users\wb563365\GitHub\VEN\"
 		}
-
-		
+	
 		if $trini   {
 				global rootpath ""
 		}
 		
 		if $male   {
-				global rootpath ""
+				global rootpath "C:\Users\wb550905\Github\VEN\"
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\03_16_20"
+global dataofficial "$rootpath\data_management\input\03_26_20"
 
 ********************************************************************************
 
@@ -194,7 +193,7 @@ foreach dtafile in $dtalist{
 	drop _merge
 
 	//eliminate useless data
-	drop edate
+	cap drop edate
 
 	// pre formatting to reshape
 	rename s?q??? s?q???_

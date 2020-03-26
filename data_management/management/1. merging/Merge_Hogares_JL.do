@@ -25,37 +25,30 @@ Note:
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lauta2   1
-		
+		global lautaa	0   
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 
 			
 		if $juli {
 				global rootpath "C:\Users\wb563583\Documents\GitHub\ENCOVI-2019"
-				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
-				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
-	    if $lauta2 {
+	    if $lautaa {
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
-		if $trini   {
+		if $trini {
 				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
-				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
 		}
 		
-		if $male   {
-				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
-				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
+		if $male {
+				global rootpath "C:\Users\wb550905\Github\VEN\"
 		}
 
-global dataofficial "$rootpath\data_management\input\03_16_20"
+global dataofficial "$rootpath\data_management\input\03_26_20"
  // Set the path for the three questionnaires
 	global pathnew "$dataofficial\ENCOVI_3_STATA_All"
 	global pathold "$dataofficial\ENCOVI_MainSurvey_Final_3_STATA_All"

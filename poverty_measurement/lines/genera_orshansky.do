@@ -48,9 +48,9 @@ Note:
 		}
 
 // set raw data path
-global cleaneddatapath "$rootpath\data_management\output\cleaned"
-global mergeddatapath "$rootpath\data_management\output\merged"
-global input  "$rootpath\poverty_measurement\input"
+global mergeddata "$rootpath\data_management\output\merged" //REPLACE ALL WITH CLEANED DATA
+global cleaneddata "$rootpath\data_management\output\cleaned"
+
 global output "$rootpath\poverty_measurement\input"
 *
 ********************************************************************************
@@ -70,7 +70,7 @@ set more off
 *************************************************************************************************************************************************)*/
 
 // merges with income data
-use "$cleaneddatapath/base_out_nesstar_cedlas_2019.dta", replace
+use "$mergeddata/base_out_nesstar_cedlas_2019.dta", replace
 keep if interview_month==2
 rename region_est2 entidad
 collapse (max)ipcf_max=ipcf (max) miembros (max) entidad, by (interview__key interview__id quest)
@@ -97,4 +97,28 @@ save `reference'
 
 // Consumption section
 // import data
+use "$mergeddata/product-hh.dta", replace
 
+// problems and solutions: a) homogenize currencies, b) correct date of survey with date of purchase, c) define frequency of purchases d) define current goods e) define food and non food spending
+
+// a) homogenize currencies
+	* We move everything to bolivares February 2020, given that there we have more sample size // 2=dolares, 3=euros, 4=colombianos // 
+		*Nota: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
+
+/* tab moneda (number of spending obs. by currency)
+
+      10b. Moneda |      Freq.     Percent        Cum.
+------------------+-----------------------------------
+        Bolívares |    131,356       91.18       91.18
+          Dólares |      2,488        1.73       92.90
+            Euros |         20        0.01       92.92
+Pesos Colombianos |     10,205        7.08      100.00
+------------------+-----------------------------------
+            Total |    144,069      100.00
+*/
+		
+global dolar_to_bol = 73460.1238
+global euro_to_bol = 80095.41371177
+global col_to_bol = 21.66060704812
+
+gen gasto_bol = gasto if 

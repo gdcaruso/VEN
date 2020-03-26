@@ -91,10 +91,9 @@ Note:
 // Replace errors with a code and destring
 	foreach var of varlist Venta VentaASK {
 	replace `var'="." if `var'=="----------------"
-	destring `var', replace force
+	destring `var', replace
 	}
 
-		
 // To generate date in a format which allow to merge with price data: YYYY-MM-DD
      //Generate Year
 	 gen year=substr(date,5,4)
@@ -119,15 +118,14 @@ Note:
 *--------------- 1T 2020	
 *--------------- Set the dates of the exchange rate as a local 
 * These are the names of the excel spreadsheet which contain daily data for each trimester
-	local fechas_T4 18032020 17032020 16032020 13032020 12032020 11032020 10032020 09032020 ///
-	06032020 05032020 04032020 03032020 02032020 28022020 27022020 26022020 21022020 20022020 19022020 18022020 17022020 14022020 ///
+	local fechas_T4 26022020 21022020 20022020 19022020	18022020 17022020 14022020 ///
 	13022020 12022020 11022020 10022020 07022020 06022020 05022020 04022020 03022020 31012020 ///
 	30012020 29012020 28012020 27012020	24012020 23012020 22012020 21012020	17012020 ///
 	16012020 15012020 14012020 13012020 10012020 09012020 08012020 07012020 03012020 02012020	
 foreach i of local fechas_T4 {
           cap import excel using "$rootpath\2_1_2a20.xls", sheet(`i') cellrange(B9:G47) firstrow clear	  
 	gen date="`i'"
-	if `i'==18032020 {
+	if `i'==26022020 {
 	tempfile exch2
 	save `exch2'
 	}
@@ -153,7 +151,7 @@ encode COD_moneda, gen(COD_moneda_e)
 	// Replace errors with a code and destring
 	foreach var of varlist Venta VentaASK {
 	replace `var'="." if `var'=="----------------"
-	destring `var', replace force
+	destring `var', replace
 	}
 
 // To generate date in a format which allow to merge with price data: YYYY-MM-DD
@@ -168,11 +166,10 @@ encode COD_moneda, gen(COD_moneda_e)
 	//Drop the variable used as imput for date
 	drop date
 	
-	
 ********************************************************************************
 *---  Append both databases
 ********************************************************************************
-append using `exch1', force
+append using `exch1' 
 
 *********************************************************************************
 *--- To select the currency units included in the survey
@@ -198,8 +195,7 @@ append using `exch1', force
 *********************************************************************************
 *--- Save exchange rates dataset
 *********************************************************************************
-
-	// Save dataset
+	 
 	save "$rootpath\exchenge_rate_sum", replace
 
 *********************************************************************************

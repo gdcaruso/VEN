@@ -32,7 +32,7 @@ Note:
 		global male   0
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\Documents\GitHub\ENCOVI-2019"
+				global rootpath "C:\Users\wb563583\Documents\GitHub\VEN"
 				global dataout "$rootpath\"
 				
 		}

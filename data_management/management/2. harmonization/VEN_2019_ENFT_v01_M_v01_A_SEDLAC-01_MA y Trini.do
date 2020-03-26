@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -1299,7 +1299,7 @@ notes deporte: the survey does not include information to define this variable
 	   BUSCAMASHS (s9q32): ¿Ha hecho algo parar trabajar mas horas?
 	   CAMBIOTR (s9q34): ¿Ha cambiado de trabajo durante los últimos meses?
 	*/
-	gen deseamashs = s9q31 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen deseamas = s9q31 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
 	gen buscamashs = s9q32 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
 	*Assumption: only part-time workers can want to work more
 	

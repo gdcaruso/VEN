@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   1
+		global lauta   0
 		
 		* User 3: Lautaro
-		global lauta2   0
+		global lauta2   1
 		
 		
 		* User 4: Malena
@@ -41,7 +41,7 @@ Note:
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
 	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\Desktop\ENCOVI-2019"
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
@@ -55,7 +55,7 @@ Note:
 				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
 		}
 
-global dataofficial "$rootpath\data_management\input\03_04_20"
+global dataofficial "$rootpath\data_management\input\03_16_20"
  // Set the path for the three questionnaires
 	global pathnew "$dataofficial\ENCOVI_3_STATA_All"
 	global pathold "$dataofficial\ENCOVI_MainSurvey_Final_3_STATA_All"

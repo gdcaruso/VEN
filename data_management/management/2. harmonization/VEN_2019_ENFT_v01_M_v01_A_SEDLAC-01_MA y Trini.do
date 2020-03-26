@@ -32,7 +32,7 @@ Note:
 				global rootpath ""
 		}
 	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\VEN"
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\ENCOVI-2019"  

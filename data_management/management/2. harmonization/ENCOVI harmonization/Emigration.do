@@ -83,13 +83,14 @@
  /* Name of Emigrants from the household(s10q2a): 2. Cuántas personas?
         
  */	
-	*-- Rename main variable 
-	rename s10q2a__0 s10q2a 
-	*-- Drop repeated variables 
-	drop s10q2a__*
-	drop s10q2a1
+	*-- From s10q2a__0 to s10q2a__9 there is information on the names of emigrants
+	*-- Drop from s10q2a__10 to s10q2a__59 (repeated variables)
+	forval i = 10/59{
+	drop s10q2a__`i'
+	}
+	
 	*-- Standarization of missing values
-	replace s10q2a="" if s10q2a=="##N/A##"
+	replace s10q2a__*="" if s10q2a=="##N/A##"
 	replace s10q2a="." if s10q2a==""
 	*-- Check values
 	tab s10q2a, mi

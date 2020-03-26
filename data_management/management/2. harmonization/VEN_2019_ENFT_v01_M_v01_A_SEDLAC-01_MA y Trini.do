@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -774,8 +774,9 @@ gen     ncarros = s5q4a if (s5q4a!=. & s5q4a!=.a)
 replace ncarros = .		if  relacion!=1 
 
 * Antiguedad del auto (en años): ant_auto
-gen   ant_auto = .
-notes ant_auto: the survey does not include information to define this variable
+gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
+gen   ant_auto = ano-anio_auto
+replace ant_auto= . if ant_auto<0
 
 * Auto nuevo (5 o menos años): auto_nuevo
 gen   auto_nuevo = .
@@ -980,7 +981,6 @@ replace exp = 0  if exp<0
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.7: Health Variables ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
-
 global salud_SEDLAC seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
 enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
 
@@ -1206,7 +1206,6 @@ notes fumar: the survey does not include information to define this variable
 gen    deporte = .
 notes deporte: the survey does not include information to define this variable
 
-
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Labor Variables ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -1299,7 +1298,7 @@ notes deporte: the survey does not include information to define this variable
 	   BUSCAMASHS (s9q32): ¿Ha hecho algo parar trabajar mas horas?
 	   CAMBIOTR (s9q34): ¿Ha cambiado de trabajo durante los últimos meses?
 	*/
-	gen deseamashs = s9q31 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen deseamas = s9q31 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
 	gen buscamashs = s9q32 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
 	*Assumption: only part-time workers can want to work more
 	

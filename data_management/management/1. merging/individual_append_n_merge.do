@@ -115,12 +115,14 @@ drop if dupli >= 1
 
 keep interview* origina responsible__name quest date
 
+
 // formatting
 keep interview__key interview__id quest date
 replace date = subinstr(date, "-", "/",.)
-gen edate=date(date,"YMD")
-format edate %td
+gen approved_date=date(date,"YMD")
+format approved_date %td
 drop date
+
 
 // test if is id
 isid interview__key interview__id quest

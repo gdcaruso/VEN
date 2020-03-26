@@ -133,8 +133,8 @@ local vsp      "01"	// version ASPIRE
 	rename ori interviewer
 	rename respo coordinator
 	replace date = subinstr(date, "-", "/",.)
-	gen edate=date(date,"YMD")
-	format edate %td
+	gen approved_date=date(date,"YMD")
+	format approved_date %td
 	drop date
 	// save temporary db with surveys approved
 	save `approved_surveys'	

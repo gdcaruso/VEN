@@ -16,7 +16,7 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 0
+		global trini 1
 		
 		* User 2: Julieta
 		global juli   0
@@ -28,7 +28,7 @@ Note:
 		global lautaa	0   
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 
 			
 		if $juli {
@@ -41,7 +41,7 @@ Note:
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 		if $trini {
-				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		
 		if $male {

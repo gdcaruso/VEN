@@ -1,7 +1,7 @@
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-
+global emigracion informant_emig hogar_emig numero_emig nombre_emig_0 nombre_emig_1 nombre_emig_2 nombre_emig_3 nombre_emig_4 nombre_emig_5 nombre_emig_6 nombre_emig_7 nombre_emig_8 nombre_emig_9 edad_emig_1 edad_emig_2 edad_emig_3 edad_emig_4 edad_emig_5 edad_emig_6 edad_emig_7 edad_emig_8 edad_emig_9 edad_emig_10 sexo_emig_1 sexo_emig_2 sexo_emig_3 sexo_emig_4 sexo_emig_5 sexo_emig_6 sexo_emig_7 sexo_emig_8 sexo_emig_9 sexo_emig_10
 
 *--------- Informant in this section
  /* Informante (s10q00): 00. Quién es el informante de esta sección?
@@ -57,12 +57,12 @@
 	*-- Standarization of missing values
 	replace s10q1=. if s10q1==.a
 	*-- Generate variable
-	clonevar house_emig = s10q1
+	clonevar hogar_emig = s10q1
 	*-- Label variable
-	label var house_emig "During last 5 years: any person who live/lived in the household left the country" 
+	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
 	*-- Label values
 	label def house_emig 1 "Yes" 2 "No"
-	label value house_emig house_emig
+	label value hogar_emig house_emig
 
 *--------- Number of Emigrants from the household
  /* Number of Emigrants from the household(s10q2): 2. Cuántas personas?
@@ -73,11 +73,11 @@
 	*-- Standarization of missing values
 	replace s10q2=. if s10q2==.a
 	*-- Generate variable
-	clonevar number_emig = s10q2
+	clonevar numero_emig = s10q2
 	*-- Label variable
-	label var number_emig "Number of Emigrants from the household"
+	label var numero_emig "Number of Emigrants from the household"
 	*-- Cross check
-	tab number_emig house_emig, mi
+	tab numero_emig hogar_emig, mi
 	
 *--------- Name of Emigrants from the household
  /* Name of Emigrants from the household(s10q2a): 2. Cuántas personas?
@@ -89,35 +89,46 @@
 	drop s10q2a__`i'
 	}
 	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 0/9{
 	*-- Standarization of missing values
-	replace s10q2a__*="" if s10q2a=="##N/A##"
-	replace s10q2a="." if s10q2a==""
-	*-- Check values
-	tab s10q2a, mi
+	replace s10q2a__`i'="" if s10q2a__`i'=="##N/A##"
+	tab s10q2a__`i', mi
 	*-- Generate variable
-	clonevar name_emig = s10q2a
+	clonevar nombre_emig_`i' = s10q2a__`i'
 	*-- Label variable
-	label var name_emig "Name of Emigrants from the household"
+	label var nombre_emig_`i' "Name of Emigrants from the household"
+	}
+
 	*-- Cross check
-	tab name_emig house_emig
+	forval i = 0/9{
+	tab nombre_emig_`i' hogar_emig
+	}
+	
 	
  *--------- Age of the emigrant
  /* Age of the emigrant(s10q3): 3. Cuántos años cumplidos tiene X?
         
  */
- 	*-- Rename main variable 
-	rename s10q31 s10q3
+ 	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename main variable 
+	rename s10q3`i' s10q3_`i'
 	*-- Label original variable
-	label var s10q3 "3.Cuántos años cumplidos tiene X?"
-	*-- Check values 
-	tab s10q3, mi
+	label var s10q3_`i' "3.Cuántos años cumplidos tiene X?"
 	*-- Standarization of missing values
-	replace s10q3=. if s10q3==.a
-	*-- Generate variable
-	clonevar age_emig = s10q3
-	*-- Label variable
-	label var age_emig "Age of Emigrants"
-	tab age_emig
+	replace s10q3_`i'=. if s10q3_`i'==.a
+		*-- Generate variable
+		clonevar edad_emig_`i' = s10q3_`i'
+		*-- Label variable
+		label var edad_emig_`i' "Age of Emigrants"
+		*-- Cross check
+		tab edad_emig_`i' hogar_emig
+	}
+	
 	
  *--------- Sex of the emigrant 
  /* Sex (s10q4): 4. El sexo de X es?
@@ -125,146 +136,227 @@
 				02 Femenino
 				
  */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
 	*-- Rename main variable 
-	rename s10q41 s10q4
+	rename s10q4`i' s10q4_`i'
 	*-- Label original variable
-	label var s10q4 "4. El sexo de X es?"
-	*-- Check values
-	tab s10q4, mi
+	label var s10q4_`i' "4. El sexo de X es?"
 	*-- Standarization of missing values
-	replace s10q4=. if s10q4==.a
-	*-- Generate variable
-	clonevar sex_emig = s10q4
-	*-- Label variable
-	label var sex_emig "Sex of Emigrants"
-	*-- Label values
-	label def sex_em 1 "Male" 2 "Female"
-	label value sex_em sex_emig
-	*-- Cross check
-	tab sex_emig house_emig
-
+	replace s10q4_`i'=. if s10q4_`i'==.a
+		*-- Generate variable
+		clonevar sexo_emig_`i' = s10q4_`i'
+		*-- Label variable
+		label var sexo_emig_`i' "Sex of Emigrants"
+		*-- Label values
+		label def sexo_emig_`i' 1 "Male" 2 "Female"
+		label value sexo_emig_`i' sexo_emig_`i'
+		}
+		
+	
+ /*
  *--------- Relationship of the emigrant with the head of the household
- /* Relationship (s10q5): 5. Cuál es el parentesco de X con el Jefe(a) del hogar?
+ Relationship (s10q5): 5. Cuál es el parentesco de X con el Jefe(a) del hogar?
         
- */
+ */ 
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
 	*-- Rename main variable 
-	rename s10q51 s10q5
+	rename s10q5`i' s10q5_`i'
 	*-- Label original variable
-	label var s10q5 "5. Cuál es el parentesco de X con el Jefe(a) del hogar?"
-	*-- Check values
-	tab s10q5, mi
+	label var s10q5_`i' "5. Cuál es el parentesco de X con el Jefe(a) del hogar?"
 	*-- Standarization of missing values
-	replace s10q5=. if s10q5==.a
+	replace s10q5_`i'=. if s10q5_`i'==.a
+	
 	*-- Generate variable
-	//clonevar rel_emig = s10q5
+	gen     relemig_`i'  = 1		if  s10q5_`i'==1
+	replace relemig_`i'  = 2		if  s10q5_`i'==2
+	replace relemig_`i'  = 3		if  s10q5_`i''==3  | s10q5_`i'==4
+	replace relemig_`i'  = 4		if  s10q5_`i''==5  
+	replace relemig_`i'  = 5		if  s10q5_`i'==6 
+	replace relemig_`i'  = 6		if  s10q5_`i'==7
+	replace relemig_`i'  = 7		if  s10q5_`i'==8  
+	replace relemig_`i'  = 8		if  s10q5_`i'==9
+	replace relemig_`i'  = 9		if  s10q5_`i'==10
+	replace relemig_`i'  = 10	    if  s10q5_`i'==11
+	replace relemig_`i'  = 11	    if  s10q5_`i'==12
+	replace relemig_`i'  = 12	    if  s10q5_`i'==13
+	
 	*-- Label variable
-	//label var rel_emig "Sex of Emigrants"
+	label var relemig_`i' "Emigrant's relationship with the head of the household"
 	*-- Label values
-	//label def rel_em 1 "Male" 2 "Female"
-	//label value rel_em rel_emig
-	*-- Cross check
-	tab rel_emig house_emig
+	label def relemig_`i' 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
+						  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
+						  8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" ///
+						  12 "Servicio Domestico"
+	label value relemig_`i' relemig_`i'
+	}
+	
 	
  *--------- Year in which the emigrant left the household
  /* Year (s10q6a): 6a. En qué año se fue X ?
         
  */	
-	*-- Rename main variable 
-	rename s10q6a1 s10q6a
-	*-- Drop repeated variables 
-	drop s10q6a*
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename original variable 
+	rename s10q6a`i' s10q6a_`i'
 	*-- Label original variable
-	label var s10q6a "6a. En qué año se fue X ?"
-	*-- Check values
-	tab s10q6a, mi
+	label var s10q6a_`i' "6a. En qué año se fue X ?"
 	*-- Standarization of missing values
-	replace s10q6a=. if s10q6a==.a
+	replace s10q6a_`i'=. if s10q6a_`i'==.a
 	*-- Generate variable
-	clonevar year_emig = s10q6a
+	clonevar anoemig_`i' = s10q6a_`i'
 	*-- Label variable
-	label var year_emig "Year of emigration"
+	label var anoemig "Year of emigration"
 	*-- Cross check
-	tab year_emig house_emig
+	tab anoemig hogar_emig
+	}
+	
 	
  *--------- Month in which the emigrant left the household
  /* Month (s10q6b): 6a. En qué mes se fue X ?
         
  */	
- 	*-- Rename main variable 
-	rename s10q6b1 s10q6b
-	*-- Drop repeated variables 
-	drop s10q6b*
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename original variable 
+	rename s10q6b`i' s10q6b_`i'
 	*-- Label original variable
-	label var s10q6b "6b. En qué año se fue X ?"
-	*-- Check values
-	tab s10q6b, mi
+	label var s10q6b_`i' "6b. En qué mes se fue X ?"
 	*-- Standarization of missing values
-	replace s10q6b=. if s10q6b==.a
+	replace s10q6b_`i'=. if s10q6b_`i'==.a
 	*-- Generate variable
-	clonevar month_emig = s10q6b
+	clonevar mesemig_`i' = s10q6b_`i'
 	*-- Label variable
-	label var month_emig "Year of emigration"
+	label var mesemig "Month of emigration"
 	*-- Cross check
-	tab month_emig house_emig
+	tab mesemig_`i' hogar_emig
+	}
 
 
   *--------- Latest education level atained by the emigrant 
  /* Education level (s10q7): 7. Cuál fue el último nivel educativo en el que
-							 X aprobó un grado, año, semestre o trimestre?       
+							 X aprobó un grado, año, semestre o trimestre?  
+			01 Ninguno
+			02 Preescolar
+			03 Régimen anterior: Básica (1-9)
+			04 Régimen anterior: Media Diversificado y Profesional (1-3)
+			05 Régimen actual: Primaria (1-6)
+			06 Régimen actual: Media (1-6)
+			07 Técnico (TSU)
+			08 Universitario
+			09 Postgrado
+
  */
- 	*-- Rename main variable 
-	rename s10q71 s10q7
-	*-- Drop repeated variables 
-	drop s10q72 s10q73 s10q74 s10q75 s10q76 s10q77 s10q78 s10q79 s10q710
+ 	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename main variable 
+	rename s10q7`i' s10q7_`i'
 	*-- Label original variable
-	label var s10q7 "7. Cuál fue el último nivel educativo en el que X aprobó un grado, año, semestre o trimestre?"
-	*-- Check values
-	tab s10q7, mi
+	label var s10q7_`i' "7. Cuál fue el último nivel educativo en el que X aprobó un grado, año, semestre o trimestre?"
 	*-- Standarization of missing values
-	replace s10q7=. if s10q7==.a
+	replace s10q7_`i'=. if s10q7_`i'==.a
 	*-- Generate variable
-	clonevar leveledu_emig = s10q7
+	clonevar leveledu_emig_`i' = s10q7_`i'
 	*-- Label variable
-	label var leveledu_emig "Education level emigrant"
-	*-- Cross check
-	tab leveledu_emig house_emig
+	label var leveledu_emig_`i' "Education level emigrant"
+	}
+	
 
  *--------- Latest education grade atained by the emigrant 
  /* Education level (s10q7a): 7a. Cuál fue el último GRADO aprobado por X?     
  */	
- 	*-- Rename main variable 
-	rename s10q7a1 s10q7a
-	*-- Drop repeated variables 
-	drop s10q7a*
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q7a`i' s10q7a_`i'
 	*-- Label original variable
-	label var s10q7a "7a. Cuál fue el último GRADO aprobado por X?"
-	*-- Check values
-	tab s10q7a, mi
+	label var s10q7a_`i' "7a. Cuál fue el último GRADO aprobado por X?"
 	*-- Standarization of missing values
-	replace s10q7a=. if s10q7a==.a
+	replace s10q7a_`i'=. if s10q7a_`i'==.a
 	*-- Generate variable
-	clonevar edug_emig = s10q7a
+	clonevar gradedu_emig_`i' = s10q7a`i'
 	*-- Label variable
-	label var edug_emig "Education grade emigrant"
+	label var edug_emig_`i' "Education grade emigrant"
 	*-- Cross check
-	tab edug_emig house_emig
-
+	tab edug_emig_`i' house_emig
+	}
+	
 
  *--------- Education regime 
- /* Education regime (s10q7ba): 7ab. El régimen de estudio era anual, semestral o
+ /* Education regime (s10q7ba): 7ba. El régimen de estudio era anual, semestral o
 							   trimestral?
 								01 Anual
 								02 Semestral
 								03 Trimestral     
  */	
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q7ba`i' s10q7ba_`i'
+	*-- Label original variable
+	label var s10q7ba_`i' "7ba. El régimen de estudio era anual, semestral o trimestral?"
+	*-- Standarization of missing values
+	replace s10q7ba_`i'=. if s10q7ba_`i'==.a
+	*-- Generate variable
+	clonevar regedu_emig_`i' = s10q7ba_`i'
+	*-- Label variable
+	label var regedu_emig_`i' "Education regime: annual, biannual or quarterly"
+	*-- Cross check
+	tab regedu_emig_`i' hogar_emig
+	*-- Label values
+	label def regedu_emig_`i' 1 "Annual" 2 "Biannual" 3 "Quarterly"
+	label value regedu_emig_`i' regedu_emig_`i'
+	}
 	
  *--------- Latest year 
- /* Education regime (s10q7ba): 7b. Cuál fue el último AÑO aprobado por X?    
+ /* Education regime (s10q7b): 7b. Cuál fue el último AÑO aprobado por X?    
  */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q7b`i' s10q7b_`i'
+	*-- Label original variable
+	label var s10q7b_`i' "7b. Cuál fue el último AÑO aprobado por X?   "
+	*-- Standarization of missing values
+	replace s10q7b_`i'=. if s10q7b_`i'==.a
+	*-- Generate variable
+	clonevar anoedu_emig_`i' = s10q7b_`i'
+	*-- Label variable
+	label var anoedu_emig_`i' "Last year of education attained"
+	*-- Cross check
+	tab anoedu_emig_`i' hogar_emig
+	}
 
   *--------- Latest semester
- /* Education regime (s10q7c): s10q7c 7b. Cuál fue el último SEMESTRE aprobado por X?   
+ /* Education regime (s10q7c): 7c. Cuál fue el último SEMESTRE aprobado por X?   
  */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q7c`i' s10q7c_`i'
+	*-- Label original variable
+	label var s10q7c_`i' "7b. Cuál fue el último AÑO aprobado por X?   "
+	*-- Standarization of missing values
+	replace s10q7b_`i'=. if s10q7b_`i'==.a
+	*-- Generate variable
+	clonevar anoedu_emig_`i' = s10q7b_`i'
+	*-- Label variable
+	label var anoedu_emig_`i' "Last year of education attained"
+	*-- Cross check
+	tab anoedu_emig_`i' hogar_emig
+	}
 
   *--------- Country of residence of the emigrant
  /* Country (s10q8): 8. En cuál país vive actualmente X?   

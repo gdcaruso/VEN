@@ -75,7 +75,7 @@ local vr       "01"     // version renta
 		* Deflactor
 			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-			use "$dataout\InflacionVerdadera_26-3-20.dta", clear
+			use "$pathout\InflacionVerdadera_26-3-20.dta", clear
 			
 			forvalues j = 11(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -98,7 +98,7 @@ local vr       "01"     // version renta
 			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses "1 2 3 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$dataout\exchenge_rate_price.dta", clear
+			use "$pathout\exchenge_rate_price.dta", clear
 			
 			destring mes, replace
 			foreach i of local monedas {

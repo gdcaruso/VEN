@@ -36,6 +36,7 @@ Note:
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"  
+				global datate "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI\Base telefonos (2019)"
 		}
 		
 		if $male   {
@@ -75,7 +76,7 @@ local vr       "01"     // version renta
 		* Deflactor
 			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-			use "$dataout\InflacionVerdadera_26-3-20.dta", clear
+			use "$pathout\InflacionVerdadera_26-3-20.dta", clear
 			
 			forvalues j = 11(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -98,7 +99,7 @@ local vr       "01"     // version renta
 			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses "1 2 3 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$dataout\exchenge_rate_price.dta", clear
+			use "$pathout\exchenge_rate_price.dta", clear
 			
 			destring mes, replace
 			foreach i of local monedas {
@@ -111,7 +112,7 @@ local vr       "01"     // version renta
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 
-	use "$dataofficial\contactos20200327.dta", clear
+	use "$datate\contactos20200327.dta", clear
 	gen aux = 1 if quest=="Tradicioinal - Viejo"
 	replace aux= 2 if quest=="Tradicional - Nuevo"
 	replace aux= 3 if quest=="Remoto"
@@ -124,16 +125,16 @@ local vr       "01"     // version renta
 		
 
 	*Generate unique household identifier by strata
-	use "$dataofficial\household(telefonos).dta", clear
+	use "$datate\household(telefonos).dta", clear
 	tempfile household_hhid
 	bysort combined_id: gen hh_by_combined_id = _n
 	save `household_hhid'
 
 	* Open "output" database
-	use "$dataofficial\individual(telefonos).dta", clear
+	use "$datate\individual(telefonos).dta", clear
 	merge m:1 interview__key interview__id quest using `household_hhid'
 	drop _merge
-	merge using interview__key interview__id quest using `phone'
+	merge m:1 interview__key interview__id quest using `phone'
 	* I drop those who do not collaborate in the survey
 	//drop if colabora_entrevista==2
 	*Obs: there are still 2 observations which do not merge. Maybe they are people who started to answer but then stopped answering
@@ -219,7 +220,7 @@ global id_ENCOVI pais ano encuesta id com psu
 
 * Primary Sample Unit: psu  
 gen psu = combined_id
-
+;
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -3271,4 +3272,4 @@ keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI
 /* Variables de ingreso CEDLAS, por ahora */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 
 
-save "$pathout\ENCOVI_2019.dta", replace
+save "$datate\ENCOVI_2019_telefono.dta", replace

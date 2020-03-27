@@ -8,7 +8,7 @@ Project:
 Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
 
 Dependencies:		CE	DLAS/UNLP -- The World Bank
-Creation Date:		January, 2020
+Creation Date:		March, 2020
 Modification Date:  
 Output:			sedlac do-file template
 
@@ -22,42 +22,35 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
+		global lauta  0
 		
 		* User 4: Malena
 		global male   0
 		
 			
 		if $juli {
-				global rootpath "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
-				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
+				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath2 "
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
-				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\1. Data Harmonization\output"
-				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\1. Data Harmonization\dofiles\aux_do"
 		}
 		if $trini   {
-				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
-				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
+				global rootpath1 "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
-				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global dataout "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\bases"
-				global aux_do "$rootpath\ENCOVI 2014 - 2018\Projects\SEDLAC Harmonization\dofiles\aux_do"
+				global rootpath1 "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
+                global rootpath2 "C:\Users\wb550905\Github\VEN" 
 		}
 
-global dataofficial "$rootpath\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
+global dataofficial "$rootpath1\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
 global data2014 "$dataofficial\ENCOVI 2014\Data"
 global data2015 "$dataofficial\ENCOVI 2015\Data"
 global data2016 "$dataofficial\ENCOVI 2016\Data"
 global data2017 "$dataofficial\ENCOVI 2017\Data"
 global data2018 "$dataofficial\ENCOVI 2018\Data"
-global datafinalharm "$rootpath\ENCOVI 2014 - 2018\Data\FINAL_DATA_BASES\ENCOVI harmonized data"
-global datafinalimp "$rootpath\ENCOVI 2014 - 2018\Data\FINAL_DATA_BASES\ENCOVI imputation data"
-
+global pathout "$rootpath2\VEN\data_management\output\cleaned"
 
 ********************************************************************************
 
@@ -262,151 +255,6 @@ gen     hijos_nacidos_vivos = .
 
 *** From the total of sons/daughters born alive, how many are currently alive?
 gen     hijos_vivos =.
-
-/*(*************************************************************************************************************************************************
-*-------------------------------------------------------------	1.3: Regional variables  ---------------------------------------------------------
-*************************************************************************************************************************************************)*/
-* Creación de Variable Geográficas Desagregadas
-	
-* Desagregación 1 (Regiones politico-administrativas): region 
-
-/* Las regiones político-administrativas de Venezuela son:
-	    1. Región Central:  Aragua, Carabobo y Cojedes.
-	    2. Región de los Llanos: Guárico, Apure, con excepción del Municipio Páez.
-	    3. Región Centro-Occidental: Falcón, Lara, Portuguesa y Yaracuy.
-	    4. Región Zuliana: Zulia
-	    5. Región de los Andes: Barinas, Mérida, Táchira, Trujillo y el municipio Páez del Estado Apure
-	    6. Región Nor-Oriental: Anzoátegui, Monagas y Sucre.
-	    7. Región Insular: Nueva Esparta y las Dependencias Federales Venezolanas.
-	    8. Región Guayana:  Bolívar, Amazonas y Delta Amacuro.
-	    9. Región Capital:  Miranda, Vargas y el Distrito Capital
-    En la encuesta la variable categorica ENTI representa a los Estados, a partir de esta variable se crearan las regions politico-administrativas y las dummies regionales
-    Las  categorias de la variable original ENTI son las siguientes:
-	   1 Amazonas
-	   2 Anzo�tegui
-	   3 Apure
-	   4 Aragua
-	   5 Barinas
-	   6 Bol�var
-	   7 Carabobo
-	   8 Cojedes
-	   9 Delta Amacuro
-	  10 Distrito Capital (Caracas)
-	  11 Falc�n
-	  12 Gu�rico
-	  13 Lara
-	  14 M�rida
-	  15 Miranda
-	  16 Monagas
-	  17 Nueva Esparta
-	  18 Portuguesa
-	  19 Sucre
-	  20 T�chira
-	  21 Trujillo
-	  22 Vargas
-	  23 Yaracuy
-	  24 Zulia
-	  99 No sabe/No responde
-*/
-
-gen     region_est1 =  1 if enti==4 | enti==7 | enti==8                //Region Central
-replace region_est1 =  2 if enti==12 | enti==3                         // Region de los LLanos
-replace region_est1 =  3 if enti==11 | enti==13 | enti==18 | enti==23  // Region Centro-Occidental
-replace region_est1 =  4 if enti==24                                   // Region Zuliana
-replace region_est1 =  5 if enti==5 | enti==14 | enti==20 | enti==21   // Region de los Andes
-replace region_est1 =  6 if enti==2 | enti==16 | enti==19              // Region Nor-Oriental
-replace region_est1 =  7 if enti==17                                   // Region Insular
-replace region_est1 =  8 if enti==6 | enti==1 | enti==9                // Region Guayana
-replace region_est1 =  9 if enti==15 | enti==22 | enti==10              // Region Capital
-
-label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
-          5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
-label value region_est1 region_est1
-
-* Desagregación 2 (Estados): region_est2
-clonevar region_est2 = enti
-
-* Desagregación 3 (Municipio): region_est3
-clonevar region_est3 = muni
-
-* Dummy urbano-rural: urbano  //REVISAR SI SE PUEDE CONSTRUIR ESTA VARIABLE
-/* : area de residencia
-		 1 = urbana  
-		 2 = rural								
-
-gen     urbano = 1		if  zona==1
-replace urbano = 0		if  zona==2
-*/
-gen     urbano =.
-							 
-* Dummies regionales 							 
-
-*1.	Región Central
-gen       cen = .
-replace   cen = 1 if enti==4 // Aragua
-replace   cen = 1 if enti==7 // Carabobo
-replace   cen = 1 if enti==8 // Cojedes
-replace   cen = 0 if enti!=4 & enti!=7 & enti!=8 & enti!=.
-
-
-*2. Región de los Llanos
-gen       lla = .
-replace   lla = 1 if enti==12 // Guarico
-replace   lla = 1 if enti==3  // Apure
-replace   lla = 0 if enti!=12 & enti!=3 & enti!=.
-
-*3. Región Centro-Occidental
-gen       ceo = .
-replace   ceo = 1 if enti==11 // Falcon
-replace   ceo = 1 if enti==13 // Lara
-replace   ceo = 1 if enti==18 // Portuguesa
-replace   ceo = 1 if enti==23 // Yaracuy
-replace   ceo = 0 if enti!=11 & enti!=13 & enti!=18 & enti!=23 & enti!=.
-
-*4. Región Zuliana: Zulia
-gen       zul = .
-replace   zul = 1 if enti==24 // Zulia
-replace   zul = 0 if enti!=24 & enti!=.
-
-*5. Región de los Andes
-gen       and = .
-replace   and = 1 if enti==5  // Barinas
-replace   and = 1 if enti==14 // Merida
-replace   and = 1 if enti==20 // Tachira 
-replace   and = 1 if enti==21 // Trujillo
-replace   and = 0 if enti!=5 & enti!=14 & enti!=20 & enti!=21 & enti!=.
-
-*6. Región Nor-Oriental 
-gen       nor = .
-replace   nor = 1 if enti==2  // Anzoategui
-replace   nor = 1 if enti==16 // Monagas
-replace   nor = 1 if enti==19 // Sucre
-replace   nor = 0 if enti!=2 & enti!=16 & enti!=19 & enti!=.
-
-*7. Región Insular
-gen       isu = .
-replace   isu = 1 if enti==17 // Nueva Esparta
-replace   isu = 0 if enti!=17 & enti!=.
-// Dependencias Federales aparece dentro de Insular a partir de 2016
-
-
-*8. Región Guayana
-gen       gua = .
-replace   gua = 1 if enti==6  // Bolivar
-replace   gua = 1 if enti==1  // Amazonas
-replace   gua = 1 if enti==9 // Delta Amacuro
-replace   gua = 0 if enti!=6 & enti!=1 & enti!=9 & enti!=.
-
-*8. Región Capital
-gen       capital = .
-replace   capital = 1 if enti==15  // Miranda
-replace   capital = 1 if enti==22  // Vargas
-replace   capital = 1 if enti==10  // Distrito Capital
-replace   capital = 0 if enti!=15 & enti!=22 & enti!=10 & enti!=.
-
-* Areas no incluidas en años previos:	nuevareg
-* para 2016 SE AGREGA LAS DEPENDENCIAS FEDERALES
-gen       nuevareg=.
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
@@ -1545,28 +1393,11 @@ compress
 ==================================================================================================================================================*/
 
 /*(************************************************************************************************************************************************* 
-*-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
+*-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
+sort id com
+order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $bank_ENCOVI
+keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $bank_ENCOVI
 
-order pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
-region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
-propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
-alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
-seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
-enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
-relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector /*sector_encuesta*/ tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 /*ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/  
-
-keep pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
-region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
-propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
-alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
-seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
-enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
-relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector /*sector_encuesta*/ tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i /*ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/
-
-save "$dataout\base_out_nesstar_cedlas_2015.dta", replace 
+save "$pathout\ENCOVI_2015_COMP.dta", replace
 

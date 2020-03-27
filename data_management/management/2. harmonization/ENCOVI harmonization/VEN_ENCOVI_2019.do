@@ -45,7 +45,7 @@ Note:
 		
 // Set output data path
 global dataofficial "$rootpath\data_management\output\merged"
-
+global dataout "$rootpath\VEN\data_management\output\cleaned"
 ********************************************************************************
 
 /*==============================================================================
@@ -108,7 +108,7 @@ gen npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Identification Variables --------------------------------------------------
 *************************************************************************************************************************************************)*/
-global id pais ano encuesta id com psu
+global id_ENCOVI pais ano encuesta id com psu
 * Country identifier: country
 	gen pais = "VEN"
 
@@ -327,171 +327,6 @@ gen     mes_ult_hijo = s6q16b if s6q14!=0 & (s6q16b!=9999)
 *** Which day was your last son born?
 gen     dia_ult_hijo = s6q16c if s6q14!=0 & (s6q16c!=9999)
 replace dia_ult_hijo = s6q16a if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9999 //wronly codified in year
-
-/*(*************************************************************************************************************************************************
-*-------------------------------------------------------------	1.3: Regional variables  ---------------------------------------------------------
-*************************************************************************************************************************************************)*/
-* Creación de Variable Geográficas Desagregadas
-	
-* Desagregación 1 (Regiones politico-administrativas): region_est1
-/* Las regiones político-administrativas de Venezuela son:
-	    1. Región Central:  Aragua, Carabobo y Cojedes.
-	    2. Región de los Llanos: Guárico, Apure, con excepción del Municipio Páez.
-	    3. Región Centro-Occidental: Falcón, Lara, Portuguesa y Yaracuy.
-	    4. Región Zuliana: Zulia
-	    5. Región de los Andes: Barinas, Mérida, Táchira, Trujillo y el municipio Páez del Estado Apure
-	    6. Región Nor-Oriental: Anzoátegui, Monagas y Sucre.
-	    7. Región Insular: Nueva Esparta y las Dependencias Federales Venezolanas.
-	    8. Región Guayana:  Bolívar, Amazonas y Delta Amacuro.
-	    9. Región Capital:  Miranda, Vargas y el Distrito Capital
-    En la encuesta la variable categorica ENTI representa a los Estados, a partir de esta variable se crearan las regions politico-administrativas y las dummies regionales
-    Las  categorias de la variable original ENTI son las siguientes:
-        1 Distrito Capital
-        2 Amazonas
-        3 Anzoategui
-        4 Apure
-        5 Aragua
-		6 Barinas
-        7 Bolívar
-        8 Carabobo
-        9 Cojedes
-        10 Delta Amacuro
-		11 Falcón
-        12 Guárico
-        13 Lara
-        14 Mérida
-        15 Miranda
-        16 Monagas
-        17 Nueva Esparta
-        18 Portuguesa
-        19 Sucre
-        20 Táchira
-        21 Trujillo
-        22 Yaracuy
-        23 Zulia
-        24 Vargas
-        25 Dependencias Federales
- */
-tab entidad, nolab
-/*
-      1. ENTIDAD |
-         FEDERAL |      Freq.     Percent        Cum.
------------------+-----------------------------------
-      Anzoategui |        627       11.66       11.66
-           Apure |         69        1.28       12.94
-          Aragua |        421        7.83       20.77
-         Bolivar |        134        2.49       23.26
-         Cojedes |         53        0.99       24.24
-          Falcon |         52        0.97       25.21
-         Guarico |        210        3.90       29.11
-            Lara |        141        2.62       31.73
-         Miranda |         83        1.54       33.28
-         Monagas |        219        4.07       37.35
-   Nueva Esparta |        773       14.37       51.72
-      Portuguesa |         69        1.28       53.00
-           Sucre |        758       14.09       67.09
-         Tachira |        964       17.92       85.02
-         Yaracuy |        419        7.79       92.81
-           Zulia |        387        7.19      100.00
------------------+-----------------------------------
-           Total |      5,379      100.00
-*/
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   //Region Central
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital
-
-label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
-          5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
-label value region_est1 region_est1
-
-* Desagregación 2 (Estados): region_est2
-clonevar region_est2 = entidad
-
-* Desagregación 3 (Municipios): region_est3
-clonevar region_est3 = municipio
-
-* Dummy urbano-rural: urbano  //REVISAR SI SE PUEDE CONSTRUIR ESTA VARIABLE
-/* : area de residencia
-		 1 = urbana  
-		 2 = rural								
-
-gen     urbano = 1		if  zona==1
-replace urbano = 0		if  zona==2
-*/
-gen urbano=.
-							 
-* Dummies regionales 							 
-
-*1.	Región Central
-gen       cen = .
-replace   cen = 1 if enti==5 // Aragua
-replace   cen = 1 if enti==8 // Carabobo
-replace   cen = 1 if enti==9 // Cojedes
-replace   cen = 0 if enti!=5 & enti!=8 & enti!=9 & enti!=.
-
-*2. Región de los Llanos
-gen       lla = .
-replace   lla = 1 if enti==12 // Guarico
-replace   lla = 1 if enti==4  // Apure
-replace   lla = 0 if enti!=12 & enti!=4 & enti!=.
-
-*3. Región Centro-Occidental
-gen       ceo = .
-replace   ceo = 1 if enti==11 // Falcon
-replace   ceo = 1 if enti==13 // Lara
-replace   ceo = 1 if enti==18 // Portuguesa
-replace   ceo = 1 if enti==22 // Yaracuy
-replace   ceo = 0 if enti!=11 & enti!=13 & enti!=18 & enti!=22 & enti!=.
-
-*4. Región Zuliana: Zulia
-gen       zul = .
-replace   zul = 1 if enti==23 // Zulia
-replace   zul = 0 if enti!=23 & enti!=.
-
-*5. Región de los Andes
-gen       and = .
-replace   and = 1 if enti==6  // Barinas
-replace   and = 1 if enti==14 // Merida
-replace   and = 1 if enti==20 // Tachira 
-replace   and = 1 if enti==21 // Trujillo
-replace   and = 0 if enti!=6 & enti!=14 & enti!=20 & enti!=21 & enti!=.
-
-*6. Región Nor-Oriental 
-gen       nor = .
-replace   nor = 1 if enti==3  // Anzoategui
-replace   nor = 1 if enti==16 // Monagas
-replace   nor = 1 if enti==19 // Sucre
-replace   nor = 0 if enti!=3 & enti!=16 & enti!=19 & enti!=.
-
-*7. Región Insular
-gen       isu = .
-replace   isu = 1 if enti==17 // Nueva Esparta
-replace   isu = 1 if enti==25 // Dependencias Federales
-replace   isu = 0 if enti!=17 & enti!=25 & enti!=.
-
-*8. Región Guayana
-gen       gua = .
-replace   gua = 1 if enti==7  // Bolivar
-replace   gua = 1 if enti==2  // Amazonas
-replace   gua = 1 if enti==10 // Delta Amacuro
-replace   gua = 0 if enti!=7 & enti!=2 & enti!=10 & enti!=.
-
-*8. Región Capital
-gen       capital = .
-replace   capital = 1 if enti==15  // Miranda
-replace   capital = 1 if enti==24  // Vargas
-replace   capital = 1 if enti==1  // Distrito Capital
-replace   capital = 0 if enti!=15 & enti!=24 & enti!=1 & enti!=.
-
-* Areas no incluidas en años previos:	nueva_region
-gen       nuevareg = .
-* Por el momento no se detectaron cambios 
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
@@ -851,7 +686,7 @@ replace telefono_fijo = .		    if  relacion_en!=1
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.6: Education --------------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global educ_ENCOVI asistio_educ razon_noasis asiste nivel_educ_act g_educ_act regimen_act a_educ_act s_educ_act t_educ_act edu_pub ///
+global educ_ENCOVI contesta_ind_e quien_contesta_e asistio_educ razon_noasis asiste nivel_educ_act g_educ_act regimen_act a_educ_act s_educ_act t_educ_act edu_pub ///
 fallas_agua fallas_elect huelga_docente falta_transporte falta_comida_hogar falta_comida_centro inasis_docente protesta nunca_deja_asistir ///
 pae pae_frecuencia pae_desayuno pae_almuerzo pae_meriman pae_meritard pae_otra ///
 cuota_insc compra_utiles compra_uniforme costo_men costo_transp otros_gastos ///
@@ -859,6 +694,12 @@ cuota_insc_monto compra_utiles_monto compra_uniforme_monto costo_men_monto costo
 cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon ///
 cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m ///
 nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/ edad_dejo_estudios razon_dejo_estudios razon_dejo_estudios_comp
+
+*** Is the "member" answering by himself/herself?
+gen contesta_ind_e=s7q0 if (s7q0!=. & s7q0!=.a)
+
+*** Who is answering instead of "member"?
+gen quien_contesta_e=s7q00 if (s7q00!=. & s7q00!=.a)
 
 *** Have you ever attended any educational center? //for age +3
 gen asistio_educ = s7q1==1 if (s7q1!=. & s7q1!=.a) & edad>=3
@@ -1154,12 +995,269 @@ label def razon_dejo_est_comp 1 "Terminó los estudios" 2 "Escuela distante" 3 "
 12 "Por embarazo/cuidar a los hijos" 13 "Tiene que ayudar en tareas del hogar" 14 "No lo considera importante" 15 "Otra"
 label value razon_dejo_est_comp razon_dejo_est_comp
 
-;
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.?: Banking ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
-global bank
+global bank_ENCOVI contesta_ind_b quien_contesta_b cuenta_corr cuenta_aho tcredito tdebito nobanco ///
+efectivo_f tcredito_f tdebito_f bancao_f pagomovil_f razon_nobanco
 
+*** Section for individuals 15+
+*** Is the "member" answering by himself/herself?
+gen contesta_ind_b=s16q0 if (s16q0!=. & s16q0!=.a)
+
+*** Who is answering instead of "member"?
+gen quien_contesta_b=s16q00 if (s16q00!=. & s16q00!=.a)
+
+*** Do you have in any bank the following?
+* Checking account
+gen cuenta_corr=s16q1__1 if (s16q1__1!=. & s16q1__1!=.a)
+* Saving account
+gen cuenta_aho=s16q1__2 if (s16q1__2!=. & s16q1__2!=.a)
+* Credit card
+gen tcredito=s16q1__3 if (s16q1__3!=. & s16q1__3!=.a)
+* Debit card
+gen tdebito=s16q1__4 if (s16q1__4!=. & s16q1__4!=.a)
+* None
+gen no_banco=s16q1__4 if (s16q1__4!=. & s16q1__4!=.a)
+
+*** How often do you pay with cash ?
+gen efectivo_f=s16q2 if (s16q2!=. & s16q2!=.a)
+
+*** How often do you pay with credit card ?
+gen tcredito_f=s16q3 if (s16q3!=. & s16q3!=.a)
+
+*** How often do you pay with debit card ?
+gen tdebito_f=s16q4 if (s16q4!=. & s16q4!=.a)
+
+*** How often do you pay using online bank?
+gen bancao_f=s16q5 if (s16q5!=. & s16q5!=.a)
+
+*** How often do you use mobile payment?
+gen pagomovil_f=s16q7 if (s16q7!=. & s16q7!=.a)
+
+*** Reasons for not holding any bank account or card?
+gen razon_nobanco=s16q7 if (s16q7!=. & s16q7!=.a)
+;
+/*(************************************************************************************************************************************************ 
+*------------------------------------------------------------- 1.?: Shocks afecting households ---------------------------------------------------------------
+************************************************************************************************************************************************)*/
+global shocks_ENCOVI
+
+*** Who is the informant in this section?
+gen contesta_ind_b=s15q00 if (s15q00!=. & s15q00!=.a)
+
+*** Which of the following events have affected to yor household
+/* "1.Muerte o discapacidad de un
+miembro adulto del hogar que
+trabajaba
+2.Muerte de alguien que enviaba
+remesas al hogar
+3.Enfermedad de la persona con el
+ingreso más importante del hogar
+4.Pérdida de un contacto importante
+ 5.Perdida de trabajo de la persona con
+el ingreso más importante del hogar
+6.Salida del miembro del hogar que
+generaba ingresos debido a
+separación/divorcio
+7.Salida del miembro de la familia que
+generaba ingresos debido al
+matrimonio
+8.Salida de un miembro del hogar que
+generaba ingresos por emigración
+9.Fracaso empresarial no
+agrícola/cierre de negocio o
+emprendimiento
+10.Robo de cultivos, dinero en efectivo,
+ganado u otros bienes
+11.Pérdida de cosecha por
+incendio/sequía/inundaciones
+12.Invasión de plagas que causó el
+fracaso de la cosecha o la pérdida de
+almacenamiento
+13.Vivienda dañada / demolida
+14.Pérdida de propiedad por incendio o
+inundación
+15.Pérdida de tierras
+16.Muerte de ganado por enfermedad"
+*/
+forv i=1/16{
+gen evento_`i'= s15q1__`i' if (s15q1__`i'!=. & s15q1__`i'!=.a) 
+}
+label var evento_1 "Death or disability of a employed household member"
+label var evento_2 "Death of a household member sending remittances"
+label var evento_3 "Illness of the main earner"
+label var evento_4 "Loss of an important contact"
+label var evento_5 "Loss of work of the person with the most important household incomet"
+label var evento_6 "Departure of the household member who generated income due to separation / divorce"
+label var evento_7 "Departure of the family member who generated income due to marriage"
+label var evento_8 "Departure of a household member who generated income due to emigration"
+label var evento_9 "Non-agricultural business failure/closure of business or entrepreneurship "
+label var evento_10 "Theft of crops, cash,livestock or other property"
+label var evento_11 "Loss of harvest due to fire / drought / flood"
+label var evento_12 "Invasion of pests that caused loss of harvest or loss of storage"
+label var evento_13 "Damaged / demolished dwelling"
+label var evento_14 "Loss of property due to fire or flood"
+label var evento_15 "Loss of land"
+label var evento_16 "Death of cattle due to disease"
+
+/*(*********************************************************************************************************************************************** 
+*---------------------------------------------------------- 1.?: Emigration ----------------------------------------------------------
+***********************************************************************************************************************************************)*/	
+global emigracion informant_emig hogar_emig numero_emig nombre_emig_0 nombre_emig_1 nombre_emig_2 nombre_emig_3 nombre_emig_4 nombre_emig_5 nombre_emig_6 nombre_emig_7 nombre_emig_8 nombre_emig_9 edad_emig_1 edad_emig_2 edad_emig_3 edad_emig_4 edad_emig_5 edad_emig_6 edad_emig_7 edad_emig_8 edad_emig_9 edad_emig_10 sexo_emig_1 sexo_emig_2 sexo_emig_3 sexo_emig_4 sexo_emig_5 sexo_emig_6 sexo_emig_7 sexo_emig_8 sexo_emig_9 sexo_emig_10
+
+
+*--------- Informant in this section
+ /* Informante (s10q00): 00. Quién es el informante de esta sección?
+		01 = Jefe del Hogar	
+		02 = Esposa(o) o Compañera(o)
+		03 = Hijo(a)		
+		04 = Hijastro(a)
+		05 = Nieto(a)		
+		06 = Yerno, nuera, suegro (a)
+		07 = Padre, madre       
+		08 = Hermano(a)
+		09 = Cunado(a)         
+		10 = Sobrino(a)
+ */
+	*-- Check values
+	tab s10q00, mi
+	*-- Standarization of missing values
+	replace s10q00=. if s10q00==.a
+	*-- Create auxiliary variable
+	clonevar informant_ref = s10q00
+	*-- Generate variable
+	gen     informant_emig  = 1		if  informant_ref==1
+	replace informant_emig  = 2		if  informant_ref==2
+	replace informant_emig  = 3		if  informant_ref==3  | informant_ref==4
+	replace informant_emig  = 4		if  informant_ref==5  
+	replace informant_emig  = 5		if  informant_ref==6 
+	replace informant_emig  = 6		if  informant_ref==7
+	replace informant_emig  = 7		if  informant_ref==8  
+	replace informant_emig  = 8		if  informant_ref==9
+	replace informant_emig  = 9		if  informant_ref==10
+	replace informant_emig  = 10	if  informant_ref==11
+	replace informant_emig  = 11	if  informant_ref==12
+	replace informant_emig  = 12	if  informant_ref==13
+	
+	*-- Label variable
+	label var informant_emig "Informant: Emigration"
+	*-- Label values	
+	label def informant_emig  1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
+							  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
+							  8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" ///
+							  12 "Servicio Domestico"	
+	label value informant_emig  informant_emig 
+
+
+*--------- Emigrant from the household
+ /* Emigrant(s10q1): 1. Duante los últimos 5 años, desde septiembre de 2014, 
+	¿alguna persona que vive o vivió con usted en su hogar se fue a vivir a otro país?
+         1 = Si
+         2 = No
+ */
+	*-- Check values
+	tab s10q1, mi
+	*-- Standarization of missing values
+	replace s10q1=. if s10q1==.a
+	*-- Generate variable
+	clonevar hogar_emig = s10q1
+	*-- Label variable
+	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
+	*-- Label values
+	label def house_emig 1 "Yes" 2 "No"
+	label value hogar_emig house_emig
+
+*--------- Number of Emigrants from the household
+ /* Number of Emigrants from the household(s10q2): 2. Cuántas personas?
+ 
+ */
+	*-- Check values
+	tab s10q2, mi
+	*-- Standarization of missing values
+	replace s10q2=. if s10q2==.a
+	*-- Generate variable
+	clonevar numero_emig = s10q2
+	*-- Label variable
+	label var numero_emig "Number of Emigrants from the household"
+	*-- Cross check
+	tab numero_emig hogar_emig, mi
+	
+*--------- Name of Emigrants from the household
+ /* Name of Emigrants from the household(s10q2a): 2. Cuántas personas?
+        
+ */	
+	*-- From s10q2a__0 to s10q2a__9 there is information on the names of emigrants
+	*-- Drop from s10q2a__10 to s10q2a__59 (repeated variables)
+	forval i = 10/59{
+	drop s10q2a__`i'
+	}
+	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 0/9{
+	*-- Standarization of missing values
+	replace s10q2a__`i'="" if s10q2a__`i'=="##N/A##"
+	tab s10q2a__`i', mi
+	*-- Generate variable
+	clonevar nombre_emig_`i' = s10q2a__`i'
+	*-- Label variable
+	label var nombre_emig_`i' "Name of Emigrants from the household"
+	}
+
+	*-- Cross check
+	forval i = 0/9{
+	tab nombre_emig_`i' hogar_emig
+	}
+	
+	
+ *--------- Age of the emigrant
+ /* Age of the emigrant(s10q3): 3. Cuántos años cumplidos tiene X?
+        
+ */
+ 	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename main variable 
+	rename s10q3`i' s10q3_`i'
+	*-- Label original variable
+	label var s10q3_`i' "3.Cuántos años cumplidos tiene X?"
+	*-- Standarization of missing values
+	replace s10q3_`i'=. if s10q3_`i'==.a
+		*-- Generate variable
+		clonevar edad_emig_`i' = s10q3_`i'
+		*-- Label variable
+		label var edad_emig_`i' "Age of Emigrants"
+		*-- Cross check
+		tab edad_emig_`i' hogar_emig
+	}
+	
+	
+ *--------- Sex of the emigrant 
+ /* Sex (s10q4): 4. El sexo de X es?
+				01 Masculino
+				02 Femenino
+				
+ */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename main variable 
+	rename s10q4`i' s10q4_`i'
+	*-- Label original variable
+	label var s10q4_`i' "4. El sexo de X es?"
+	*-- Standarization of missing values
+	replace s10q4_`i'=. if s10q4_`i'==.a
+		*-- Generate variable
+		clonevar sexo_emig_`i' = s10q4_`i'
+		*-- Label variable
+		label var sexo_emig_`i' "Sex of Emigrants"
+		*-- Label values
+		label def sexo_emig_`i' 1 "Male" 2 "Female"
+		label value sexo_emig_`i' sexo_emig_`i'
+		}
+		
 
 
 /*(************************************************************************************************************************************************ 
@@ -2574,8 +2672,6 @@ include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
 compress
 
 
-
-
 /*==================================================================================================================================================
 								3: Resultados
 ==================================================================================================================================================*/
@@ -2583,27 +2679,9 @@ compress
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
 *************************************************************************************************************************************************)*/
-order pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
-region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
-propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
-alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
-seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
-enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
-relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11  
+sort id com
+order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $bank_ENCOVI
+keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $bank_ENCOVI
 
-keep pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
-region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
-propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
-alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
-seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
-enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
-relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg /*ipc*/ pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i /*ipc05 ipc11 ppp05 ppp11 *//*ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/  
-
-notes: Venezuela changed its currency during the recolection of data. Income variables might be expressed in different currencies.
-
-save "$dataout\base_out_nesstar_cedlas_2018.dta", replace
+save "$pathout\ENCOVI_2019.dta", replace
 

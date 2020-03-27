@@ -16,7 +16,7 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
 		global juli   0
@@ -25,7 +25,7 @@ Note:
 		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -44,8 +44,8 @@ Note:
 
 		
 // Set output data path
+global dataout "$rootpath\data_management\output\cleaned"
 global dataofficial "$rootpath\data_management\output\merged"
-global pathout "$rootpath\data_management\output\cleaned"
 
 ********************************************************************************
 
@@ -75,7 +75,7 @@ local vr       "01"     // version renta
 		* Deflactor
 			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-			use "$pathout\InflacionVerdadera_26-3-20.dta", clear
+			use "$dataout\InflacionVerdadera_26-3-20.dta", clear
 			
 			forvalues j = 11(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -98,7 +98,7 @@ local vr       "01"     // version renta
 			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses "1 2 3 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$pathout\exchenge_rate_price.dta", clear
+			use "$dataout\exchenge_rate_price.dta", clear
 			
 			destring mes, replace
 			foreach i of local monedas {
@@ -373,11 +373,11 @@ replace dia_ult_hijo = s6q16a if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda suministro_agua suministro_agua_comp frecuencia_agua ///
-serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda tenencia_vivienda_comp ///
+serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
 pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago renta_imp_en renta_imp_mon titulo_propiedad ///
 fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
 comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
-pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom
+pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
 
 *** Type of flooring material
 /* MATERIAL_PISO (s4q1)
@@ -1919,12 +1919,11 @@ gen razon_nobanco=s16q7 if (s16q7!=. & s16q7!=.a)
 
 
 /*(*********************************************************************************************************************************************** 
-*---------------------------------------------------------- X: EMIGRATION / EMIGRACIÓN ----------------------------------------------------------
+*---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global emigra_ENCOVI informant_emig hogar_emig numero_emig ///
-nombre_emig_* edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* ///
-leveledu_emig_* gradedu_emig_* regedu_emig_* anoedu_emig_* semedu_emig_* paisemig_* ///
-opaisemig_* ciuemig_* soloemig_* conemig_* razonemig_* ocupaemig_* ocupnemig_* ///
+
+global emigra_ENCOVI informant_emig hogar_emig numero_emig nombre_emig_* edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* leveledu_emig_* ///
+gradedu_emig_* regedu_emig_* anoedu_emig_* semedu_emig_* paisemig_* opaisemig_* ciuemig_* soloemig_* conemig_* razonemig_* ocupaemig_* ocupnemig_* ///
 volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 
 
@@ -2597,6 +2596,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	label value miememig_`i' miememig_`i'
 	} 
 
+
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- XI: MORTALITY / MORTALIDAD ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -2814,9 +2814,105 @@ label var evento_16 "Death of cattle due to disease"
 *----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
 ************************************************************************************************************************************************)*/
 
-global antropo_ENCOVI
+global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
 
-* missing
+* For children younger than 5 years old
+
+*** Was the child measured?
+	/*s14q1 Fue medido?
+			1=Si
+			2=No 
+	*/
+	gen 	medido = s14q1==1 if age_months<=120 & (s14q1!=. & s14q1!=.a)
+
+*** Why wasn't the child measured?
+	/*s14q2 Por qué no fue medido?
+			1=No estaba en casa al momento de hacer la entrevista
+			2=Estaba enfermo
+			3=No está disponible
+			4=Otra razón 
+	*/
+	gen 	razon_nomedido = s14q2==1 if s14q1==2 & age_months<=120 & (s14q2!=. & s14q2!=.a)
+
+*** Confirm child's reported age (in months)
+	/*s14q3 Confirmar la edad (en meses) reportada del niño
+			1=Si, es correcto
+			2=No, no es correcto
+	*/
+	gen 	confirma_edad = person_confirm==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
+	
+*** Was the child able to be alone in the measurement instrument?
+	/*s14q14 Fue capaz de permanecer solo en el instrumento de medición?
+			1=Si
+			2=No 
+	*/
+	gen 	solo_medicion = s14q14==1 if s14q1==1 & age_months<=120 & (s14q14!=. & s14q14!=.a)
+
+*** Register the weight in kilograms (twice, third if too much difference between first two)
+	*weight_1 Registre el peso en kilogramos
+	*weight_2 Segundo registro del peso 
+	*weight_3 Tercer registro (si mucha diferencia en los 2 primeros)
+	gen		peso1 = weight_1 if s14q1==1 & age_months<=120 & (weight_1!=. & weight_1!=.a)
+	gen		peso2 = weight_2 if s14q1==1 & age_months<=120 & (weight_2!=. & weight_2!=.a)
+	gen		peso3 = weight_3 if weight_diff12>0.1 & s14q1==1 & age_months<=120 & (weight_3!=. & weight_3!=.a)
+
+*** Weight (in kg) calculated by the survey
+	*weight Peso en kilogramos calculado por la encuesta
+	gen 	peso = weight if s14q1==1 & age_months<=120 & (weight!=. & weight!=.a)
+	
+*** Register the altitude/longitude in centimeters (twice)
+	*height_1 Registre la altura/longitud en centímetros
+	*height_2 Segundo registro de la altura/longitud
+	*height_3 Tercer registro (si mucha diferencia en los 2 primeros)
+	gen		altura1 = height_1 if s14q1==1 & age_months<=120 & (height_1!=. & height_1!=.a)
+	gen		altura2 = height_2 if s14q1==1 & age_months<=120 & (height_2!=. & height_2!=.a)
+	gen		altura3 = height_3 if height_diff12>0.5 & s14q1==1 & age_months<=120 & (height_3!=. & height_3!=.a)
+
+***Height (in cm) calculated by the survey
+	*height Altura en centímetros calculada por la encuesta 
+	gen		altura = height if s14q1==1 & age_months<=120 & (height!=. & height!=.a)
+
+*** Was the child measured standing or lying down?
+	/* posicion Entrevistador: El menor fue medido de pie o acostado?
+			1=De pie
+			2=Acostado
+	*/
+	*replace	posicion=. if age_months=<120 
+	replace posicion=. if posicion!=.a
+	
+*** When weighting, was there why you couldn't weight (ex. heavy clothes that the child didn't take out)?
+	/*weight_comments Al pesar, existía algo por lo que pudiera pesar más (por ejemplo ropa pesada que no se le quitó) ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_pesar = weight_comments if age_months<=120 & (weight_comments!=. & weight_comments!=.a)
+
+*** When measuring, was there something why you could not measure more (ex. thick shoes or accesories)?
+	/*height_comments Al medir, había algo por lo que pudiera medir más (por ejemplo zapatos gruesos o accesorios) ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_medir = height_comments if age_months<=120 & (height_comments!=. & height_comments!=.a)
+
+*** When measuring, was there irregularities in the surface of the floor where you placed the stadiometer?
+	/*height_comments2 Al medir, había irregularidad en la superficie del piso donde se colocó el tallímetro ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_medir2 = height_comments2 if age_months<=120 & (height_comments2!=. & height_comments2!=.a)
+
+*** Height for age index, calculated by the survey
+	* hfa Índice de altura para la edad
+	replace hfa =. if age_months<=120 & (hfa!=. & hfa!=.a)
+	
+*** Weight for age index, calculated by the survey
+	* wfa Índice de peso para la edad
+	replace wfa =. if age_months<=120 & (wfa!=. & wfa!=.a)
+	
+*** Weight for height index, calculated by the survey
+	* wfh Índice de peso para la altura
+	replace wfh =. if age_months<=120 & (wfh!=. & wfh!=.a)
+
 
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- 1.9: Income Variables ----------------------------------------------------------
@@ -3756,7 +3852,7 @@ replace renta_imp = 0.10*itf_sin_ri  if  propieta_no_paga == 1
 
 include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
 	
-*include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
+* include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
 * Chequear nuestros labels!!
 
 compress
@@ -3779,4 +3875,4 @@ keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI
 /* Variables de ingreso CEDLAS, por ahora */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 
 
-save "$pathout\ENCOVI_2019.dta", replace
+save "$dataout\ENCOVI_2019.dta", replace

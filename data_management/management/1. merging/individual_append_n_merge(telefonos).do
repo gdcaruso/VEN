@@ -99,6 +99,9 @@ replace quest=2 if quest==. & quest!=1
 append using "$pathpixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
+	// Create identification for completed surveys
+	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
+
 	// To identify unique interviews according the last date and time entered
     bys interview__key interview__id (date time) : keep if _n==_N
 	

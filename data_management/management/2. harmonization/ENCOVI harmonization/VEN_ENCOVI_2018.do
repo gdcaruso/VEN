@@ -264,7 +264,7 @@ gen     hijos_vivos = smhp26 if smhp25!=0 & smhp26<=smhp25 & (smhp26!=98 & smhp2
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda suministro_agua suministro_agua_comp frecuencia_agua ///
-electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
+electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda tenencia_vivienda_comp 
 
 *** Type of flooring material
 /* MATERIAL_PISO (vsp1)

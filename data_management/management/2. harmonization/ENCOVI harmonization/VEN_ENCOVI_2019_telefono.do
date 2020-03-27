@@ -135,6 +135,7 @@ local vr       "01"     // version renta
 	merge m:1 interview__key interview__id quest using `household_hhid'
 	drop _merge
 	merge m:1 interview__key interview__id quest using `phone'
+	drop if _merge==1
 	* I drop those who do not collaborate in the survey
 	//drop if colabora_entrevista==2
 	*Obs: there are still 2 observations which do not merge. Maybe they are people who started to answer but then stopped answering
@@ -142,7 +143,7 @@ local vr       "01"     // version renta
 	*Change names to lower cases
 	rename _all, lower
 
-
+;
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	II Control de la entrevista  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -220,7 +221,7 @@ global id_ENCOVI pais ano encuesta id com psu
 
 * Primary Sample Unit: psu  
 gen psu = combined_id
-;
+
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
 *************************************************************************************************************************************************)*/

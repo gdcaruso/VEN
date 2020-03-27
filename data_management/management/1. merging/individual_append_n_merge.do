@@ -22,7 +22,7 @@ Note:
 // Define rootpath according to user
 
 	    * User 1: Trini
-		global trini 0
+		global trini 1
 		
 		* User 2: Julieta
 		global juli   0
@@ -35,7 +35,7 @@ Note:
 		
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 			
 		if $juli {
 				global rootpath ""
@@ -48,7 +48,7 @@ Note:
 		}
 	
 		if $trini   {
-				global rootpath ""
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		
 		if $male   {

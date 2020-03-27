@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -1298,8 +1298,8 @@ notes deporte: the survey does not include information to define this variable
 	   BUSCAMASHS (s9q32): ¿Ha hecho algo parar trabajar mas horas?
 	   CAMBIOTR (s9q34): ¿Ha cambiado de trabajo durante los últimos meses?
 	*/
-	gen deseamas = s9q31 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
-	gen buscamashs = s9q32 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen deseamashs = s9q31 if s9q18<35 & (s9q31!=. & s9q31!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen buscamashs = s9q32 if s9q18<35 & (s9q32!=. & s9q32!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
 	*Assumption: only part-time workers can want to work more
 	
 	gen cambiotr = s9q34 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active
@@ -1647,11 +1647,11 @@ foreach j of local monedas {
 			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q15==6
 			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*`tc3mes2' 					if interview_month==2 & s9q15==6
 			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*`tc3mes3' 	* `deflactor3'	if interview_month==3 & s9q15==6
-		gen pagoslab_mon4_bolfeb = pagoslab_mon4			*`tc4mes11' 	* `deflactor11'	if interview_month==11 & s9q15==6
+		gen pagoslab_mon4_bolfeb = pagoslab_mon4			*`tc4mes11' * `deflactor11'	if interview_month==11 & s9q15==6
 			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q15==6
 			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q15==6
 			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes2'					if interview_month==2 & s9q15==6
-			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes3'		* `deflactor3'	if interview_month==3 & s9q15==6
+			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q15==6
 	
 	egen pagoslab_mon = rowtotal(pagoslab_mon1_bolfeb pagoslab_mon2_bolfeb pagoslab_mon3_bolfeb pagoslab_mon4_bolfeb)
 
@@ -1753,12 +1753,12 @@ foreach j of local monedas {
 			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*`tc2mes1'	* `deflactor1'	if interview_month==1
 			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*`tc2mes2' 					if interview_month==2
 			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*`tc2mes3'	* `deflactor3'	if interview_month==3
-		gen ingresoslab_bene3_bolfeb  = ingresoslab_bene3			*`tc3mes11' * `deflactor11'		if interview_month==11
+		gen ingresoslab_bene3_bolfeb  = ingresoslab_bene3			*`tc3mes11' * `deflactor11'	if interview_month==11
 			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*`tc3mes12' * `deflactor12'	if interview_month==12
 			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
 			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*`tc3mes2'					if interview_month==2
 			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*`tc3mes3'	* `deflactor3'	if interview_month==3
-		gen ingresoslab_bene4_bolfeb = ingresoslab_mon4				*`tc4mes11' * `deflactor11'		if interview_month==11
+		gen ingresoslab_bene4_bolfeb = ingresoslab_mon4				*`tc4mes11' * `deflactor11'	if interview_month==11
 			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*`tc4mes12' * `deflactor12'	if interview_month==12
 			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*`tc4mes1'	* `deflactor1'	if interview_month==1
 			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*`tc4mes2'					if interview_month==2
@@ -2200,7 +2200,7 @@ foreach j of local monedas {
 		gen itrane_o_m3_bolfeb  = itrane_o_m3			*`tc3mes11' * `deflactor11'	if interview_month==11
 			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes12' * `deflactor12'	if interview_month==12
 			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
-			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes2'				if interview_month==2
+			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes2'					if interview_month==2
 			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes3'	* `deflactor3'	if interview_month==3
 		gen itrane_o_m4_bolfeb = itrane_o_m4			*`tc4mes11'	* `deflactor11'	if interview_month==11
 			replace itrane_o_m4_bolfeb = itrane_o_m4	*`tc4mes12' * `deflactor12'	if interview_month==12
@@ -2234,7 +2234,7 @@ foreach j of local monedas {
 		gen itrane_ns1_bolfeb = itrane_ns1					 	* `deflactor11'	if interview_month==11
 			replace itrane_ns1_bolfeb = itrane_ns1				* `deflactor12'	if interview_month==12
 			replace itrane_ns1_bolfeb = itrane_ns1				* `deflactor1'	if interview_month==1
-			replace itrane_ns1_bolfeb = itrane_ns1				 					if interview_month==2
+			replace itrane_ns1_bolfeb = itrane_ns1				 				if interview_month==2
 			replace itrane_ns1_bolfeb = itrane_ns1			 	* `deflactor3'	if interview_month==3
 		gen itrane_ns2_bolfeb = itrane_ns2			*`tc2mes11'	* `deflactor11'	if interview_month==11
 			replace itrane_ns2_bolfeb = itrane_ns2	*`tc2mes12' * `deflactor12'	if interview_month==12

@@ -50,7 +50,7 @@ global data2015 "$dataofficial\ENCOVI 2015\Data"
 global data2016 "$dataofficial\ENCOVI 2016\Data"
 global data2017 "$dataofficial\ENCOVI 2017\Data"
 global data2018 "$dataofficial\ENCOVI 2018\Data"
-global pathout "$rootpath2\VEN\data_management\output\cleaned"
+global pathout "$rootpath2\data_management\output\cleaned"
 
 ********************************************************************************
 
@@ -382,7 +382,7 @@ replace `x'=. if relacion_en!=1
 /*(************************************************************************************************************************************************* 
 *--------------------------------------------------------- 1.5: Durables goods --------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas telefono_fijo
+global dur_ENCOVI auto ncarros heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas telefono_fijo
 
 *** Dummy household owns cars
 *  AUTO (): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
@@ -467,7 +467,7 @@ replace celular =. if relacion_en!=1
 *---------------------------------------------------------- 1.6: Variables educativas --------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global educ_ENCOVI asiste alfabeto edu_pub ///
-nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ /*titulo*/ edad_dejo_estudios razon_dejo_estudios razon_dejo_estudios_comp
+nivel_educ g_educ s_educ razon_dejo_est_comp
 
 *** Do you attend any educational center? //for age +3
 * Asiste a la educación formal:	asiste 
@@ -494,7 +494,7 @@ notes   asiste: variable defined for individuals aged 3 and older
 		7 = Postgrado	
 	   98 = No aplica
 	   99 = NS/NR
-* A_EDUC (ep37a): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Preescolar, Primaria y Media)
+* G_EDUC (ep37a): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Preescolar, Primaria y Media)
         Primaria: 1-6to
         Media: 1-6to
 * S_EDUC (ep37s): ¿Cuál es el último semestre que aprobó? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
@@ -503,13 +503,13 @@ notes   asiste: variable defined for individuals aged 3 and older
 		Postgrado: 1-12
 */
 clonevar nivel_educ = ep37n if (ep37n!=98 & ep37n!=99)
-gen a_educ = ep37a     if (ep37a!=98 & ep37a!=99)
+gen g_educ = ep37a     if (ep37a!=98 & ep37a!=99)
 gen s_educ = ep37s     if (ep37s!=98 & ep37s!=99)
 
 *** Literacy
 * Alfabeto:	alfabeto (si no existe la pregunta sobre si la persona sabe leer y escribir, consideramos que un individuo esta alfabetizado si ha recibido al menos dos años de educacion formal)
 gen     alfabeto = 0 if nivel_educ!=.	
-replace alfabeto = 1 if (nivel_educ==3 & (a_educ>=2 & a_educ<=6)) | (nivel_educ>=4 & nivel_educ<=7)
+replace alfabeto = 1 if (nivel_educ==3 & (g_educ>=2 & g_educ<=6)) | (nivel_educ>=4 & nivel_educ<=7)
 notes   alfabeto: variable defined for all individuals
 
 *** Establecimiento educativo público: edu_pub
@@ -549,7 +549,8 @@ label def razon_dejo_est_comp 1 "Terminó los estudios" 2 "Escuela distante" 3 "
 7 "Enfermedad/discapacidad" 8 "Tiene que trabajar" 9 "No quiso seguir estudiando" 10 "Inseguridad al asistir al centro educativo" 11 "Discriminación o violencia" ///
 12 "Por embarazo/cuidar a los hijos" 13 "Tiene que ayudar en tareas del hogar" 14 "No lo considera importante" 15 "Otra"
 label value razon_dejo_est_comp razon_dejo_est_comp
-;
+
+/*
 
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.7: Variables Salud ---------------------------------------------------------------
@@ -1044,7 +1045,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 * Ingresos laborales segun si recibieron o no
 * Corrijo los 15 que dijeron NS/NR a haber recibido dinero pero contestaron cuánto dinero recibieron, corregir? 
 replace tp51=1 if tp51==99 & tp51m>199
-tab tp51m tp51 // 1,085 de los 3,642 "no aplica" en tp51 son menores de 10 años*/
+tab tp51m tp51 // 1,085 de los 3,642 "no aplica" en tp51 son menores de 10 años
 
 * Situacion laboral y recepcion de ingresos
 tab tp47 tp51
@@ -1374,6 +1375,8 @@ include "$aux_do\do_file_1_variables.do"
 include "$aux_do\do_file_2_variables.do"
 include "$aux_do\labels.do"
 compress
+
+*/
 /*==================================================================================================================================================
 								3: Resultados
 ==================================================================================================================================================*/
@@ -1386,7 +1389,7 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $bank_ENCOVI
-keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $bank_ENCOVI
+order $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
+keep  $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
 
 save "$pathout\ENCOVI_2014_COMP.dta", replace

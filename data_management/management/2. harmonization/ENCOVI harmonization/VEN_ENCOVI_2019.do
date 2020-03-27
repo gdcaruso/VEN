@@ -45,7 +45,8 @@ Note:
 		
 // Set output data path
 global dataofficial "$rootpath\data_management\output\merged"
-global dataout "$rootpath\VEN\data_management\output\cleaned"
+global pathout "$rootpath\data_management\output\cleaned"
+
 ********************************************************************************
 
 /*==============================================================================
@@ -92,7 +93,8 @@ rename _all, lower
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Control de la entrevista  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global control_ent entidad municipio nombmun parroquia nombpar centropo nombcp segmento peso_segmento combined_id tipo_muestra gps_struc id_struc statut sector_urb 
+global control_ent entidad municipio nombmun parroquia nombpar centropo nombcp segmento peso_segmento combined_id tipo_muestra gps* id_str statut sector_urb 
+rename sample_type tipo_muestra
 rename segment_weight peso_segmento
 rename sector sector_urb
 
@@ -169,8 +171,8 @@ gen psu = combined_id
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi perte_2014 razon_incorp_hh ///
-certificado_naci cedula razon_nocertificado estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo anio_mes_hijo anio_dia_hijo
+global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi pert_2014 razon_incorp_hh ///
+certificado_naci cedula razon_nocertificado estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
 
 *** Relation to the head:	relacion_en
 /* Categories of the new harmonized variable:
@@ -693,7 +695,7 @@ cuota_insc compra_utiles compra_uniforme costo_men costo_transp otros_gastos ///
 cuota_insc_monto compra_utiles_monto compra_uniforme_monto costo_men_monto costo_transp_monto otros_gastos_monto ///
 cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon ///
 cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m ///
-nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/ edad_dejo_estudios razon_dejo_estudios razon_dejo_estudios_comp
+nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/ edad_dejo_estudios razon_dejo_est_comp
 
 *** Is the "member" answering by himself/herself?
 gen contesta_ind_e=s7q0 if (s7q0!=. & s7q0!=.a)
@@ -998,7 +1000,7 @@ label value razon_dejo_est_comp razon_dejo_est_comp
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.?: Banking ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
-global bank_ENCOVI contesta_ind_b quien_contesta_b cuenta_corr cuenta_aho tcredito tdebito nobanco ///
+global bank_ENCOVI contesta_ind_b quien_contesta_b cuenta_corr cuenta_aho tcredito tdebito no_banco ///
 efectivo_f tcredito_f tdebito_f bancao_f pagomovil_f razon_nobanco
 
 *** Section for individuals 15+
@@ -1037,14 +1039,14 @@ gen pagomovil_f=s16q7 if (s16q7!=. & s16q7!=.a)
 
 *** Reasons for not holding any bank account or card?
 gen razon_nobanco=s16q7 if (s16q7!=. & s16q7!=.a)
-;
+
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.?: Shocks afecting households ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
 global shocks_ENCOVI
 
 *** Who is the informant in this section?
-gen contesta_ind_b=s15q00 if (s15q00!=. & s15q00!=.a)
+gen contesta_ind_eh=s15q00 if (s15q00!=. & s15q00!=.a)
 
 *** Which of the following events have affected to yor household
 /* "1.Muerte o discapacidad de un
@@ -1101,6 +1103,7 @@ label var evento_14 "Loss of property due to fire or flood"
 label var evento_15 "Loss of land"
 label var evento_16 "Death of cattle due to disease"
 
+/*
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- 1.?: Emigration ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
@@ -1258,7 +1261,6 @@ global emigracion informant_emig hogar_emig numero_emig nombre_emig_0 nombre_emi
 		label value sexo_emig_`i' sexo_emig_`i'
 		}
 		
-
 
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.7: Health Variables ---------------------------------------------------------------
@@ -2623,7 +2625,6 @@ foreach i of varlist iasalp_m iasalp_nm  ictapp_m ictapp_nm  ipatrp_m ipatrp_nm 
 		replace `i' = `i' / p_reg 
 		replace `i' = `i' / ipc_rel 
 		}
-*/
 
 /*=================================================================================================================================================
 					2: Preparacion de los datos: Variables de segundo orden
@@ -2670,7 +2671,7 @@ stop - hasta acá llegó MA. Ver labels!
 
 include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
 compress
-
+*/
 
 /*==================================================================================================================================================
 								3: Resultados
@@ -2684,4 +2685,4 @@ order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOV
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $bank_ENCOVI
 
 save "$pathout\ENCOVI_2019.dta", replace
-
+;

@@ -99,20 +99,27 @@ replace quest=2 if quest==. & quest!=1
 append using "$pathpixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
+	// Create identification for completed surveys
+	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
+
+	// To identify unique interviews according the last date and time entered
+    bys interview__key interview__id (date time) : keep if _n==_N
+	
+
 //	Create a temporary db with surveys approved by HQ 
 
-bys quest interview__key interview__id (date): keep if action==6 // 6=approved by HQ
+//bys quest interview__key interview__id (date): keep if action==6 // 6=approved by HQ
 	
 // check, log and delete duplicates
-duplicates tag interview__key interview__id quest, generate(dupli)
+//duplicates tag interview__key interview__id quest, generate(dupli)
 
-preserve
-keep if dupli >= 1
-save "$rootpath\data_management\output\merged\duplicates-ind.dta", replace
-restore	
-drop if dupli >= 1
+//preserve
+//keep if dupli >= 1
+//save "$rootpath\data_management\output\merged\duplicates-ind.dta", replace
+//restore	
+//drop if dupli >= 1
 
-keep interview* origina responsible__name quest date
+//keep interview* origina responsible__name quest date
 
 
 // formatting

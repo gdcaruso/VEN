@@ -16,10 +16,10 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta   0
@@ -32,7 +32,7 @@ Note:
 
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\Documents\GitHub\ENCOVI-2019"
+				global rootpath "C:\Users\wb563583\Documents\GitHub\VEN"
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
@@ -108,23 +108,14 @@ local vsp      "01"	// version ASPIRE
 	// Create a tempfile for approved surveys
     tempfile approved_surveys
 	
-	// Create identification for approved surveys
-	bys quest interview__key interview__id (date): keep if action==6 // 6=approved by HQ
-	
-	// check, log and delete duplicates
-	duplicates tag interview__key interview__id quest, generate(dupli)
-	
-	preserve
-	keep if dupli >= 1
-	save "$rootpath\data_management\output\merged\duplicates-hh.dta", replace
-	restore	
-	drop if dupli >= 1
-	
-	keep interview* origina responsible__name quest date
+	// Create identification for completed surveys
+	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
 
+	// To identify unique interviews according the last date and time entered
+    bys interview__key interview__id (date time) : keep if _n==_N
+	
+	
 	// Change format
-	rename ori interviewer
-	rename respo coordinator
 	replace date = subinstr(date, "-", "/",.)
 	gen approved_date=date(date,"YMD")
 	format approved_date %td

@@ -301,7 +301,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
  */
  	*-- Given that the maximum number of emigrantes per household is 10 
 	*-- We will have 10 variables with names
-	forval i = 1/8{
+	forval i = 1/10{
 	*-- Rename main variable 
 	rename emp70a`i' emp70a_`i'
 	*-- Label original variable
@@ -370,14 +370,14 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- We will have 10 variables with names
 	forval i = 1/8{
 	*-- Rename main variable 
-	rename emp71ot`i' emp71ot_`i'
+	rename emp71_ot`i' emp71_ot_`i'
 	*-- Label original variable
-	label var emp71ot_`i' "8a. Otro país, especifique"
+	label var emp71_ot_`i' "8a. Otro país, especifique"
 	*-- Standarization of missing values
-	replace emp71ot_`i'="." if emp71ot_`i'=="NO APLICA"
-	replace emp71ot_`i'="." if emp71ot_`i'=="SIN RESPUESTA"
+	replace emp71_ot_`i'="." if emp71_ot_`i'=="NO APLICA"
+	replace emp71_ot_`i'="." if emp71_ot_`i'=="SIN RESPUESTA"
 	*-- Generate variable
-	gen opaisemig_`i' = emp71ot_`i'
+	gen opaisemig_`i' = emp71_ot_`i'
 	*-- Label variable
 	label var opaisemig_`i' "Country in which X lives (Other)"
 	*-- Cross check
@@ -517,7 +517,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 					09 Ocupaciones elementales
 					10 Ocupaciones militares
 					11 No se desempeñaba en alguna ocupación			
-    
+ */    
   	*-- Given that the maximum number of emigrantes per household is 10 
 	*-- We will have 10 variables with names
 	forval i = 1/10{
@@ -534,7 +534,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Cross check
 	tab ocupaemig_`i' hogar_emig
 	} 
- */
+
    *--------- Occupation: in the new country
  /*  Occupation now (s10q11): 11. Qué ocupación tiene X en el país donde vive ?
 			
@@ -549,7 +549,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 					09 Ocupaciones elementales
 					10 Ocupaciones militares
 					11 No se desempeñaba en alguna ocupación			
-   
+ */    
   	*-- Given that the maximum number of emigrantes per household is 10 
 	*-- We will have 10 variables with names
 	forval i = 1/10{
@@ -567,7 +567,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	tab ocupnemig_`i' hogar_emig
 	} 
 
-  */ 
+ 
     *--------- The emigrant moved back to the country
  /*  Moved back (emp64): 12. X regresó a residenciarse nuevamente al país?
 							01 Si
@@ -675,8 +675,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Label original variable
 	label var emp66l_`i' "Numero de linea en la encuesta"
 	*-- Standarization of missing values
-	replace emp66l_`i'=. if emp66l_`i'==98
-	replace emp66l_`i'=. if emp66l_`i'==99
+	replace emp66l_`i'=. if emp66_`i'==98
+	replace emp66l_`i'=. if emp66_`i'==99
 	*-- Generate variable
 	clonevar numeroemig_`i' = emp66l_`i'
 	*-- Label variable

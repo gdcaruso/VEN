@@ -2332,8 +2332,8 @@ gen     lp_3usd= 3.2
 gen     lp_5usd= 5.5
 
 **** Linea de Pobreza Oficial
-gen     lp_extrema  = .
-gen     lp_moderada = .
+gen     lp_extrema  = 2650116
+gen     lp_moderada = 6360278
 
 **** Ingreso Oficial
 gen     ing_pob_ext    = .

@@ -1,11 +1,11 @@
 /*===========================================================================
-Country name:		Venezuela
+Country name:	Venezuela
 Year:			2019
 Survey:			ECNFT
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Malena Acuña, Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
+Authors:			Malena Acuña, Trinidad Saavedra, Lautaro Chittaro, Julieta Ladronis
 
 Dependencies:		CEDLAS/UNLP -- The World Bank
 Creation Date:		March, 2020
@@ -22,17 +22,17 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
 				global rootpath ""
 		}
 	    if $lauta {
-				global rootpath "C:\Users\wb563365\Github\VEN"
+				global rootpath ""
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"  
@@ -44,6 +44,7 @@ Note:
 
 		
 // Set output data path
+global dataout "$rootpath\data_management\output\cleaned"
 global dataofficial "$rootpath\data_management\output\merged"
 
 ********************************************************************************
@@ -68,6 +69,45 @@ local vr       "01"     // version renta
 /*==================================================================================================================================================
 								1: Data preparation: First-Order Variables
 ==================================================================================================================================================*/
+
+*** 0.0 To take everything to bolívares of Feb 2020 (month with greatest sample) ***
+		
+		* Deflactor
+			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
+			
+			use "$dataout\InflacionVerdadera_26-3-20.dta", clear
+			
+			forvalues j = 11(1)12 {
+				sum indice if mes==`j' & ano==2019
+				local indice`j' = r(mean) 			
+				}
+			forvalues j = 1(1)3 {
+				sum indice if mes==`j' & ano==2020
+				display r(mean)
+				local indice`j' = r(mean)				
+				}
+			local deflactor11 `indice2'/`indice11'
+			local deflactor12 `indice2'/`indice12'
+			local deflactor1 `indice2'/`indice1'
+			local deflactor2 `indice2'/`indice2'
+			local deflactor3 `indice2'/`indice3'
+			
+		* Exchange Rates / Tipo de cambio
+			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
+			
+			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
+			local meses "1 2 3 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
+			
+			use "$dataout\exchenge_rate_price.dta", clear
+			
+			destring mes, replace
+			foreach i of local monedas {
+				foreach j of local meses {
+					sum mean_moneda	if moneda==`i' & mes==`j'
+					local tc`i'mes`j' = r(mean)
+				}
+			}
+			
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 
@@ -88,19 +128,37 @@ drop if colabora_entrevista==2
 *Change names to lower cases
 rename _all, lower
 
+
+/*(************************************************************************************************************************************************* 
+*-------------------------------------------------------------	II Control de la entrevista  -------------------------------------------------------
+*************************************************************************************************************************************************)*/
+global control_ent entidad municipio nombmun parroquia nombpar centropo nombcp segmento peso_segmento combined_id tipo_muestra gps* id_str statut sector_urb 
+rename sample_type tipo_muestra
+rename segment_weight peso_segmento
+rename sector sector_urb
+
+/*(************************************************************************************************************************************************* 
+*-------------------------------------------------------------	III Determinacion de hogares  -------------------------------------------------------
+*************************************************************************************************************************************************)*/
+global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
+gen npers_viv=s3q1 if s3q1!=. & s3q1!=.a
+gen comparte_gasto_viv=s3q2 if s3q2!=. & s3q2!=.a
+gen npers_gasto_sep=s3q3 if s3q3!=. & s3q3!=.a
+gen npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
+
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Identification Variables --------------------------------------------------
 *************************************************************************************************************************************************)*/
-
+global id_ENCOVI pais ano encuesta id com psu
 * Country identifier: country
-	gen country = "VEN"
+	gen pais = "VEN"
 
 * Year identifier: year
 	capture drop year
-	gen year = 2019
+	gen ano = 2019
 
 * Survey identifier: survey
-	gen survey = "ENCOVI - 2019"
+	gen encuesta = "ENCOVI - 2019"
 
 * Household identifier: id
 	**Variables id_hh, hhid, id_str were generated for the listing, we shouldn't use them to generate id
@@ -152,9 +210,10 @@ gen psu = combined_id
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global demo_SEDLAC relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua
-global demo_ENCOVI reltohead sex age agegroup country_birth 
-* Relation to the head:	reltohead
+global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi pert_2014 razon_incorp_hh ///
+certificado_naci cedula razon_nocertificado estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
+
+*** Relation to the head:	relacion_en
 /* Categories of the new harmonized variable:
 		01 = Jefe del Hogar	
 		02 = Esposa(o) o Compañera(o)
@@ -183,7 +242,7 @@ global demo_ENCOVI reltohead sex age agegroup country_birth
 		12 = No pariente
 		13 = Servicio Domestico
 */
-clonevar relacion_en = s6q2
+clonevar relacion_en = s6q2 if s6q2!=. & s6q2!=.a
 
 gen     reltohead = 1		if  relacion_en==1
 replace reltohead = 2		if  relacion_en==2
@@ -201,69 +260,61 @@ replace reltohead = 12		if  relacion_en==13
 label def reltohead 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
 		            6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"	
 label value reltohead reltohead
+rename reltohead relacion_comp
 
-* Household identifier: hogar
-gen hogar = (reltohead==1)	
-
-* Miembros de hogares secundarios (seleccionando personal doméstico): hogarsec 
-gen hogarsec =.
-replace hogarsec =1 if relacion_en==13
-replace hogarsec =0 if inrange(relacion_en, 1,12)
-
-* Hogares con presencia de miembros secundarios: presec	
-tempvar aux
-egen `aux' = sum(hogarsec), by(id)
-gen       presec = 0
-replace   presec = 1  if  `aux'>0  
-replace   presec = .  if  relacion!=1
-drop `aux'
-
-* Numero de miembros del hogar (de la familia principal): miembros 
-tempvar uno
-gen `uno' = 1
-egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
-
-* Sex 
+*** Sex 
 /* SEXO (s6q3): El sexo de ... es
 	1 = Masculino
 	2 = Femenino
 */
-clonevar sex = s6q3
-label define sex 1 "Male" 2 "Female"
-label value sex sex
+clonevar sexo = s6q3 if (s6q3!=. & s6q3!=.a)
+label define sexo 1 "Male" 2 "Female"
+label value sexo sexo
+gen hombre = sexo ==1 if sexo!=.
 
-* Age
+*** Age
 * EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
 notes   edad: range of the variable: 0-97
-gen age = edad
+*clonevar sexo = s6q5 if (s6q5!=. & s6q5!=.a)
 
-* Age group: agegroup
-/* 1 = individuos de 14 anos o menos
-   2 = individuos entre 15 y 24 
-   3 = individuos entre 25 y 40
-   4 = individuos entre 41 y 64
-   5 = individuos mayores a 65
-*/
-gen agegroup = .
-replace agegroup = 1 if age<=14
-replace agegroup = 2 if age>=15 & age<=24
-replace agegroup = 3 if age>=25 & age<=40
-replace agegroup = 4 if age>=41 & age<=64
-replace agegroup = 5 if age>=65 & age!=.
+*** Year of birth
+clonevar anio_naci = s6q4_year if (s6q4_year!=. & s6q4_year!=.a & s6q4_year!=9999 & s6q4_year!=9 ) 
 
-* Country of birth
-gen country_birth = s6q6 if (s6q6!=. & s6q6!=.a)
+*** Month of birth
+clonevar mes_naci = s6q4_month if (s6q4_month!=. & s6q4_month!=.a & s6q4_month!=9999) 
 
-* Identificador de miembros del hogar
-gen     jefe = (reltohead==1)
-gen     conyuge = (reltohead==2)
-gen     hijo = (reltohead==3)
+*** Day of birth
+clonevar dia_naci = s6q4_day if (s6q4_day!=. & s6q4_day!=.a & s6q4_day!=9999) 
 
-* Numero de hijos menores de 18
-tempvar aux
-gen `aux' = (hijo==1 & age<=18)
-egen      nro_hijos = count(`aux'), by(id)
-replace   nro_hijos = .  if  jefe!=1 & conyuge!=1
+*** Country of birth
+gen pais_naci = s6q6 if (s6q6!=. & s6q6!=.a)
+
+*** In September 2018 where do you reside?
+gen residencia = s6q7 if (s6q7!=. & s6q7!=.a)
+
+*** In which state did you reside in September 2018?
+gen resi_estado = s6q7a if (s6q7a!=. & s6q7a!=.a)
+
+*** In which county did you reside in September 2018?
+gen resi_municipio = s6q7b if (s6q7b!=. & s6q7b!=.a)
+
+*** Which was the main reason for moving to another residency?
+gen razon_cambio_resi = s6q7c if (s6q7c!=. & s6q7c!=.a)
+
+*** Are you part of this household since the last 5 years?
+gen pert_2014 = (s6q8==1) if (s6q8!=. & s6q8!=.a)
+
+*** Reason for incorporating to the household
+gen razon_incorp_hh = (s6q9==1) if (s6q9!=. & s6q9!=.a)
+
+*** Birth certificate
+gen certificado_naci = (s6q10==1) if (s6q10!=. & s6q10!=.a)
+
+*** ID card
+gen cedula = (s6q11==1) if (s6q11!=. & s6q11!=.a)
+
+*** Reasons for not having birth certificate
+gen razon_nocertificado = (s6q12==1) if (s6q12!=. & s6q12!=.a)
 
 * Marital status
 /* ESTADO_CIVIL_ENCUESTA (s6q13): Cual es su situacion conyugal
@@ -277,7 +328,7 @@ replace   nro_hijos = .  if  jefe!=1 & conyuge!=1
 	   8 = soltero /nunca unido		
 	   98 = No aplica
 	   99 = NS/NR 
-* Marital status
+* Estado civil
 	   1 = married
 	   2 = never married
 	   3 = living together
@@ -293,228 +344,40 @@ replace marital_status = 4	if  estado_civil_encuesta==5 | estado_civil_encuesta=
 replace marital_status = 5	if  estado_civil_encuesta==7
 label def marital_status 1 "Married" 2 "Never married" 3 "Living together" 4 "Divorced/Separated" 5 "Widowed"
 label value marital_status marital_status
-
-gen     married = 0		if  estado_civil_encuesta>=5 & estado_civil_encuesta<=8
-replace married = 1		if  estado_civil_encuesta>=1 & estado_civil_encuesta<=4
-gen     single = estado_civil_encuesta==8 if estado_civil_encuesta!=.
-
-rename  estado_civil_encuesta marital_status_survey
+rename marital_status estado_civil
 
 *** Number of sons/daughters born alive
-gen     children_born_alive = s6q14 if (s6q14!=. & s6q14!=.a)
+gen     hijos_nacidos_vivos = s6q14 if (s6q14!=. & s6q14!=.a)
 
 *** From the total of sons/daughters born alive, how many are currently alive?
-gen     children_alive = s6q15 if s6q14!=0 & s6q15 <=s6q14 & (s6q15!=. & s6q15!=.a)
+gen     hijos_vivos = s6q15 if s6q14!=0 & s6q15 <=s6q14 & (s6q15!=. & s6q15!=.a)
 
-/*(*************************************************************************************************************************************************
-*-------------------------------------------------------------	1.3: Regional variables  ---------------------------------------------------------
-*************************************************************************************************************************************************)*/
-* Creación de Variable Geográficas Desagregadas
-	
-* Desagregación 1 (Regiones politico-administrativas): region_est1
-/* Las regiones político-administrativas de Venezuela son:
-	    1. Región Central:  Aragua, Carabobo y Cojedes.
-	    2. Región de los Llanos: Guárico, Apure, con excepción del Municipio Páez.
-	    3. Región Centro-Occidental: Falcón, Lara, Portuguesa y Yaracuy.
-	    4. Región Zuliana: Zulia
-	    5. Región de los Andes: Barinas, Mérida, Táchira, Trujillo y el municipio Páez del Estado Apure
-	    6. Región Nor-Oriental: Anzoátegui, Monagas y Sucre.
-	    7. Región Insular: Nueva Esparta y las Dependencias Federales Venezolanas.
-	    8. Región Guayana:  Bolívar, Amazonas y Delta Amacuro.
-	    9. Región Capital:  Miranda, Vargas y el Distrito Capital
-    En la encuesta la variable categorica ENTI representa a los Estados, a partir de esta variable se crearan las regions politico-administrativas y las dummies regionales
-    Las  categorias de la variable original ENTI son las siguientes:
-        1 Distrito Capital
-        2 Amazonas
-        3 Anzoategui
-        4 Apure
-        5 Aragua
-		6 Barinas
-        7 Bolívar
-        8 Carabobo
-        9 Cojedes
-        10 Delta Amacuro
-		11 Falcón
-        12 Guárico
-        13 Lara
-        14 Mérida
-        15 Miranda
-        16 Monagas
-        17 Nueva Esparta
-        18 Portuguesa
-        19 Sucre
-        20 Táchira
-        21 Trujillo
-        22 Yaracuy
-        23 Zulia
-        24 Vargas
-        25 Dependencias Federales
- */
-tab entidad, nolab
-/*
-      1. ENTIDAD |
-         FEDERAL |      Freq.     Percent        Cum.
------------------+-----------------------------------
-      Anzoategui |        627       11.66       11.66
-           Apure |         69        1.28       12.94
-          Aragua |        421        7.83       20.77
-         Bolivar |        134        2.49       23.26
-         Cojedes |         53        0.99       24.24
-          Falcon |         52        0.97       25.21
-         Guarico |        210        3.90       29.11
-            Lara |        141        2.62       31.73
-         Miranda |         83        1.54       33.28
-         Monagas |        219        4.07       37.35
-   Nueva Esparta |        773       14.37       51.72
-      Portuguesa |         69        1.28       53.00
-           Sucre |        758       14.09       67.09
-         Tachira |        964       17.92       85.02
-         Yaracuy |        419        7.79       92.81
-           Zulia |        387        7.19      100.00
------------------+-----------------------------------
-           Total |      5,379      100.00
-*/
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   //Region Central
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital
+*** Which year was your last son born?
+gen     anio_ult_hijo = s6q16a if s6q14!=0 & (s6q16a!=9999 & s6q16a!=. & s6q16a!=.a)
+replace anio_ult_hijo = 2005 if anio_ult_hijo==20005
+replace anio_ult_hijo = 2011 if anio_ult_hijo==20011
+replace anio_ult_hijo = 2013 if anio_ult_hijo==20013
+replace anio_ult_hijo = 2017 if anio_ult_hijo==20017
+replace anio_ult_hijo = 2012 if anio_ult_hijo==212
+replace anio_ult_hijo = s6q16c if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9999 //wronly codified in day
+replace anio_ult_hijo = . if s6q16a<1000
 
-label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
-          5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
-label value region_est1 region_est1
+*** Which month was your last son born?
+gen     mes_ult_hijo = s6q16b if s6q14!=0 & (s6q16b!=9999)
 
-* Desagregación 2 (Estados): region_est2
-clonevar region_est2 = entidad
-
-* Desagregación 3 (Municipios): region_est3
-clonevar region_est3 = municipio
-
-* Dummy urbano-rural: urbano  //REVISAR SI SE PUEDE CONSTRUIR ESTA VARIABLE
-/* : area de residencia
-		 1 = urbana  
-		 2 = rural								
-
-gen     urbano = 1		if  zona==1
-replace urbano = 0		if  zona==2
-*/
-gen urbano=.
-							 
-* Dummies regionales 							 
-
-*1.	Región Central
-gen       cen = .
-replace   cen = 1 if enti==5 // Aragua
-replace   cen = 1 if enti==8 // Carabobo
-replace   cen = 1 if enti==9 // Cojedes
-replace   cen = 0 if enti!=5 & enti!=8 & enti!=9 & enti!=.
-
-*2. Región de los Llanos
-gen       lla = .
-replace   lla = 1 if enti==12 // Guarico
-replace   lla = 1 if enti==4  // Apure
-replace   lla = 0 if enti!=12 & enti!=4 & enti!=.
-
-*3. Región Centro-Occidental
-gen       ceo = .
-replace   ceo = 1 if enti==11 // Falcon
-replace   ceo = 1 if enti==13 // Lara
-replace   ceo = 1 if enti==18 // Portuguesa
-replace   ceo = 1 if enti==22 // Yaracuy
-replace   ceo = 0 if enti!=11 & enti!=13 & enti!=18 & enti!=22 & enti!=.
-
-*4. Región Zuliana: Zulia
-gen       zul = .
-replace   zul = 1 if enti==23 // Zulia
-replace   zul = 0 if enti!=23 & enti!=.
-
-*5. Región de los Andes
-gen       and = .
-replace   and = 1 if enti==6  // Barinas
-replace   and = 1 if enti==14 // Merida
-replace   and = 1 if enti==20 // Tachira 
-replace   and = 1 if enti==21 // Trujillo
-replace   and = 0 if enti!=6 & enti!=14 & enti!=20 & enti!=21 & enti!=.
-
-*6. Región Nor-Oriental 
-gen       nor = .
-replace   nor = 1 if enti==3  // Anzoategui
-replace   nor = 1 if enti==16 // Monagas
-replace   nor = 1 if enti==19 // Sucre
-replace   nor = 0 if enti!=3 & enti!=16 & enti!=19 & enti!=.
-
-*7. Región Insular
-gen       isu = .
-replace   isu = 1 if enti==17 // Nueva Esparta
-replace   isu = 1 if enti==25 // Dependencias Federales
-replace   isu = 0 if enti!=17 & enti!=25 & enti!=.
-
-*8. Región Guayana
-gen       gua = .
-replace   gua = 1 if enti==7  // Bolivar
-replace   gua = 1 if enti==2  // Amazonas
-replace   gua = 1 if enti==10 // Delta Amacuro
-replace   gua = 0 if enti!=7 & enti!=2 & enti!=10 & enti!=.
-
-*8. Región Capital
-gen       capital = .
-replace   capital = 1 if enti==15  // Miranda
-replace   capital = 1 if enti==24  // Vargas
-replace   capital = 1 if enti==1  // Distrito Capital
-replace   capital = 0 if enti!=15 & enti!=24 & enti!=1 & enti!=.
-
-* Areas no incluidas en años previos:	nueva_region
-gen       nuevareg = .
-* Por el momento no se detectaron cambios 
-
-***************************************************************************************************************************************************
-* Migrante:	migrante
-/*      0 = si nacio en el municipio donde reside actualmente
-        1 = nacio en un municipio distinto de donde vive actualmente
-RESIDE_EN (s6q7): En septiembre de 2018 residia en:
-       1 = En este mismo municipio
-	   2 = En otro municipio
-	   3 = En otro pais
-	   4 = No habia nacido
-*/
-clonevar reside_en = s6q7
-gen migrante = (reside_en==2 | reside_en==3) 
-
-* Migrantes extranjeros: migra_ext 
-/*      0 = migrante pero no es del extranjero
-        1 = inmigrante de un pais extranjero
-*/
-gen migra_ext = (reside_en==3) if migrante==1
-
-* Migrantes internos (urbano-rural): migra_rur
-/*      1 = si la persona es migrante nacido en zona rural y ahora esta viviendo en zonas urbanas
-        0 = si es nacido en zonas urbanas y ahora vive en rural, y missing si no es migrante, o no se puede saber si migro del campo a la ciudad o viceversa
-*/
-gen migra_rur = .
-notes   migra_rur: the survey does not include information to define this variable
-	
-* Años en el actual lugar de residencia de un migrante: anios_residencia
-gen   anios_residencia = .
-notes anios_residencia: the survey does not include information to define this variable
-
-
-* Migrante reciente (definida solo para los migrantes): migra_rec
-/*      1 = si la persona migro hace tres años o menos
-        0 = si la persona migro hace mas de tres años
-		. = si no es migrante o no sabe cuando migro
-*/
-gen   migra_rec = .
-notes migra_rec: the survey does not include information to define this variable
+*** Which day was your last son born?
+gen     dia_ult_hijo = s6q16c if s6q14!=0 & (s6q16c!=9999)
+replace dia_ult_hijo = s6q16a if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9999 //wronly codified in year
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global dwell_SEDLAC propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici 
-global dwell_ENCOVI flooring_material exterior_wall_malterial roofing_material dwelling_type water_supply frecuencia_agua tipo_sanitario servicio_electrico interr_serv_electrico $dwell_SEDLAC 
+global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda suministro_agua suministro_agua_comp frecuencia_agua ///
+serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
+pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago renta_imp_en renta_imp_mon titulo_propiedad ///
+fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
+comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
+pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
 
 *** Type of flooring material
 /* MATERIAL_PISO (s4q1)
@@ -523,9 +386,9 @@ global dwell_ENCOVI flooring_material exterior_wall_malterial roofing_material d
 		 3 = Tierra		
 		 4 = Tablas 
 */
-gen  flooring_material = s4q1            if (s4q1!=. & s4q1!=.a)	
-label def flooring_material 1 "Mosaic,granite,vynil, brick.." 2 "Cement" 3 "Tierra" 4 "Boards" 5 "Other"
-label value flooring_material flooring_material
+gen  material_piso = s4q1            if (s4q1!=. & s4q1!=.a)	
+label def material_piso 1 "Mosaic,granite,vynil, brick.." 2 "Cement" 3 "Ground floor" 4 "Boards" 5 "Other"
+label value material_piso material_piso
 
 *** Type of exterior wall material		 
 /* MATERIAL_PARED_EXTERIOR (s4q2)
@@ -538,9 +401,9 @@ label value flooring_material flooring_material
 		 7 = Adobe, tapia o bahareque sin frisado
 		 8 = Otros (laminas de zinc, carton, tablas, troncos, piedra, paima, similares)  
 */
-gen  exterior_wall_material = s4q2  if (s4q2!=. & s4q2!=.a)
-label def exterior_wall_material 1 "Frieze brick" 2 "Non frieze brick" 3 "Concrete"
-label value exterior_wall_material exterior_wall_material
+gen  material_pared_exterior = s4q2  if (s4q2!=. & s4q2!=.a)
+label def material_pared_exterior 1 "Frieze brick" 2 "Non frieze brick" 3 "Concrete" 4 "" 5 "" 6 "" 7 "" 8 ""
+label value material_pared_exterior material_pared_exterior
 
 *** Type of roofing material
 /* MATERIAL_TECHO (s4q3)
@@ -550,7 +413,7 @@ label value exterior_wall_material exterior_wall_material
 		 4 = Laminas metalicas (zinc, aluminio y similares)    
 		 5 = Materiales de desecho (tablon, tablas o similares, palma)
 */
-gen  roofing_material = s4q3           if (s4q3!=. & s4q3!=.a)
+gen  material_techo = s4q3           if (s4q3!=. & s4q3!=.a)
 
 *** Type of dwelling
 /* TIPO_VIVIENDA (s4q4): Tipo de Vivienda 
@@ -562,7 +425,7 @@ gen  roofing_material = s4q3           if (s4q3!=. & s4q3!=.a)
 		6 = Habitacion en vivienda o local de trabajo
 		7 = Rancho campesino
 */
-clonevar dwelling_type = s4q4 if (s4q4!=. & s4q4!=.a)
+clonevar tipo_vivienda = s4q4 if (s4q4!=. & s4q4!=.a)
 
 *** Water supply
 /* SUMINISTRO_AGUA (s4q5): Cuales han sido las principales fuentes de suministro de agua en esta vivienda?
@@ -573,14 +436,18 @@ clonevar dwelling_type = s4q4 if (s4q4!=. & s4q4!=.a)
 		5 = Pozo protegido
 		6 = Otros medios
 */
-gen     water_supply = 1 if  s4q5__1==1
-replace water_supply = 2 if  s4q5__2==1
-replace water_supply = 3 if  s4q5__3==1
-replace water_supply = 4 if  s4q5__4==1
-replace water_supply = 5 if  s4q5__5==1
-replace water_supply = 6 if  s4q5__6==1	
-label def water_supply 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Pozo con bomba" 5 "Pozo protegido" 6 "Otros medios"
-label value water_supply water_supply
+gen     suministro_agua = 1 if  s4q5__1==1
+replace suministro_agua = 2 if  s4q5__2==1
+replace suministro_agua = 3 if  s4q5__3==1
+replace suministro_agua = 4 if  s4q5__4==1
+replace suministro_agua = 5 if  s4q5__5==1
+replace suministro_agua = 6 if  s4q5__6==1	
+label def suministro_agua 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Pozo con bomba" 5 "Pozo protegido" 6 "Otros medios"
+label value suministro_agua suministro_agua
+* Comparable across all years
+recode suministro_agua (5 6=4), g(suministro_agua_comp)
+label def suministro_agua_comp 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Otros medios"
+label value suministro_agua_comp suministro_agua_comp
 
 *** Frequency of water supply
 /* FRECUENCIA_AGUA (s4q6): Con que frecuencia ha llegado el agua del acueducto a esta vivienda?
@@ -590,7 +457,7 @@ label value water_supply water_supply
 		4 = Una vez cada 15 dias
 		5 = Nunca
 */
-clonevar frequency_water = s4q6 if (s4q6!=. & s4q6!=.a)	
+clonevar frecuencia_agua = s4q6 if (s4q6!=. & s4q6!=.a)	
 
 *** Electricity
 /* SERVICIO_ELECTRICO : En los ultimos 3 meses, el servicio electrico ha sido suministrado por?
@@ -599,19 +466,22 @@ clonevar frequency_water = s4q6 if (s4q6!=. & s4q6!=.a)
 			s4q7_3 = Otra forma
 			s4q7_4 = No tiene servicio electrico
 */
-gen electricity= (s4q7__1==1 | s4q7__2==1 | s4q7__3==1)  if (s4q7__1!=. & s4q7__1!=.a & s4q7__2!=. & s4q7__2!=.a & s4q7__3!=. & s4q7__3!=.a)
+gen serv_elect_red_pub=s4q7__1 if s4q7__1!=. & s4q7__1!=.a
+gen serv_elect_planta_priv=s4q7__2 if s4q7__2!=. & s4q7__2!=.a
+gen serv_elect_otro=s4q7__3 if s4q7__3!=. & s4q7__3!=.a
+gen electricidad= (s4q7__1==1 | s4q7__2==1 | s4q7__3==1)  if (s4q7__1!=. & s4q7__1!=.a & s4q7__2!=. & s4q7__2!=.a & s4q7__3!=. & s4q7__3!=.a)
+* tab s4q7__4
 
 *** Electric power interruptions
-/* electric_interrup (s4q8): En esta vivienda el servicio electrico se interrumpe
+/* interrumpe_elect (s4q8): En esta vivienda el servicio electrico se interrumpe
 			1 = Diariamente por varias horas
 			2 = Alguna vez a la semana por varias horas
 			3 = Alguna vez al mes
 			4 = Nunca se interrumpe			
 */
-gen electric_interrup = s4q8 if (s4q8!=. & s4q8!=.a)
-replace electric_interrup = 5 if s4q7__4==1 //add category "No tiene servicio electrico" to make it comaparable to previous years
-label def electric_interrup 1 "Diariamente por varias horas" 2 "Alguna vez a la semana por varias" 3 "Alguna vez al mes" 4 "Nunca se interrumpe" 5 "No tiene servicio electrico"
-label value electric_interrup electric_interrup
+gen interrumpe_elect = s4q8 if (s4q8!=. & s4q8!=.a)
+label def interrumpe_elect 1 "Diariamente por varias horas" 2 "Alguna vez a la semana por varias" 3 "Alguna vez al mes" 4 "Nunca se interrumpe" 
+label value interrumpe_elect interrumpe_elect
 
 *** Type of toilet
 /* TIPO_SANITARIO (s4q9): esta vivienda tiene 
@@ -622,21 +492,24 @@ label value electric_interrup electric_interrup
 		5 = No tiene poceta o excusado
 		99 = NS/NR
 */
-clonevar toilet_type = s4q9 if (s4q9!=. & s4q9!=.a)
+clonevar tipo_sanitario = s4q9 if (s4q9!=. & s4q9!=.a)
+* comparable across all years
+recode tipo_sanitario (2=1) (3=2)(4=3) (5=4), g(tipo_sanitario_comp)
+label def tipo_sanitario 1 "Poceta a cloaca/Pozo septico" 2 "Poceta sin conexion" 3 "Excusado de hoyo o letrina" 4 "No tiene poseta o excusado"
+label value tipo_sanitario_comp tipo_sanitario_comp
 
 *** Number of rooms used exclusively to sleep
 * NDORMITORIOS (s5q1): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
-clonevar nbedrooms = s5q1 if (s5q1!=. & s5q1!=.a) //up to 9
+clonevar ndormi= s5q1 if (s5q1!=. & s5q1!=.a) //up to 9
 
 *** Bath with shower 
 * BANIO (s5q2): Su hogar tiene uso exclusivo de bano con ducha o regadera?
-gen     bath = s5q2==1 if (s5q2!=. & s5q2!=.a)
+gen     banio_con_ducha = s5q2==1 if (s5q2!=. & s5q2!=.a)
 
 *** Number of bathrooms with shower
 * NBANIOS (s5q3): cuantos banos con ducha o regadera?
-clonevar nbaths = s5q3 if bath==1 //up to 9
+clonevar nbanios = s5q3 if banio_con_ducha==1 
 
-*********************************************************************************
 *** Housing tenure
 /* TENENCIA_VIVIENDA (s5q7): régimen de  de la vivienda  
 		1 = Propia pagada		
@@ -650,94 +523,412 @@ clonevar nbaths = s5q3 if bath==1 //up to 9
 		9 = Tomada
 		10 = Otra
 */
-clonevar housing_tenure = s5q7 if (s5q7!=. & s5q7!=.a)
-gen     propieta = 1		if  tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6  // Daniel: "Ambos tienen título de propiedad. Una es financiada, y otra es regalada" 
-replace propieta = 0		if  tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=7 & tenencia_vivienda<=10)
-replace propieta = .		if  relacion!=1
+clonevar tenencia_vivienda = s5q7 if (s5q7!=. & s5q7!=.a)
+gen tenencia_vivienda_comp=1 if tenencia_vivienda==1
+replace tenencia_vivienda_comp=2 if tenencia_vivienda==2
+replace tenencia_vivienda_comp=3 if tenencia_vivienda==3 | tenencia_vivienda==4
+replace tenencia_vivienda_comp=4 if tenencia_vivienda==8
+replace tenencia_vivienda_comp=5 if tenencia_vivienda==9
+replace tenencia_vivienda_comp=6 if tenencia_vivienda==5 | tenencia_vivienda==6
+replace tenencia_vivienda_comp=7 if tenencia_vivienda==7 | tenencia_vivienda==10
+label define tenencia_vivienda_comp 1 "Propia pagada" 2 "Propia pagandose" 3 "Alquilada" 4 "Prestada" 5 "Invadida" 6 "De algun programa de gobierno" 7 "Otra"
+label value tenencia_vivienda_comp tenencia_vivienda_comp
 
 *** How much did you pay for rent or mortgage the last month?
+gen pago_alq_mutuo=s5q8a if s5q8a!=. & s5q8a!=.a
+
+*** In which currency did you make the payment?
+gen pago_alq_mutuo_mon=s5q8b if s5q8b!=. & s5q8b!=.a
+
+*** In which month did you make the payment?
+gen pago_alq_mutuo_m=s5q8c if s5q8c!=. & s5q8c!=.a
+
+*** During the last year, have you had arrears in payments?
+gen atrasos_alq_mutuo=(s5q9==1) if s5q9!=. & s5q9!=.a
+
+*** What consequences did the arrears in payments had?
+gen implicancias_nopago=s5q10 if s5q10!=. & s5q10!=.a
+
+*** If you had to rent similar dwelling, how much did you think you should pay?
+gen renta_imp_en=s5q11 if s5q11!=. & s5q11!=.a
+
+*** In which currency ?
+gen renta_imp_mon=s5q11a if s5q11a!=. & s5q11a!=.a
+
+*** What type of property title do you have?
+gen titulo_propiedad=s5q12 if s5q12!=. & s5q12!=.a
+
+*** What are the main sources of drinking water in your household?
+* Acueducto
+gen fagua_acueduc=s5q13__1 if s5q13__1!=. & s5q13__1!=.a
+* Pila o estanque
+gen fagua_estanq=s5q13__2 if s5q13__2!=. & s5q13__2!=.a
+* Camión cisterna
+gen fagua_cisterna=s5q13__3 if s5q13__3!=. & s5q13__3!=.a
+* Pozo con bomba
+gen fagua_bomba=s5q13__4 if s5q13__4!=. & s5q13__4!=.a
+* Pozo protegido
+gen fagua_pozo=s5q13__5 if s5q13__5!=. & s5q13__5!=.a
+* Aguas superficiales (manantial,río, lago, canal de irrigación)
+gen fagua_manantial=s5q13__6 if s5q13__6!=. & s5q13__6!=.a
+* Agua embotellada
+gen fagua_botella=s5q13__7 if s5q13__7!=. & s5q13__7!=.a
+* Otros
+gen fagua_otro=s5q13__8 if s5q13__8!=. & s5q13__8!=.a
+
+*** In your household, is the water treated to make it drinkable
+gen tratamiento_agua=(s5q14==1) if s5q14!=. & s5q14!=.a
+
+*** How do you treat the water to make it more safe for drinking
+gen tipo_tratamiento=s5q15 if s5q15!=. & s5q15!=.a
+
+*** Which type of fuel do you use for cooking?
+gen comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
+
+*** Did you pay for the following utilities?
+* Water
+gen pagua=(s5q17__1==1) if s5q17__1!=. & s5q17__1!=.a 
+* Electricity
+gen pelect=(s5q17__2==1) if s5q17__2!=. & s5q17__2!=.a
+* Gas
+gen pgas=(s5q17__3==1) if s5q17__3!=. & s5q17__3!=.a
+* Carbon, wood
+gen pcarbon=(s5q17__4==1) if s5q17__4!=. & s5q17__4!=.a
+* Paraffin
+gen pparafina=(s5q17__5==1) if s5q17__5!=. & s5q17__5!=.a
+* Landline, internet and tv cable
+gen ptelefono=(s5q17__7==1) if s5q17__7!=. & s5q17__7!=.a
+
+*** How much did you pay for the following utilities?
+gen pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
+* Electricity
+gen pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
+* Gas
+gen pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
+* Carbon, wood
+gen pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
+* Paraffin
+gen pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
+* Landline, internet and tv cable
+gen ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
+
+*** In which currency did you pay for the following utilities?
+gen pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
+* Electricity
+gen pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
+* Gas
+gen pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
+* Carbon, wood
+gen pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
+* Paraffin
+gen pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
+* Landline, internet and tv cable
+gen ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
+
+*** In which month did you pay for the following utilities?
+gen pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
+* Electricity
+gen pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
+* Gas
+gen pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
+* Carbon, wood
+gen pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
+* Paraffin
+gen pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
+* Landline, internet and tv cable
+gen ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
+
+*** In your household, have any home appliences damaged due to blackouts or voltage inestability?
+gen danio_electrodom=(s5q20==1) if s5q20!=. & s5q20!=.a
+
+foreach x in $dwell_ENCOVI {
+replace `x'=. if relacion_en!=1
+}
 
 /*(************************************************************************************************************************************************* 
 *--------------------------------------------------------- 1.5: Durables goods  --------------------------------------------------------
 *************************************************************************************************************************************************)*/
+global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas telefono_fijo
+
 *** Dummy household owns cars
 *  AUTO (s5q4): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
-gen     car = s5q4==1		if  s5q4!=. & s5q4!=.a
-*replace car = .		if  relacion!=1 
+gen     auto = s5q4==1		if  s5q4!=. & s5q4!=.a
+replace auto = .		if  relacion_en!=1 
 
 *** Number of functioning cars in the household
 * NCARROS (s5q4a) : ¿De cuantos carros dispone este hogar que esten en funcionamiento?
-gen     ncars = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
-*replace ncars = .		if  relacion!=1 
+gen     ncarros = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
+replace ncarros = .		if  relacion_en!=1 
 
 *** Year of the most recent car
-gen year_car= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
-replace year_car = . if relacion==1
+gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
+replace anio_auto = . if relacion_en==1
 
 *** Does the household have fridge?
 * Heladera (s5q6__1): ¿Posee este hogar nevera?
-gen     fridge = s5q6__1==1 if (s5q6__1!=. & s5q6__1!=.a)
-*replace fridge = .		if  relacion!=1 
+gen     heladera = s5q6__1==1 if (s5q6__1!=. & s5q6__1!=.a)
+replace heladera = .		if  relacion_en!=1 
 
 *** Does the household have washing machine?
 * Lavarropas (s5q6__2): ¿Posee este hogar lavadora?
-gen     washing_machine = s5q6__2==1 if (s5q6__2!=. & s5q6__2!=.a)
-*replace washing_machine = .		if  relacion!=1 
+gen     lavarropas = s5q6__2==1 if (s5q6__2!=. & s5q6__2!=.a)
+replace lavarropas = .		if  relacion_en!=1 
 
 *** Does the household have dryer
 * Secadora (s5q6__3): ¿Posee este hogar secadora? 
-gen     dryer = s5q6__3==1 if (s5q6__3!=. & s5q6__3!=.a)
-*replace dryer = .		if  relacion!=1 
+gen     secadora = s5q6__3==1 if (s5q6__3!=. & s5q6__3!=.a)
+replace secadora = .		if  relacion_en!=1 
 
 *** Does the household have computer?
 * Computadora (s5q6__4): ¿Posee este hogar computadora?
-gen computer = s5q6__4==1 if (s5q6__4!=. & s5q6__4!=.a)
-*replace computer = .		if  relacion!=1 
+gen computadora = s5q6__4==1 if (s5q6__4!=. & s5q6__4!=.a)
+replace computadora = .		if  relacion_en!=1 
 
 *** Does the household have internet?
 * Internet (s5q6__5): ¿Posee este hogar internet?
 gen     internet = s5q6__5==1 if (s5q6__5!=. & s5q6__5!=.a)
-*replace internet = .	if  relacion!=1 
+replace internet = .	if  relacion_en!=1 
 
 *** Does the household have tv?
 * Televisor (s5q6__6): ¿Posee este hogar televisor?
-gen     tv = s5q6__6==1 if (s5q6__6!=. & s5q6__6!=.a)
-*replace tv = .	if  relacion!=1 
+gen     televisor = s5q6__6==1 if (s5q6__6!=. & s5q6__6!=.a)
+replace televisor = .	if  relacion_en!=1 
 
 *** Does the household have radio?
 * Radio (s5q6__7): ¿Posee este hogar radio? 
 gen     radio = s5q6__7==1 if (s5q6__7!=. & s5q6__7!=.a)
-*replace radio = .		if  relacion!=1 
+replace radio = .		if  relacion_en!=1 
 
 *** Does the household have heater?
 * Calentador (s5q6__8): ¿Posee este hogar calentador? //NO COMPARABLE CON CALEFACCION FIJA
-gen     heater = s5q6__8==1 if (s5q6__8!=. & s5q6__8!=.a)
-*replace heater = .		if  relacion!=1 
+gen     calentador = s5q6__8==1 if (s5q6__8!=. & s5q6__8!=.a)
+replace calentador = .		if  relacion_en!=1 
 
 *** Does the household have air conditioner?
 * Aire acondicionado (s5q6__9): ¿Posee este hogar aire acondicionado?
-gen     air_conditioner = s5q6__9==1 if (s5q6__9!=. & s5q6__9!=.a)
-*replace air_conditioner = .		    if  relacion!=1 
+gen     aire = s5q6__9==1 if (s5q6__9!=. & s5q6__9!=.a)
+replace aire = .		    if  relacion_en!=1 
 
 *** Does the household have cable tv?
 * TV por cable o satelital (s5q6__10): ¿Posee este hogar TV por cable?
 gen     tv_cable = s5q6__10==1 if (s5q6__10!=. & s5q6__10!=.a)
-*replace tv_cable = .		if  relacion!=1
+replace tv_cable = .		if  relacion_en!=1
 
 *** Does the household have microwave oven?
 * Horno microonada (s5q6__11): ¿Posee este hogar horno microonda?
-gen     microwave = s5q6__11==1 if (s5q6__11!=. & s5q6__11!=.a)
-*replace microwave = .		if  relacion!=1
+gen     microondas = s5q6__11==1 if (s5q6__11!=. & s5q6__11!=.a)
+replace microondas = .		if  relacion_en!=1
 
 *** Does the household have landline telephone?
 * Teléfono fijo (s5q6__12): telefono_fijo
-gen     landline_phone = s5q6__12==1 if (s5q6__12!=. & s5q6__12!=.a)
-*replace landline_phone = .		    if  relacion!=1 
-;
+gen     telefono_fijo = s5q6__12==1 if (s5q6__12!=. & s5q6__12!=.a)
+replace telefono_fijo = .		    if  relacion_en!=1 
+
 /*(************************************************************************************************************************************************* 
-*---------------------------------------------------------- 1.6: Education --------------------------------------------------------------
+*------------------------------------------------------ VII. EDUCATION / EDUCACIÓN -----------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global educ_SEDLAC alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp
+global educ_ENCOVI contesta_ind_e quien_contesta_e asistio_educ razon_noasis asiste nivel_educ_act g_educ_act regimen_act a_educ_act s_educ_act t_educ_act edu_pub ///
+fallas_agua fallas_elect huelga_docente falta_transporte falta_comida_hogar falta_comida_centro inasis_docente protesta nunca_deja_asistir ///
+pae pae_frecuencia pae_desayuno pae_almuerzo pae_meriman pae_meritard pae_otra ///
+cuota_insc compra_utiles compra_uniforme costo_men costo_transp otros_gastos ///
+cuota_insc_monto compra_utiles_monto compra_uniforme_monto costo_men_monto costo_transp_monto otros_gastos_monto ///
+cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon ///
+cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m ///
+nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/ edad_dejo_estudios razon_dejo_est_comp
+
+*** Is the "member" answering by himself/herself?
+gen contesta_ind_e=s7q0 if (s7q0!=. & s7q0!=.a)
+
+*** Who is answering instead of "member"?
+gen quien_contesta_e=s7q00 if (s7q00!=. & s7q00!=.a)
+
+*** Have you ever attended any educational center? //for age +3
+gen asistio_educ = s7q1==1 if (s7q1!=. & s7q1!=.a) & edad>=3
+
+*** Reasons for never attending
+/* RAZONES_NO_ASIS (s7q2): Cual fue la principal razon por la que nunca asistio?
+		1 = Muy joven
+		2 = Escuela distante
+		3 = Escuela cerrada
+		4 = Muchos paros/inasistencia de maestros
+		5 = Costo de los útiles
+		6 = Costo de los uniformes
+		7 = Enfermedad/discapacidad
+		8 = Debía trabajar
+		9 = Inseguridad al asistir al centro educativo
+		10 = Discriminación
+		11 = Violencia
+		14 = Obligaciones en el hogar
+		15 = No lo considera importante
+		16 = Otra, especifique
+*/
+clonevar razon_noasis = s7q2 if s7q1==2 & (s7q2!=. & s7q2!=.a)
+
+*** During the period 2019-2020 did you attend any educational center? //for age +3
+gen asiste= s7q1==1 if (s7q1!=. & s7q1!=.a) & edad>=3
+replace asiste = .  if  edad<3
+notes   asiste: variable defined for individuals aged 3 and older
+
+*** Which is the educational level you are currently attending?
+/* NIVEL_EDUC_ACT (s7q4): ¿Cual fue el ultimo nivel educativo en el que aprobo un grado, ano, semetre, trimestre?  
+		1 = Ninguno		
+        2 = Preescolar
+		5 = Regimen actual: Primaria (1-6)		
+		6 = Regimen actual: Media (1-6)
+		7 = Tecnico (TSU)		
+		8 = Universitario
+		9 = Postgrado	
+*/
+gen nivel_educ_act=s7q4 if (s7q4!=. & s7q4!=.a) & edad>=3
+label def nivel_educ_act 1 "Ninguno" 2 "Preescolar" 3 "Primaria" 4 "Media" 5 "Tecnico (TSU)" 6 "Universitario" 7 "Postgrado"
+label value nivel_educ_act nivel_educ_act
+
+*** Which grade are you currently attending
+/* G_EDUC_ACT (s7q4a): ¿Cuál es el grado al que asiste? (variable definida para nivel educativo Primaria y Media)
+        Primaria: 1-6to
+        Media: 1-6to
+*/
+gen g_educ_act = s7q4a if  s7q3==1 & (s7q4==3 | s7q4==4 | s7q4==5 | s7q4==6) & (s7q4a!=. & s7q4a!=.a) 
+
+*** Regimen de estudios
+* REGIMEN_ACT (s7q4b): El regimen de estudios es anual, semestral o trimestral?
+clonevar regimen_act = s7q4b if s7q3==1 & (s7q4>=7 & s7q4<=9) & (s7q4b!=. & s7q4b!=.a)
+replace regimen_act =3 if regimen_act==5 //8 obs wrongly codified
+
+*** Which year are you currently attending	?	
+/* A_EDUC_ACT (s7q4c): ¿Cuál es el ano al que asiste? (variable definida para nivel educativo Primaria y Media)
+        Tecnico: 1-3
+        Universitario: 1-7
+		Postgrado: 1-6
+*/
+gen a_educ_act = s7q4c    if s7q3==1 & (s7q4==7 | s7q4==8 | s7q4==9) & s7q4b==1 & (s7q4c!=. & s7q4c!=.a) //for those who study tertiary education on annual basis
+
+*** Which semester are you currently attending?
+/* S_EDUC_ACT (s7q4d): ¿Cuál es el semestre al que asiste? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
+		Tecnico: 1-6 semestres
+		Universitario: 1-14 semestres
+		Postgrado: 1-12 semestres
+*/
+gen s_educ_act = s7q4d    if s7q3==1 & (s7q4==7 | s7q4==8 | s7q4==9) & s7q4b==2 & (s7q4d!=. & s7q4d!=.a) //for those who study tertiary education on biannual basis
+
+*** Which quarter are you currently attending?
+/* T_EDUC_ACT (s7q4e): ¿Cuál esel trimestre al que asiste? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
+		Tecnico: 1-9 semestres
+		Universitario: 1-21 semestres
+		Postgrado: 1-18
+*/
+gen t_educ_act = s7q4e    if s7q3==1 & (s7q4==7 | s7q4==8 | s7q4==9) & s7q4b==3 & (s7q4e!=. & s7q4e!=.a) //for those who study tertiary education on quarterly basis
+
+*** Type of educational center
+/* TIPO_CENTRO_EDUC (s7q5): ¿el centro de educacion donde estudia es:
+		1 = Privado
+		2 = Publico
+		.
+		.a
+*/
+gen tipo_centro_educ = s7q5 if s7q3==1 & (s7q5!=. & s7q5!=.a)
+gen     edu_pub = 1	if  tipo_centro_educ==2  
+replace edu_pub = 0	if  tipo_centro_educ==1
+replace edu_pub = . if  edad<3
+
+*** During this school period, did you stop attending the educational center where you regularly study due to:
+* Water failiures
+gen fallas_agua = s7q6__1  if s7q3==1 & (s7q6__1!=. & s7q6__1!=.a)
+* Electricity failures
+gen fallas_elect = s7q6__2  if s7q3==1 & (s7q6__2!=. & s7q6__2!=.a)
+* Huelga de personal docente
+gen huelga_docente = s7q6__3  if s7q3==1 & (s7q6__3!=. & s7q6__3!=.a)
+* Falta transporte
+gen falta_transporte = s7q6__4  if s7q3==1 & (s7q6__4!=. & s7q6__4!=.a)
+* Falta de comida en el hogar
+gen falta_comida_hogar = s7q6__5  if s7q3==1 & (s7q6__5!=. & s7q6__5!=.a)
+* Falta de comida en el centro educativo
+gen falta_comida_centro = s7q6__6  if s7q3==1 & (s7q6__6!=. & s7q6__6!=.a)
+* Inasistencia del personal docente
+gen inasis_docente = s7q6__7  if s7q3==1 & (s7q6__7!=. & s7q6__7!=.a)
+* Manifestaciones, movilizaciones o protestas
+gen protestas = s7q6__8  if s7q3==1 & (s7q6__8!=. & s7q6__8!=.a)
+* Nunca deje de asistir
+gen nunca_deja_asistir = s7q6__9  if s7q3==1 & (s7q6__9!=. & s7q6__9!=.a)
+
+*** El centro educativo al que asiste cuenta con el programa de alimentacion escolar PAE?
+gen pae = s7q7==1 if s7q3==1 & (s7q7!=. & s7q7!=.a)
+
+*** En el centro educativo al que asiste, el programa PAE funciona:
+/* 		1.Todos los días
+		2.Solo algunos días
+		3.Casi nunca
+*/
+gen pae_frecuencia = s7q8 if s7q7==1 & (s7q8!=. & s7q8!=.a)
+
+*** En el centro educativo al que asiste, el programa pae ofrece:
+* Desayuno
+gen pae_desayuno= s7q9__1 if  s7q7==1 & (s7q9__1!=. & s7q9__1!=.a)
+* Almuerzo
+gen pae_almuerzo= s7q9__2 if  s7q7==1 & (s7q9__2!=. & s7q9__2!=.a)
+* Merienda en la manana
+gen pae_meriman= s7q9__3 if  s7q7==1 & (s7q9__3!=. & s7q9__3!=.a)
+* Merienda en la tarde
+gen pae_meritard= s7q9__4 if  s7q7==1 & (s7q9__4!=. & s7q9__4!=.a)
+* Otra
+gen pae_otra= s7q9__5 if  s7q7==1 & (s7q9__5!=. & s7q9__5!=.a)
+
+*** Durante el periodo escolar 2019-2020 gasto, consiguio, recibio donancion en alguno de los siguientes conceptos?
+* Cuota de inscripción
+gen cuota_insc=s7q10_0__1 if s7q3==1 & (s7q10_0__1!=. & s7q10_0__1!=.a)
+* Compra de útiles y libros escolares
+gen compra_utiles=s7q10_0__2 if s7q3==1 & (s7q10_0__2!=. & s7q10_0__2!=.a)
+* Compra de uniformes y calzados escolares
+gen compra_uniforme=s7q10_0__3 if s7q3==1 & (s7q10_0__3!=. & s7q10_0__3!=.a)
+* Costo de la mensualidad
+gen costo_men=s7q10_0__4 if s7q3==1 & (s7q10_0__4!=. & s7q10_0__4!=.a)
+* Uso de transporte público o escolar
+gen costo_transp=s7q10_0__5 if s7q3==1 & (s7q10_0__5!=. & s7q10_0__5!=.a)
+* Otros gastos
+gen otros_gastos=s7q10_0__6 if s7q3==1 & (s7q10_0__6!=. & s7q10_0__6!=.a)
+
+*** Monto pagado
+* Cuota de inscripción
+gen cuota_insc_monto=s7q10a_1 if s7q10_0__1==1 & (s7q10a_1!=. & s7q10a_1!=.a & s7q10a_1!=9999)
+* Compra de útiles y libros escolares
+gen compra_utiles_monto=s7q10a_2 if s7q10_0__2==1 & (s7q10a_2!=. & s7q10a_2!=.a & s7q10a_2!=9999)
+* Compra de uniformes y calzados escolares
+gen compra_uniforme_monto=s7q10a_3 if s7q10_0__3==1 & (s7q10a_3!=. & s7q10a_3!=.a & s7q10a_3!=9999)
+* Costo de la mensualidad
+gen costo_men_monto=s7q10a_4 if s7q10_0__4==1 & (s7q10a_4!=. & s7q10a_4!=.a & s7q10a_4!=9999)
+* Uso de transporte público o escolar
+gen costo_transp_monto=s7q10a_5 if s7q10_0__5==1 & (s7q10a_5!=. & s7q10a_5!=.a & s7q10a_5!=9999)
+* Otros gastos
+gen otros_gastos_monto=s7q10a_6 if s7q10_0__6==1 & (s7q10a_6!=. & s7q10a_6!=.a & s7q10a_6!=9999)
+
+*** Moneda en que se realizo el pago
+* Cuota de inscripción
+gen cuota_insc_mon=s7q10b_1 if s7q10_0__1==1 & (s7q10b_1!=. & s7q10b_1!=.a)
+* Compra de útiles y libros escolares
+gen compra_utiles_mon=s7q10b_2 if s7q10_0__2==1 & (s7q10b_2!=. & s7q10b_2!=.a)
+* Compra de uniformes y calzados escolares
+gen compra_uniforme_mon=s7q10b_3 if s7q10_0__3==1 & (s7q10b_3!=. & s7q10b_3!=.a)
+* Costo de la mensualidad
+gen costo_men_mon=s7q10b_4 if s7q10_0__4==1 & (s7q10b_4!=. & s7q10b_4!=.a)
+* Uso de transporte público o escolar
+gen costo_transp_mon=s7q10b_5 if s7q10_0__5==1 & (s7q10b_5!=. & s7q10b_5!=.a)
+* Otros gastos
+gen otros_gastos_mon=s7q10b_6 if s7q10_0__6==1 & (s7q10b_6!=. & s7q10b_6!=.a)
+
+*** Mes en que se realizo el pago
+gen cuota_insc_m=s7q10b_1 if s7q10_0__1==1 & (s7q10b_1!=. & s7q10b_1!=.a)
+* Compra de útiles y libros escolares
+gen compra_utiles_m=s7q10b_2 if s7q10_0__2==1 & (s7q10b_2!=. & s7q10b_2!=.a)
+* Compra de uniformes y calzados escolares
+gen compra_uniforme_m=s7q10b_3 if s7q10_0__3==1 & (s7q10b_3!=. & s7q10b_3!=.a)
+* Costo de la mensualidad
+gen costo_men_m=s7q10b_4 if s7q10_0__4==1 & (s7q10b_4!=. & s7q10b_4!=.a)
+* Uso de transporte público o escolar
+gen costo_transp_m=s7q10b_5 if s7q10_0__5==1 & (s7q10b_5!=. & s7q10b_5!=.a)
+* Otros gastos
+gen otros_gastos_m=s7q10b_6 if s7q10_0__6==1 & (s7q10b_6!=. & s7q10b_6!=.a)
+
+*** Educational attainment
 /* NIVEL_EDUC_EN (s7q11): ¿Cual fue el ultimo nivel educativo en el que aprobo un grado, ano, semetre, trimestre?  
 		1 = Ninguno		
         2 = Preescolar
@@ -747,23 +938,10 @@ global educ_SEDLAC alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc
 		6 = Regimen actual: Media (1-6)
 		7 = Tecnico (TSU)		
 		8 = Universitario
-		9 = Postgrado			
-* G_EDUC (s7q11a): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Primaria y Media)
-        Primaria: 1-6to
-        Media: 1-6to
-* A_EDUC (s7q4b): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Primaria y Media)
-        Tecnico: 1-3
-        Universitario: 1-7
-		Postgrado: 1-6
-* S_EDUC (emhp27c): ¿Cuál es el último semestre que aprobó? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
-		Tecnico: 1-6 semestres
-		Universitario: 1-14 semestres
-		Postgrado: 1-12 semestres
-* T_EDUC (emhp27d): ¿Cuál es el último semestre que aprobó? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
-		Tecnico: 1-9 semestres
-		Universitario: 1-21 semestres
-		Postgrado: 1-18
-* NIVEL_EDUC: ¿Cual fue el ultimo grado o año aprobado y de que nivel educativo: 
+		9 = Postgrado
+*/
+clonevar nivel_educ_en = s7q11 if s7q1==1 & (s7q11!=. & s7q11!=.a) & edad>3
+/* NIVEL_EDUC: Comparable across years
 		1 = Ninguno		
         2 = Preescolar
 		3 = Primaria		
@@ -772,13 +950,6 @@ global educ_SEDLAC alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc
 		6 = Universitario
 		7 = Postgrado			
 */
-clonevar nivel_educ_en = s7q11 if s7q1==1 & (s7q11!=. & s7q11!=.a) & edad>3
-gen     g_educ = s7q11a        if s7q1==1 & (s7q11==3 | s7q11==4 | s7q11==5 | s7q11==6) & (s7q11a!=. & s7q11a!=.a) & edad>3
-replace g_educ=3               if s7q11a>3 & s7q11==4
-gen a_educ = s7q11b    if s7q1==1 & (s7q11==7 | s7q11==8 | s7q4==9) & s7q11ba==1 & (s7q11b!=. & s7q11b!=.a) //for those who study or studied tertiary education on annual basis, there are individuals in categories 4 and 6 who replied this question
-gen s_educ = s7q11c    if s7q1==1 & (s7q11==7 | s7q11==8 | s7q4==9) & s7q11ba==2 & (s7q11c!=. & s7q11c!=.a) //for those who study or studied tertiary education on biannual basis
-gen t_educ = s7q11d    if s7q1==1 & (s7q11==7 | s7q11==8 | s7q4==9) & s7q11ba==3 & (s7q11d!=. & s7q11d!=.a) //for those who study or studied tertiary education on quarterly basis
-
 gen nivel_educ = 1 if nivel_educ_en==1
 replace nivel_educ = 2 if nivel_educ_en==2 
 replace nivel_educ = 3 if nivel_educ_en==3 | nivel_educ_en==5
@@ -789,295 +960,147 @@ replace nivel_educ = 7 if nivel_educ_en==9
 label def nivel_educ 1 "Ninguno" 2 "Preescolar" 3 "Primaria" 4 "Media" 5 "Tecnico (TSU)" 6 "Universitario" 7 "Postgrado"
 label value nivel_educ nivel_educ
 
-* Alfabeto:	alfabeto (si no existe la pregunta sobre si la persona sabe leer y escribir, consideramos que un individuo esta alfabetizado si ha recibido al menos dos años de educacion formal)
+*** Which was the last grade you completed?
+/* G_EDUC (s7q11a): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Primaria y Media)
+        Primaria: 1-6to
+        Media: 1-6to
+*/
+gen     g_educ = s7q11a        if s7q1==1 & (s7q11==3 | s7q11==4 | s7q11==5 | s7q11==6) & (s7q11a!=. & s7q11a!=.a) & edad>3
+replace g_educ=3               if s7q11a>3 & s7q11==4
+
+*** Cual era el regimen de estudios
+* REGIMEN (s7q11ba): El regimen de estudios era anual, semestral o trimestral?
+clonevar regimen = s7q11ba if s7q1==1 & (s7q11>=7 & s7q11<=9) & (s7q11ba!=. & s7q11ba!=.a)
+
+*** Which was the last year you completed?
+/** A_EDUC (s7q4b): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Primaria y Media)
+        Tecnico: 1-3
+        Universitario: 1-7
+		Postgrado: 1-6
+*/
+gen a_educ = s7q11b    if s7q1==1 & (s7q11==7 | s7q11==8 | s7q4==9) & s7q11ba==1 & (s7q11b!=. & s7q11b!=.a) //for those who study or studied tertiary education on annual basis, there are individuals in categories 4 and 6 who replied this question
+
+*** Which was the last semester you completed?
+/* S_EDUC (emhp27c): ¿Cuál es el último semestre que aprobó? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
+		Tecnico: 1-6 semestres
+		Universitario: 1-14 semestres
+		Postgrado: 1-12 semestres
+*/
+gen s_educ = s7q11c    if s7q1==1 & (s7q11==7 | s7q11==8 | s7q4==9) & s7q11ba==2 & (s7q11c!=. & s7q11c!=.a) //for those who study or studied tertiary education on biannual basis
+
+*** Which was the last quarter you completed?
+/* T_EDUC (emhp27d): ¿Cuál es el último semestre que aprobó? (variable definida para nivel educativo Tecnico, Universitario y Postgrado)
+		Tecnico: 1-9 semestres
+		Universitario: 1-21 semestres
+		Postgrado: 1-18
+*/
+gen t_educ = s7q11d    if s7q1==1 & (s7q11==7 | s7q11==8 | s7q4==9) & s7q11ba==3 & (s7q11d!=. & s7q11d!=.a) //for those who study or studied tertiary education on quarterly basis
+
+***  Literacy
+*Alfabeto:	alfabeto (si no existe la pregunta sobre si la persona sabe leer y escribir, consideramos que un individuo esta alfabetizado si ha recibido al menos dos años de educacion formal)
 gen     alfabeto = 0 if nivel_educ!=.	
 replace alfabeto = 1 if (nivel_educ==3 & (g_educ>=2 & g_educ<=9)) | (nivel_educ>=4 & nivel_educ<=7)
 notes   alfabeto: variable defined for all individuals
 
-* Asiste a la educación formal:	asiste
-/*ASISTE_ENCUESTA (s7q3): ¿Durante este periodo escolar 2019-2020, asiste regularmente a un centro educativo como estudiante? 
-        1 = Si
-		2 = No
-*/
-clonevar asiste_encuesta = s7q3  if (s7q3!=. & s7q3!=.a)                                             
-gen     asiste = asiste_encuesta==1 if asiste_encuesta!=.
-replace asiste = .  if  edad<3
-notes   asiste: variable defined for individuals aged 3 and older
-
-* Establecimiento educativo público: edu_pub
-/* TIPO_CENTRO_EDUC (s7q5): ¿el centro de educacion donde estudia es:
-		1 = Privado
-		2 = Publico
-		.
-		.a
-*/
-gen tipo_centro_educ = s7q5 if (s7q5!=. & s7q5!=.a)
-gen     edu_pub = 1	if  tipo_centro_educ==2  
-replace edu_pub = 0	if  tipo_centro_educ==1
-replace edu_pub = . if  edad<3
-
-* Educación en años: aedu //only for those who are currently attending
-
-gen     aedu = 0	if  nivel_educ_en==1 | nivel_educ_en==2
-replace aedu = 0	if  (nivel_educ_en==3 | nivel_educ_en==5) & g_educ==0
-
-replace aedu = 1	if  (nivel_educ_en==3 | nivel_educ_en==5) & g_educ==1
-replace aedu = 2	if  (nivel_educ_en==3 | nivel_educ_en==5) & g_educ==2
-replace aedu = 3	if  (nivel_educ_en==3 | nivel_educ_en==5) & g_educ==3
-replace aedu = 4	if  (nivel_educ_en==3 | nivel_educ_en==5) & g_educ==4
-replace aedu = 5	if  (nivel_educ_en==3 | nivel_educ_en==5) & g_educ==5
-replace aedu = 6	if  (nivel_educ_en==3 | nivel_educ_en==5) & g_educ==6
-
-replace aedu = 7	if  nivel_educ_en==3 & g_educ==7
-replace aedu = 8	if  nivel_educ_en==3 & g_educ==8
-replace aedu = 9	if  nivel_educ_en==3 & g_educ==9
-replace aedu = 10	if  nivel_educ_en==4 & g_educ==1
-replace aedu = 11	if  nivel_educ_en==4 & g_educ==2
-replace aedu = 12	if  nivel_educ_en==4 & g_educ==3
-
-replace aedu = 7	if  nivel_educ_en==6 & g_educ==1
-replace aedu = 8	if  nivel_educ_en==6 & g_educ==2
-replace aedu = 9	if  nivel_educ_en==6 & g_educ==3
-replace aedu = 10	if  nivel_educ_en==6 & g_educ==4
-replace aedu = 11	if  nivel_educ_en==6 & g_educ==5
-replace aedu = 12	if  nivel_educ_en==6 & g_educ==6
-
-replace aedu = 12	if (nivel_educ_en==7 | nivel_educ_en==8 ) & (a_educ==0 | s_educ<=1 | t_educ<=2)	 
-replace aedu = 13	if  nivel_educ_en==7 & (a_educ==1 | (s_educ>=2 & s_educ<=3) | (t_educ>=3 & t_educ<=5))
-replace aedu = 14	if  nivel_educ_en==7 & (a_educ==2 | (s_educ>=4 & s_educ<=5) | (t_educ>=6 & t_educ<=8))
-replace aedu = 15	if  nivel_educ_en==7 & (a_educ==3 | s_educ==6 | t_educ==9)
-               
-replace aedu = 13	if  nivel_educ_en==8 & (a_educ==1 | (s_educ>=2 & s_educ<=3)   | (t_educ>=3 & t_educ<=5))
-replace aedu = 14	if  nivel_educ_en==8 & (a_educ==2 | (s_educ>=4 & s_educ<=5)   | (t_educ>=6 & t_educ<=8))
-replace aedu = 15	if  nivel_educ_en==8 & (a_educ==3 | (s_educ>=6 & s_educ<=7)   | (t_educ>=9 & t_educ<=11))
-replace aedu = 16	if  nivel_educ_en==8 & (a_educ==4 | (s_educ>=8 & s_educ<=9)   | (t_educ>=12 & t_educ<=14))
-replace aedu = 17	if  nivel_educ_en==8 & (a_educ==5 | (s_educ>=10 & s_educ<=11) | (t_educ>=15 & t_educ<=17))
-replace aedu = 18	if  nivel_educ_en==8 & (a_educ==6 | (s_educ>=12 & s_educ<=13) | (t_educ>=18 & t_educ<=20))
-replace aedu = 19	if  nivel_educ_en==8 & (a_educ==7 | s_educ==14 | t_educ==21)
-
-replace aedu = 17   if  nivel_educ_en==9 & (a_educ==0 | s_educ<=1 | t_educ<=2) //we are considering that the average of tertiary (university) education is five years  
-replace aedu = 18   if  nivel_educ_en==9 & (a_educ==1 | (s_educ>=2 & s_educ<=3) | (t_educ>=3 & t_educ<=5))
-replace aedu = 19	if  nivel_educ_en==9 & (a_educ==2 | (s_educ>=4 & s_educ<=5) | (t_educ>=6 & t_educ<=8))
-replace aedu = 20	if  nivel_educ_en==9 & (a_educ==3 | (s_educ>=6 & s_educ<=7) | (t_educ>=9 & t_educ<=11))
-replace aedu = 21	if  nivel_educ_en==9 & (a_educ==4 | (s_educ>=8 & s_educ<=9) | (t_educ>=12 & t_educ<=14))
-replace aedu = 22	if  nivel_educ_en==9 & (a_educ==5 | (s_educ>=10 & s_educ<=11) | (t_educ>=15 & t_educ<=17))
-replace aedu = 23	if  nivel_educ_en==9 & (a_educ==6 | s_educ==12 | t_educ==18)
-notes aedu: variable defined for individuals aged 3 and older
-
-* Nivel educativo: nivel 
-/*   0 = Nunca asistió      
-     1 = Primario incompleto
-     2 = Primario completo   
-	 3 = Secundario incompleto
-     4 = Secundario completo 
-	 5 = Superior incompleto 
-     6 = Superior completo						
+/*
+*** Obtuvo el titulo respectivo //missing in database
+gen titulo = s7q11e==1 if s7q1==1 & (s7q11>=7 & s7q11<=9) 
 */
 
-gen     nivel = 0	if  nivel_educ_en==1 | nivel_educ_en==2
-replace nivel = 1	if  nivel_educ_en==3 & g_educ<=8
-replace nivel = 1	if  nivel_educ_en==5 & g_educ<=5
-replace nivel = 2	if  nivel_educ_en==3 & g_educ==9
-replace nivel = 2	if  nivel_educ_en==5 & g_educ==6 
-replace nivel = 3	if  nivel_educ_en==4 & g_educ<=2
-replace nivel = 3	if  nivel_educ_en==6 & g_educ<=5
-replace nivel = 4	if  nivel_educ_en==4 & g_educ==3
-replace nivel = 4	if  nivel_educ_en==6 & g_educ==6
-replace nivel = 5   if (nivel_educ_en==7 & (a_educ<=2 | s_educ<=5 | t_educ<=8)) | (nivel_educ_en==8 & (a_educ<=4 | s_educ<=9 | t_educ<=14)) // Consideramos tecnica completa si completo almenos 6 semestres y universitaria completa si completo al menos 10 semestres
-replace nivel = 6   if (nivel_educ_en==7 & (a_educ==3 | s_educ==6 | t_educ==9)) | (nivel_educ_en==8 & ((a_educ>=5 & a_educ!=.) | (s_educ>=10 & s_educ!=.) | (t_educ>=15 & t_educ!=.))) | nivel_educ_en==9
-notes nivel: variable defined for individuals aged 3 and older 
+*** A que edad termini/dejo los estudios
+gen edad_dejo_estudios = s7q12 if (s7q12!=. & s7q12!=.a)
 
-label def nivel 0 "Nunca asistio" 1 "Primario Incompleto" 2 "Primario Completo" 3 "Secundario Incompleto" 4 "Secundario Completo" ///
-                5 "Superior Incompleto" 6 "Superior Completo"
-label value nivel nivel
-
-tab nivel_educ_en
-sum aedu
-tab nivel
-*brow id pid nivel_educ_en g_educ a_educ s_educ if nivel!=. & aedu==. // se pierden 165 obs que reportan nivel_educ, pero no reportan a_educ o s_educ segun corresponde
-
-* Nivel educativo: niveduc
-/*   0 = baja educacion  (menos de 9 años)      
-     1 = media educacion (de 9 a 13 años)
-     2 = alta educacion  (mas de 13 años) 
+*** Cual fue la principal razon por la que dejo los estudios?
+/* RAZONES_ABAN_ESTUDIOS
+		1.Terminó los estudios
+		2.Escuela distante
+		3.Escuela cerrada
+		4.Muchos paros/inasistencia de maestros
+		5.Costo de los útiles
+		6.Costo de los uniformes
+		7.Enfermedad/discapacidad
+		8.Debía trabajar
+		9.No quiso seguir estudiando
+		10.Inseguridad al asistir al centro educativo
+		11.Discriminación
+		12.Violencia
+		13.Por embarazo/cuidar a los hijos
+		14.Obligaciones en el hogar
+		15.No lo considera importante
+		16.Otra (Especifique)
 */
-gen     nivedu = 1 if aedu<9
-replace nivedu = 2 if aedu>=9 & aedu<=13
-replace nivedu = 3 if aedu>13 & aedu!=.
+clonevar razon_dejo_estudios= s7q13 if (s7q13!=. & s7q13!=.a)
+recode razon_dejo_estudios (11 12=11) (13=12) (14=13) (15=14) (16=15), g(razon_dejo_est_comp)
+label def razon_dejo_est_comp 1 "Terminó los estudios" 2 "Escuela distante" 3 "Escuela cerrada" 4 "Muchos paros/inasistencia de maestros" 5 "Costo de los útiles" 6 "Costo de los uniformes" ///
+7 "Enfermedad/discapacidad" 8 "Tiene que trabajar" 9 "No quiso seguir estudiando" 10 "Inseguridad al asistir al centro educativo" 11 "Discriminación o violencia" ///
+12 "Por embarazo/cuidar a los hijos" 13 "Tiene que ayudar en tareas del hogar" 14 "No lo considera importante" 15 "Otra"
+label value razon_dejo_est_comp razon_dejo_est_comp
 
-*label def nivedu 0 "Baja educacion (menos de 9 años)" 1 "Media educacion (de 9-13 años)" 2 "Alta educacion (mas de 13 años)"
-*label value nivedu nivedu
 
-* Dummies niveles de educacion
-gen     prii = (nivel==0 | nivel==1) if nivel!=.
-gen     pric = (nivel==2) if nivel!=.
-gen     seci = (nivel==3) if nivel!=.
-gen     secc = (nivel==4) if nivel!=.
-gen     supi = (nivel==5) if nivel!=.
-gen     supc = (nivel==6) if nivel!=.
-
-* Experiencia potencial: exp
-gen     exp = edad - aedu - 6
-replace exp = 0  if exp<0
-		
 /*(************************************************************************************************************************************************ 
-*------------------------------------------------------------- 1.7: Health Variables ---------------------------------------------------------------
+*------------------------------------------------------------- VIII. HEALTH VARIABLES ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
 
-global salud_SEDLAC seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
-enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
+global health_ENCOVI enfermo enfermedad visita razon_no_medico medico_o_quien lugar_consulta pago_consulta cant_pago_consulta mone_pago_consulta ///
+	mes_pago_consulta receto_remedio recibio_remedio donde_remedio pago_remedio mone_pago_remedio mes_pago_remedio pago_estudio pago_examen ///
+	mone_pago_examen mes_pago_examen remedio_tresmeses cant_remedio_tresmeses mone_remedio_tresmeses mes_remedio_tresmeses seguro_salud ///
+	afiliado_segsalud pagosegsalud quien_pagosegsalud cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
 
-* Seguro de salud: seguro_salud
-	/* s8q17: ¿está afiliado a algún seguro medico?
-			1 = si
-			2 = no
-			99 = NS/NR 
-	*/
 
-gen     seguro_salud = 1	if  s8q17==1
-replace seguro_salud = 0	if  s8q17==2
+*** Have you had any health problem, illness, or accident in the last 30 days?
+/* s8q1 ¿Ha tenido un problema de salud, enfermedad o accidente en los últimos 30 días?: enfermo
+		1 = si
+        2 = no */
+gen    enfermo = s8q1==1 & (s8q1!=. & s8q1!=.a)
 
-* Tipo de seguro de salud: tipo_seguro
-	/* s8q18: ¿Con cuál seguro médico está afiliado? 
-		1 = Instituto Venezolano de los Seguros Sociales (IVSS)
-	    2 = Instituto de prevision social publico (IPASME, IPSFA, otros)
-	    3 = Seguro medico contratado por institucion publica
-	    4 = Seguro medico contratado por institucion privada
-	    5 = Seguro medico privado contratado de forma particular
-	 */
-		
-	/*  0 = esta afiliado a algun seguro de salud publico o vinculado al trabajo (obra social)
-        1 = si esta afiliado a algun seguro de salud privado
-	*/
-	
-gen afiliado_seguro_salud = 1     if s8q18==1 
-replace afiliado_seguro_salud = 2 if s8q18==2 
-replace afiliado_seguro_salud = 3 if s8q18==3 
-replace afiliado_seguro_salud = 4 if s8q18==4
-replace afiliado_seguro_salud = 5 if s8q18==5
-replace afiliado_seguro_salud = 6 if s8q17==2
-label define afiliado_seguro_salud 1 "Instituto Venezolano de los Seguros Sociales (IVSS)" 2 "Instituto de prevision social publico (IPASME, IPSFA, otros)" ///
-3 "Seguro medico contratado por institucion publica" 4 "Seguro medico contratado por institucion privada" 5 "Seguro medico privado contratado de forma particular" ///
-6 "No tiene plan de seguro de atencion medica"
+*** Which was your main health problem?
+/* s8q2 ¿Cual fue el principal problema de salud que tuvo?
+		1 = Fiebre / Malaria
+		2 = Diarrea
+		3 = Accidente / Lesión
+		4 = Problema dental
+		5 = Problema de la piel
+		6 = Enfermedad de los ojos
+		7 = Problema de tensión
+		8 = Fiebre tifoidea
+		9 = Problema estomacal
+		10 = Dolor de garganta
+		11 = Tos, resfriado, gripe
+		12 = Diabetes
+		13 = Meningitis
+		14 = Otro */
+gen enfermedad = s8q2 if (s8q1!=. & s8q1!=.a) & s8q1==1
 
-gen 	tipo_seguro = 0     if  (afiliado_seguro_salud>=1 & afiliado_seguro_salud<=4) 
-replace tipo_seguro = 1     if  afiliado_seguro_salud==5 //SOLO 5 o 4 y 5?
-
-* Uso de metodos anticonceptivos: anticonceptivo
-gen     anticonceptivo = . 
-notes anticonceptivo: the survey does not include information to define this variable
-
-* ¿Consulto ginecologo en los ultimos 3 años?: ginecologo 
-gen     ginecologo=. 
-notes ginecologo: the survey does not include information to define this variable
-
-* ¿Hizo papanicolao en los ultimos 3 años?: papanicolao
-gen     papanicolao=. 
-notes papanicolao: the survey does not include information to define this variable
-
-* ¿Hizo mamografia en los ultimos 3 años?: mamografia
-gen     mamografia=. 
-notes mamografia: the survey does not include information to define this variable
-
-* Control durante el embarazo: control_embarazo //SOLO PARA EMBARAZADAS O TAMBIEN PARA QUIENES TUVIERON HIJOS VIVOS PREVIAMENTE?
-/*      1 = si se realizo controles durante el embarazo
-        0 = si no se realizo controles durante el embarazo
-*/	
-gen     control_embarazo=. 
-notes control_embarazo: the survey does not include information to define this variable
-
-* Lugar control del embarazo: lugar_control_embarazo
-/*      1 = si el control del embarazo fue en un lugar privado
-        0 = si el control del embarazo fue en un lugar publico o vinculado al trabajo (obra social)
-*/
-gen     lugar_control_embarazo=.
-notes lugar_control_embarazo: the survey does not include information to define this variable
-
-* Lugar del parto: lugar_parto
-/*      1 = si el parto fue en un lugar privado
-        0 = si el parto fue en un lugar publico o vinculado al trabajo (obra social)
-*/
-gen     lugar_parto = .
-notes lugar_parto: the survey does not include information to define this variable
-
-* ¿Hasta que edad le dio pecho?: tiempo_pecho
-gen    tiempo_pecho = .
-notes tiempo_pecho: the survey does not include information to define this variable
-
-* Vacunas
-*  ¿Ha recibido vacuna Anti-BCG (contra la tuberculosis): vacuna_bcg
-gen    vacuna_bcg = .
-notes vacuna_bcg: the survey does not include information to define this variable 
-
-*  ¿Ha recibido vacuna Anti-hepatitis B: vacuna_hepatitis
-gen    vacuna_hepatitis = .
-notes vacuna_hepatitis: the survey does not include information to define this variable 
-
-*  ¿Ha recibido vacuna Cuadruple (contra la difteria, el tetanos y la influenza tipo b): vacuna_cuadruple
-gen    vacuna_cuadruple = .
-notes vacuna_cuadruple: the survey does not include information to define this variable 
-
-*  ¿Ha recibido vacuna Triple Bacteriana (contra la difteria, el tetanos y la tos convulsa): vacuna_triple
-gen    vacuna_triple = . 
-notes vacuna_triple: the survey does not include information to define this variable
-
-*  ¿Ha recibido vacuna Antihemophilus (contra la influenza tipo b): vacuna_hemo
-gen    vacuna_hemo = . 
-notes vacuna_hemo: the survey does not include information to define this variable
-
-*  ¿Ha recibido vacuna Sabin (contra la poliomielitis): vacuna_sabin
-gen    vacuna_sabin = . 
-notes vacuna_sabin: the survey does not include information to define this variable
-
-*  ¿Ha recibido vacuna Triple Viral (contra el sarampion, las paperas y la rubeola): vacuna_triple_viral
-gen    vacuna_triple_viral = . 
-notes vacuna_triple_viral: the survey does not include information to define this variable
-
-* ¿Estuvo enfermo?: enfermo
-/*     1 = si estuvo enfermo o sintio malestar en el ultimo mes
-       0 = si no estuvo enfermo ni sintio malestar en el ultimo mes
-*/
-gen    enfermo = s8q1==1 if (s8q1!=. & s8q1!=.a)
-
-* ¿Interrumpio actividades por estar enfermo?: interrumpio
-/*      1 = si interrumpio sus actividades habituales por estar enfermo
-        0 = si no interrumpio sus actividades habituales por estar enfermo
-*/
-gen    interrumpio = .
-notes interrumpio: the survey does not include information to define this variable
-
-* ¿Visito al medico?: visita
-/*     1 = si consulto al medico en las ultimas 4 semanas
-       0 = si no consulto al medico en las ultimas 4 semanas
-*/
+*** Have you gone to get healthcare in the last 30 days?
+/* s8q3 ¿Ha consultado un servicio de salud (incluida una farmacia) o con un curandero tradicional en los últimos 30 días debido a este problema de salud?: visita
+		1 = si  
+        2 = no  */
 gen    visita = s8q3==1 if s8q1==1 & (s8q3!=. & s8q3!=.a)
 *Obs: Refers to last 30 days
 
-* ¿Por que no consulto al medico?: razon_no_medico
-/*     1 = si no consulto al medico por razones economicas
-       0 = si no consulto al medico por razones no economicas
-*/
+*** Why didn't you try to consult to treat the sickness or accident?
+/* 	s8q4 ¿Cuál es la razón por la cual no consultó para tratar esta enfermedad síntoma o malestar y/o accidente?: razon_no_medico
+	 	1 = Se automedicó, utilizó remedios caseros
+		2 = No tiene dinero para pagar consulta, exámenes, medicinas
+		3 = No lo consideró necesario, no hizo nada
+		4 = Lugar de atención queda lejos del domicilio
+		5 = La atención no es adecuada
+		6 = Hay que esperar mucho tiempo
+		7 = No lo atendieron
+		8 = Otra	*/
+gen    razon_no_medico = s8q4 if (s8q4!=. & s8q4!=.a) & (s8q1==1 & s8q3==2)
 
-	/* s8q4 Razón por la cual no consultó para tratarse 
-			1 = Se automedicó, utilizó remedios caseros
-			2 = No tiene dinero para pagar consulta, exámenes, medicinas
-			3 = No lo consideró necesario, no hizo nada
-			4 = Lugar de atención queda lejos del domicilio
-			5 = La atención no es adecuada
-			6 = Hay que esperar mucho tiempo
-			7 = No lo atendieron
-			8 = Otra
-	*/
-
-gen    razon_no_medico = 1 if s8q4==2 & (s8q1==1 & s8q3==2)
-replace razon_no_medico = 0	if (s8q4==1 | s8q4>=3 & s8q4<=8) & s8q1==1
-*Assumption: We included "4. Lugar de atencion queda lejos del domicilio" in "not economic" but are aware it could be argued it could be linked to economic issues... However, till Feb 25 2020 les than 1% of respondants of this question chose option 4.
-
-* Lugar de ultima consulta: lugar_consulta
-/*     1 = si el lugar de la ultima consulta es privado
-       0 = si el lugar de la ultima consulta es publico o vinculado al trabajo
-*/
-	/* s8q6: ¿Dónde acudió para su atención? 
+*** Who did you mainly consult to treat the sickness or accident?
+/*	s8q5 ¿A quién consultó principalmente para tratar esta enfermedad síntoma o malestar y/o accidente?
+	 	1 = Médico
+		2 = Enfermera u otro auxiliar paramédico
+		3 = Farmacéutico
+		4 = Curandero, yerbatero o brujo
+		5 = Otro 	*/
+gen    medico_o_quien = s8q5 if (s8q5!=. & s8q5!=.a) & (s8q1==1 & s8q3==1)
+		
+*** Where did you go for healthcare attention?
+/* 	s8q6 ¿Donde acudió para su atención?: lugar_consulta
 		1 = Ambulatorio/clínica popular/ CDI
 		2 = Hospital público o del Seguro Social
 		3 = Servicio privado sin hospitalización
@@ -1085,90 +1108,730 @@ replace razon_no_medico = 0	if (s8q4==1 | s8q4>=3 & s8q4<=8) & s8q1==1
 		5 = Centro de salud privado sin fines de lucro
 		6 = Servicio médico en el lugar de trabajo
 		7 = Farmacia
-		8 = Otro
-	 */
-gen    lugar_consulta = 1 if s8q6>=3 & s8q6<=5 & (s8q1==1 & s8q3==1)
-replace lugar_consulta = 0	if s8q6<=2 | s8q6==6 & (s8q1==1 & s8q3==1)
-*Doubt: What to do with "Farmacia" (MA thinks they are private, TS had coded as not) and "Otro" (s8q6_os allows them to specify - could be coded once we have it)? 
-*Assumption: at least for now we will leave them as missing
+		8 = Otro	 */
+gen    lugar_consulta = s8q6 if (s8q6!=. & s8q6!=.a) & (s8q1==1 & s8q3==1)
 
-* Pago de la ultima consulta: pago_consulta
-/*     1 = si el pago de la ultima consulta fue privado
-       0 = si el pago de la ultima consulta es publico o vinculado al trabajo
-*/
-gen    pago_consulta = 1 if s8q7==1 & (s8q1==1 & s8q3==1)
-replace pago_consulta = 0	if  s8q7==2 & (s8q1==1 & s8q3==1)
-*Assumption: we understand private payments as "pocket payments" (even done in public places or your places linked to work, as they may pay for one part and you pay for another). Thus we dont mix it with lugar_consulta
+*** Did you pay for consulting or healthcare attention?
+/* 	s8q7 ¿Pagó por consultas o atención médica?: pago_consulta
+	 	1 = si 
+		2 = no  */
+gen    	pago_consulta = s8q7==1 & (s8q1==1 & s8q3==1)
 
-* Tiempo que tardo en llegar al medico medido en horas: tiempo_consulta
-gen    tiempo_consulta = .
-notes tiempo_consulta: the survey does not include information to define this variable
+*** How much did you pay? 
+* 	s8q8a ¿Cuánto pagó?: cant_pago_consulta
+gen    	cant_pago_consulta = s8q8a if s8q1==1 & s8q3==1 & s8q7==1
 
-* ¿Obtuvo remedios prescriptos?: obtuvo_remedio
-	/*     1 = si obtuvo medicamentos prescriptos
-		   0 = si no obtuvo medicamentos prescriptos
-	*/
+*** In which currency did you pay?
+/* 	s8q8b ¿En qué moneda realizó el pago?: mone_pago_consulta
+	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
+gen    	mone_pago_consulta = s8q8b if (s8q8b!=. & s8q8b!=.a) & (s8q1==1 & s8q3==1 & s8q7==1)
 
-		/* s8q9: ¿Se recetó algún medicamento para la enfermedad o accidente? 
-			1 = Si
-			2 = No
-			
-		*s8q10: ¿Cómo obtuvo los medicamentos?
+*** In which month did you pay?
+/* 	s8q8c ¿En qué mes pagó?: mes_pago_consulta
+	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
+gen    mes_pago_consulta = s8q8c if (s8q8c!=. & s8q8c!=.a) & (s8q1==1 & s8q3==1 & s8q7==1)
+		
+*** Did you get any medicine prescribed for the illness of accident?
+/* s8q9 ¿Se recetó a algún medicamento para la enferemedad o accidente?: receto_remedio
+		 	1 = Si
+			2 = No */
+gen     receto_remedio = s8q9==1 if (s8q1==1 & s8q3==1)
+
+*** How did you get the medicines?
+/* s8q10 ¿Cómo obtuvo los medicamentos?: recibio_remedio
 			1 = Los recibió todos gratis
 			2 = Recibió algunos gratis y otros los compró
 			3 = Los compró todos
 			4 = Compró algunos
 			5 = Recibió algunos gratis y los otros no pudo comprarlos
-			6 = No pudo obtener ninguno
-		 */
-	gen     receto_remedio=.
-	replace receto_remedio=s8q9==1 if (s8q1==1 & s8q3==1)
+			6 = No pudo obtener ninguno */
+gen  	recibio_remedio = s8q10 if (s8q1==1 & s8q9==1) & (s8q10!=. & s8q10!=.a) 
 
-	clonevar  recibio_remedio = s8q10 if receto_remedio==1 & (s8q10!=. & s8q10!=.a) 
+*** Where did you buy the medicines?
+/* s8q11 ¿Dónde compró los medicamentos?
+			1 = Boticas o farmacias populares
+			2 = Otras farmacias comerciales
+			3 = Institutos de Previsión Social u otras fundaciones ( IPAS-ME, IPSFA, otros)
+			4 = Otro	*/		
+gen     donde_remedio = s8q11==1 if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
+		
+*** How much did you pay for the medicines?
+* s8q12a ¿Cuánto pagó por los medicamentos?: pago_remedio
+gen     pago_remedio = s8q12a if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
 
-	gen     obtuvo_remedio = (recibio_remedio>=1 & recibio_remedio<=5) if receto_remedio==1 
+*** In which currency did you pay?
+/* 	s8q12b ¿En qué moneda realizó el pago?: moneda_pago_remedio
+	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
+gen    	mone_pago_remedio = s8q12b if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
 
-* ¿Por que no obtuvo remedios prescriptos?: razon_no_remedio
-/*     1 = si no obtuvo remedios por razones economicas
-       0 = si no obtuvo remedios por otras razones
-*/
-gen    razon_no_remedio = .
-notes razon_no_remedio: the survey does not include information to define this variable
+*** In which month did you pay?
+/* 	s8q12c ¿En qué mes pagó?: mes_pago_remedio
+	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
+gen    	mes_pago_remedio = s8q12c if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
 
-* ¿Fuma?: fumar
-/*     1 = si fuma o fumo alguna vez
-       0 = si nunca fumo
-*/
-gen   fumar = .
-notes fumar: the survey does not include information to define this variable
+*** Did you pay for Xrays, lab exams or similar?
+/* s8q13 ¿Pagó por radiografías, exámenes de laboratorio o similares?: pago_estudio
+			1 = Si
+			2 = No 		*/
+gen 	pago_estudio = s8q13==1 if s8q1==1 & s8q3==1 
+			
+*** How much did you pay?
+* s8q14a ¿Cuánto pagó?: pago_examen
+gen     pago_examen = s8q14a if s8q1==1 & s8q3==1 
 
-* ¿Hace deporte regularmente?: deporte
-/*     1 = si hace deporte regularmente (1 vez por semana)
-       0 = si no hace deporte regularmente
-*/
-gen    deporte = .
-notes deporte: the survey does not include information to define this variable
+*** In which currency did you pay?
+/* 	s8q14b ¿En qué moneda realizó el pago?: mone_pago_examen
+	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
+gen    	mone_pago_examen = s8q14b if s8q1==1 & s8q3==1 
 
+*** In which month did you pay?
+/* 	s8q14c ¿En qué mes pagó?: mes_pago_examen
+	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
+gen    	mes_pago_examen = s8q14c if s8q1==1 & s8q3==1 
+
+*** Although you answered you did not have any health problem, illness or accident in the last month, did you spend money in medicines due to illnesses, accidents or health problems in the last 3 months?
+/*  s8q15 Aunque usted ya indicó que no consultó a ningún personal médico, ¿gastó dinero en los ultimos 3 meses en medicinas por enfermedad, accidente, o quebrantos de salud que tuvo ?
+			1 = Si
+			2 = No 		*/
+gen 	remedio_tresmeses = s8q15==1 if s8q1==2
+
+*** How much did you pay?
+* s8q16a ¿Cuánto gastó?: cant_remedio_tresmeses
+gen     cant_remedio_tresmeses = s8q16a if s8q1==2 & s8q15==1
+
+*** In which currency did you pay?
+/* 	s8q16b ¿En qué moneda realizó el pago?: mone_remedio_tresmeses
+	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
+gen    	mone_remedio_tresmeses = s8q16b if s8q1==2 & s8q15==1
+
+*** In which month did you pay?
+/* 	s8q16c ¿En qué mes pagó?: mes_remedio_tresmeses
+	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
+gen    	mes_remedio_tresmeses = s8q16c if s8q1==2 & s8q15==1
+
+*** Are you affiliated to health insurance?
+/* 	s8q17 ¿Está afiliado a algún seguro medico?: seguro_salud
+			1 = si
+			2 = no	 */
+gen     seguro_salud = 1	if  s8q17==1
+replace seguro_salud = 0	if  s8q17==2
+
+*** Which is the main health insurance or that with greatest coverage you are affiliated to?
+/* s8q18: ¿Cuál es el seguro médico principal o de mayor cobertura al cual está afiliado?: afiliado_segsalud
+		1 = Instituto Venezolano de los Seguros Sociales (IVSS)
+		2 = Instituto de prevision social publico (IPASME, IPSFA, otros)
+		3 = Seguro medico contratado por institucion publica
+		4 = Seguro medico contratado por institucion privada
+		5 = Seguro medico privado contratado de forma particular */
+gen 	afiliado_segsalud = s8q18   if s8q17==1 & (s8q18!=. & s8q18!=.a) 
+label 	define afiliado_segsalud ///
+		1 "Instituto Venezolano de los Seguros Sociales (IVSS)" ///
+		2 "Instituto de prevision social publico (IPASME, IPSFA, otros)" ///
+		3 "Seguro medico contratado por institucion publica" ///
+		4 "Seguro medico contratado por institucion privada" ///
+		5 "Seguro medico privado contratado de forma particular"
+
+*** Did you pay for health insurance?
+/* 	s8q19 ¿Pagó por el seguro médico?: pagosegsalud
+		1 = si
+		2 = no	 */
+gen     pagosegsalud = s8q19==1  if s8q17==1
+
+*** Who paid for the health insurance?
+/* s8q20 ¿Quién pagó por el seguro médico?: quien_pagosegsalud
+		1 = Beneficio laboral
+		2 = Familiar en el exterior
+		3 = Otro miembro del hogar
+		4 = Otro (especifique) */
+gen     quien_pagosegsalud = s8q19==1  if s8q17==1 & s8q18==5
+
+*** How much did you pay?
+* s8q21a ¿Cuál fue el monto pagado por el seguro de salud?: cant_pagosegsalud
+gen     cant_pagosegsalud = s8q21a if s8q19==1
+
+*** In which currency did you pay?
+/* 	s8q21b ¿En qué moneda realizó el pago?: mone_pagosegsalud
+	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
+gen    	mone_pagosegsalud = s8q21b if s8q19==1
+
+*** In which month did you pay?
+/* 	s8q21c ¿En qué mes pagó?: mes_pagosegsalud
+	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
+gen    	mes_pagosegsalud= s8q21c if s8q19==1
+		
 
 /*(************************************************************************************************************************************************* 
-*---------------------------------------------------------- 1.8: Labor Variables ---------------------------------------------------------------
+*---------------------------------------------------------- IX: LABOR / EMPLEO ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
+
+global labor_ENCOVI trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
+como_busco_semana razon_no_busca actividades_inactivos tarea sector_encuesta categ_ocu hstr_ppal trabajo_secundario hstr_todos im_sueldo im_hsextra ///
+im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_sueldo_cant im_hsextra_cant ///
+im_propina_cant im_comision_cant im_ticket_cant im_guarderia_cant im_beca_cant im_hijos_cant im_antiguedad_cant im_transporte_cant im_rendimiento_cant ///
+im_otro_cant i_sueldo_mone i_hsextra_mone i_propina_mone i_comision_mone i_ticket_mone i_guarderia_mone i_beca_mone i_hijos_mone i_antiguedad_mone ///
+i_transporte_mone i_rendimiento_mone i_otro_mone c_sso c_rpv c_spf c_aca c_sps c_otro c_sso_cant c_rpv_cant c_spf_cant c_aca_cant c_sps_cant c_otro_cant ///
+c_sso_mone c_rpv_mone c_spf_mone c_aca_mone c_sps_mone c_otro_mone inm_comida inm_productos inm_transporte inm_vehiculo inm_estaciona inm_telefono ///
+inm_servicios inm_guarderia inm_otro inm_comida_cant inm_productos_cant inm_transporte_cant inm_vehiculo_cant inm_estaciona_cant inm_telefono_cant ///
+inm_servicios_cant inm_guarderia_cant inm_otro_cant inm_comida_mone inm_productos_mone inm_transporte_mone inm_vehiculo_mone inm_estaciona_mone ///
+inm_telefono_mone inm_servicios_mone inm_guarderia_mone inm_otro_mone d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro d_sso_cant d_spf_cant d_isr_cant ///
+d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone im_patron im_patron_cant ///
+im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone inm_indep inm_indep_cant inm_indep_mone gm_indep_cant ///
+gm_indep_mone razon_menoshs deseamashs buscamashs razon_nobusca cambiotr razon_cambiotr aporta_pension pension_IVSS pension_publi pension_priv pension_otro ///
+aporte_pension cant_aporta_pension mone_aporta_pension 
 
 *Notes: interviews done if age>9
 
-* Relacion laboral en su ocupacion principal: relab
-/* LABOR_STATUS: La semana pasada estaba:
+* Identifying economically active and inactive, and reasons
+
+	*** Did you work at least one hour last week? 
+	/* 	s9q1 ¿La semana pasada trabajó al menos una hora?: trabajo_semana
+			1 = si
+			2 = no	 */
+	gen     trabajo_semana = s9q1==1 & (s9q1!=. & s9q1!=.a) 
+
+	*** Independently of last answer, did you dedicate last week at least one hour to: 
+	/* 	s9q2 Independientemente de lo que me acaba de decir, ¿le dedicó la semana pasada, al menos una hora a...: trabajo_semana_2
+			1 = Realizar una actividad que le proporcionó ingresos
+			2 = Ayudar en las tierras o en el negocio de un familiar o de otra persona
+			3 = No trabajó la semana pasada	 */
+	gen     trabajo_semana_2 = s9q2 if s9q1==2 & (s9q2!=. & s9q2!=.a) 
+
+	*** Despite you already said you didnt work last week, do you have any job, business, or do you do any activity on your own? 
+	/* 	s9q3 Aunque ya me dijo que no trabajó la semana pasada, ¿tiene algún empleo, negocio o realiza alguna actividad por su cuenta?: trabajo_independiente
+			1 = si
+			2 = no	 */
+	gen     trabajo_independiente = s9q3==1 if (s9q1==2 & s9q2==3) & (s9q3!=. & s9q3!=.a) 
+
+	*** Main reason for not working last week
+	/* s9q4 Cuál es la razón principal por la que no trabajó la semana pasada?: razon_no_trabajo
+			1 = Estaba enfermo
+			2 = Vacaciones
+			3 = Permiso
+			4 = Conflictos laborales
+			5 = Reparación de equipo, maquinaria, vehículo
+			*Obs: number 6 is missing
+			7 = No quiere trabajar
+			8 = Falta de trabajo, clientes o pedidos
+			9 = Impedimento de autoridades municipales o nacionales
+			10 = Nuevo empleo a empezar en 30 días
+			11 = Factores estacionales
+			16 = Otro 	*/
+	gen     razon_no_trabajo = s9q4 if s9q3==1 & (s9q2!=. & s9q2!=.a) 
+		
+	*** Last week did you receive wages or benefits? 
+	/* 	s9q5 Durante la semana pasada recibió sueldo o ganancias?: sueldo_semana
+			1 = si
+			2 = no	 */
+	gen     sueldo_semana = s9q5==1 if s9q3==1 & (s9q5!=. & s9q5!=.a) 
+
+	*** Did you do anything to look for a paid job in the last 4 weeks?
+	/* s9q6 Durante las últimas 4 semanas, ¿hizo algo para encontrar un trabajo remunerado?: busco_trabajo
+			1 = si
+			2 = no	*/
+	gen     busco_trabajo = s9q6==1 if (s9q3==2 & s9q1==2 & s9q2==3) & (s9q6!=. & s9q6!=.a) 
+
+	*** Or did you do anything to start a business?
+	/* s9q7 O hizo algo para empezar un negocio?: empezo_negocio
+			1 = si
+			2 = no	*/
+	gen     empezo_negocio = s9q7==1 if (s9q6==2 & s9q3==2 & s9q1==2 & s9q2==3) & (s9q7!=. & s9q7!=.a) 
+
+	*** When was the last time did you did something to find a job or start a business joinlty or alone?
+	/* s9q8 Cuándo fue la última vez que hizo algo para conseguir trabajo o establecer un negocio solo o asociado? (para quienes no buscaron en las últimas 4 semanas): cuando_buscotr
+			1 = En los últimos 2 meses
+			2 = En los últimos 12 meses
+			3 = Hace más de un año
+			4 = No ha hecho diligencias	*/
+	gen     cuando_buscotr = s9q8 if (s9q7==2 & s9q6==2 & s9q3==2 & s9q1==2 & s9q2==3) & (s9q8!=. & s9q8!=.a) 
+
+	*** Have you carried out any of these proceedings in that period? (4 weeks)
+	/* s9q9__* Ha realizado alguna de estas diligencias en ese período? (4 semanas): dili_*
+			1 = Consultó a una agencia de empleo
+			2 = Puso o contestó aviso
+			3 = Llenó alguna planilla
+			4 = Búsqueda de crédito o local
+			5 = Trámites de permiso o legalización de documentos
+			6 = Compra de insumos o materia prima
+			7 = Contacto personal
+			8 = Otra diligencia		*/
+	gen     dili_agencia 	= s9q9__1==1 if (s9q6==1 | s9q7==1) & (s9q9__1!=. & s9q9__1!=.a) 
+	gen     dili_aviso 		= s9q9__2==1 if (s9q6==1 | s9q7==1) & (s9q9__2!=. & s9q9__2!=.a) 
+	gen     dili_planilla 	= s9q9__3==1 if (s9q6==1 | s9q7==1) & (s9q9__3!=. & s9q9__3!=.a) 
+	gen     dili_credito 	= s9q9__4==1 if (s9q6==1 | s9q7==1) & (s9q9__4!=. & s9q9__4!=.a) 
+	gen     dili_tramite 	= s9q9__5==1 if (s9q6==1 | s9q7==1) & (s9q9__5!=. & s9q9__5!=.a) 
+	gen     dili_compra 	= s9q9__6==1 if (s9q6==1 | s9q7==1) & (s9q9__6!=. & s9q9__6!=.a) 
+	gen     dili_contacto 	= s9q9__7==1 if (s9q6==1 | s9q7==1) & (s9q9__7!=. & s9q9__7!=.a) 
+	gen     dili_otro	 	= s9q9__8==1 if (s9q6==1 | s9q7==1) & (s9q9__8!=. & s9q9__8!=.a) 
+	
+	*** Have you carried out any of these proceedings last week?
+	/* s9q10 ¿Realizó alguna de esas diligencias la semana pasada?: como_busco_semana
+			1 = si
+			2 = no	*/
+	gen     como_busco_semana = s9q10==1 if (s9q9__1!=. | s9q9__2!=. | s9q9__3!=. | s9q9__4!=. | s9q9__5!=. | s9q9__6!=. | s9q9__7!=. | s9q9__8!=.) & (s9q10!=. & s9q10!=.a) 
+
+	*** Have you carried out any of these proceedings in that period? (4 weeks)
+	/* s9q11 ¿Por cuál de estos motivos no está buscando trabajo actualmente?: razon_no_busca
+			1 = Está cansado de buscar trabajo
+			2 = No encuentra el trabajo apropiado
+			3 = Cree que no va a encontrar trabajo
+			4 = No sabe cómo ni dónde buscar trabajo
+			5 = Cree que por su edad no le darán trabajo
+			6 = Ningún trabajo se adapta a sus capacidades
+			7 = No tiene quién le cuide los niños
+			8 = Está enfermo/motivos de salud
+			9 = Otro motivo ? Especifique */
+	gen     razon_no_busca = s9q11 if (s9q8==1|2|3|4) & (s9q11!=. & s9q11!=.a) 
+
+	*** What are you doing right now? (only for those who did not work)
+	/* s9q12 ¿Qué es lo que está haciendo actualmente? (sólo para aquellos que no trabajaron): actividades_inactivos
+			1 = Estudiando
+			2 = Entrenando
+			3 = Actividades del hogar o responsabilidades de la familia
+			4 = Trabajando en una parcela para uso familiar
+			* Obs: number 5 is missing
+			6 = Jubilado o pensionado
+			7 = Enfermedad de largo plazo
+			8 = Discapacidad
+			9 = Trabajo voluntario
+			10 = Trabajo caridad
+			11 = Actividades culturales o de ocio	*/
+	gen     actividades_inactivos = s9q12 if (s9q11==1|2|3|4|5|6|7|8|9) & (s9q12!=. & s9q12!=.a) 
+
+* For all the economically active
+
+	*** What is your position at your main occupation? 
+	/* s9q13 ¿Cuál es la ocupación que desempeña en su trabajo principal? (encuestas anteriores: ¿Cuál es el oficio o trabajo que realiza?): tarea
+			1 = Director o gerente
+			2 = Profesional científico o intelectual
+			3 = Técnico o profesional de nivel medio
+			4 = Personal de apoyo administrativo
+			5 = Trabajador de los servicios o vendedor de comercios y mercados
+			6 = Agricultor o trabajador calificado agropecuario, forestal o pesquero
+			7 = Oficial, operario o artesano de artes mecánicas y otros oficios
+			8 = Operador de instalaciones fijas y máquinas y maquinarias
+			9 = Ocupaciones elementales
+			10 = Ocupaciones militares */
+	gen     tarea = s9q13 		if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q13!=. & s9q13!=.a) // the first parenthesis means being economically active
+
+	*** What does the business, institution or firm in which you work do?
+	/* s9q14 ¿A que se dedica el negocio, organismo o empresa en la que trabaja/desempaña su trabajo principal?: sector_encuesta
+			1 = Agricultura, ganaderia, pesca, caza y actividades de servicios conexas
+			2 = Explotación de minas y canteras
+			3 = Industria manufacturera
+			4 = Instalacion/ suministro/ distribucion de electricidad, gas o agua
+			5 = Construccion
+			6 = Comercio al por mayor y al por menor; reparacion de vehiculos automotores y motocicletas
+			7 = Transporte, almacenamiento, alojamiento y servicio de comida, comunicaciones y servicios de computacion
+			8 = Entidades financieras y de seguros, inmobiliarias, profesionales, cientificas y tecnicas; y servicios administrativos de apoyo
+			9 = Administración publica y defensa, enseñanza, salud, asistencia social, arte, entretenimiento, embajadas
+			10 = Otras actividades de servicios como reparaciones, limpieza, peluqueria, funeraria y servicio domestico	*/
+	gen 	sector_encuesta = s9q14 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q14!=. & s9q14!=.a) // the first parenthesis means being economically active
+
+	*** In your work you are...
+	/* s9q15 En su trabajo se desempña como...: categ_ocu
+			1 = Empleado u obrero en el sector publico
+				*Obs: 1 used to be divided in 2 before, thats why number 2 is skipped.
+			3 = Empleado u obrero en empresa privada		
+				*Obs: 3 used to be divided in 2 before, thats why number 4 is skipped.
+			5 = Patrono o empleador
+			6 = Trabajador por cuenta propia
+			7 = Miembro de cooperativas
+			8 = Ayudante familiar remunerado/no remunerado
+			9 = Servicio domestico		*/
+	gen 	categ_ocu = s9q15 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q15!=. & s9q15!=.a) // the first parenthesis means being economically active
+	*Obs. CAPI1: s9q15==(1|2|3|4|7|8|9) i.e. workers not self-employed or employer
+
+	*** How many hours did you work last week in your main occupation?
+	/* s9q16 ¿Cuántas horas trabajó durante la semana pasada en su ocupación principal?: hstr_ppal	*/
+	gen     hstr_ppal = s9q16 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q16!=. & s9q16!=.a) 
+
+	*** Besides your main occupation, did you do any other activity through which you received income, such as selling things, contracted work, etc?
+	/* s9q17 Además de su trabajo principal, ¿realizó la semana pasada alguna otra actividad por la que percibió ingresos tales como, venta de artículos, trabajos contratados, etc?: trabajo_secundario
+			1 = si
+			2 = no		*/
+	gen     trabajo_secundario = s9q17==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q17!=. & s9q17!=.a) 
+
+	*** How many hours do you normally work weekly in all your jobs or businesses?
+	/* s9q18 ¿Cuántas horas trabaja normalmente a la semana en todos sus trabajos o negocios?: hstr_todos */
+		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
+	gen     hstr_todos = s9q18 if s9q17==1 & (s9q18!=. & s9q18!=.a) 
+
+		*Problem: it should not be possible but there is at least one case in which the total hours worked appears to be greater than the hours worked for the main job
+		
+* For those not self-employed or employers (s9q15==1|3|7|8|9) // CAPI1=true
+	
+	*** With respect to last month, did you receive income in all of your jobs or businesses for the following concepts? (each one is a dummy)
+	/* s9q19__* ¿Con respecto al mes pasado, recibió en todos sus trabajos o negocios ingresos por los siguientes conceptos?: im_*
+				1 = Sueldos y salarios
+				2 = Horas extras
+				3 = Propinas
+				4 = Comisiones
+				5 = Cesta ticket, tarjeta de alimentación
+				6 = Aporte por guardería
+				7 = Beca estudio
+				8 = Prima por hijos
+				9 = Antigüedad
+				10 = Bono de transporte
+				11 = Bono por rendimiento
+				12 = Otros bonos y compensaciones */
+			*Note: im stands for ingreso monetario
+			*Note2: For those not self-employed or employers (s9q15==1|3|7|8|9)	// CAPI1=true
+	gen     im_sueldo 		= s9q19__1==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__1!=. & s9q19__1!=.a) 
+	gen     im_hsextra 		= s9q19__2==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__2!=. & s9q19__2!=.a) 
+	gen     im_propina 		= s9q19__3==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__3!=. & s9q19__3!=.a) 
+	gen     im_comision	 	= s9q19__4==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__4!=. & s9q19__4!=.a) 
+	gen 	im_ticket		= s9q19__5==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__5!=. & s9q19__5!=.a) 
+	gen 	im_guarderia	= s9q19__6==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__6!=. & s9q19__6!=.a) 
+	gen 	im_beca			= s9q19__7==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__7!=. & s9q19__7!=.a) 
+	gen 	im_hijos		= s9q19__8==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__8!=. & s9q19__8!=.a) 
+	gen 	im_antiguedad 	= s9q19__9==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__9!=. & s9q19__9!=.a) 
+	gen 	im_transporte	= s9q19__10==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__10!=. & s9q19__10!=.a) 
+	gen 	im_rendimiento	= s9q19__11==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__11!=. & s9q19__11!=.a) 
+	gen 	im_otro			= s9q19__12==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__12!=. & s9q19__12!=.a) 
+		
+	*** Amount received (1 variable for each of the 12 options)
+	* s9q19a_* Monto recibido: im_*_cant
+	* Note: cant stands for cantidad/quantity
+	gen     im_sueldo_cant 		= s9q19a_1 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_1!=. & s9q19a_1!=.a) 
+	gen     im_hsextra_cant 	= s9q19a_2 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_2!=. & s9q19a_2!=.a) 
+	gen     im_propina_cant		= s9q19a_3 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_3!=. & s9q19a_3!=.a) 
+	gen     im_comision_cant	= s9q19a_4 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_4!=. & s9q19a_4!=.a) 
+	gen 	im_ticket_cant		= s9q19a_5 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_5!=. & s9q19a_5!=.a) 
+	gen 	im_guarderia_cant 	= s9q19a_6 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_6!=. & s9q19a_6!=.a) 
+	gen 	im_beca_cant		= s9q19a_7 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_7!=. & s9q19a_7!=.a) 
+	gen 	im_hijos_cant		= s9q19a_8 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_8!=. & s9q19a_8!=.a) 
+	gen 	im_antiguedad_cant	= s9q19a_9 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_9!=. & s9q19a_9!=.a) 
+	gen 	im_transporte_cant	= s9q19a_10 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_10!=. & s9q19a_10!=.a) 
+	gen 	im_rendimiento_cant	= s9q19a_11 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_11!=. & s9q19a_11!=.a) 
+	gen 	im_otro_cant		= s9q19a_12 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_12!=. & s9q19a_12!=.a) 
+
+	*** In which currency? (1 variable for each of the 12 options)
+	* s9q19b_* En qué moneda?: i_*_mone
+	* 1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos
+	gen     i_sueldo_mone 		= s9q19b_1 if s9q19__1!=. & (s9q19b_1!=. & s9q19b_1!=.a) 
+	gen     i_hsextra_mone 		= s9q19b_2 if s9q19__2!=. & (s9q19b_2!=. & s9q19b_2!=.a) 
+	gen     i_propina_mone		= s9q19b_3 if s9q19__3!=. & (s9q19b_3!=. & s9q19b_3!=.a) 
+	gen     i_comision_mone		= s9q19b_4 if s9q19__4!=. & (s9q19b_4!=. & s9q19b_4!=.a) 
+	gen 	i_ticket_mone		= s9q19b_5 if s9q19__5!=. & (s9q19b_5!=. & s9q19b_5!=.a) 
+	gen 	i_guarderia_mone 	= s9q19b_6 if s9q19__6!=. & (s9q19b_6!=. & s9q19b_6!=.a) 
+	gen 	i_beca_mone			= s9q19b_7 if s9q19__7!=. & (s9q19b_7!=. & s9q19b_7!=.a) 
+	gen 	i_hijos_mone		= s9q19b_8 if s9q19__8!=. & (s9q19b_8!=. & s9q19b_8!=.a) 
+	gen 	i_antiguedad_mone	= s9q19b_9 if s9q19__9!=. & (s9q19b_9!=. & s9q19b_9!=.a) 
+	gen 	i_transporte_mone	= s9q19b_10 if s9q19__10!=. & (s9q19b_10!=. & s9q19b_10!=.a) 
+	gen 	i_rendimiento_mone 	= s9q19b_11 if s9q19__11!=. & (s9q19b_11!=. & s9q19b_11!=.a) 
+	gen 	i_otro_mone			= s9q19b_12 if s9q19__12!=. & (s9q19b_12!=. & s9q19b_12!=.a)
+
+	*** With respect to last month, did you receive in your jobs contributions from your employer to social security for any of the folowing concepts? (each one is a dummy)
+	/* s9q20__* ¿Con respecto al mes pasado recibió en su trabajo u otros empleos, contribuciones de los patronos a la seguridad social por los siguientes conceptos?: c_*
+				1 = Seguro social obligatorio
+				2 = Régimen de prestaciones Vivienda y hábitat
+				3 = Seguro de paro forzoso
+				4 = Aporte patronal de la caja de ahorro
+				5 = Contribuciones al sistema privado de seguros
+				6 = Otras contribuciones */
+			* Note: For those not self-employed or employers (s9q15==1|3|7|8|9) // CAPI1=true	
+	gen     c_sso 		= s9q20__1==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__1!=. & s9q20__1!=.a) 
+	gen     c_rpv 		= s9q20__2==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__2!=. & s9q20__2!=.a) 
+	gen     c_spf 		= s9q20__3==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__3!=. & s9q20__3!=.a) 
+	gen     c_aca	 	= s9q20__4==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__4!=. & s9q20__4!=.a) 
+	gen 	c_sps		= s9q20__5==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__5!=. & s9q20__5!=.a) 
+	gen 	c_otro		= s9q20__6==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__6!=. & s9q20__6!=.a) 
+		
+	*** Amount received (1 variable for each of the 6 options)
+	* s9q20a_* Monto recibido: c_*_cant
+	gen     c_sso_cant 		= s9q20a_1 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_1!=. & s9q20a_1!=.a) 
+	gen     c_rpv_cant 		= s9q20a_2 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_2!=. & s9q20a_2!=.a) 
+	gen     c_spf_cant  	= s9q20a_3 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_3!=. & s9q20a_3!=.a) 
+	gen     c_aca_cant 	 	= s9q20a_4 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_4!=. & s9q20a_4!=.a) 
+	gen 	c_sps_cant 		= s9q20a_5 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_5!=. & s9q20a_5!=.a) 
+	gen 	c_otro_cant 	= s9q20a_6 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_6!=. & s9q20a_6!=.a)
+
+	*** In which currency? (1 variable for each of the 12 options)
+	* s9q20b_* En qué moneda?: c_*_mone
+	* 1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos
+	gen     c_sso_mone 		= s9q20b_1 if s9q20__1!=. & (s9q20b_1!=. & s9q20b_1!=.a) 
+	gen     c_rpv_mone 		= s9q20b_2 if s9q20__2!=. & (s9q20b_2!=. & s9q20b_2!=.a) 
+	gen     c_spf_mone  	= s9q20b_3 if s9q20__3!=. & (s9q20b_3!=. & s9q20b_3!=.a) 
+	gen     c_aca_mone 	 	= s9q20b_4 if s9q20__4!=. & (s9q20b_4!=. & s9q20b_4!=.a) 
+	gen 	c_sps_mone 		= s9q20b_5 if s9q20__5!=. & (s9q20b_5!=. & s9q20b_5!=.a) 
+	gen 	c_otro_mone 	= s9q20b_6 if s9q20__6!=. & (s9q20b_6!=. & s9q20b_6!=.a)
+
+	*** With respect to last month, did you receive any of the following benefits in your work or other jobs? (each one is a dummy)
+	/* s9q21__* ¿Con respecto al mes pasado, recibió alguno de los siguientes beneficios en su trabajo u otros empleos? 
+				1 = Alimentación
+				2 = Productos de la empresa
+				3 = Transporte
+				4 = Vehículo para uso privado
+				5 = Exoneración del pago de estacionamiento
+				6 = Teléfono personal
+				7 = Servicios básicos de vivienda
+				8 = Guardería del trabajo
+				9 = Otros beneficios	*/
+		* Note: For those not self-employed or employers (s9q15==1|3|7|8|9)	// CAPI1=true
+		* Note 2: inm stands for ingreso no monetario
+	gen     inm_comida 			= s9q21__1==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__1!=. & s9q21__1!=.a) 
+	gen     inm_productos 		= s9q21__2==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__2!=. & s9q21__2!=.a) 
+	gen     inm_transporte 		= s9q21__3==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__3!=. & s9q21__3!=.a) 
+	gen     inm_vehiculo	 	= s9q21__4==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__4!=. & s9q21__4!=.a) 
+	gen 	inm_estaciona		= s9q21__5==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__5!=. & s9q21__5!=.a) 
+	gen 	inm_telefono		= s9q21__6==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__6!=. & s9q21__6!=.a) 
+	gen 	inm_servicios		= s9q21__7==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__7!=. & s9q21__7!=.a) 
+	gen 	inm_guarderia		= s9q21__8==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__8!=. & s9q21__8!=.a) 
+	gen 	inm_otro	 		= s9q21__9==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__9!=. & s9q21__9!=.a) 
+		
+	*** Amount received, or estimation of how much they would have paid for the benefit (1 variable for each of the 9 options)
+	* s9q21a_*: Monto recibido (Si no percibe el beneficio en dinero, estime cuánto tendría que haber pagado por ese concepto (p.e. pago de guardería infantil, comedor en la empresa o transporte))
+	gen     inm_comida_cant 	= s9q21a_1 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_1!=. & s9q21a_1!=.a) 
+	gen     inm_productos_cant 	= s9q21a_2 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_2!=. & s9q21a_2!=.a) 
+	gen     inm_transporte_cant	= s9q21a_3 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_3!=. & s9q21a_3!=.a) 
+	gen     inm_vehiculo_cant	= s9q21a_4 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_4!=. & s9q21a_4!=.a) 
+	gen 	inm_estaciona_cant	= s9q21a_5 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_5!=. & s9q21a_5!=.a) 
+	gen 	inm_telefono_cant 	= s9q21a_6 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_6!=. & s9q21a_6!=.a) 
+	gen 	inm_servicios_cant	= s9q21a_7 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_7!=. & s9q21a_7!=.a) 
+	gen 	inm_guarderia_cant	= s9q21a_8 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_8!=. & s9q21a_8!=.a) 
+	gen 	inm_otro_cant 		= s9q21a_9 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_9!=. & s9q21a_9!=.a) 
+
+	*** In which currency? (1 variable for each of the 12 options)
+	* s9q21b_* En qué moneda?: inm_*_moneda
+	* 1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos
+	gen     inm_comida_mone 	= s9q21b_1 if s9q21__1!=. & (s9q21b_1!=. & s9q21b_1!=.a) 
+	gen     inm_productos_mone 	= s9q21b_2 if s9q21__2!=. & (s9q21b_2!=. & s9q21b_2!=.a) 
+	gen     inm_transporte_mone	= s9q21b_3 if s9q21__3!=. & (s9q21b_3!=. & s9q21b_3!=.a) 
+	gen     inm_vehiculo_mone	= s9q21b_4 if s9q21__4!=. & (s9q21b_4!=. & s9q21b_4!=.a) 
+	gen 	inm_estaciona_mone	= s9q21b_5 if s9q21__5!=. & (s9q21b_5!=. & s9q21b_5!=.a) 
+	gen 	inm_telefono_mone 	= s9q21b_6 if s9q21__6!=. & (s9q21b_6!=. & s9q21b_6!=.a) 
+	gen 	inm_servicios_mone	= s9q21b_7 if s9q21__7!=. & (s9q21b_7!=. & s9q21b_7!=.a) 
+	gen 	inm_guarderia_mone	= s9q21b_8 if s9q21__8!=. & (s9q21b_8!=. & s9q21b_8!=.a) 
+	gen 	inm_otro_mone		= s9q21b_9 if s9q21__9!=. & (s9q21b_9!=. & s9q21b_9!=.a)
+
+	*** With respect to last month, how much was discounted from your monthly labor income as part of…? (each one is a dummy)
+	/* s9q22__* Con respecto al mes pasado, ¿cuánto fue descontado del ingreso mensual de en su empleo por concepto de…?: d_*
+				1 = Seguro social obligatorio
+				2 = Seguro de paro forzoso
+				3 = Impuesto sobre la renta
+				4 = Caja de ahorro
+				5 = Cuotas de préstamo
+				6 = Régimen de Prestaciones de Vivienda y Hábitat
+				7 = Otros	*/
+		* Note: For those not self-employed or employers (s9q15==1|3|7|8|9)	// CAPI1=true
+	gen     d_sso	 	= s9q22__1==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__1!=. & s9q22__1!=.a) 
+	gen     d_spf	 	= s9q22__2==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__2!=. & s9q22__2!=.a) 
+	gen     d_isr 		= s9q22__3==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__3!=. & s9q22__3!=.a) 
+	gen     d_cah		= s9q22__4==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__4!=. & s9q22__4!=.a) 
+	gen 	d_cpr		= s9q22__5==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__5!=. & s9q22__5!=.a) 
+	gen 	d_rpv		= s9q22__6==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__6!=. & s9q22__6!=.a) 
+	gen 	d_otro		= s9q22__7==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__7!=. & s9q22__7!=.a) 
+		
+	*** Amount received, or estimation of how much they would have paid for the benefit (1 variable for each of the 9 options)
+	* s9q22a_*: Monto recibido (Si no percibe el beneficio en dinero, estime cuánto tendría que haber pagado por ese concepto (p.e. pago de guardería infantil, comedor en la empresa o transporte))
+	gen     d_sso_cant 	= s9q22a_1 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_1!=. & s9q22a_1!=.a) 
+	gen     d_spf_cant 	= s9q22a_2 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_2!=. & s9q22a_2!=.a) 
+	gen     d_isr_cant 	= s9q22a_3 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_3!=. & s9q22a_3!=.a) 
+	gen     d_cah_cant 	= s9q22a_4 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_4!=. & s9q22a_4!=.a) 
+	gen 	d_cpr_cant 	= s9q22a_5 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_5!=. & s9q22a_5!=.a) 
+	gen 	d_rpv_cant  = s9q22a_6 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_6!=. & s9q22a_6!=.a) 
+	gen 	d_otro_cant = s9q22a_7 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_7!=. & s9q22a_7!=.a) 
+
+	*** In which currency? (1 variable for each of the 7 options)
+	/* s9q22b_* En qué moneda?: d_*_moneda
+		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
+	gen     d_sso_mone 	= s9q22b_1 if s9q22__1!=. & (s9q22b_1!=. & s9q22b_1!=.a) 
+	gen     d_spf_mone 	= s9q22b_2 if s9q22__2!=. & (s9q22b_2!=. & s9q22b_2!=.a) 
+	gen     d_isr_mone	= s9q22b_3 if s9q22__3!=. & (s9q22b_3!=. & s9q22b_3!=.a) 
+	gen     d_cah_mone	= s9q22b_4 if s9q22__4!=. & (s9q22b_4!=. & s9q22b_4!=.a) 
+	gen 	d_cpr_mone	= s9q22b_5 if s9q22__5!=. & (s9q22b_5!=. & s9q22b_5!=.a) 
+	gen 	d_rpv_mone 	= s9q22b_6 if s9q22__6!=. & (s9q22b_6!=. & s9q22b_6!=.a) 
+	gen 	d_otro_mone	= s9q22b_7 if s9q22__7!=. & (s9q22b_7!=. & s9q22b_7!=.a)
+
+* For employers (s9q15==5) // CAPI2=true
+	
+	*** Last month did you receive money due to the selling of products, goods, or services from your business or activity?
+	/* s9q23 ¿El mes pasado recibió dinero por la venta de los productos, bienes o servicios de su negocio o actividad?: im_patron
+				1 = si
+				2 = no*/
+		* Note: For employers (s9q15==5) // CAPI2=true	
+	gen     im_patron 	= s9q23==1 if s9q15==5 & (s9q23!=. & s9q23!=.a) 
+		
+	*** Amount received
+	* s9q23a: Monto recibido: im_patron_cant
+	gen     im_patron_cant 	= s9q23a if s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
+
+	*** In which currency?
+	/* s9q23b En qué moneda?
+		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
+	gen     im_patron_mone 	= s9q23b if s9q15==5 & (s9q23b!=. & s9q23b!=.a) 
+
+	*** Last month did you take products from your business or activity you own or your household's consumption?
+	/* s9q24 ¿El mes pasado retiró productos del negocio o actividad para consumo propio o de su hogar?: inm_patron
+				1 = si
+				2 = no*/
+		* Note: For employers (s9q15==5) // CAPI2=true	
+	gen     inm_patron 	= s9q24==1 if s9q15==5 & (s9q24!=. & s9q24!=.a) 
+		
+	*** How much you would have had to pay for these products?
+	* s9q24a: ¿Cuánto hubiera tenido que pagar por esos productos?: inm_patron_cant
+	gen     inm_patron_cant 	= s9q24a if s9q15==5 & (s9q24a!=. & s9q24a!=.a) 
+
+	*** In which currency? 
+	/* s9q24b ¿En qué moneda?: inm_patron_mone
+		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
+	gen     inm_patron_mone 	= s9q24b if s9q15==5 & (s9q24b!=. & s9q24b!=.a)
+
+* For self-employed workers (s9q15==6) // CAPI3=true
+	
+	*** During the last 12 months, did you receive money or net benefits derived from your business or activity?
+	/* s9q25 ¿Durante los últimos doce (12) meses, recibió dinero por ganancias o utilidades netas derivadas del negocio o actividad? : im_indep
+				1 = si
+				2 = no	*/
+		* Note: For self-employed workers (s9q15==6) // CAPI3=true	
+	gen     im_indep 	= s9q25==1 if s9q15==6 & (s9q25!=. & s9q25!=.a) 
+		
+	*** Amount received
+	* s9q25a: Cuánto recibió?: im_indep_cant
+	gen     im_indep_cant 	= s9q25a if s9q15==6 & (s9q25a!=. & s9q25a!=.a) 
+
+	*** In which currency? 
+	/* s9q25b En qué moneda?: im_indep_mone
+		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
+	gen     im_indep_mone 	= s9q25b if s9q15==6 & (s9q25b!=. & s9q25b!=.a) 
+
+	*** Last month did you receive income from your activity for own expenses or from your household?
+	/* s9q26 ¿El mes pasado, recibió ingresos por su actividad para gastos propios o de su hogar?: inm_indep
+				1 = si
+				2 = no	*/
+		* Note: For self-employed workers (s9q15==6) // CAPI3=true	
+	gen     inm_indep 	= s9q26==1 if s9q15==6 & (s9q26!=. & s9q26!=.a) 
+		
+	*** How much did you receive?
+	* s9q26a: Cuánto recibió?: inm_indep_cant
+	gen     inm_indep_cant 	= s9q26a if s9q15==6 & (s9q26a!=. & s9q26a!=.a) 
+
+	*** In which currency? 
+	/* s9q26b En qué moneda?: inm_indep_mone
+		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
+	gen     inm_indep_mone 	= s9q26b if s9q15==5 & (s9q26b!=. & s9q26b!=.a)
+
+	*** Last month, how much money did you spend to generate income (e.g. office renting, transport expenditures, cleaning products)?
+	* s9q27: El mes pasado, ¿cuánto dinero gastó  para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?: gm_indep_cant
+		* Note: For self-employed workers (s9q15==6) // CAPI3=true	
+		* Note2: gm stands for gasto monetario
+	gen     gm_indep_cant 	= s9q27 if s9q15==5 & (s9q27!=. & s9q27!=.a) 
+		
+	*** In which currency? 
+	/* s9q27b En qué moneda?: inm_indep_mone
+		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
+	gen     gm_indep_mone 	= s9q27a if s9q15==5 & (s9q27a!=. & s9q27a!=.a)
+
+* For part-time workers (those who worked less than 35 hours last week in all their jobs) // CAPI4
+				
+	*** Why did you work less than 35 hours a week last week in all your jobs?
+	/* s9q30: ¿Por qué trabajó menos de 35 horas la semana pasada en todos sus trabajos?: razon_menoshs
+		1 = Trabaja a tiempo parcial
+		2 = Conflicto laboral (huelga, protesta, paro)
+		3 = Enfermedad, permiso, vacaciones
+		4 = Falta de trabajo
+		5 = Escasez de materiales o equipos en reparación
+		6 = Otra (Especifique)	*/
+		*Note: for part-time workers, i.e. those who worked less than 35 hours last week in all their jobs // CAPI4
+	gen 	razon_menoshs = s9q30 if s9q18<35 & (s9q30!=. & s9q30!=.a) 
+
+	*** Would you prefer to work more than 35 hs per week?
+	/* s9q31 ¿Preferiría trabajar más de 35 horas por semana? 
+				1 = si
+				2 = no	*/
+		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
+	gen 	deseamashs = s9q31==1 if s9q18<35 & (s9q31!=. & s9q31!=.a)
+
+	*** Have you done something to work more hours?
+	/* s9q32 ¿Ha hecho algo parar trabajar mas horas?: buscamashs
+				1 = si
+				2 = no	*/
+		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
+	gen 	buscamashs = s9q32==1 if s9q18<35 & (s9q32!=. & s9q32!=.a)
+		
+	*** Why haven't you done something to work additional hours?
+	/* s9q33 ¿Por cuál motivo no ha hecho diligencias para trabajar horas adicionales?: razon_nobusca
+			1 = Cree que no hay trabajo
+			2 = Está cansado de buscar trabajo
+			3 = No sabe buscar trabajo
+			4 = No encuentra trabajo apropiado
+			5 = Está esperando trabajo o negocio
+			6 = Dificultad para tramitar permisos
+			7 = No consigue créditos o financiamientos
+			8 = Es estudiante
+			9 = Se ocupa del hogar
+			10 = Enfermedad o discapacidad
+			11 = Otra (Especifique)	*/
+		* Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
+	gen 	razon_nobusca = s9q33 if s9q18<35 & (s9q33!=. & s9q33!=.a)
+	
+* For all workers
+
+	*** Have you changed jobs in the last 12 months?
+	/* s9q34 ¿Ha cambiado de trabajo en los últimos 12 meses?: cambiotr
+				1 = si
+				2 = no	*/
+	gen 	cambiotr = s9q34==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q34!=. & s9q34!=.a)
+
+	*** What is the main reason why you changed jobs?
+	/* s9q35 ¿Cuál fue la razón principal por la que cambió de trabajo?
+		1 = Conseguir ingresos más altos
+		2 = Tener un trabajo más adecuado
+		3 = Finalización del contrato o empleo laboral
+		4 = Dificultades con la empresa (despido, reducción de personal, cierre de la empresa)
+		5 = Dificultades económica (falta de materiales e insumos para trabajar)
+		6 = Otra (Especifique)	*/
+	gen		razon_cambiotr = s9q35 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q35!=. & s9q35!=.a)
+
+	*** Do you make contributions to any pension fund?
+	/* s9q36 ¿Realiza aportes para algún fondo de pensiones?	
+				1 = si
+				2 = no	*/
+	gen		aporta_pension = s9q36==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q36!=. & s9q36!=.a)
+
+	*** Which pension fund?
+	/* s9q37__* ¿A cuál fondo de pensión?	
+				1 = El IVSS
+				2 = Otra institución o empresa pública
+				3 = Para institución o empresa privada
+				4 = Otro	*/
+	gen		pension_IVSS 	= s9q37__1==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__1!=. & s9q37__1!=.a)
+	gen		pension_publi 	= s9q37__2==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__2!=. & s9q37__2!=.a)
+	gen		pension_priv 	= s9q37__3==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__3!=. & s9q37__3!=.a)
+	gen		pension_otro 	= s9q37__4==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__4!=. & s9q37__4!=.a)
+	
+	/* Bringing together s9q36 & s9q37__* to match previous ENCOVIs: aporte_pension
+			1 = Si, para el IVSS
+			2 = Si, para otra institucion o empresa publica
+			3 = Si, para institucion o empresa privada
+			4 = Si, para otra
+			5 = No	*/
+	gen 	aporte_pension = 1 if s9q36==1 & s9q37__1==1
+	replace aporte_pension = 2 if s9q36==1 & s9q37__2==1
+	replace aporte_pension = 3 if s9q36==1 & s9q37__3==1
+	replace aporte_pension = 4 if s9q36==1 & s9q37__4==1
+	replace aporte_pension = 5 if s9q36==2
+	
+	*** How much did you pay last month for pension funds?
+	* s9q38 En el último mes, ¿cuánto pagó en total por fondos de pensiones? 
+	gen		cant_aporta_pension = s9q38 if s9q36==1 & (s9q38!=. & s9q38!=.a)
+
+	*** In which currency?
+	/* s9q39a ¿En qué moneda? 
+		1=bolivares, 2=dolares, 3=euros, 4=colombianos */
+	gen		mone_aporta_pension = s9q39a if s9q36==1 & (s9q39a!=. & s9q39a!=.a)
+
+* From CEDLAS which might be useful
+
+	/* LABOR_STATUS: La semana pasada estaba:
         1 = Trabajando
 		2 = No trabajó, pero tiene trabajo
-		
 		3 = Buscando trabajo (antes esto se subdividía entre 3."por primera vez" y 4."habiendo trabajado antes")
-		
 		5 = En quehaceres del hogar
 		6 = Incapacitado
 		7 = Otra situacion
 		8 = Estudiando o de vacaciones escolares
-		9 = Pensionado o jubilado
-	*/
+		9 = Pensionado o jubilado	*/
 	gen labor_status = 1 if s9q1==1 | s9q2==1 | s9q2==2 | s9q5==1
 	*Assumption: if someone received a wage or benefits last week, we consider he has worked 
 	replace labor_status = 2 if s9q2==3 & s9q3==1
@@ -1180,27 +1843,13 @@ notes deporte: the survey does not include information to define this variable
 	replace labor_status = 9 if s9q3==2 & (s9q6==1 | (s9q6==2 & s9q7==2) ) & s9q12==6
 	tab labor_status
 
-/* CATEG_OCUP (s9q15): En su trabajo se desempena como
-        1 = Empleado en el sector publico
-		2 = Obrero en el sector publico
-		3 = Empleado en empresa privada
-		4 = Obrero en empresa privada
-		5 = Patrono o empleador
-		6 = Trabajador por cuenta propia
-		7 = Miembro de cooperativas
-		8 = Ayudante familiar remunerado/no remunerado
-		9 = Servicio domestico
-	*/
-	gen categ_ocu = s9q15 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active
-
-/* RELAB:
-        1 = Empleador
-		2 = Empleado (asalariado)
-		3 = Independiente (cuenta propista)
-		4 = Trabajador sin salario
-		5 = Desocupado
-		. = No economicamente activos
-	*/
+	/* RELAB (FROM CEDLAS, might be useful):
+			1 = Empleador
+			2 = Empleado (asalariado)
+			3 = Independiente (cuenta propista)
+			4 = Trabajador sin salario
+			5 = Desocupado
+			. = No economicamente activos */
 	gen     relab = .
 	replace relab = 1 if (labor_status==1 | labor_status==2) & categ_ocu== 5  // Employer 
 	replace relab = 2 if (labor_status==1 | labor_status==2) & ((categ_ocu>=1 & categ_ocu<=4) | categ_ocu== 9 | categ_ocu==7) // Employee. Obs: survey's CAPI1 defines the miembro de cooperativas as not self-employed
@@ -1209,211 +1858,1060 @@ notes deporte: the survey does not include information to define this variable
 	replace relab = 2 if (labor_status==1 | labor_status==2) & (categ_ocu== 8 & (s9q19__1==1 | s9q19__2==1 | s9q19__3==1 | s9q19__4==1 | s9q19__5==1 | s9q19__6==1 | s9q19__7==1 | s9q19__8==1 | s9q19__9==1 | s9q19__10==1 | s9q19__11==1 | s9q19__12==1)) //paid family worker
 	replace relab = 5 if (labor_status==3)
 
-* Duracion del desempleo: durades (en meses)
-	/* DILIGENCIAS_BT (s9q8): ¿Cuándo fue la ultima vez que hizo diligencias para conseguir trabajo o establecer un negocio solo o asociado?
-			1 = En los últimos 2 meses
-			2 = En los últimos 12 meses
-			3 = Hace mas de un año
-			4 = No hizo diligencias
-	*/
-	gen diligencias_bt = s9q8 if (s9q6==2 & s9q7==2 & s9q3==2 & s9q1==2 & s9q2==3)
+	* Asalariado en la ocupacion principal: asal
+		* Dummy "asalariado" entre trabajadores
+		gen     asal = (relab==2) if (relab>=1 & relab<=4)
 
-	gen     durades = 0   if relab==5
-	replace durades = 1   if relab==5 & diligencias_bt==1
-	replace durades = 6 if relab==5 & diligencias_bt==2
-	replace durades = 13  if relab==5 & diligencias_bt==3 
-	*Assumption: we complete with 13 months when more than 12 months
+	* Employed:	ocupado
+	gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
 
-* Horas trabajadas totales y en ocupacion principal: hstrt y hstrp
+	* Unemployed: desocupa
+	gen     desocupa = (labor_status==3)  //buscando trabajo
+			
+	* Inactive: inactivos	
+	gen     inactivo= inrange(labor_status,5,9) 
 
-	* s9q18: ¿Cuántas horas trabaja a la semana en todos sus trabajos o negocios?
-	gen      hstrt = . 
-	replace  hstrt = s9q18 if (relab>=1 & relab<=4) & (s9q18>=0 & s9q18!=.) & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means being economically active
+	* Economically active population: pea	
+	gen     pea = (ocupado==1 | desocupa ==1)
 
-	* s9q16: ¿Cuántas horas trabajó durante la semana pasada en su ocupación principal?
-	gen      hstrp = . 
-	replace  hstrp = s9q16 if (relab>=1 & relab<=4) & (s9q16>=0 & s9q16!=.) & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means being economically active
+/*(************************************************************************************************************************************************ 
+*------------------------------------------------------------- XVI: BANKING / BANCARIZACIÓN ---------------------------------------------------------------
+************************************************************************************************************************************************)*/
+global bank_ENCOVI contesta_ind_b quien_contesta_b cuenta_corr cuenta_aho tcredito tdebito no_banco ///
+efectivo_f tcredito_f tdebito_f bancao_f pagomovil_f razon_nobanco
 
-	*Problem: it should not be possible but there is at least one case in which the total hours worked appears to be greater than the hours worked for the main job
+*** Section for individuals 15+
+*** Is the "member" answering by himself/herself?
+gen contesta_ind_b=s16q0 if (s16q0!=. & s16q0!=.a)
 
-* Deseo o busqueda de otro trabajo o mas horas: deseamas (el trabajador ocupado manifiesta el deseo de trabajar mas horas y/o cambiar de empleo (proxy de inconformidad con su estado ocupacional actual)
-	/* DMASHORAS (s9q31): ¿Preferiria trabajar mas de 35 horas por semana?
-	   BMASHORAS (s9q32): ¿Ha hecho algo parar trabajar mas horas?
-	   CAMBIO_EMPLEO (s9q34): ¿Ha cambiado de trabajo durante los últimos meses?
-	*/
-	gen dmashoras = s9q31 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
-	gen bmashoras = s9q32 if s9q18<35 // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
-	*Assumption: only part-time workers can want to work more
+*** Who is answering instead of "member"?
+gen quien_contesta_b=s16q00 if (s16q00!=. & s16q00!=.a)
+
+*** Do you have in any bank the following?
+* Checking account
+gen cuenta_corr=s16q1__1 if (s16q1__1!=. & s16q1__1!=.a)
+* Saving account
+gen cuenta_aho=s16q1__2 if (s16q1__2!=. & s16q1__2!=.a)
+* Credit card
+gen tcredito=s16q1__3 if (s16q1__3!=. & s16q1__3!=.a)
+* Debit card
+gen tdebito=s16q1__4 if (s16q1__4!=. & s16q1__4!=.a)
+* None
+gen no_banco=s16q1__4 if (s16q1__4!=. & s16q1__4!=.a)
+
+*** How often do you pay with cash ?
+gen efectivo_f=s16q2 if (s16q2!=. & s16q2!=.a)
+
+*** How often do you pay with credit card ?
+gen tcredito_f=s16q3 if (s16q3!=. & s16q3!=.a)
+
+*** How often do you pay with debit card ?
+gen tdebito_f=s16q4 if (s16q4!=. & s16q4!=.a)
+
+*** How often do you pay using online bank?
+gen bancao_f=s16q5 if (s16q5!=. & s16q5!=.a)
+
+*** How often do you use mobile payment?
+gen pagomovil_f=s16q7 if (s16q7!=. & s16q7!=.a)
+
+*** Reasons for not holding any bank account or card?
+gen razon_nobanco=s16q7 if (s16q7!=. & s16q7!=.a)
+
+
+/*(*********************************************************************************************************************************************** 
+*---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
+***********************************************************************************************************************************************)*/	
+
+global emigra_ENCOVI informant_emig hogar_emig numero_emig nombre_emig_* edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* leveledu_emig_* ///
+gradedu_emig_* regedu_emig_* anoedu_emig_* semedu_emig_* paisemig_* opaisemig_* ciuemig_* soloemig_* conemig_* razonemig_* ocupaemig_* ocupnemig_* ///
+volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
+
+
+*--------- Informant in this section
+ /* Informante (s10q00): 00. Quién es el informante de esta sección?
+		01 = Jefe del Hogar	
+		02 = Esposa(o) o Compañera(o)
+		03 = Hijo(a)		
+		04 = Hijastro(a)
+		05 = Nieto(a)		
+		06 = Yerno, nuera, suegro (a)
+		07 = Padre, madre       
+		08 = Hermano(a)
+		09 = Cunado(a)         
+		10 = Sobrino(a)
+ */
+	*-- Check values
+	tab s10q00, mi
+	*-- Standarization of missing values
+	replace s10q00=. if s10q00==.a
+	*-- Create auxiliary variable
+	clonevar informant_ref = s10q00
+	*-- Generate variable
+	gen     informant_emig  = 1		if  informant_ref==1
+	replace informant_emig  = 2		if  informant_ref==2
+	replace informant_emig  = 3		if  informant_ref==3  | informant_ref==4
+	replace informant_emig  = 4		if  informant_ref==5  
+	replace informant_emig  = 5		if  informant_ref==6 
+	replace informant_emig  = 6		if  informant_ref==7
+	replace informant_emig  = 7		if  informant_ref==8  
+	replace informant_emig  = 8		if  informant_ref==9
+	replace informant_emig  = 9		if  informant_ref==10
+	replace informant_emig  = 10	if  informant_ref==11
+	replace informant_emig  = 11	if  informant_ref==12
+	replace informant_emig  = 12	if  informant_ref==13
 	
-	gen cambio_empleo = s9q34 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active
+	*-- Label variable
+	label var informant_emig "Informant: Emigration"
+	*-- Label values	
+	label def informant_emig  1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
+							  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
+							  8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" ///
+							  12 "Servicio Domestico"	
+	label value informant_emig  informant_emig 
 
-	gen     deseamas = 0 if (relab>=1 & relab<=4)
-	replace deseamas = 1 if dmashoras==1 | bmashoras==1 
 
-* Antiguedad: antigue
-	gen     antigue = .
-	notes   antigue: the survey does not include information to define this variable
+*--------- Emigrant from the household
+ /* Emigrant(s10q1): 1. Duante los últimos 5 años, desde septiembre de 2014, 
+	¿alguna persona que vive o vivió con usted en su hogar se fue a vivir a otro país?
+         1 = Si
+         2 = No
+ */
+	*-- Check values
+	tab s10q1, mi
+	*-- Standarization of missing values
+	replace s10q1=. if s10q1==.a
+	*-- Generate variable
+	clonevar hogar_emig = s10q1
+	*-- Label variable
+	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
+	*-- Label values
+	label def house_emig 1 "Yes" 2 "No"
+	label value hogar_emig house_emig
 
-* Asalariado en la ocupacion principal: asal
-	* Dummy "asalariado" entre trabajadores
-	gen     asal = (relab==2) if (relab>=1 & relab<=4)
-
-* Tipo de empresa: empresa 
-	/*      1 = Empresa privada grande (mas de cinco trabajadores)
-			2 = Empresa privada pequena (cinco o menos trabajadores)
-			3 = Empresa publica
-	*/
-	gen firm_size = .
-	notes firm_size: the survey does not include information to define this variable
-
-* Grupos de condicion laboral: grupo_lab
-	/*      1 = Patrones //formal
-			2 = Trabajadores asalariados en empresas grandes //formal
-			3 = Trabajadores asalariados en el sector publico //formal
-			4 = Trabajadores independientes profesionales (educacion superior completa) //formal
-			5 = Trabajadores asalariados en empresas pequenas //informal
-			6 = Trabajadores independientes no profesionales  //informal
-			7 = Trabajadores sin salario                      //informal
-	*/
+*--------- Number of Emigrants from the household
+ /* Number of Emigrants from the household(s10q2): 2. Cuántas personas?
+ 
+ */
+	*-- Check values
+	tab s10q2, mi
+	*-- Standarization of missing values
+	replace s10q2=. if s10q2==.a
+	*-- Generate variable
+	clonevar numero_emig = s10q2
+	*-- Label variable
+	label var numero_emig "Number of Emigrants from the household"
+	*-- Cross check
+	tab numero_emig hogar_emig, mi
 	
-	/*		gen     grupo_lab = 1		if  relab==1 
-			replace grupo_lab = 2		if  relab==2 & empresa==1
-			replace grupo_lab = 3		if  relab==2 & empresa==3
-			replace grupo_lab = 4		if  relab==3 & supc==1 
-			replace grupo_lab = 5		if  relab==2 & empresa==2 
-			replace grupo_lab = 6		if  relab==3 & supc~=1 
-			replace grupo_lab = 7		if  relab==4
-	*/
+*--------- Name of Emigrants from the household
+ /* Name of Emigrants from the household(s10q2a): 2. Cuántas personas?
+        
+ */	
+	*-- From s10q2a__0 to s10q2a__9 there is information on the names of emigrants
+	*-- Drop from s10q2a__10 to s10q2a__59 (repeated variables)
+	forval i = 10/59{
+	drop s10q2a__`i'
+	}
 	
-	gen     grupo_lab = .
-	notes grupo_lab: the survey does not include information to define this variable
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 0/9{
+	*-- Standarization of missing values
+	replace s10q2a__`i'="" if s10q2a__`i'=="##N/A##"
+	tab s10q2a__`i', mi
+	*-- Generate variable
+	clonevar nombre_emig_`i' = s10q2a__`i'
+	*-- Label variable
+	label var nombre_emig_`i' "Name of Emigrants from the household"
+	}
 
-* Categorias de condicion laboral: categ_lab
-/*      1 = Trabajadores considerados formales bajo definicion en grupo_lab 
-        2 = Trabajadores considerados informales o de baja productividad
-*/
-/*		gen     categ_lab = 1		if  grupo_lab>=1 & grupo_lab<=4
-		replace categ_lab = 2		if  grupo_lab>=5 & grupo_lab<=7
-*/
-	gen     categ_lab = .
-	notes categ_lab: the survey does not include information to define this variable
-
-* Sector de actividad: sector1d (clasificacion CIIU) y sector (10 sectores)
-/*      1 = Agricola, actividades primarias
-	    2 = Industrias de baja tecnologia (industria alimenticia, bebidas y tabaco, textiles y confecciones) 
-	    3 = Resto de industria manufacturera
-	    4 = Construccion
-	    5 = Comercio minorista y mayorista, restaurants, hoteles, reparaciones
-	    6 = Electricidad, gas, agua, transporte, comunicaciones
-	    7 = Bancos, finanzas, seguros, servicios profesionales
-	    8 = Administración pública, defensa y organismos extraterritoriales
-	    9 = Educacion, salud, servicios personales 
-	    10 = Servicio domestico 
-* SECTOR_ENCUESTA (s9q14): ¿A que se dedica el negocio, organismo o empresa en la que trabaja?
-        1 = Agricultura, ganaderia, pesca, caza y actividades de servicios conexas
-		2 = Explotación de minas y canteras
-		3 = Industria manufacturera
-	    4 = Instalacion/ suministro/ distribucion de electricidad, gas o agua
-	    5 = Construccion
-		6 = Comercio al por mayor y al por menor; reparacion de vehiculos automotores y motocicletas
-		7 = Transporte, almacenamiento, alojamiento y servicio de comida, comunicaciones y servicios de computacion
-		8 = Entidades financieras y de seguros, inmobiliarias, profesionales, cientificas y tecnicas; y servicios administrativos de apoyo
-		9 = Admin publi, enseñanza, salud, asistencia social, arte, entretenimiento, embajadas
-		10 = Otras actividades de servicios como reparaciones, limpieza, peluqueria, funeraria y servicio domestico
-*/
-	clonevar sector_encuesta = s9q14 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active
-
-	gen     sector1d = .
-	notes sector1d: the survey does not include information to define this variable
-
-	rename sector secturbabarr
-	*The database already had a variable called "sector", referring to the sector, urbanization or neighborhood. We rename that one to leave only one "sector"
 	
-	gen     sector = .
-	notes sector: the survey does not allow to differentiate between low productivity manufacture industries and the rest of manufacture industries.
-	/*
-	gen     sector8= 1  if (relab>=1 & relab<=4) & sector_encuesta==1  //Actividades agricolas y ganaderas
-	replace sector8 = 2 if (relab>=1 & relab<=4) & sector_encuesta==2 //Minas
-	replace sector8 = 3 if (relab>=1 & relab<=4) & sector_encuesta==3 //Manufactura
-	replace sector8 = 4 if (relab>=1 & relab<=4) & sector_encuesta==5 //Construccion
-	replace sector8 = 5 if (relab>=1 & relab<=4) & sector_encuesta==6 //Comercio
-	replace sector8 = 6 if (relab>=1 & relab<=4) & (sector_encuesta==4 | sector_encuesta==7) //Electricidad, agua, gas, transporte y comunicaciones
-	replace sector8 = 7 if (relab>=1 & relab<=4) & sector_encuesta==8 //Entidades financieras
-	replace sector8 = 8 if (relab>=1 & relab<=4) & (sector_encuesta==9 | sector_encuesta==10) // otros servicios
-	*/
-
-* Tarea que desempeña: tarea
-	/* TAREA (s9q13): ¿Cuál es el oficio o trabajo que realiza?
-			1 = Director o gerente
-			2 = Profesionales cientifico o intelectual
-			3 = Técnicos o profesional de nivel medio
-			4 = Personal de apoyo administrativo
-			5 = Trabajador de los servicios o vendedor de comercios y mercados
-			6 = Agricultores y trabajadores calificado agropecuario, forestal o  pesquero
-			7 = Oficiales y operario o artesano de artes mecanicas y otros oficios
-			8 = Operadores de instalaciones fijas y máquinas y maquinarias
-			9 = Ocupaciones elementales
-			10 = Ocupaciones militares
-	*/
-	clonevar tarea= s9q13 if (relab>=1 & relab<=4) & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means means being economically active
-
-*Características del empleo y acceso a beneficios a partir del empleo
-*Nota: Las variables referidas al acceso a beneficios laborales se construyen solo para trabajadores asalariados
-
-* Workers with contract:  contrato
-	gen     contrato = .
-	notes contrato: the survey does not include information to define this variable
-
-* Permanent occupation
-	gen     ocuperma = .
-	notes ocuperma: the survey does not include information to define this variable
-
-* Right to receive retirement benefits: djubila
-	/*APORTE_PENSION (created using s9q36 & s9q37__* to match previous ENCOVIs)
-			1 = Si, para el IVSS
-			2 = Si, para otra institucion o empresa publica
-			3 = Si, para institucion o empresa privada
-			4 = Si, para otra
-			5 = No
-	*/
-	gen aporte_pension = 1     if s9q36==1 & s9q37__1==1
-	replace aporte_pension = 2 if s9q36==1 & s9q37__2==1
-	replace aporte_pension = 3 if s9q36==1 & s9q37__3==1
-	replace aporte_pension = 4 if s9q36==1 & s9q37__4==1
-	replace aporte_pension = 5 if s9q36==2
-
-	gen     djubila = (s9q36==1) if relab==2 & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means means being economically active
-
-* Health insurance linked to employment: dsegsale
-gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2
-
-* Right to be paid 13 months a year (instead of 12): aguinaldo
-gen     aguinaldo = .
-notes aguinaldo: the survey does not include information to define this variable
-
-* Right to paid vacations: dvacaciones
-gen     dvacaciones = .
-notes dvacaciones: the survey does not include information to define this variable
-
-* Unionized: sindicato
-gen     sindicato = .
-notes sindicato: the survey does not include information to define this variable
-
-* Employment program: prog_empleo //si el individuo esta trabajando en un plan de empleo publico
-gen     prog_empleo = .
-notes prog_empleo: the survey does not include information to define this variable
-
-* Employed:	ocupado
-gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
-
-* Unemployed: desocupa
-gen     desocupa = (labor_status==3)  //buscando trabajo
+ *--------- Age of the emigrant
+ /* Age of the emigrant(s10q3): 3. Cuántos años cumplidos tiene X?
+        
+ */
+ 	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename main variable 
+	rename s10q3`i' s10q3_`i'
+	*-- Label original variable
+	label var s10q3_`i' "3.Cuántos años cumplidos tiene X?"
+	*-- Standarization of missing values
+	replace s10q3_`i'=. if s10q3_`i'==.a
+		*-- Generate variable
+		clonevar edad_emig_`i' = s10q3_`i'
+		*-- Label variable
+		label var edad_emig_`i' "Age of Emigrants"
+		*-- Cross check
+		tab edad_emig_`i' hogar_emig
+	}
+	
+	
+ *--------- Sex of the emigrant 
+ /* Sex (s10q4): 4. El sexo de X es?
+				01 Masculino
+				02 Femenino
+				
+ */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename main variable 
+	rename s10q4`i' s10q4_`i'
+	*-- Label original variable
+	label var s10q4_`i' "4. El sexo de X es?"
+	*-- Standarization of missing values
+	replace s10q4_`i'=. if s10q4_`i'==.a
+		*-- Generate variable
+		clonevar sexo_emig_`i' = s10q4_`i'
+		*-- Label variable
+		label var sexo_emig_`i' "Sex of Emigrants"
+		*-- Label values
+		label def sexo_emig_`i' 1 "Male" 2 "Female"
+		label value sexo_emig_`i' sexo_emig_`i'
+		}
 		
-* Inactive: inactivos	
-gen     inactivo= inrange(labor_status,5,9) 
+	
+ /*
+ *--------- Relationship of the emigrant with the head of the household
+ Relationship (s10q5): 5. Cuál es el parentesco de X con el Jefe(a) del hogar?
+        
+ */ 
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename main variable 
+	rename s10q5`i' s10q5_`i'
+	*-- Label original variable
+	label var s10q5_`i' "5. Cuál es el parentesco de X con el Jefe(a) del hogar?"
+	*-- Standarization of missing values
+	replace s10q5_`i'=. if s10q5_`i'==.a
+	*-- Generate variable
+	clonevar relemig_`i'  = s10q5_`i'
+	replace relemig_`i'  = 1		if  s10q5_`i'==1
+	replace relemig_`i'  = 2		if  s10q5_`i'==2
+	replace relemig_`i'  = 3		if  s10q5_`i'==3  | s10q5_`i'==4
+	replace relemig_`i'  = 4		if  s10q5_`i'==5  
+	replace relemig_`i'  = 5		if  s10q5_`i'==6 
+	replace relemig_`i'  = 6		if  s10q5_`i'==7
+	replace relemig_`i'  = 7		if  s10q5_`i'==8  
+	replace relemig_`i'  = 8		if  s10q5_`i'==9
+	replace relemig_`i'  = 9		if  s10q5_`i'==10
+	replace relemig_`i'  = 10	    if  s10q5_`i'==11
+	replace relemig_`i'  = 11	    if  s10q5_`i'==12
+	replace relemig_`i'  = 12	    if  s10q5_`i'==13
+	*-- Label variable
+	label var relemig_`i' "Emigrant's relationship with the head of the household"
+	*-- Label values
+	label def remig_`i' 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
+						  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
+						  8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" ///
+						  12 "Servicio Domestico"
+	label value relemig_`i' remig_`i'
+	}
+	
+	
+ *--------- Year in which the emigrant left the household
+ /* Year (s10q6a): 6a. En qué año se fue X ?
+        
+ */	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename original variable 
+	rename s10q6a`i' s10q6a_`i'
+	*-- Label original variable
+	label var s10q6a_`i' "6a. En qué año se fue X ?"
+	*-- Standarization of missing values
+	replace s10q6a_`i'=. if s10q6a_`i'==.a
+	*-- Generate variable
+	clonevar anoemig_`i' = s10q6a_`i'
+	*-- Label variable
+	label var anoemig_`i' "Year of emigration"
+	*-- Cross check
+	tab anoemig_`i' hogar_emig
+	}
+	
+	
+ *--------- Month in which the emigrant left the household
+ /* Month (s10q6b): 6a. En qué mes se fue X ?
+        
+ */	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename original variable 
+	rename s10q6b`i' s10q6b_`i'
+	*-- Label original variable
+	label var s10q6b_`i' "6b. En qué mes se fue X ?"
+	*-- Standarization of missing values
+	replace s10q6b_`i'=. if s10q6b_`i'==.a
+	*-- Generate variable
+	clonevar mesemig_`i' = s10q6b_`i'
+	*-- Label variable
+	label var mesemig_`i' "Month of emigration"
+	*-- Cross check
+	tab mesemig_`i' hogar_emig
+	}
 
-* Economically active population: pea	
-gen     pea = (ocupado==1 | desocupa ==1)
+
+  *--------- Latest education level atained by the emigrant 
+ /* Education level (s10q7): 7. Cuál fue el último nivel educativo en el que
+							 X aprobó un grado, año, semestre o trimestre?  
+			01 Ninguno
+			02 Preescolar
+			03 Régimen anterior: Básica (1-9)
+			04 Régimen anterior: Media Diversificado y Profesional (1-3)
+			05 Régimen actual: Primaria (1-6)
+			06 Régimen actual: Media (1-6)
+			07 Técnico (TSU)
+			08 Universitario
+			09 Postgrado
+
+ */
+ 	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Rename main variable 
+	rename s10q7`i' s10q7_`i'
+	*-- Label original variable
+	label var s10q7_`i' "7. Cuál fue el último nivel educativo en el que X aprobó un grado, año, semestre o trimestre?"
+	*-- Standarization of missing values
+	replace s10q7_`i'=. if s10q7_`i'==.a
+	*-- Generate variable
+	clonevar leveledu_emig_`i' = s10q7_`i'
+	*-- Label variable
+	label var leveledu_emig_`i' "Education level emigrant"
+	}
+	
+
+ *--------- Latest education grade atained by the emigrant 
+ /* Education level (s10q7a): 7a. Cuál fue el último GRADO aprobado por X?     
+ */	
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q7a`i' s10q7a_`i'
+	*-- Label original variable
+	label var s10q7a_`i' "7a. Cuál fue el último GRADO aprobado por X?"
+	*-- Standarization of missing values
+	replace s10q7a_`i'=. if s10q7a_`i'==.a
+	*-- Generate variable
+	clonevar gradedu_emig_`i' = s10q7a_`i'
+	*-- Label variable
+	label var gradedu_emig_`i' "Education grade emigrant"
+	*-- Cross check
+	tab gradedu_emig_`i' hogar_emig
+	}
+	
+
+ *--------- Education regime 
+ /* Education regime (s10q7ba): 7ba. El régimen de estudio era anual, semestral o
+							   trimestral?
+								01 Anual
+								02 Semestral
+								03 Trimestral     
+ */	
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q7ba`i' s10q7ba_`i'
+	*-- Label original variable
+	label var s10q7ba_`i' "7ba. El régimen de estudio era anual, semestral o trimestral?"
+	*-- Standarization of missing values
+	replace s10q7ba_`i'=. if s10q7ba_`i'==.a
+	*-- Generate variable
+	clonevar regedu_emig_`i' = s10q7ba_`i'
+	*-- Label variable
+	label var regedu_emig_`i' "Education regime: annual, biannual or quarterly"
+	*-- Cross check
+	tab regedu_emig_`i' hogar_emig
+	*-- Label values
+	label def regedu_emig_`i' 1 "Annual" 2 "Biannual" 3 "Quarterly"
+	label value regedu_emig_`i' regedu_emig_`i'
+	}
+	
+ *--------- Latest year 
+ /* Education regime (s10q7b): 7b. Cuál fue el último AÑO aprobado por X?    
+ */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q7b`i' s10q7b_`i'
+	*-- Label original variable
+	label var s10q7b_`i' "7b. Cuál fue el último AÑO aprobado por X?   "
+	*-- Standarization of missing values
+	replace s10q7b_`i'=. if s10q7b_`i'==.a
+	*-- Generate variable
+	clonevar anoedu_emig_`i' = s10q7b_`i'
+	*-- Label variable
+	label var anoedu_emig_`i' "Last year of education attained"
+	*-- Cross check
+	tab anoedu_emig_`i' hogar_emig
+	}
+
+  *--------- Latest semester
+ /* Education regime (s10q7c): 7c. Cuál fue el último SEMESTRE aprobado por X?   
+ */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q7c`i' s10q7c_`i'
+	*-- Label original variable
+	label var s10q7c_`i' "7c. Cuál fue el último SEMESTRE aprobado por X?"
+	*-- Standarization of missing values
+	replace s10q7c_`i'=. if s10q7c_`i'==.a
+	*-- Generate variable
+	clonevar semedu_emig_`i' = s10q7b_`i'
+	*-- Label variable
+	label var semedu_emig_`i' "Last semester of education attained"
+	*-- Cross check
+	tab semedu_emig_`i' hogar_emig
+	}
+
+  *--------- Country of residence of the emigrant
+ /* Country (s10q8): 8. En cuál país vive actualmente X?   
+ */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q8`i' s10q8_`i'
+	*-- Label original variable
+	label var s10q8_`i' "8. En cuál país vive actualmente X?"
+	*-- Standarization of missing values
+	replace s10q8_`i'=. if s10q8_`i'==.a
+	*-- Generate variable
+	clonevar paisemig_`i' = s10q8_`i'
+	*-- Label variable
+	label var paisemig_`i' "Country in which X lives"
+	*-- Cross check
+	tab paisemig_`i' hogar_emig
+	}
+
+  *--------- Other country of residence 
+ /* Other Country (s10q8_os): 8a. Otro país, especifique
+ */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q8_os`i' s10q8_os_`i'
+	*-- Label original variable
+	label var s10q8_os_`i' "8a. Otro país, especifique"
+	*-- Standarization of missing values
+	replace s10q8_os_`i'="." if s10q8_os_`i'==".a"
+	*-- Standarization of other
+	replace s10q8_os_`i'="Bolivia" if s10q8_os_`i'=="bolivia"
+	replace s10q8_os_`i'="Venezuela" if s10q8_os_`i'=="Venezuela."
+	replace s10q8_os_`i'="Arabia" if s10q8_os_`i'=="arabia"
+	replace s10q8_os_`i'="Bonaire" if s10q8_os_`i'=="bonaire"
+	replace s10q8_os_`i'="Isla San Martin" if s10q8_os_`i'=="isla San Martin"
+	*-- Generate variable
+	gen opaisemig_`i' = s10q8_os_`i'
+	*-- Label variable
+	label var opaisemig_`i' "Country in which X lives (Other)"
+	*-- Cross check
+	tab opaisemig_`i' hogar_emig
+	}
+
+  *--------- City of residence 
+ /* City (s10q8b): 8b. Y en cuál ciudad ?
+ */
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q8b`i' s10q8b_`i'
+	*-- Label original variable
+	label var s10q8b_`i' "8b. Y en cuál ciudad ?"
+	*-- Standarization of missing values
+	replace s10q8b_`i'="." if s10q8b_`i'==".a"
+	replace s10q8b_`i'="." if s10q8b_`i'=="##N/A##"
+	*-- Standarization of values
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="No Saben"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="No saben"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="No Saben"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="NO RECUERDA"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no sabe que ciudad" 
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no sabe la ciudad"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no sabes"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no sabe"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no sabr"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no se acordó del nombre dónde esta"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no sé acuerda"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no recuerda el nombre"
+	replace s10q8b_`i'="No sabe/no recuerda" if s10q8b_`i'=="no lo recuerda"
+	*-- Generate variable
+	gen ciuemig_`i' = s10q8b_`i'
+	*-- Label variable
+	label var ciuemig_`i' "City in which X lives"
+	*-- Cross check
+	tab ciuemig_`i' hogar_emig
+	}
+
+   *--------- Emigrated alone or not
+ /* City (s10q8c): 8c. X emigró solo/a ?	
+					01 Si
+					02 No
+ */
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q8c`i' s10q8c_`i'
+	*-- Label original variable
+	label var s10q8c_`i' "8c. X emigró solo/a ?"
+	*-- Standarization of missing values
+	replace s10q8c_`i'=. if s10q8c_`i'==.a
+	*-- Generate variable
+	clonevar soloemig_`i' = s10q8c_`i'
+	*-- Label variable
+	label var soloemig_`i' "Has X emigrated alone"
+	*-- Cross check
+	tab soloemig_`i' hogar_emig
+	*-- Label values
+	label def soloemig_`i' 1 "Yes" 2 "No"
+	label value soloemig_`i' soloemig_`i'
+	}
+
+
+  *--------- Emigrated with other people 
+ /*  (s10q8d):8d. Con quién emigró X?				
+				01 Padre/madre
+				02 Hermano/a
+				03 Conyuge/pareja
+				04 Hijos/hijas
+				05 Otro pariente
+				06 No parientes
+ */
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q8d`i' s10q8d_`i'
+	*-- Label original variable
+	label var s10q8d_`i' "8d. Con quién emigró X?"
+	*-- Standarization of missing values
+	replace s10q8d_`i'=. if s10q8d_`i'==.a
+	*-- Generate variable
+	clonevar conemig_`i' = s10q8d_`i'
+	*-- Label variable
+	label var conemig_`i' "Who emigrated with X"
+	*-- Cross check
+	tab conemig_`i' hogar_emig
+	*-- Label values
+	label def conemig_`i' 1 "Father/Mother" 2 "Brother/sister" 3 "Partner" 4 "Son/duther" 5 "Other relative" 6 "Non relative"
+	label value conemig_`i' conemig_`i'
+	} 
+
+  *--------- Reason for leaving the country
+ /*  Reason (s10q9_os):9. Cuál fue el motivo por el cual X se fue				
+						01 Fue a buscar/consiguió trabajo
+						02 Cambió su lugar de trabajo
+						03 Por razones de estudio
+						04 Reagrupación familiar
+						05 Se casó o unió
+						06 Por motivos de salud
+						07 Por violencia e inseguridad
+						08 Por razones políticas
+						09 Otro			
+ */
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q9_os`i' s10q9_os_`i'
+	*-- Label original variable
+	label var s10q9_os_`i' "9. Cuál fue el motivo por el cual X se fue"
+	*-- Standarization of missing values
+	replace s10q9_os_`i'="." if s10q9_os_`i'==".a"
+	*-- Generate variable
+	gen razonemig_`i' = s10q9_os_`i'
+	*-- Label variable
+	label var razonemig_`i' "Why X emigrated"
+	*-- Cross check
+	tab razonemig_`i' hogar_emig
+	} 
+
+  *--------- Occupation: Before leaving the country
+ /*  Occupation before (s10q10):10. Cuál era la ocupación principal de X antes de emigrar?
+			
+					01 Director o gerente
+					02 Profesional científico o intelectual
+					03 Técnico o profesional de nivel medio
+					04 Personal de apoyo administrativo
+					05 Trabajador de los servicios o vendedor de comercios y mercados
+					06 Agricultor o trabajador calificado agropecuario, forestal o pesquero
+					07 Oficial, operario o artesano de artes mecánicas y otros oficios
+					08 Operador de instalaciones fijas y máquinas y maquinarias
+					09 Ocupaciones elementales
+					10 Ocupaciones militares
+					11 No se desempeñaba en alguna ocupación			
+ */    
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q10`i' s10q10_`i'
+	*-- Label original variable
+	label var s10q10_`i' "10. Cuál era la ocupación principal de X antes de emigrar?"
+	*-- Standarization of missing values
+	replace s10q10_`i'=. if s10q10_`i'==.a
+	*-- Generate variable
+	clonevar ocupaemig_`i' = s10q10_`i'
+	*-- Label variable
+	label var ocupaemig_`i' "Which was X occupation before leaving"
+	*-- Cross check
+	tab ocupaemig_`i' hogar_emig
+	} 
+
+   *--------- Occupation: in the new country
+ /*  Occupation now (s10q11): 11. Qué ocupación tiene X en el país donde vive ?
+			
+					01 Director o gerente
+					02 Profesional científico o intelectual
+					03 Técnico o profesional de nivel medio
+					04 Personal de apoyo administrativo
+					05 Trabajador de los servicios o vendedor de comercios y mercados
+					06 Agricultor o trabajador calificado agropecuario, forestal o pesquero
+					07 Oficial, operario o artesano de artes mecánicas y otros oficios
+					08 Operador de instalaciones fijas y máquinas y maquinarias
+					09 Ocupaciones elementales
+					10 Ocupaciones militares
+					11 No se desempeñaba en alguna ocupación			
+ */    
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q11`i' s10q11_`i'
+	*-- Label original variable
+	label var s10q11_`i' "11. Qué ocupación tiene X en el país donde vive?"
+	*-- Standarization of missing values
+	replace s10q11_`i'=. if s10q11_`i'==.a
+	*-- Generate variable
+	gen ocupnemig_`i' = s10q11_`i'
+	*-- Label variable
+	label var ocupnemig_`i' "Which is X occupation now"
+	*-- Cross check
+	tab ocupnemig_`i' hogar_emig
+	} 
+
+ 
+    *--------- The emigrant moved back to the country
+ /*  Moved back (s10q12): 12. X regresó a residenciarse nuevamente al país?
+							01 Si
+							02 No
+		
+ */    
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q12`i' s10q12_`i'
+	*-- Label original variable
+	label var s10q12_`i' "12. X regresó a residenciarse nuevamente al país?"
+	*-- Standarization of missing values
+	replace s10q12_`i'=. if s10q12_`i'==.a
+	*-- Generate variable
+	clonevar volvioemig_`i' = s10q12_`i'
+	*-- Label variable
+	label var volvioemig_`i' "Does X moved back to the country?"
+	*-- Cross check
+	tab volvioemig_`i' hogar_emig
+	*-- Label values
+	label def volvioemig_`i' 1 "Yes" 2 "No"
+	label value volvioemig_`i' volvioemig_`i'
+	} 
+
+
+     *--------- Year: The emigrant moved back to the country
+ /*  Year (s10q13a): 13a. En qué año regresó X?
+		
+ */    
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q13a`i' s10q13a_`i'
+	*-- Label original variable
+	label var s10q13a_`i' "13a. En qué año regresó X?"
+	*-- Standarization of missing values
+	replace s10q13a_`i'=. if s10q13a_`i'==.a
+	*-- Generate variable
+	gen volvioanoemig_`i' = s10q13a_`i'
+	*-- Label variable
+	label var volvioanoemig_`i' "Year: X moved back to the country?"
+	*-- Cross check
+	tab volvioanoemig_`i' hogar_emig
+	} 
+
+      *--------- Month: The emigrant moved back to the country
+ /*  Month (s10q13b): 13b. En qué mes regresó X?
+		
+ */ 
+ 	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q13b`i' s10q13b_`i'
+	*-- Label original variable
+	label var s10q13b_`i' "13b. En qué mes regresó X?"
+	*-- Standarization of missing values
+	replace s10q13b_`i'=. if s10q13b_`i'==.a
+	*-- Generate variable
+	clonevar volviomesemig_`i' = s10q13b_`i'
+	*-- Label variable
+	label var volviomesemig_`i' "Month: X moved back to the country?"
+	*-- Cross check
+	tab volviomesemig_`i' hogar_emig
+	} 
+
+ 
+      *--------- Member of the household
+ /*  Member (s10q14):14. En el presente X forma parte de este hogar?
+						01 Si
+						02 No
+	
+ */   
+ 	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q14`i' s10q14_`i'
+	*-- Label original variable
+	label var s10q14_`i' "14. En el presente X forma parte de este hogar?"
+	*-- Standarization of missing values
+	replace s10q14_`i'=. if s10q14_`i'==.a
+	*-- Generate variable
+	clonevar miememig_`i' = s10q14_`i'
+	*-- Label variable
+	label var miememig_`i' "Is X a member of the household?"
+	*-- Cross check
+	tab miememig_`i' hogar_emig
+	*-- Label values
+	label def miememig_`i' 1 "Yes" 2 "No"
+	label value miememig_`i' miememig_`i'
+	} 
+
+
+/*(************************************************************************************************************************************************* 
+*---------------------------------------------------------- XI: MORTALITY / MORTALIDAD ---------------------------------------------------------------
+*************************************************************************************************************************************************)*/
+
+global mortali_ENCOVI ctoshnosyud ctoshnosme hnohombre1 hnohombre2 hnohombre3 hnohombre4 hnohombre5 hnohombre6 hnohombre7 hnohombre8 hnohombre9 hnohombre10 ///
+hnohombre11 hnohombre12 hnohombre13 hnohombre14 hnohombre15 hnohombre16 hnohombre17 hnohombre18 hnohombre19 hnovivo1 hnovivo2 hnovivo3 hnovivo4 hnovivo5 ///
+hnovivo6 hnovivo7 hnovivo8 hnovivo9 hnovivo10 hnovivo11 hnovivo12 hnovivo13 hnovivo14 hnovivo15 hnovivo16 hnovivo17 hnovivo18 hnovivo19 hnoedad1 hnoedad2 ///
+hnoedad3 hnoedad4 hnoedad5 hnoedad6 hnoedad7 hnoedad8 hnoedad9 hnoedad10 hnoedad11 hnoedad12 hnoedad13 hnoedad14 hnoedad15 hnoedad16 hnoedad17 hnoedad18 ///
+hnoedad19 hnocontactoano1 hnocontactoano2 hnocontactoano3 hnocontactoano4 hnocontactoano5 hnocontactoano6 hnocontactoano7 hnocontactoano8 hnocontactoano9 ///
+hnocontactoano10 hnocontactoano11 hnocontactoano12 hnocontactoano13 hnocontactoano14 hnocontactoano15 hnocontactoano16 hnocontactoano17 hnocontactoano18 ///
+hnocontactoano19 hnocontactomes1 hnocontactomes2 hnocontactomes3 hnocontactomes4 hnocontactomes5 hnocontactomes6 hnocontactomes7 hnocontactomes8 hnocontactomes9 ///
+hnocontactomes10 hnocontactomes11 hnocontactomes12 hnocontactomes13 hnocontactomes14 hnocontactomes15 hnocontactomes16 hnocontactomes17 hnocontactomes18 ///
+hnocontactomes19 hnofallecioano1 hnofallecioano2 hnofallecioano3 hnofallecioano4 hnofallecioano5 hnofallecioano6 hnofallecioano7 hnofallecioano8 hnofallecioano9 ///
+hnofallecioano10 hnofallecioano11 hnofallecioano12 hnofallecioano13 hnofallecioano14 hnofallecioano15 hnofallecioano16 hnofallecioano17 hnofallecioano18 ///
+hnofallecioano19 hnofalleciomes1 hnofalleciomes2 hnofalleciomes3 hnofalleciomes4 hnofalleciomes5 hnofalleciomes6 hnofalleciomes7 hnofalleciomes8 hnofalleciomes9 ///
+hnofalleciomes10 hnofalleciomes11 hnofalleciomes12 hnofalleciomes13 hnofalleciomes14 hnofalleciomes15 hnofalleciomes16 hnofalleciomes17 hnofalleciomes18 hnofalleciomes19 ///
+hnoedadfallecio1 hnoedadfallecio2 hnoedadfallecio3 hnoedadfallecio4 hnoedadfallecio5 hnoedadfallecio6 hnoedadfallecio7 hnoedadfallecio8 hnoedadfallecio9 hnoedadfallecio10 ///
+hnoedadfallecio11 hnoedadfallecio12 hnoedadfallecio13 hnoedadfallecio14 hnoedadfallecio15 hnoedadfallecio16 hnoedadfallecio17 hnoedadfallecio18 hnoedadfallecio19
+
+*** How many sons or daughters did your biological mother have, including you?
+	* s11q1 Cuántos hijos o hijas tuvo su madre biológica incluyéndolo usted?
+	gen		ctoshnosyud = s11q1 if s11q1>=1 & (s11q1!=. & s11q1!=.a)
+
+*** How many of these sons or daughters were born before you?
+	* s11q2 Cuántos de estos hijos o hijas nacieron antes de usted?
+	gen 	ctoshnosme = s11q2 if (s11q2!=. & s11q2!=.a)
+	*Ok nadie contesta que tiene hermanos menores si son hijos únicos
+	
+*** You can mention the name of your siblings from the same biological mother, starting from the oldest
+	* s11q3__* A continuación, puede mencionar el nombre de cada uno de sus hermanos o hermanas nacidos de su madre biológica comenzando por el de mayor edad
+	*forvalues i = 0(1)19 {
+	*gen 	nombrehno`i' = s11q3__`i' if s11q1>=2 & (s11q3__`i'!=. & s11q3__`i'!=.a)
+	*}
+
+* SIBLINGS / HERMANOS
+
+*** Whats the sex of your siblings?
+	/*s11q4* Cuál es el sexo de cada uno de sus hermanos/as?
+		1= Masculino
+		2= Femenino
+	*/
+	forvalues i = 1(1)19 {
+	gen 	hnohombre`i' = 1 if s11q4`i'==1 & s11q1>=2 & (s11q4`i'!=. & s11q4`i'!=.a)
+	replace 	hnohombre`i' = 0 if s11q4`i'==2 & s11q1>=2 & (s11q4`i'!=. & s11q4`i'!=.a)
+	}
+	
+*** Are they still alive? (one variable for each)
+	/*s11q5* Continúa vivo?
+		1=Si
+		2=No
+		3=No sabe
+	*/
+	forvalues i = 1(1)19 {
+	gen 	hnovivo`i' = s11q5`i' if s11q1>=2 & (s11q5`i'!=. & s11q5`i'!=.a)
+	}
+
+*** How old are they? (one variable for each)
+	*s11q6* Qué edad tiene?
+	forvalues i = 1(1)19 {
+	gen 	hnoedad`i' = s11q6`i' if s11q5`i'==1 & s11q1>=2 & (s11q6`i'!=. & s11q6`i'!=.a)
+	}
+
+*** In which year did you last have contact with them? (one variable for each - for those who they don't know if alive)
+	*s11q7a* En qué año fue la última vez que tuvo contacto con ...? (para aquellos que no sabe si están vivos)
+	forvalues i = 1(1)19 {
+	gen 	hnocontactoano`i' = s11q7a`i' if s11q5`i'==3 & s11q1>=2 & (s11q7a`i'!=. & s11q7a`i'!=.a)
+	}
+	
+*** In which month did you last have contact with them? (one variable for each - for those who they don't know if alive)
+	*s11q7b* En qué mes fue la última vez que tuvo contacto con ...? (para aquellos que no sabe si están vivos)
+	forvalues i = 1(1)19 {
+	gen 	hnocontactomes`i' = s11q7b`i' if s11q5`i'==3 & s11q1>=2 & (s11q7b`i'!=. & s11q7b`i'!=.a)
+	}
+	
+*** In which year did they die? (one variable for each who passed away)
+	*s11q8a* En qué año falleció ...? (para aquellos que fallecieron)
+	forvalues i = 1(1)19 {
+		gen 	hnofallecioano`i' = s11q8a`i' if s11q5`i'==2 & s11q1>=2 & (s11q8a`i'!=. & s11q8a`i'!=.a)
+		}
+		
+*** In which month did they die? (one variable for each who passed away)
+	*s11q8b* En qué mes falleció ...?
+	forvalues i = 1(1)19 {
+		gen 	hnofalleciomes`i' = s11q8b`i' if s11q5`i'==2 & s11q1>=2 & (s11q8b`i'!=. & s11q8b`i'!=.a)
+		}
+
+*** How old was him/her when she/he passed away? (one variable for each who passed away)
+	*s11q8c* Qué edad tenía ... cuando falleció?
+	forvalues i = 1(1)19 {
+		gen 	hnoedadfallecio`i' = s11q8c`i' if s11q5`i'==2 & s11q1>=2 & (s11q8c`i'!=. & s11q8c`i'!=.a)
+		}
+
+/*(************************************************************************************************************************************************ 
+*----------------------------------------------------- XIII: FOOD SAFETY / SEGURIDAD ALIMENTARIA --------------------------------------------------
+************************************************************************************************************************************************)*/
+
+global segalimentaria_ENCOVI ingsuf_comida preocucomida_norecursos faltacomida_norecursos nosaludable_norecursos pocovariado_norecursos salteacomida_norecursos comepoco_norecursos ///
+hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_me18_norecursos comepoco_me18_norecursos nocomedia_me18_norecursos comida_trueque
+
+*** Do you believe that the income of the household is sufficient for buying groceries/food to consume inside and outside the household?
+	/*s13q1 Considera usted que el ingreso del hogar es suficiente para la compra de alimentos/comida para consumir dentro y fuera del hogar?
+			1=Si
+			2=No 
+	*/
+	gen 	ingsuf_comida = s13q1==1 if (s13q1!=. & s13q1!=.a)
+
+*** During the last month, due to lack of money or other resources, did...
+	*DURANTE EL ÚLTIMO MES, POR FALTA DE DINERO U OTROS RECURSOS, ¿ALGUNA VEZ…
+		/* 	1=Si
+			2=No */
+	
+	* ...you worry about food running out in your household?
+		*s13q2_1 ...usted se preocupó porque los alimentos se acabaran en su hogar? 
+		gen 	preocucomida_norecursos = s13q2_1==1 	if (s13q2_1!=. & s13q2_1!=.a)
+
+	* ...your household run out of food? 
+		* s13q2_2 ...en su hogar se quedaron sin alimentos?
+		gen 	faltacomida_norecursos = s13q2_2==1 	if (s13q2_2!=. & s13q2_2!=.a)
+
+	* ...your household stop having a healthy diet? (meat, fish, vegetables, fruits, cereals)
+		* s13q2_3 ...en su hogar dejaron de tener una alimentación saludable (contiene carnes, pescados, verduras, hortalizas, frutas, cereales)?
+		gen 	nosaludable_norecursos = s13q2_3==1 	if (s13q2_3!=. & s13q2_3!=.a)
+
+	* ...you or any adult in your household fed based on a low variety of food types? (always eat the same)
+		* s13q2_4 ...usted o algún adulto en su hogar tuvo una alimentación basada en poca variedad de alimentos (siempre come lo mismo)?
+		gen 	pocovariado_norecursos = s13q2_4==1 	if (s13q2_4!=. & s13q2_4!=.a)
+
+	* ...you or an adult in your house stopped eating breakfast, lunch or dinner?
+		* s13q2_5 ...usted o algún adulto en su hogar dejó de desayunar, almorzar o cenar?
+		gen 	salteacomida_norecursos = s13q2_5==1 	if (s13q2_5!=. & s13q2_5!=.a)
+
+	* ...you or an adult in your household ate less than what he/she should eat?
+		* s13q2_6 ...usted o algún adulto en su hogar comió menos de lo que debía comer?
+		gen 	comepoco_norecursos = s13q2_6==1 		if (s13q2_6!=. & s13q2_6!=.a)
+	
+	* ...you or an adult in your household felt hunger but didn't eat?
+		* s13q2_7 ...usted o algún adulto en su hogar sintió hambre pero no comió?
+		gen 	hambre_norecursos = s13q2_7==1 			if (s13q2_7!=. & s13q2_7!=.a)
+	
+	* ...you or an adult in your household only ate once a day, or stopped eating during a whole day?
+		* s13q2_8 ...usted o algún adulto en su hogar sólo comió una vez al día, o dejó de comer durante todo un día?
+		gen 	nocomedia_norecursos = s13q2_8==1 		if (s13q2_8!=. & s13q2_8!=.a)
+	
+	* ...any person younger than 18 years old in your household fed based on a low variety of food types? 
+		* s13q2_9 ...algún menor de 18 años en su hogar tuvo una alimentación basada en poca variedad de alimentos?
+		gen 	pocovariado_me18_norecursos = s13q2_9==1 if (s13q2_9!=. & s13q2_9!=.a)
+		
+	* ...any person younger than 18 years old in your household stopped eating breakfast, lunch or dinner?
+		* s13q2_10 ...algún menor de 18 años en su hogar dejó de desayunar, almorzar o cenar?
+		gen 	salteacomida_me18_norecursos = s13q2_10==1 if (s13q2_10!=. & s13q2_10!=.a)
+	
+	* ...you ever had to dimish the portions served to any person younger than 18 years old?
+		* s13q2_11 ...tuvieron que disminuir la cantidad servida en las comidas a algún menor de 18 años en su hogar?
+		gen 	comepoco_me18_norecursos = s13q2_11==1 	if (s13q2_11!=. & s13q2_11!=.a)
+	
+	* ...any person younger than 18 years old in your household only ate once a day, or stopped eating during a whole day?
+		* s13q2_12 ...algún menor de 18 años en su hogar solo comió una vez al día, o dejó de comer durante todo un día?
+		gen 	nocomedia_me18_norecursos = s13q2_12==1 if (s13q2_12!=. & s13q2_12!=.a)
+		
+*** During the last month, due to lack of money, did you or an adult in your household had to make in-kind payments or barter to consume food?
+	/* s13q3 Durante el último mes, por falta de dinero, ¿alguna vez usted o algún adulto en su hogar tuvo que hacer pagos en especie o trueque para consumir alimentos?
+			1=Si
+			2=No 
+	*/
+	gen 	comida_trueque = s13q3==1 if (s13q3!=. & s13q3!=.a)
+		
+/*(************************************************************************************************************************************************ 
+*---------------------------------------- XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES -------------------------------------
+************************************************************************************************************************************************)*/
+
+global shocks_ENCOVI
+
+*** Who is the informant in this section?
+gen contesta_ind_eh=s15q00 if (s15q00!=. & s15q00!=.a)
+
+*** Which of the following events have affected to yor household
+/* "1.Muerte o discapacidad de un miembro adulto del hogar que trabajaba
+	2.Muerte de alguien que enviaba remesas al hogar
+	3.Enfermedad de la persona con el ingreso más importante del hogar
+	4.Pérdida de un contacto importante 
+	5.Perdida de trabajo de la persona con el ingreso más importante del hogar
+	6.Salida del miembro del hogar que generaba ingresos debido a separación/divorcio
+	7.Salida del miembro de la familia que generaba ingresos debido al matrimonio
+	8.Salida de un miembro del hogar que generaba ingresos por emigración
+	9.Fracaso empresarial no agrícola/cierre de negocio o emprendimiento
+	10.Robo de cultivos, dinero en efectivo, ganado u otros bienes
+	11.Pérdida de cosecha por incendio/sequía/inundaciones
+	12.Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
+	13.Vivienda dañada / demolida 
+	14.Pérdida de propiedad por incendio o inundación
+	15.Pérdida de tierras
+	16.Muerte de ganado por enfermedad"
+*/
+forv i=1/16{
+gen evento_`i'= s15q1__`i' if (s15q1__`i'!=. & s15q1__`i'!=.a) 
+}
+label var evento_1 "Death or disability of a employed household member"
+label var evento_2 "Death of a household member sending remittances"
+label var evento_3 "Illness of the main earner"
+label var evento_4 "Loss of an important contact"
+label var evento_5 "Loss of work of the person with the most important household incomet"
+label var evento_6 "Departure of the household member who generated income due to separation / divorce"
+label var evento_7 "Departure of the family member who generated income due to marriage"
+label var evento_8 "Departure of a household member who generated income due to emigration"
+label var evento_9 "Non-agricultural business failure/closure of business or entrepreneurship "
+label var evento_10 "Theft of crops, cash,livestock or other property"
+label var evento_11 "Loss of harvest due to fire / drought / flood"
+label var evento_12 "Invasion of pests that caused loss of harvest or loss of storage"
+label var evento_13 "Damaged / demolished dwelling"
+label var evento_14 "Loss of property due to fire or flood"
+label var evento_15 "Loss of land"
+label var evento_16 "Death of cattle due to disease"
+
+/*(************************************************************************************************************************************************ 
+*----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
+************************************************************************************************************************************************)*/
+
+global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
+
+* For children younger than 5 years old
+
+*** Was the child measured?
+	/*s14q1 Fue medido?
+			1=Si
+			2=No 
+	*/
+	gen 	medido = s14q1==1 if age_months<=120 & (s14q1!=. & s14q1!=.a)
+
+*** Why wasn't the child measured?
+	/*s14q2 Por qué no fue medido?
+			1=No estaba en casa al momento de hacer la entrevista
+			2=Estaba enfermo
+			3=No está disponible
+			4=Otra razón 
+	*/
+	gen 	razon_nomedido = s14q2==1 if s14q1==2 & age_months<=120 & (s14q2!=. & s14q2!=.a)
+
+*** Confirm child's reported age (in months)
+	/*s14q3 Confirmar la edad (en meses) reportada del niño
+			1=Si, es correcto
+			2=No, no es correcto
+	*/
+	gen 	confirma_edad = person_confirm==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
+	
+*** Was the child able to be alone in the measurement instrument?
+	/*s14q14 Fue capaz de permanecer solo en el instrumento de medición?
+			1=Si
+			2=No 
+	*/
+	gen 	solo_medicion = s14q14==1 if s14q1==1 & age_months<=120 & (s14q14!=. & s14q14!=.a)
+
+*** Register the weight in kilograms (twice, third if too much difference between first two)
+	*weight_1 Registre el peso en kilogramos
+	*weight_2 Segundo registro del peso 
+	*weight_3 Tercer registro (si mucha diferencia en los 2 primeros)
+	gen		peso1 = weight_1 if s14q1==1 & age_months<=120 & (weight_1!=. & weight_1!=.a)
+	gen		peso2 = weight_2 if s14q1==1 & age_months<=120 & (weight_2!=. & weight_2!=.a)
+	gen		peso3 = weight_3 if weight_diff12>0.1 & s14q1==1 & age_months<=120 & (weight_3!=. & weight_3!=.a)
+
+*** Weight (in kg) calculated by the survey
+	*weight Peso en kilogramos calculado por la encuesta
+	gen 	peso = weight if s14q1==1 & age_months<=120 & (weight!=. & weight!=.a)
+	
+*** Register the altitude/longitude in centimeters (twice)
+	*height_1 Registre la altura/longitud en centímetros
+	*height_2 Segundo registro de la altura/longitud
+	*height_3 Tercer registro (si mucha diferencia en los 2 primeros)
+	gen		altura1 = height_1 if s14q1==1 & age_months<=120 & (height_1!=. & height_1!=.a)
+	gen		altura2 = height_2 if s14q1==1 & age_months<=120 & (height_2!=. & height_2!=.a)
+	gen		altura3 = height_3 if height_diff12>0.5 & s14q1==1 & age_months<=120 & (height_3!=. & height_3!=.a)
+
+***Height (in cm) calculated by the survey
+	*height Altura en centímetros calculada por la encuesta 
+	gen		altura = height if s14q1==1 & age_months<=120 & (height!=. & height!=.a)
+
+*** Was the child measured standing or lying down?
+	/* posicion Entrevistador: El menor fue medido de pie o acostado?
+			1=De pie
+			2=Acostado
+	*/
+	*replace	posicion=. if age_months=<120 
+	replace posicion=. if posicion!=.a
+	
+*** When weighting, was there why you couldn't weight (ex. heavy clothes that the child didn't take out)?
+	/*weight_comments Al pesar, existía algo por lo que pudiera pesar más (por ejemplo ropa pesada que no se le quitó) ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_pesar = weight_comments if age_months<=120 & (weight_comments!=. & weight_comments!=.a)
+
+*** When measuring, was there something why you could not measure more (ex. thick shoes or accesories)?
+	/*height_comments Al medir, había algo por lo que pudiera medir más (por ejemplo zapatos gruesos o accesorios) ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_medir = height_comments if age_months<=120 & (height_comments!=. & height_comments!=.a)
+
+*** When measuring, was there irregularities in the surface of the floor where you placed the stadiometer?
+	/*height_comments2 Al medir, había irregularidad en la superficie del piso donde se colocó el tallímetro ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_medir2 = height_comments2 if age_months<=120 & (height_comments2!=. & height_comments2!=.a)
+
+*** Height for age index, calculated by the survey
+	* hfa Índice de altura para la edad
+	replace hfa =. if age_months<=120 & (hfa!=. & hfa!=.a)
+	
+*** Weight for age index, calculated by the survey
+	* wfa Índice de peso para la edad
+	replace wfa =. if age_months<=120 & (wfa!=. & wfa!=.a)
+	
+*** Weight for height index, calculated by the survey
+	* wfh Índice de peso para la altura
+	replace wfh =. if age_months<=120 & (wfh!=. & wfh!=.a)
 
 
 /*(*********************************************************************************************************************************************** 
@@ -1423,8 +2921,9 @@ gen     pea = (ocupado==1 | desocupa ==1)
 ********** A. LABOR INCOME **********
 	
 ****** 9.0. SET-UP ******
-* Assumption for our new variables: No response and doesn't apply both are categorized as missing
 
+* Assumption for our new variables: No response and doesn't apply both are categorized as missing
+		
 *** MONETARY
 
 /* * For those not self-employed or employers (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9)
@@ -1492,7 +2991,6 @@ gen     pea = (ocupado==1 | desocupa ==1)
 
 * Creating variables
 
-local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 	* Note: while respondants can register different concepts with different currencies, they can't register one concept with multiple currencies (ej. "sueldo y salario" paid in 2 different currencies) 
 
 	gen ingresoslab_monpe = . 	// For not self-employed nor employers who received payment in Petro
@@ -1548,47 +3046,53 @@ foreach j of local monedas {
 		drop noreporta cuantasreporta
 		
 	* We take everything to bolivares February 2020, given that there we have more sample // 2=dolares, 3=euros, 4=colombianos // 
-		*Nota: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
-		*Nota: We used Inflacion verdadera's inflation to build the deflactor
 		* gen ingresoslab_monX_bolfeb = ingresoslab_monX		*tipo de cambio	* deflactor a febrero
-		gen ingresoslab_mon1_bolfeb = ingresoslab_mon1					 		* 8.72818941228807	if interview_month==11
-			replace ingresoslab_mon1_bolfeb = ingresoslab_mon1					* 6.01503214109115	if interview_month==12
-			replace ingresoslab_mon1_bolfeb = ingresoslab_mon1					* 3.20509397505709	if interview_month==1
-			replace ingresoslab_mon1_bolfeb = ingresoslab_mon1				 						if interview_month==2
-		gen ingresoslab_mon2_bolfeb = ingresoslab_mon2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace ingresoslab_mon2_bolfeb = ingresoslab_mon2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace ingresoslab_mon2_bolfeb = ingresoslab_mon2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace ingresoslab_mon2_bolfeb = ingresoslab_mon2	*73460.1238 						if interview_month==2
-		gen ingresoslab_mon3_bolfeb  = ingresoslab_mon3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace ingresoslab_mon3_bolfeb = ingresoslab_mon3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace ingresoslab_mon3_bolfeb = ingresoslab_mon3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace ingresoslab_mon3_bolfeb = ingresoslab_mon3	*80095.41371177						if interview_month==2
-		gen ingresoslab_mon4_bolfeb = ingresoslab_mon4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace ingresoslab_mon4_bolfeb = ingresoslab_mon4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace ingresoslab_mon4_bolfeb = ingresoslab_mon4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace ingresoslab_mon4_bolfeb = ingresoslab_mon4	*21.66060704812						if interview_month==2
+		gen ingresoslab_mon1_bolfeb = ingresoslab_mon1				 		* `deflactor11'	if interview_month==11
+			replace ingresoslab_mon1_bolfeb = ingresoslab_mon1				* `deflactor12'	if interview_month==12
+			replace ingresoslab_mon1_bolfeb = ingresoslab_mon1				* `deflactor1'	if interview_month==1
+			replace ingresoslab_mon1_bolfeb = ingresoslab_mon1				 				if interview_month==2
+			replace ingresoslab_mon1_bolfeb = ingresoslab_mon1				* `deflactor3'	if interview_month==3
+		gen ingresoslab_mon2_bolfeb = ingresoslab_mon2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace ingresoslab_mon2_bolfeb = ingresoslab_mon2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace ingresoslab_mon2_bolfeb = ingresoslab_mon2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace ingresoslab_mon2_bolfeb = ingresoslab_mon2	*`tc2mes2' 					if interview_month==2
+			replace ingresoslab_mon2_bolfeb = ingresoslab_mon2	*`tc2mes3'	* `deflactor3'	if interview_month==3
+		gen ingresoslab_mon3_bolfeb  = ingresoslab_mon3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace ingresoslab_mon3_bolfeb = ingresoslab_mon3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace ingresoslab_mon3_bolfeb = ingresoslab_mon3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace ingresoslab_mon3_bolfeb = ingresoslab_mon3	*`tc3mes2'					if interview_month==2
+			replace ingresoslab_mon3_bolfeb = ingresoslab_mon3	*`tc3mes3'	* `deflactor3'	if interview_month==3
+		gen ingresoslab_mon4_bolfeb = ingresoslab_mon4			*`tc4mes11'	* `deflactor11'	if interview_month==11
+			replace ingresoslab_mon4_bolfeb = ingresoslab_mon4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace ingresoslab_mon4_bolfeb = ingresoslab_mon4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace ingresoslab_mon4_bolfeb = ingresoslab_mon4	*`tc4mes2'					if interview_month==2
+			replace ingresoslab_mon4_bolfeb = ingresoslab_mon4	*`tc4mes3'	* `deflactor3'	if interview_month==3
 		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
 		gen ingresoslab_monpe_bolfeb  = ingresoslab_monpe_dummy	*30*73460.1238 		if ingresoslab_monpe_dummy==1
 	
 	egen ingresoslab_mon = rowtotal(ingresoslab_mon1_bolfeb ingresoslab_mon2_bolfeb ingresoslab_mon3_bolfeb ingresoslab_mon4_bolfeb ingresoslab_monpe_bolfeb)
 
 	* Substract payments done to get the self-employed's actual income
-		gen pagoslab_mon1_bolfeb = pagoslab_mon1						 	* 8.72818941228807	if interview_month==11 & s9q15==6
-			replace pagoslab_mon1_bolfeb = pagoslab_mon1					* 6.01503214109115	if interview_month==12 & s9q15==6
-			replace pagoslab_mon1_bolfeb = pagoslab_mon1					* 3.20509397505709	if interview_month==1 & s9q15==6
-			replace pagoslab_mon1_bolfeb = pagoslab_mon1				 						if interview_month==2 & s9q15==6
-		gen pagoslab_mon2_bolfeb = pagoslab_mon2			*30097.14836 	* 8.72818941228807	if interview_month==11 & s9q15==6
-			replace pagoslab_mon2_bolfeb = pagoslab_mon2	*44482.68537895 * 6.01503214109115	if interview_month==12 & s9q15==6
-			replace pagoslab_mon2_bolfeb = pagoslab_mon2	*68780.160295 	* 3.20509397505709	if interview_month==1 & s9q15==6
-			replace pagoslab_mon2_bolfeb = pagoslab_mon2	*73460.1238 						if interview_month==2 & s9q15==6
-		gen pagoslab_mon3_bolfeb  = pagoslab_mon3			*33227.24238536 * 8.72818941228807	if interview_month==11 & s9q15==6
-			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*49431.92724323 * 6.01503214109115	if interview_month==12 & s9q15==6
-			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*76259.14734081 * 3.20509397505709 	if interview_month==1 & s9q15==6
-			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*80095.41371177						if interview_month==2 & s9q15==6
-		gen pagoslab_mon4_bolfeb = pagoslab_mon4			*8.7947132815 	* 8.72818941228807	if interview_month==11 & s9q15==6
-			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*13.19404117947 * 6.01503214109115	if interview_month==12 & s9q15==6
-			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*20.6963505285 	* 3.20509397505709	if interview_month==1 & s9q15==6
-			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*21.66060704812						if interview_month==2 & s9q15==6
+		gen pagoslab_mon1_bolfeb = pagoslab_mon1						* `deflactor11'	if interview_month==11 & s9q15==6
+			replace pagoslab_mon1_bolfeb = pagoslab_mon1				* `deflactor12'	if interview_month==12 & s9q15==6
+			replace pagoslab_mon1_bolfeb = pagoslab_mon1				* `deflactor1'	if interview_month==1 & s9q15==6
+			replace pagoslab_mon1_bolfeb = pagoslab_mon1			 					if interview_month==2 & s9q15==6
+			replace pagoslab_mon1_bolfeb = pagoslab_mon1			 	* `deflactor3'	if interview_month==3 & s9q15==6
+		gen pagoslab_mon2_bolfeb = pagoslab_mon2			*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q15==6
+			replace pagoslab_mon2_bolfeb = pagoslab_mon2	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q15==6
+			replace pagoslab_mon2_bolfeb = pagoslab_mon2	*`tc2mes1'	* `deflactor1'	if interview_month==1 & s9q15==6
+			replace pagoslab_mon2_bolfeb = pagoslab_mon2	*`tc2mes2' 					if interview_month==2 & s9q15==6
+			replace pagoslab_mon2_bolfeb = pagoslab_mon2	*`tc2mes3' 	* `deflactor3'	if interview_month==3 & s9q15==6
+		gen pagoslab_mon3_bolfeb  = pagoslab_mon3			*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q15==6
+			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q15==6
+			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q15==6
+			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*`tc3mes2' 					if interview_month==2 & s9q15==6
+			replace pagoslab_mon3_bolfeb = pagoslab_mon3	*`tc3mes3' 	* `deflactor3'	if interview_month==3 & s9q15==6
+		gen pagoslab_mon4_bolfeb = pagoslab_mon4			*`tc4mes11' 	* `deflactor11'	if interview_month==11 & s9q15==6
+			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q15==6
+			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q15==6
+			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes2'					if interview_month==2 & s9q15==6
+			replace pagoslab_mon4_bolfeb = pagoslab_mon4	*`tc4mes3'		* `deflactor3'	if interview_month==3 & s9q15==6
 	
 	egen pagoslab_mon = rowtotal(pagoslab_mon1_bolfeb pagoslab_mon2_bolfeb pagoslab_mon3_bolfeb pagoslab_mon4_bolfeb)
 
@@ -1680,22 +3184,26 @@ foreach j of local monedas {
 		*Nota: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 		*Nota: We used Inflacion verdadera's inflation to build the deflactor
 		* gen ingresoslab_monX_bolfeb = ingresoslab_monX		*tipo de cambio	* deflactor a febrero
-		gen ingresoslab_bene1_bolfeb = ingresoslab_bene1					 		* 8.72818941228807	if interview_month==11
-			replace ingresoslab_bene1_bolfeb = ingresoslab_bene1					* 6.01503214109115	if interview_month==12
-			replace ingresoslab_bene1_bolfeb = ingresoslab_bene1					* 3.20509397505709	if interview_month==1
-			replace ingresoslab_bene1_bolfeb = ingresoslab_bene1				 						if interview_month==2
-		gen ingresoslab_bene2_bolfeb = ingresoslab_bene2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*73460.1238 						if interview_month==2
-		gen ingresoslab_bene3_bolfeb  = ingresoslab_bene3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*80095.41371177						if interview_month==2
-		gen ingresoslab_bene4_bolfeb = ingresoslab_mon4				*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*21.66060704812						if interview_month==2
+		gen ingresoslab_bene1_bolfeb = ingresoslab_bene1					 	* `deflactor11'	if interview_month==11
+			replace ingresoslab_bene1_bolfeb = ingresoslab_bene1				* `deflactor12'	if interview_month==12
+			replace ingresoslab_bene1_bolfeb = ingresoslab_bene1				* `deflactor1'	if interview_month==1
+			replace ingresoslab_bene1_bolfeb = ingresoslab_bene1			 					if interview_month==2
+			replace ingresoslab_bene1_bolfeb = ingresoslab_bene1			 	* `deflactor3'	if interview_month==3
+		gen ingresoslab_bene2_bolfeb = ingresoslab_bene2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*`tc2mes1'	* `deflactor1'	if interview_month==1
+			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*`tc2mes2' 					if interview_month==2
+			replace ingresoslab_bene2_bolfeb = ingresoslab_bene2	*`tc2mes3'	* `deflactor3'	if interview_month==3
+		gen ingresoslab_bene3_bolfeb  = ingresoslab_bene3			*`tc3mes11' * `deflactor11'		if interview_month==11
+			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*`tc3mes2'					if interview_month==2
+			replace ingresoslab_bene3_bolfeb = ingresoslab_bene3	*`tc3mes3'	* `deflactor3'	if interview_month==3
+		gen ingresoslab_bene4_bolfeb = ingresoslab_mon4				*`tc4mes11' * `deflactor11'		if interview_month==11
+			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*`tc4mes2'					if interview_month==2
+			replace ingresoslab_bene4_bolfeb = ingresoslab_bene4	*`tc4mes3' 	* `deflactor3'	if interview_month==3
 		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
 		
 	egen ingresoslab_bene = rowtotal(ingresoslab_bene1_bolfeb ingresoslab_bene2_bolfeb ingresoslab_bene3_bolfeb ingresoslab_bene4_bolfeb)
@@ -1892,23 +3400,27 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		* We take everything to bolivares February 2020, given that there we have more sample // 2=dolares, 3=euros, 4=colombianos // 
 		*Nota: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 		*Nota: We used Inflacion verdadera's inflation to build the deflactor
-		* gen ingresoslab_monX_bolfeb = ingresoslab_monX		*tipo de cambio	* deflactor a febrero
-		gen ijubi_m1_bolfeb = ijubi_m1					 		* 8.72818941228807	if interview_month==11
-			replace ijubi_m1_bolfeb = ijubi_m1					* 6.01503214109115	if interview_month==12
-			replace ijubi_m1_bolfeb = ijubi_m1					* 3.20509397505709	if interview_month==1
-			replace ijubi_m1_bolfeb = ijubi_m1				 						if interview_month==2
-		gen ijubi_m2_bolfeb = ijubi_m2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace ijubi_m2_bolfeb = ijubi_m2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace ijubi_m2_bolfeb = ijubi_m2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace ijubi_m2_bolfeb = ijubi_m2	*73460.1238 						if interview_month==2
-		gen ijubi_m3_bolfeb  = ijubi_m3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace ijubi_m3_bolfeb = ijubi_m3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace ijubi_m3_bolfeb = ijubi_m3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace ijubi_m3_bolfeb = ijubi_m3	*80095.41371177						if interview_month==2
-		gen ijubi_m4_bolfeb = ijubi_m4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace ijubi_m4_bolfeb = ijubi_m4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace ijubi_m4_bolfeb = ijubi_m4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace ijubi_m4_bolfeb = ijubi_m4	*21.66060704812						if interview_month==2
+		* gen ingresoslab_monX_bolfeb = ingresoslab_monX	*tipo de cambio	* deflactor a febrero
+		gen ijubi_m1_bolfeb = ijubi_m1					 	* `deflactor11'	if interview_month==11
+			replace ijubi_m1_bolfeb = ijubi_m1				* `deflactor12'	if interview_month==12
+			replace ijubi_m1_bolfeb = ijubi_m1				* `deflactor1'	if interview_month==1
+			replace ijubi_m1_bolfeb = ijubi_m1								if interview_month==2
+			replace ijubi_m1_bolfeb = ijubi_m1				* `deflactor3'	if interview_month==3
+		gen ijubi_m2_bolfeb = ijubi_m2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace ijubi_m2_bolfeb = ijubi_m2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace ijubi_m2_bolfeb = ijubi_m2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace ijubi_m2_bolfeb = ijubi_m2	*`tc2mes2'					if interview_month==2
+			replace ijubi_m2_bolfeb = ijubi_m2	*`tc2mes3' 	* `deflactor3'	if interview_month==3
+		gen ijubi_m3_bolfeb  = ijubi_m3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace ijubi_m3_bolfeb = ijubi_m3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace ijubi_m3_bolfeb = ijubi_m3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace ijubi_m3_bolfeb = ijubi_m3	*`tc3mes2'					if interview_month==2
+			replace ijubi_m3_bolfeb = ijubi_m3	*`tc3mes3' 	* `deflactor3'	if interview_month==3
+		gen ijubi_m4_bolfeb = ijubi_m4			*`tc4mes11' * `deflactor11'	if interview_month==11
+			replace ijubi_m4_bolfeb = ijubi_m4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace ijubi_m4_bolfeb = ijubi_m4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace ijubi_m4_bolfeb = ijubi_m4	*`tc4mes2'					if interview_month==2
+			replace ijubi_m4_bolfeb = ijubi_m4	*`tc4mes3' 	* `deflactor3'	if interview_month==3
 		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
 		gen ijubi_mpe_bolfeb  = ijubi_mpetro_dummy	*30*73460.1238 		if ijubi_mpetro_dummy==1
 	
@@ -1940,22 +3452,26 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 			sum icap_m`j'
 	}
 
-		gen icap_m1_bolfeb = icap_m1					 		* 8.72818941228807	if interview_month==11
-			replace icap_m1_bolfeb = icap_m1					* 6.01503214109115	if interview_month==12
-			replace icap_m1_bolfeb = icap_m1					* 3.20509397505709	if interview_month==1
-			replace icap_m1_bolfeb = icap_m1				 						if interview_month==2
-		gen icap_m2_bolfeb = icap_m2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace icap_m2_bolfeb = icap_m2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace icap_m2_bolfeb = icap_m2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace icap_m2_bolfeb = icap_m2	*73460.1238 						if interview_month==2
-		gen icap_m3_bolfeb  = icap_m3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace icap_m3_bolfeb = icap_m3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace icap_m3_bolfeb = icap_m3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace icap_m3_bolfeb = icap_m3	*80095.41371177						if interview_month==2
-		gen icap_m4_bolfeb = icap_m4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace icap_m4_bolfeb = icap_m4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace icap_m4_bolfeb = icap_m4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace icap_m4_bolfeb = icap_m4	*21.66060704812						if interview_month==2
+		gen icap_m1_bolfeb = icap_m1					 	* `deflactor11'	if interview_month==11
+			replace icap_m1_bolfeb = icap_m1				* `deflactor12'	if interview_month==12
+			replace icap_m1_bolfeb = icap_m1				* `deflactor1'	if interview_month==1
+			replace icap_m1_bolfeb = icap_m1			 					if interview_month==2
+			replace icap_m1_bolfeb = icap_m1			 	* `deflactor3'	if interview_month==3
+		gen icap_m2_bolfeb = icap_m2			*`tc2mes11' * `deflactor11'	if interview_month==11
+			replace icap_m2_bolfeb = icap_m2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace icap_m2_bolfeb = icap_m2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace icap_m2_bolfeb = icap_m2	*`tc2mes2' 					if interview_month==2
+			replace icap_m2_bolfeb = icap_m2	*`tc2mes3' 	* `deflactor3'	if interview_month==3
+		gen icap_m3_bolfeb  = icap_m3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace icap_m3_bolfeb = icap_m3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace icap_m3_bolfeb = icap_m3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace icap_m3_bolfeb = icap_m3	*`tc3mes2'					if interview_month==2
+			replace icap_m3_bolfeb = icap_m3	*`tc3mes3' 	* `deflactor3'	if interview_month==3
+		gen icap_m4_bolfeb = icap_m4			*`tc4mes11' * `deflactor11'	if interview_month==11
+			replace icap_m4_bolfeb = icap_m4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace icap_m4_bolfeb = icap_m4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace icap_m4_bolfeb = icap_m4	*`tc4mes2'					if interview_month==2
+			replace icap_m4_bolfeb = icap_m4	*`tc4mes3'	* `deflactor3'	if interview_month==3
 	
 	egen icap_m = rowtotal(icap_m1_bolfeb icap_m2_bolfeb icap_m3_bolfeb icap_m4_bolfeb)
 	
@@ -1979,22 +3495,26 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 			sum rem`j' // 89 report in bolívares
 	}
 	
-		gen rem1_bolfeb = rem1					 		* 8.72818941228807	if interview_month==11
-			replace rem1_bolfeb = rem1					* 6.01503214109115	if interview_month==12
-			replace rem1_bolfeb = rem1					* 3.20509397505709	if interview_month==1
-			replace rem1_bolfeb = rem1				 						if interview_month==2
-		gen rem2_bolfeb = rem2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace rem2_bolfeb = rem2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace rem2_bolfeb = rem2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace rem2_bolfeb = rem2	*73460.1238 						if interview_month==2
-		gen rem3_bolfeb  = rem3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace rem3_bolfeb = rem3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace rem3_bolfeb = rem3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace rem3_bolfeb = rem3	*80095.41371177						if interview_month==2
-		gen rem4_bolfeb = rem4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace rem4_bolfeb = rem4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace rem4_bolfeb = rem4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace rem4_bolfeb = rem4	*21.66060704812						if interview_month==2
+		gen rem1_bolfeb = rem1					 	* `deflactor11'	if interview_month==11
+			replace rem1_bolfeb = rem1				* `deflactor12'	if interview_month==12
+			replace rem1_bolfeb = rem1				* `deflactor1'	if interview_month==1
+			replace rem1_bolfeb = rem1			 					if interview_month==2
+			replace rem1_bolfeb = rem1			 	* `deflactor3'	if interview_month==3
+		gen rem2_bolfeb = rem2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace rem2_bolfeb = rem2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace rem2_bolfeb = rem2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace rem2_bolfeb = rem2	*`tc2mes2' 					if interview_month==2
+			replace rem2_bolfeb = rem2	*`tc2mes3' 	* `deflactor3'	if interview_month==3
+		gen rem3_bolfeb  = rem3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace rem3_bolfeb = rem3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace rem3_bolfeb = rem3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace rem3_bolfeb = rem3	*`tc3mes2'					if interview_month==2
+			replace rem3_bolfeb = rem3	*`tc3mes3'	* `deflactor3'	if interview_month==3
+		gen rem4_bolfeb = rem4			*`tc4mes11' * `deflactor11'	if interview_month==11
+			replace rem4_bolfeb = rem4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace rem4_bolfeb = rem4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace rem4_bolfeb = rem4	*`tc4mes2'					if interview_month==2
+			replace rem4_bolfeb = rem4	*`tc4mes3' 	* `deflactor3'	if interview_month==3
 	
 	egen rem = rowtotal(rem1_bolfeb rem2_bolfeb rem3_bolfeb rem4_bolfeb)
 
@@ -2017,22 +3537,26 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 			sum itranp_o_m`j'
 	}
 	
-		gen itranp_o_m1_bolfeb = itranp_o_m1					 		* 8.72818941228807	if interview_month==11
-			replace itranp_o_m1_bolfeb = itranp_o_m1					* 6.01503214109115	if interview_month==12
-			replace itranp_o_m1_bolfeb = itranp_o_m1					* 3.20509397505709	if interview_month==1
-			replace itranp_o_m1_bolfeb = itranp_o_m1				 						if interview_month==2
-		gen itranp_o_m2_bolfeb = itranp_o_m2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace itranp_o_m2_bolfeb = itranp_o_m2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace itranp_o_m2_bolfeb = itranp_o_m2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace itranp_o_m2_bolfeb = itranp_o_m2	*73460.1238 						if interview_month==2
-		gen itranp_o_m3_bolfeb  = itranp_o_m3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace itranp_o_m3_bolfeb = itranp_o_m3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace itranp_o_m3_bolfeb = itranp_o_m3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace itranp_o_m3_bolfeb = itranp_o_m3	*80095.41371177						if interview_month==2
-		gen itranp_o_m4_bolfeb = itranp_o_m4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace itranp_o_m4_bolfeb = itranp_o_m4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace itranp_o_m4_bolfeb = itranp_o_m4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace itranp_o_m4_bolfeb = itranp_o_m4	*21.66060704812						if interview_month==2
+		gen itranp_o_m1_bolfeb = itranp_o_m1					 	* `deflactor11'	if interview_month==11
+			replace itranp_o_m1_bolfeb = itranp_o_m1				* `deflactor12'	if interview_month==12
+			replace itranp_o_m1_bolfeb = itranp_o_m1				* `deflactor1'	if interview_month==1
+			replace itranp_o_m1_bolfeb = itranp_o_m1				 				if interview_month==2
+			replace itranp_o_m1_bolfeb = itranp_o_m1			 	* `deflactor3'	if interview_month==3
+		gen itranp_o_m2_bolfeb = itranp_o_m2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace itranp_o_m2_bolfeb = itranp_o_m2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace itranp_o_m2_bolfeb = itranp_o_m2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace itranp_o_m2_bolfeb = itranp_o_m2	*`tc2mes2' 					if interview_month==2
+			replace itranp_o_m2_bolfeb = itranp_o_m2	*`tc2mes3' 	* `deflactor3'	if interview_month==3
+		gen itranp_o_m3_bolfeb  = itranp_o_m3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace itranp_o_m3_bolfeb = itranp_o_m3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace itranp_o_m3_bolfeb = itranp_o_m3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace itranp_o_m3_bolfeb = itranp_o_m3	*`tc3mes2'					if interview_month==2
+			replace itranp_o_m3_bolfeb = itranp_o_m3	*`tc3mes3' 	* `deflactor3'	if interview_month==3
+		gen itranp_o_m4_bolfeb = itranp_o_m4			*`tc4mes11' * `deflactor11'	if interview_month==11
+			replace itranp_o_m4_bolfeb = itranp_o_m4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace itranp_o_m4_bolfeb = itranp_o_m4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace itranp_o_m4_bolfeb = itranp_o_m4	*`tc4mes2'					if interview_month==2
+			replace itranp_o_m4_bolfeb = itranp_o_m4	*`tc4mes3'	* `deflactor3'	if interview_month==3
 	
 	egen itranp_o_m = rowtotal(itranp_o_m1_bolfeb itranp_o_m2_bolfeb itranp_o_m3_bolfeb itranp_o_m4_bolfeb)
 
@@ -2056,22 +3580,26 @@ foreach j of local monedas {
 			sum itranp_ns`j'
 	}
 	
-		gen itranp_ns1_bolfeb = itranp_ns1					 		* 8.72818941228807	if interview_month==11
-			replace itranp_ns1_bolfeb = itranp_ns1					* 6.01503214109115	if interview_month==12
-			replace itranp_ns1_bolfeb = itranp_ns1					* 3.20509397505709	if interview_month==1
-			replace itranp_ns1_bolfeb = itranp_ns1				 						if interview_month==2
-		gen itranp_ns2_bolfeb = itranp_ns2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace itranp_ns2_bolfeb = itranp_ns2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace itranp_ns2_bolfeb = itranp_ns2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace itranp_ns2_bolfeb = itranp_ns2	*73460.1238 						if interview_month==2
-		gen itranp_ns3_bolfeb  = itranp_ns3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace itranp_ns3_bolfeb = itranp_ns3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace itranp_ns3_bolfeb = itranp_ns3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace itranp_ns3_bolfeb = itranp_ns3	*80095.41371177						if interview_month==2
-		gen itranp_ns4_bolfeb = itranp_ns4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace itranp_ns4_bolfeb = itranp_ns4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace itranp_ns4_bolfeb = itranp_ns4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace itranp_ns4_bolfeb = itranp_ns4	*21.66060704812						if interview_month==2
+		gen itranp_ns1_bolfeb = itranp_ns1						* `deflactor11'	if interview_month==11
+			replace itranp_ns1_bolfeb = itranp_ns1				* `deflactor12'	if interview_month==12
+			replace itranp_ns1_bolfeb = itranp_ns1				* `deflactor1'	if interview_month==1
+			replace itranp_ns1_bolfeb = itranp_ns1				 				if interview_month==2
+			replace itranp_ns1_bolfeb = itranp_ns1			 	* `deflactor3'	if interview_month==3
+		gen itranp_ns2_bolfeb = itranp_ns2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace itranp_ns2_bolfeb = itranp_ns2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace itranp_ns2_bolfeb = itranp_ns2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace itranp_ns2_bolfeb = itranp_ns2	*`tc2mes2' 					if interview_month==2
+			replace itranp_ns2_bolfeb = itranp_ns2	*`tc2mes3'	* `deflactor3'	if interview_month==3
+		gen itranp_ns3_bolfeb  = itranp_ns3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace itranp_ns3_bolfeb = itranp_ns3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace itranp_ns3_bolfeb = itranp_ns3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace itranp_ns3_bolfeb = itranp_ns3	*`tc3mes2'					if interview_month==2
+			replace itranp_ns3_bolfeb = itranp_ns3	*`tc3mes3'	* `deflactor3'	if interview_month==3
+		gen itranp_ns4_bolfeb = itranp_ns4			*`tc4mes11' * `deflactor11'	if interview_month==11
+			replace itranp_ns4_bolfeb = itranp_ns4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace itranp_ns4_bolfeb = itranp_ns4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace itranp_ns4_bolfeb = itranp_ns4	*`tc4mes2'					if interview_month==2
+			replace itranp_ns4_bolfeb = itranp_ns4	*`tc4mes3' 	* `deflactor3'	if interview_month==3
 	
 	egen itranp_ns = rowtotal(itranp_ns1_bolfeb itranp_ns2_bolfeb itranp_ns3_bolfeb itranp_ns4_bolfeb)
 
@@ -2100,22 +3628,26 @@ foreach j of local monedas {
 			sum itrane_o_m`j'
 	}
 	
-		gen itrane_o_m1_bolfeb = itrane_o_m1					 		* 8.72818941228807	if interview_month==11
-			replace itrane_o_m1_bolfeb = itrane_o_m1					* 6.01503214109115	if interview_month==12
-			replace itrane_o_m1_bolfeb = itrane_o_m1					* 3.20509397505709	if interview_month==1
-			replace itrane_o_m1_bolfeb = itrane_o_m1				 						if interview_month==2
-		gen itrane_o_m2_bolfeb = itrane_o_m2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace itrane_o_m2_bolfeb = itrane_o_m2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace itrane_o_m2_bolfeb = itrane_o_m2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace itrane_o_m2_bolfeb = itrane_o_m2	*73460.1238 						if interview_month==2
-		gen itrane_o_m3_bolfeb  = itrane_o_m3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace itrane_o_m3_bolfeb = itrane_o_m3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace itrane_o_m3_bolfeb = itrane_o_m3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace itrane_o_m3_bolfeb = itrane_o_m3	*80095.41371177						if interview_month==2
-		gen itrane_o_m4_bolfeb = itrane_o_m4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace itrane_o_m4_bolfeb = itrane_o_m4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace itrane_o_m4_bolfeb = itrane_o_m4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace itrane_o_m4_bolfeb = itrane_o_m4	*21.66060704812						if interview_month==2
+		gen itrane_o_m1_bolfeb = itrane_o_m1					 	* `deflactor11'	if interview_month==11
+			replace itrane_o_m1_bolfeb = itrane_o_m1				* `deflactor12'	if interview_month==12
+			replace itrane_o_m1_bolfeb = itrane_o_m1				* `deflactor1'	if interview_month==1
+			replace itrane_o_m1_bolfeb = itrane_o_m1			 					if interview_month==2
+			replace itrane_o_m1_bolfeb = itrane_o_m1			 	* `deflactor3'	if interview_month==3
+		gen itrane_o_m2_bolfeb = itrane_o_m2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace itrane_o_m2_bolfeb = itrane_o_m2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace itrane_o_m2_bolfeb = itrane_o_m2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace itrane_o_m2_bolfeb = itrane_o_m2	*`tc2mes2' 					if interview_month==2
+			replace itrane_o_m2_bolfeb = itrane_o_m2	*`tc2mes3' 	* `deflactor3'	if interview_month==3
+		gen itrane_o_m3_bolfeb  = itrane_o_m3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes2'				if interview_month==2
+			replace itrane_o_m3_bolfeb = itrane_o_m3	*`tc3mes3'	* `deflactor3'	if interview_month==3
+		gen itrane_o_m4_bolfeb = itrane_o_m4			*`tc4mes11'	* `deflactor11'	if interview_month==11
+			replace itrane_o_m4_bolfeb = itrane_o_m4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace itrane_o_m4_bolfeb = itrane_o_m4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace itrane_o_m4_bolfeb = itrane_o_m4	*`tc4mes2'					if interview_month==2
+			replace itrane_o_m4_bolfeb = itrane_o_m4	*`tc4mes3'	* `deflactor3'	if interview_month==3
 	
 	egen itrane_o_m = rowtotal(itrane_o_m1_bolfeb itrane_o_m2_bolfeb itrane_o_m3_bolfeb itrane_o_m4_bolfeb)
 
@@ -2140,22 +3672,26 @@ foreach j of local monedas {
 			sum itrane_ns`j'
 	}
 	
-		gen itrane_ns1_bolfeb = itrane_ns1					 		* 8.72818941228807	if interview_month==11
-			replace itrane_ns1_bolfeb = itrane_ns1					* 6.01503214109115	if interview_month==12
-			replace itrane_ns1_bolfeb = itrane_ns1					* 3.20509397505709	if interview_month==1
-			replace itrane_ns1_bolfeb = itrane_ns1				 						if interview_month==2
-		gen itrane_ns2_bolfeb = itrane_ns2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace itrane_ns2_bolfeb = itrane_ns2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace itrane_ns2_bolfeb = itrane_ns2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace itrane_ns2_bolfeb = itrane_ns2	*73460.1238 						if interview_month==2
-		gen itrane_ns3_bolfeb  = itrane_ns3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace itrane_ns3_bolfeb = itrane_ns3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace itrane_ns3_bolfeb = itrane_ns3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace itrane_ns3_bolfeb = itrane_ns3	*80095.41371177						if interview_month==2
-		gen itrane_ns4_bolfeb = itrane_ns4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace itrane_ns4_bolfeb = itrane_ns4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace itrane_ns4_bolfeb = itrane_ns4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace itrane_ns4_bolfeb = itrane_ns4	*21.66060704812						if interview_month==2
+		gen itrane_ns1_bolfeb = itrane_ns1					 	* `deflactor11'	if interview_month==11
+			replace itrane_ns1_bolfeb = itrane_ns1				* `deflactor12'	if interview_month==12
+			replace itrane_ns1_bolfeb = itrane_ns1				* `deflactor1'	if interview_month==1
+			replace itrane_ns1_bolfeb = itrane_ns1				 					if interview_month==2
+			replace itrane_ns1_bolfeb = itrane_ns1			 	* `deflactor3'	if interview_month==3
+		gen itrane_ns2_bolfeb = itrane_ns2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace itrane_ns2_bolfeb = itrane_ns2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace itrane_ns2_bolfeb = itrane_ns2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace itrane_ns2_bolfeb = itrane_ns2	*`tc2mes2' 					if interview_month==2
+			replace itrane_ns2_bolfeb = itrane_ns2	*`tc2mes3' 	* `deflactor3'	if interview_month==3
+		gen itrane_ns3_bolfeb  = itrane_ns3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace itrane_ns3_bolfeb = itrane_ns3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace itrane_ns3_bolfeb = itrane_ns3	*`tc3mes1' 	* `deflactor1'	if interview_month==1
+			replace itrane_ns3_bolfeb = itrane_ns3	*`tc3mes2'					if interview_month==2
+			replace itrane_ns3_bolfeb = itrane_ns3	*`tc3mes3' 	* `deflactor3'	if interview_month==3
+		gen itrane_ns4_bolfeb = itrane_ns4			*`tc4mes11'	* `deflactor11'	if interview_month==11
+			replace itrane_ns4_bolfeb = itrane_ns4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace itrane_ns4_bolfeb = itrane_ns4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace itrane_ns4_bolfeb = itrane_ns4	*`tc4mes2'					if interview_month==2
+			replace itrane_ns4_bolfeb = itrane_ns4	*`tc4mes3' 	* `deflactor3'	if interview_month==3
 	
 	egen itrane_ns = rowtotal(itrane_ns1_bolfeb itrane_ns2_bolfeb itrane_ns3_bolfeb itrane_ns4_bolfeb)
 	
@@ -2176,22 +3712,26 @@ foreach j of local monedas {
 			sum inla_extraord`j'
 	}
 
-		gen inla_extraord1_bolfeb = inla_extraord1					 		* 8.72818941228807	if interview_month==11
-			replace inla_extraord1_bolfeb = inla_extraord1					* 6.01503214109115	if interview_month==12
-			replace inla_extraord1_bolfeb = inla_extraord1					* 3.20509397505709	if interview_month==1
-			replace inla_extraord1_bolfeb = inla_extraord1				 						if interview_month==2
-		gen inla_extraord2_bolfeb = inla_extraord2			*30097.14836 	* 8.72818941228807	if interview_month==11
-			replace inla_extraord2_bolfeb = inla_extraord2	*44482.68537895 * 6.01503214109115	if interview_month==12
-			replace inla_extraord2_bolfeb = inla_extraord2	*68780.160295 	* 3.20509397505709	if interview_month==1
-			replace inla_extraord2_bolfeb = inla_extraord2	*73460.1238 						if interview_month==2
-		gen inla_extraord3_bolfeb  = inla_extraord3			*33227.24238536 * 8.72818941228807	if interview_month==11
-			replace inla_extraord3_bolfeb = inla_extraord3	*49431.92724323 * 6.01503214109115	if interview_month==12
-			replace inla_extraord3_bolfeb = inla_extraord3	*76259.14734081 * 3.20509397505709 	if interview_month==1
-			replace inla_extraord3_bolfeb = inla_extraord3	*80095.41371177						if interview_month==2
-		gen inla_extraord4_bolfeb = inla_extraord4			*8.7947132815 	* 8.72818941228807	if interview_month==11
-			replace inla_extraord4_bolfeb = inla_extraord4	*13.19404117947 * 6.01503214109115	if interview_month==12
-			replace inla_extraord4_bolfeb = inla_extraord4	*20.6963505285 	* 3.20509397505709	if interview_month==1
-			replace inla_extraord4_bolfeb = inla_extraord4	*21.66060704812						if interview_month==2
+		gen inla_extraord1_bolfeb = inla_extraord1						* `deflactor11'	if interview_month==11
+			replace inla_extraord1_bolfeb = inla_extraord1				* `deflactor12'	if interview_month==12
+			replace inla_extraord1_bolfeb = inla_extraord1				* `deflactor1'	if interview_month==1
+			replace inla_extraord1_bolfeb = inla_extraord1			 					if interview_month==2
+			replace inla_extraord1_bolfeb = inla_extraord1			 	* `deflactor3'	if interview_month==3
+		gen inla_extraord2_bolfeb = inla_extraord2			*`tc2mes11'	* `deflactor11'	if interview_month==11
+			replace inla_extraord2_bolfeb = inla_extraord2	*`tc2mes12' * `deflactor12'	if interview_month==12
+			replace inla_extraord2_bolfeb = inla_extraord2	*`tc2mes1' 	* `deflactor1'	if interview_month==1
+			replace inla_extraord2_bolfeb = inla_extraord2	*`tc2mes2' 					if interview_month==2
+			replace inla_extraord2_bolfeb = inla_extraord2	*`tc2mes3' 	* `deflactor3'	if interview_month==3
+		gen inla_extraord3_bolfeb  = inla_extraord3			*`tc3mes11' * `deflactor11'	if interview_month==11
+			replace inla_extraord3_bolfeb = inla_extraord3	*`tc3mes12' * `deflactor12'	if interview_month==12
+			replace inla_extraord3_bolfeb = inla_extraord3	*`tc3mes1' 	* `deflactor1' 	if interview_month==1
+			replace inla_extraord3_bolfeb = inla_extraord3	*`tc3mes2'					if interview_month==2
+			replace inla_extraord3_bolfeb = inla_extraord3	*`tc3mes3'	* `deflactor3'	if interview_month==3
+		gen inla_extraord4_bolfeb = inla_extraord4			*`tc4mes11' * `deflactor11'	if interview_month==11
+			replace inla_extraord4_bolfeb = inla_extraord4	*`tc4mes12' * `deflactor12'	if interview_month==12
+			replace inla_extraord4_bolfeb = inla_extraord4	*`tc4mes1'	* `deflactor1'	if interview_month==1
+			replace inla_extraord4_bolfeb = inla_extraord4	*`tc4mes2'					if interview_month==2
+			replace inla_extraord4_bolfeb = inla_extraord4	*`tc4mes3'	* `deflactor3'	if interview_month==3
 	
 	egen inla_extraord = rowtotal(inla_extraord1_bolfeb inla_extraord2_bolfeb inla_extraord3_bolfeb inla_extraord4_bolfeb)
 	
@@ -2214,32 +3754,6 @@ gen wage=    // Ingreso laboral horario total en la ocupación principal
 gen ilaho_m	// Ingreso laboral horario monetario en todos los trabajos 
 gen ilaho   // Ingreso laboral horario total en todos los trabajos 
 */
-
-
-/*(************************************************************************************************************************************************ 
-*------------------------------------------------------------- 1.10: LINEAS DE POBREZA  -------------------------------------------------------------
-************************************************************************************************************************************************)*/
-
-/* We are missing information to complete this */
-
-**** Lineas internacionales 
-* Linea de pobreza 1.9 USD a day at 2011 PPP
-gen     lp_1usd= 1.9
-
-* Linea de pobreza 3.2 USD a day at 2011 PPP
-gen     lp_3usd= 3.2
-
-* Linea de pobreza 5.5 USD a day at 2011 PPP
-gen     lp_5usd= 5.5
-
-**** Linea de Pobreza Oficial
-gen     lp_extrema  = .
-gen     lp_moderada = .
-
-**** Ingreso Oficial
-gen     ing_pob_ext    = .
-gen     ing_pob_mod    = .
-*gen     ing_pob_mod_lp = ing_pob_mod / lp_moderada
 
 
 *(************************************************************************************************************************************************ 
@@ -2291,8 +3805,24 @@ foreach i of varlist iasalp_m iasalp_nm  ictapp_m ictapp_nm  ipatrp_m ipatrp_nm 
 capture label drop relacion
 capture label drop hombre
 capture label drop nivel
-include "$rootpath\data_management\management\2. harmonization\aux_do\cuantiles.do"
-*include "$aux_do\do_file_aspire.do" // It was used to create specific things for another World Bank Practice
+
+*Solo para que corran los do aux de CEDLAS
+	gen hstrp=.
+	gen hstrt=.
+	gen hogarsec=0
+	gen     relacion = 1		if  relacion_en==1
+		replace relacion = 2		if  relacion_en==2
+		replace relacion = 3		if  relacion_en==3  | relacion_en==4
+		replace relacion = 4		if  relacion_en==7  
+		replace relacion = 5		if  relacion_en==8 
+		replace relacion = 6		if  relacion_en==5
+		replace relacion = 7		if  relacion_en==6  | relacion_en==9  | relacion_en==10 | relacion_en==11 
+		replace relacion = 8		if  relacion_en==12 | relacion_en==13
+	gen nivel=.
+	tempvar uno
+	gen `uno' = 1
+	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
+
 include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_1_variables.do"
 
 /* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
@@ -2321,15 +3851,11 @@ replace renta_imp = 0.10*itf_sin_ri  if  propieta_no_paga == 1
 *replace renta_imp = renta_imp / ipc_rel 
 
 include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
+	
+* include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
+* Chequear nuestros labels!!
 
-*Para Lautaro:
-	histogram ipcf if ipcf!=0 & ipcf<=20000000
-	histogram ipcf if ipcf!=0 & interview_month==2 & ipcf<=20000000
-
-include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
 compress
-
-
 
 
 /*==================================================================================================================================================
@@ -2339,27 +3865,14 @@ compress
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
 *************************************************************************************************************************************************)*/
-order pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
-region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
-propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
-alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
-seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
-enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
-relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11  
 
-keep pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
-region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
-propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
-alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
-seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
-enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
-relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg /*ipc*/ pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i /*ipc05 ipc11 ppp05 ppp11 *//*ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/  
+sort id com
 
-notes: Venezuela changed its currency during the recolection of data. Income variables might be expressed in different currencies.
+order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI ///
+/* Variables de ingreso CEDLAS, por ahora */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 
-save "$dataout\base_out_nesstar_cedlas_2018.dta", replace
+keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI ///
+/* Variables de ingreso CEDLAS, por ahora */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 
+
+save "$dataout\ENCOVI_2019.dta", replace

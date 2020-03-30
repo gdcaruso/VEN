@@ -22,7 +22,7 @@ Note:
 // Define rootpath according to user
 
 	    * User 1: Trini
-		global trini 0
+		global trini 1
 		
 		* User 2: Julieta
 		global juli   0
@@ -31,7 +31,7 @@ Note:
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lauta2   1
+		global lautaa   0
 		
 		
 		* User 4: Malena
@@ -43,21 +43,20 @@ Note:
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
-	    if $lauta2 {
+	    if $lautaa {
 				global rootpath "C:\Users\wb563365\GitHub\VEN\"
 		}
-
-		
+	
 		if $trini   {
-				global rootpath ""
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		
 		if $male   {
-				global rootpath ""
+				global rootpath "C:\Users\wb550905\Github\VEN\"
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\03_16_20"
+global dataofficial "$rootpath\data_management\input\03_26_20"
 
 ********************************************************************************
 
@@ -100,20 +99,27 @@ replace quest=2 if quest==. & quest!=1
 append using "$pathpixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
+	// Create identification for completed surveys
+	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
+
+	// To identify unique interviews according the last date and time entered
+    bys interview__key interview__id (date time) : keep if _n==_N
+	
+
 //	Create a temporary db with surveys approved by HQ 
 
-bys quest interview__key interview__id (date): keep if action==6 // 6=approved by HQ
+//bys quest interview__key interview__id (date): keep if action==6 // 6=approved by HQ
 	
 // check, log and delete duplicates
-duplicates tag interview__key interview__id quest, generate(dupli)
+//duplicates tag interview__key interview__id quest, generate(dupli)
 
-preserve
-keep if dupli >= 1
-save "$rootpath\data_management\output\merged\duplicates-ind.dta", replace
-restore	
-drop if dupli >= 1
+//preserve
+//keep if dupli >= 1
+//save "$rootpath\data_management\output\merged\duplicates-ind.dta", replace
+//restore	
+//drop if dupli >= 1
 
-keep interview* origina responsible__name quest date
+//keep interview* origina responsible__name quest date
 
 
 // formatting
@@ -194,7 +200,7 @@ foreach dtafile in $dtalist{
 	drop _merge
 
 	//eliminate useless data
-	drop edate
+	cap drop edate
 
 	// pre formatting to reshape
 	rename s?q??? s?q???_

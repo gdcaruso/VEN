@@ -19,13 +19,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lautaa	0   
+		global lautaa	1   
 		
 		* User 4: Malena
 		global male   0

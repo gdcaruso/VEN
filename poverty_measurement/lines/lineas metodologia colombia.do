@@ -85,7 +85,7 @@ rename ipcf_max ipcf
 xtile quant = ipcf, nquantiles(100)
 global pprior = 50
 keep if inrange(quant, $pprior -15, $pprior +15)
-
+save "$output/reference_metocol.dta"
 
 /*(************************************************************************************************************************************************* 
 * Remove households eating outside

@@ -22,17 +22,17 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
 				global rootpath ""
 		}
 	    if $lauta {
-				global rootpath ""
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"  

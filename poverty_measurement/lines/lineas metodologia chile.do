@@ -1,5 +1,5 @@
 /*===========================================================================
-Puropose: This script tries to replicate Chilenial methodolody of pov estimation 
+Puropose: This script tries to replicate Chilenian methodolody of pov estimation 
 ===========================================================================
 Country name:	Venezuela
 Year:			2019

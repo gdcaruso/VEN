@@ -11,7 +11,7 @@ Project:
 Authors:			Lautaro Chittaro
 
 Dependencies:		The World Bank
-Creation Date:		21th Feb, 2020
+Creation Date:		31th march, 2020
 Modification Date:  
 Output:			dta with baskets values and indexes
 
@@ -53,6 +53,11 @@ global cleaneddatapath "$rootpath\data_management\output\cleaned"
 global mergeddatapath "$rootpath\data_management\output\merged"
 global input  "$rootpath\poverty_measurement\input"
 global output "$rootpath\poverty_measurement\input"
+
+///////////////////////////////////////////////////////////////////////////////
+// USER SHOULD CHOOSE BETWEEN METHODOLOGIES (CHILENIAN OR COLOMBIAN)
+///////////////////////////////////////////////////////////////////////////////
+
 *
 ********************************************************************************
 
@@ -104,68 +109,7 @@ drop if _merge==2
 // consumption data mixes arroz and harina de arroz, but arroz is way more popular that harina de arroz. So we prefer a price for arroz only.
 drop if bien==2
 
-// Many products of the price data set are agregated in the consumption dataset. Example carne de res bistec, molida and desmechada. With no prior on within-group relevance, we just input a mean.
-collapse (mean) precio=precio, by (ENTIDAD mes COD_GASTO LABEL_GASTO)
-	
 
-// merge prices with representative baskets
-rename COD_GASTO bien
-merge m:1 bien using "$input/canastapercapita_metocol_sin_outliars.dta"
-
-// cleaning
-keep if _merge==3
-keep ENTIDAD mes bien LABEL_GASTO precio cantidad
-rename LABEL_GASTO label_bien
-rename ENTIDAD entidad
-rename cantidad_ajustada cantidad
-
-
-//generate labels
-labmask bien, values(label_bien)
-drop label_bien
-
-
-
-/*(************************************************************************************************************************************************* 
-* 1: basket value by month-state
-*************************************************************************************************************************************************)*/
-
-// generate value of each products
-bysort entidad mes: gen valor = precio * cantidad
-
-// save basket value result
-preserve
-keep if entidad==1
-export excel "$output/valor_canasta_df.xlsx", firstrow(variables) replace
-restore
-
-//generate baskets by month and state
-collapse (sum) valor, by (entidad mes)
-
-// set basis for indexes
-gen temp = valor if mes=="02" & entidad == 1
-egen valorbase = max (temp)
-drop temp
-
-gen index=100*valor/valorbase
-
-// set time 
-replace mes = "nov2019" if mes=="11"
-replace mes = "dec2019" if mes=="12"
-replace mes = "jan2020" if mes=="01"
-replace mes = "feb2020" if mes=="02"
-replace mes = "mar2020" if mes=="03"
-replace mes = "apr2020" if mes=="04"
-replace mes = "may2020" if mes=="05"
-replace mes = "jun2020" if mes=="06"
-
-gen t = monthly(mes, "MY")
-format t %tm
-
-sort entidad t
-
-export excel "$output/indice_precios_por_estado.xlsx", firstrow(variables) replace
-save "$output/indice_precio_por_estado.dta", replace
 
 
 /*(************************************************************************************************************************************************* 
@@ -199,7 +143,7 @@ merge m:1 bien using "$input/canastapercapita_metocol_sin_outliars.dta"
 
 // cleaning
 keep if _merge==3
-keep mes bien LABEL_GASTO precio cantidad
+keep mes bien LABEL_GASTO precio cantidad_ajustada
 rename LABEL_GASTO label_bien
 rename cantidad_ajustada cantidad
 
@@ -211,7 +155,7 @@ drop label_bien
 
 // generate value of each products
 bysort mes: gen valor = precio * cantidad
-export excel "$output/valor_canasta_nacional.xlsx", firstrow(variables) replace
+export excel "$output/valor_canasta_nacional_metocol.xlsx", firstrow(variables) replace
 
 
 //generate baskets by month and state
@@ -239,6 +183,75 @@ format t %tm
 
 sort t
 
-export excel "$output/indice_precios_nacional.xlsx", firstrow(variables) replace
-save "$output/indice_precio_nacional.dta", replace
+export excel "$output/indice_precios_nacional_metocol.xlsx", firstrow(variables) replace
+save "$output/indice_precio_nacional_metocol.dta", replace
 
+
+
+
+/*(************************************************************************************************************************************************* 
+* 1: DEPRECIATED: BASKETS AND INDEXES AT SUBNATIONAL LEVEL
+*************************************************************************************************************************************************)*/
+
+// // Many products of the price data set are agregated in the consumption dataset. Example carne de res bistec, molida and desmechada. With no prior on within-group relevance, we just input a mean.
+// collapse (mean) precio=precio, by (ENTIDAD mes COD_GASTO LABEL_GASTO)
+//	
+//
+// // merge prices with representative baskets
+// rename COD_GASTO bien
+// merge m:1 bien using "$input/canastapercapita_metochi_sin_outliars.dta"
+// stop
+// // cleaning
+// keep if _merge==3
+// keep ENTIDAD mes bien LABEL_GASTO precio cantidad
+// rename LABEL_GASTO label_bien
+// rename ENTIDAD entidad
+// rename cantidad_ajustada cantidad
+//
+//
+// //generate labels
+// labmask bien, values(label_bien)
+// drop label_bien
+//
+//
+//
+// /*(************************************************************************************************************************************************* 
+// * 1: basket value by month-state
+// *************************************************************************************************************************************************)*/
+//
+// // generate value of each products
+// bysort entidad mes: gen valor = precio * cantidad
+//
+// // save basket value result
+// preserve
+// keep if entidad==1
+// export excel "$output/valor_canasta_df.xlsx", firstrow(variables) replace
+// restore
+//
+// //generate baskets by month and state
+// collapse (sum) valor, by (entidad mes)
+//
+// // set basis for indexes
+// gen temp = valor if mes=="02" & entidad == 1
+// egen valorbase = max (temp)
+// drop temp
+//
+// gen index=100*valor/valorbase
+//
+// // set time 
+// replace mes = "nov2019" if mes=="11"
+// replace mes = "dec2019" if mes=="12"
+// replace mes = "jan2020" if mes=="01"
+// replace mes = "feb2020" if mes=="02"
+// replace mes = "mar2020" if mes=="03"
+// replace mes = "apr2020" if mes=="04"
+// replace mes = "may2020" if mes=="05"
+// replace mes = "jun2020" if mes=="06"
+//
+// gen t = monthly(mes, "MY")
+// format t %tm
+//
+// sort entidad t
+//
+// export excel "$output/indice_precios_por_estado.xlsx", firstrow(variables) replace
+// save "$output/indice_precio_por_estado.dta", replace

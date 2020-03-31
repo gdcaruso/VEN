@@ -57,8 +57,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
         
  */
  	
-	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8 {
 	*-- Rename main variable 
 	rename emp67e`i' emp67_`i'
@@ -82,8 +82,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 				02 Femenino
 				
  */
- 	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+ 	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8 {
 	*-- Rename main variable 
 	rename emp78x`i' emp78_`i'
@@ -106,8 +106,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
  Relationship (emp68): 5. Cuál es el parentesco de X con el Jefe(a) del hogar?
         
  */ 
-	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8 {
 	*-- Rename main variable 
 	rename emp68`i' emp68_`i'
@@ -146,8 +146,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
  /* Year (emp69a): 6a. En qué año se fue X ?
         
  */	
-	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8 {
 	*-- Rename original variable 
 	rename emp69a`i' emp69a_`i'
@@ -170,8 +170,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
  /* Month (emp69m): 6a. En qué mes se fue X ?
         
  */	
-	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8 {
 	*-- Rename original variable 
 	rename emp69m`i' emp69m_`i'
@@ -216,8 +216,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 
  */
  	
-	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8 {
 	*-- Rename main variable 
 	rename emp70n`i' emp70n_`i'
@@ -251,8 +251,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
  *--------- Latest education grade atained by the emigrant: NA
  /* Education level (): 7a. Cuál fue el último GRADO aprobado por X?     
 	
- 	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+ 	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8{
 	*-- Rename main variable 
 	rename s10q7a`i' s10q7a_`i'
@@ -276,8 +276,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 								02 Semestral
 								03 Trimestral     
 	
- 	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+ 	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/10{
 	*-- Rename main variable 
 	rename s10q7ba`i' s10q7ba_`i'
@@ -299,8 +299,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
  *--------- Latest year 
  /* Education regime (emp70a): 7b. Cuál fue el último AÑO aprobado por X?    
  */
- 	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+ 	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8{
 	*-- Rename main variable 
 	rename emp70a`i' emp70a_`i'
@@ -321,8 +321,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
   *--------- Latest semester
  /* Education regime (amp70s): 7c. Cuál fue el último SEMESTRE aprobado por X?   
  */
- 	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+ 	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8{
 	*-- Rename main variable 
 	rename emp70s`i' emp70s_`i'
@@ -344,8 +344,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
  /* Country () 2019: 8. En cuál país vive actualmente X? 
     Country (emp71) 2018: 71. ¿A que pais se fue…?
  */
- 	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+ 	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8{
 	*-- Rename main variable 
 	rename emp71`i' emp71_`i'
@@ -366,8 +366,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
   *--------- Other country of residence 
  /* Other Country (emp71_ot): 8a. Otro país, especifique
  */
- 	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+ 	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8{
 	*-- Rename main variable 
 	rename emp71ot`i' emp71ot_`i'
@@ -387,8 +387,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
   *--------- City of residence 
  /* City (s10q8b): 8b. Y en cuál ciudad ?
 
-  	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+  	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/10{
 	*-- Rename main variable 
 	rename s10q8b`i' s10q8b_`i'
@@ -424,8 +424,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 					01 Si
 					02 No
 
-  	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+  	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/10{
 	*-- Rename main variable 
 	rename s10q8c`i' s10q8c_`i'
@@ -454,8 +454,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 				05 Otro pariente
 				06 No parientes
 
-  	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+  	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/10{
 	*-- Rename main variable 
 	rename s10q8d`i' s10q8d_`i'
@@ -486,8 +486,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 						08 Por razones políticas
 						09 Otro			
  */
-  	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+  	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8{
 	*-- Rename main variable 
 	rename emp72`i' emp72_`i'
@@ -501,6 +501,26 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	label var razonemig_`i' "Why X emigrated"
 	*-- Cross check
 	tab razonemig_`i' hogar_emig
+	} 
+
+  *--------- Other Reasons for leaving the country
+ /*  Reason (emp72):9. Cuál fue el motivo por el cual X se fue (Otros)*/
+  	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
+	forval i = 1/8{
+	*-- Rename main variable 
+	rename emp72ot`i' emp72ot_`i'
+	*-- Label original variable
+	label var emp72ot_`i' "9a. Cuál fue el motivo por el cual X se fue (Otros)"
+	*-- Standarization of missing values
+	replace emp72ot_`i'="." if emp72ot_`i'=="98"
+	replace emp72ot_`i'="." if emp72ot_`i'=="99"
+	*-- Generate variable
+	gen razonemigot_`i' = emp72ot_`i'
+	*-- Label variable
+	label var razonemigot_`i' "Why X emigrated (Other reasons)"
+	*-- Cross check
+	tab razonemigot_`i' hogar_emig
 	} 
 
   *--------- Occupation: Before leaving the country
@@ -518,8 +538,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 					10 Ocupaciones militares
 					11 No se desempeñaba en alguna ocupación			
     
-  	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+  	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/10{
 	*-- Rename main variable 
 	rename s10q10`i' s10q10_`i'
@@ -550,8 +570,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 					10 Ocupaciones militares
 					11 No se desempeñaba en alguna ocupación			
    
-  	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+  	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/10{
 	*-- Rename main variable 
 	rename s10q11`i' s10q11_`i'
@@ -574,8 +594,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 							02 No
 		
  */    
-  	*-- Given that the maximum number of emigrantes per household is 10 
-	*-- We will have 10 variables with names
+  	*-- Given that the maximum number of emigrants per household is 8 
+	*-- We will have 8 variables with names
 	forval i = 1/8{
 	*-- Rename main variable 
 	rename emp64`i' emp64_`i'

@@ -1901,8 +1901,8 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		gen ing_nlb_xid = 1  if s9q29a__6==1 // Intereses y dividendos
 		gen ing_nlb_xa = 1   if s9q29a__9==1 // Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)
 	* Ingresos no laborales extraordinarios
- 		gen ing_nlb_xte = 1  if s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord
-		gen ing_nlb_xi = 1   if s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord
+ 		gen ing_nlb_xte = 1  if s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord o inla_otro
+		gen ing_nlb_xi = 1   if s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord o inla_otro
 
 *How many non-labor incomes do people receive?
 	egen    recibe = rowtotal(ing_nlb_*), mi
@@ -2469,11 +2469,6 @@ include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_1_
 	*replace renta_imp = renta_imp / ipc_rel 
 
 include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
-
-*Para Lautaro:
-	*histogram ipcf if ipcf!=0 & ipcf<=20000000
-	*histogram ipcf if ipcf!=0 & interview_month==2 & ipcf<=20000000
-	
 include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
 compress
 
@@ -2504,10 +2499,9 @@ alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
 seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
 enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
 relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
+iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 /*pobreza_enc pobreza_extrema_enc*/ lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc /*pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/  ///
 interview_month interview__key interview__id quest ///
-ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_otro s9q25a s9q26a s9q27
 
 *Obs: We are missing the weights to be able to generate these in the aux do_file_2_variables: "pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11"
 notes: Venezuela changed its currency during the recolection of data. Income variables were changed to be expressed in bolivares of February 2020.

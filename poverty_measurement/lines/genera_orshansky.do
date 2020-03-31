@@ -69,21 +69,7 @@ set more off
 * 1: sets population of reference
 *************************************************************************************************************************************************)*/
 
-// merges with income data
-use "$mergeddata/base_out_nesstar_cedlas_2019.dta", replace
-keep if interview_month==2
-rename region_est2 entidad
-collapse (max)ipcf_max=ipcf (max) miembros (max) entidad, by (interview__key interview__id quest)
-
-rename ipcf_max ipcf
-
-
-// keeps quantiles in poverty prior surrounding
-xtile quant = ipcf, nquantiles(100)
-global pprior = 50
-keep if inrange(quant, $pprior -15, $pprior +15)
-
-tempfile reference
+use "$output/reference_metocol.dta", replace
 save `reference'
 
 
@@ -138,16 +124,16 @@ save `reference'
 // there are two data sources of spending. 1) Household-individual section of survey and 2) Consumption section. Also, there are two types of spending: a) food b) non-food. So we aggregate each type of consumption in each section of the survey
 
 
-
-// Consumption section  (long shape)
+/*(************************************************************************************************************************************************* 
+* // Consumption section  (long shape)
+*********************************************************************************************************************)*/
 // import feb2020 product data
 use "$mergeddata/product-hh.dta", replace
 merge m:1 interview__id interview__key quest using `reference'
 keep if _merge ==3
 drop _merge
 
-// problems and solutions: a) homogenize currencies, b) correct date of survey with date of purchase, c) define frequency of purchases d) define current goods e) define types of goods
-
+// problems and solutions: a) define good types b) define current goods c) homogenize currencies d) correct date of purchase  e) define frequency of purchase for each type 
 
 // a) define good type
 gen type_good = .
@@ -168,7 +154,7 @@ gen current_good = .
 replace current_good = 1 if inlist(type_good,1,2,3,4,6,7) 
 replace current_good = 0 if type_good==3 //bienes durables (TV, plancha)
 
-// b) homogenize currencies
+// c) homogenize currencies
 	* We move everything to bolivares February 2020, given that there we have more sample size // 2=dolares, 3=euros, 4=colombianos // 
 		*Nota: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 
@@ -190,7 +176,7 @@ replace gasto_bol = gasto * `tc3mes2' if moneda == 3
 replace gasto_bol = gasto * `tc4mes2' if moneda == 4
 
 
-// c) define date of purchases
+// d) define date of purchases
 // problem: dates of purchase is different among goods
 
 /* FOR FOOD and alcohol&smoke
@@ -287,7 +273,7 @@ For the rest, we cannot discriminate between a purchase done within the timespan
 
 
 
-// c) define frequency of purchases
+// e) define frequency of purchases
 // problem:
 we dont know how recurrent are the purchased of different goods
 FOR FOOD and alcohol&smoke
@@ -330,7 +316,9 @@ save `conSpending'
 
 
 
-// Household section (wide shape)
+/*(************************************************************************************************************************************************* 
+* // HH section  (wide shape) TODO!
+*********************************************************************************************************************)*/
 use "$mergeddata/household.dta", replace
 merge 1:1 interview__id interview__key quest using `reference'
 keep if _merge ==3
@@ -343,7 +331,10 @@ s5q17* //servicios
 
 
 
-// Individual section  (wide shape)
+/*(************************************************************************************************************************************************* 
+* // Individual section  (wide shape) TODO!
+*********************************************************************************************************************)*/
+
 use "$mergeddata/individual.dta", replace
 merge 1:1 interview__id interview__key quest using `reference'
 keep if _merge ==3

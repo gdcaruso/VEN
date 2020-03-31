@@ -175,9 +175,8 @@ bysort newid (entidad): replace entidad=entidad[1]
 // creates food "popularity" across hh
 bysort bien: egen popularity = count(cantidad_h) if cantidad_h>0 & cantidad_h!=. 
 egen totalhh = max(newid)
-
 replace popularity = popularity/totalhh
-replace popularity = 0 if popularity==.
+sort popularity
 
 
 // creates caloric share across hh
@@ -193,10 +192,6 @@ keep if shareintake>0.01 | popularity>0.3
 // drop condimentos (no prices collected)
 drop if bien == 79
 
-
-// gen total intake after filters
-qui sum(calintake)
-gen totintake_after_filters = r(sum)
 
 
 
@@ -217,6 +212,12 @@ egen pop = total(miembros) if first==1
 egen population = max(pop)
 drop pop
 
+
+// gen total intake after filters
+qui sum(calintake)
+gen totintake_after_filters = r(sum)
+
+
 //compare requirement to actual calories to adjust basket
 gen totintake_pc = totintake_after_filters/population
 gen ajuste_calorico = cal_req/totintake_pc
@@ -224,9 +225,12 @@ gen cantidad_ajustada = cantidad_h*ajuste_calorico
 
 // output canasta ajustada
 preserve 
-collapse (sum) cantidad_ajustada (max) population (max) cal, by(bien) 
+collapse (sum) cantidad_h cantidad_ajustada (max) population (max) cal, by(bien) 
 replace cantidad_ajustada = cantidad_ajustada/population
+replace cantidad_h = cantidad_h/population
+
 gen cal_intake = cantidad_ajustada*cal
+gsort -cal_intake
 save "$output/canastapercapita_metocol_sin_outliars.dta", replace
 export excel using "$output/canastapercapita_metocol_sin_outliars.xlsx", firstrow(var) replace
 

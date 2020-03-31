@@ -16,10 +16,10 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
@@ -30,7 +30,7 @@ Note:
 			
 		if $juli {
 				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 "
+				global rootpath2 
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
@@ -94,22 +94,38 @@ drop if _merge==2
 tab CMHP18 if _merge==3 //cuatro observacions con edad mayor a 2
 *brow if _merge==3 & CMHP18>2
 drop _merge
-/*
-merge 1:1 ENNUM LIN using "$data2017\EMIGRACIÓN2017.dta" 
-drop _merge
-*/
 rename _all, lower
 
-*Incluyo las regiones de archivos 2017
+*-----Incluyo las regiones de archivos 2017
+*******************************************
+	preserve
+	use "$data2017\region_merge.dta", clear
+	rename _all, lower
+	tempfile region
+	save `region'
+	restore
+	merge m:1 ennumc lin using `region'
+	drop _merge  
+	*----- Save as temporary file
+	tempfile house
+	save `house' 
 
-preserve
-use "$data2017\region_merge.dta", clear
-rename LIN lin
-tempfile region
-save `region'
-restore
-merge m:1 ennumc lin using `region'
-drop _merge  
+*----- Emigration
+*******************************************
+	tempfile emigracion
+	use "$data2017\EMIGRACIÓN2017.dta", clear
+	// Rename
+	rename _all, lower
+	// Identify duplicates
+	duplicates report ennumc linemig
+	// Rename 
+	rename linemig lin
+	// Reshape
+	reshape wide emp*, i(ennumc) j(lin)
+	save `emigracion'
+	use `house', clear
+	merge m:1 ennumc using `emigracion' 
+	drop _merge
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Identification Variables  --------------------------------------------------

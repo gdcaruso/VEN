@@ -16,10 +16,10 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
@@ -30,7 +30,7 @@ Note:
 			
 		if $juli {
 				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 "
+				global rootpath2 
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
@@ -105,10 +105,37 @@ merge 1:1 ENNUM LIN using `vacu'
 tab CMHP18 if _merge==3 // hay dos observacions con edad mayor a 2, aunque las respuestas estas codificadas como NA
 *brow if _merge==3 & CMHP18>2
 drop _merge
-/*
-merge 1:1 ENNUM LIN using "$data2018\MIGRACION.dta" //NO ME QUEDA CLARO SI SE PUEDE HACER EL CRUCE (no hay identificador unico)
-drop _merge
-*/
+tempfile house
+save `house' 
+
+*----- Emigration
+*******************************************
+	tempfile emigracion
+	use "$data2018\MIGRACION.dta", clear
+	drop ENNUM17
+	sort ENNUM LIN
+	egen Migrante_id = group (ENNUM LIN)
+	// Identify duplicates
+	duplicates tag Migrante_id, gen(dupli)
+	// Check duplicates
+	br Migrante_id ENNUM LIN EMP64 EMP65M EMP65A EMP66 EMP66L EMP67E EMP78X EMP68 EMP69M EMP69A EMP70N EMP70A EMP70S EMP71 EMP71OT EMP72 EMP72OT if Migrante_id==76 | Migrante_id==241 | Migrante_id==476 | Migrante_id==479 | Migrante_id==649
+	// Fix duplicates
+	by ENNUM LIN: gen x = _n
+	by ENNUM LIN: gen x1 = _N
+	replace LIN=2 if x==2 & x1==2
+	duplicates report ENNUM LIN
+	// Drop auxiliary variables
+	drop x x1 dupli Migrante_id
+	// Create unique identification 
+	// Reshape
+	reshape wide EMP*, i(ENNUM) j(LIN)
+	save `emigracion'
+	use `house', clear
+	merge m:1 ENNUM using `emigracion' //NO ME QUEDA CLARO SI SE PUEDE HACER EL CRUCE (no hay identificador unico)
+	// Hay encuestas que solo aparecen en la seccion de emigracion
+	// Parece que son encuestas que se hicieron en el intento de construir un panel
+	drop if _merge==2
+
 
 rename _all, lower
 

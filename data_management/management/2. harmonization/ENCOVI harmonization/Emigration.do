@@ -509,18 +509,39 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- We will have 10 variables with names
 	forval i = 1/10{
 	*-- Rename main variable 
-	rename s10q9_os`i' s10q9_os_`i'
+	rename s10q9`i' s10q9_`i'
 	*-- Label original variable
-	label var s10q9_os_`i' "9. Cuál fue el motivo por el cual X se fue"
+	label var s10q9_`i' "9. Cuál fue el motivo por el cual X se fue"
 	*-- Standarization of missing values
-	replace s10q9_os_`i'="." if s10q9_os_`i'==".a"
+	replace s10q9_`i'="." if s10q9_os_`i'==".a"
 	*-- Generate variable
-	gen razonemig_`i' = s10q9_os_`i'
+	gen razonemig_`i' = s10q9_`i'
 	*-- Label variable
 	label var razonemig_`i' "Why X emigrated"
 	*-- Cross check
 	tab razonemig_`i' hogar_emig
 	} 
+	
+  *--------- Other Reasons for leaving the country
+ /*  Reason (s10q9_os):9. Cuál fue el motivo por el cual X se fue				
+									
+ */
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q9_os`i' s10q9_os_`i'
+	*-- Label original variable
+	label var s10q9_os_`i' "9. Cuál fue el motivo por el cual X se fue (otros)"
+	*-- Standarization of missing values
+	replace s10q9_os_`i'="." if s10q9_os_`i'==".a"
+	*-- Generate variable
+	gen razonemigot_`i' = s10q9_os_`i'
+	*-- Label variable
+	label var razonemigot_`i' "Why X emigrated (Other reasons)"
+	*-- Cross check
+	tab razonemigot_`i' hogar_emig
+	} 	
 
   *--------- Occupation: Before leaving the country
  /*  Occupation before (s10q10):10. Cuál era la ocupación principal de X antes de emigrar?

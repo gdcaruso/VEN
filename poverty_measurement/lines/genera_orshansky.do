@@ -70,6 +70,7 @@ set more off
 *************************************************************************************************************************************************)*/
 
 use "$output/reference_metocol.dta", replace
+tempfile reference
 save `reference'
 
 
@@ -319,15 +320,190 @@ save `conSpending'
 /*(************************************************************************************************************************************************* 
 * // HH section  (wide shape) TODO!
 *********************************************************************************************************************)*/
-use "$mergeddata/household.dta", replace
-merge 1:1 interview__id interview__key quest using `reference'
-keep if _merge ==3
+use "$cleaneddata/ENCOVI_2019.dta", replace
+merge m:1 interview__id interview__key quest using `reference'
+keep if _merge == 3
 drop _merge
 
 
+
 //select relevant variables
-keep interview__id interview__key quest s5q8* s5q7 s5q11* // alquiler e imputado ///
-s5q17* //servicios
+global viviendavar renta_imp pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon
+
+global serviciosvar pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m
+
+global educvar cuota_insc_monto compra_utiles_monto costo_men_monto costo_transp_monto otros_gastos_monto cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m
+
+global saludvar cant_pago_consulta mone_pago_consulta mes_pago_consulta pago_remedio mone_pago_remedio mes_pago_remedio pago_examen mone_pago_examen mes_pago_examen cant_remedio_tresmeses mone_remedio_tresmeses mes_remedio_tresmeses cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
+
+global jubivar d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone cant_aporta_pension mone_aporta_pension
+
+stop
+keep interview__id interview__key quest  ///
+$viviendavar ///
+$serviciosvar ///
+$educvar ///
+$saludvar ///
+$jubivar
+
+////////////////////
+// CLASIFICACION //
+//////////////////
+
+// first we move everything to feb 2020 bolivares, mensual freq. Then we reshape to get a long dataset.
+
+******************************************vivienda
+// global viviendavar renta_imp pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon
+
+*********************declared rent (mensual)
+// data in bolivares feb2020
+gen gasto901 = pago_alq_mutuo if pago_alq_mutuo_mon ==1 & pago_alq_m == 2
+
+
+// data of March and many currencies
+replace gasto901 = pago_alq_mutuo* `tc2mes3'* `deflactor3' if moneda == 2 & pago_alq_m == 3
+replace gasto901 = pago_alq_mutuo* `tc3mes3'* `deflactor3' if moneda == 3 & pago_alq_m == 3
+replace gasto901 = pago_alq_mutuo* `tc4mes3'* `deflactor3' if moneda == 4 & pago_alq_m == 3
+
+// data in many currencies feb2020
+replace gasto901 = pago_alq_mutuo* `tc2mes2' if moneda == 2 & pago_alq_m == 2
+replace gasto901 = pago_alq_mutuo* `tc3mes2' if moneda == 3 & pago_alq_m == 2
+replace gasto901 = pago_alq_mutuo* `tc4mes2' if moneda == 4 & pago_alq_m == 2
+
+// data of Jan and many currencies
+replace gasto901 = pago_alq_mutuo* `tc2mes1'* `deflactor1' if moneda == 2 & pago_alq_m == 1
+replace gasto901 = pago_alq_mutuo* `tc3mes1'* `deflactor1' if moneda == 3 & pago_alq_m == 1
+replace gasto901 = pago_alq_mutuo* `tc4mes1'* `deflactor1' if moneda == 4 & pago_alq_m == 1
+
+
+// data of Dec and many currencies
+replace gasto901 = pago_alq_mutuo* `tc2mes12'* `deflactor12' if moneda == 2 & pago_alq_m == 12
+replace gasto901 = pago_alq_mutuo* `tc3mes12'* `deflactor12' if moneda == 3 & pago_alq_m == 12
+replace gasto901 = pago_alq_mutuo* `tc4mes12'* `deflactor12' if moneda == 4 & pago_alq_m == 12
+
+// data of Nov and many currencies
+replace gasto901 = pago_alq_mutuo* `tc2mes11'* `deflactor11' if moneda == 2 & pago_alq_m == 11
+replace gasto901 = pago_alq_mutuo* `tc3mes11'* `deflactor11' if moneda == 3 & pago_alq_m == 11
+replace gasto901 = pago_alq_mutuo* `tc4mes11'* `deflactor11' if moneda == 4 & pago_alq_m == 11
+
+*****************renta imputada por el entrevisatado
+
+// data in bolivares feb2020
+gen gasto902 = renta_imp_en if renta_imp_mon == 1
+
+
+// data in many currencies (march)
+replace gasto902 = renta_imp_en* `tc2mes3' * `deflactor3' if renta_imp_mon == 2 & interview_month==3
+replace gasto902 = renta_imp_en* `tc3mes3' * `deflactor3'  if renta_imp_mon == 3 & interview_month==3
+replace gasto902 = renta_imp_en* `tc4mes3' * `deflactor3' if renta_imp_mon == 4 & interview_month==3
+
+// data in many currencies (feb)
+replace gasto902 = renta_imp_en* `tc2mes2' if renta_imp_mon == 2 & interview_month==2
+replace gasto902 = renta_imp_en* `tc3mes2' if renta_imp_mon == 3 & interview_month==2
+replace gasto902 = renta_imp_en* `tc4mes2' if renta_imp_mon == 4 & interview_month==2
+
+// data in many currencies (jan)
+replace gasto902 = renta_imp_en* `tc2mes1' * `deflactor1' if renta_imp_mon == 2 & interview_month==1
+replace gasto902 = renta_imp_en* `tc3mes1' * `deflactor1'  if renta_imp_mon == 3 & interview_month==1
+replace gasto902 = renta_imp_en* `tc4mes1' * `deflactor1' if renta_imp_mon == 4 & interview_month==1
+
+// data in many currencies (dec)
+replace gasto902 = renta_imp_en* `tc2mes12' * `deflactor12' if renta_imp_mon == 2 & interview_month==12
+replace gasto902 = renta_imp_en* `tc3mes12' * `deflactor12'  if renta_imp_mon == 3 & interview_month==12
+replace gasto902 = renta_imp_en* `tc4mes12' * `deflactor12' if renta_imp_mon == 4 & interview_month==12
+
+// data in many currencies (nov)
+replace gasto902 = renta_imp_en* `tc2mes11' * `deflactor11' if renta_imp_mon == 2 & interview_month==11
+replace gasto902 = renta_imp_en* `tc3mes11' * `deflactor11'  if renta_imp_mon == 3 & interview_month==11
+replace gasto902 = renta_imp_en* `tc4mes11' * `deflactor11' if renta_imp_mon == 4 & interview_month==11
+
+
+******************inputed rent by analyst
+// data in bolivares feb2020
+gen gasto903 = renta_imp if renta_imp_mon == 1 //assumed everything was moved in the income module to feb 2020
+
+
+**********************************************services
+
+
+
+
+
+
+
+
+
+
+
+gen gasto = pago_alq_mutuo if bien == 902
+replace gasto = renta_imp if bien == 903
+replace gasto = renta_imp_en if bien == 902 //the order is relevant, we prefer the reported rent than our inputation
+
+gen moneda = pago_alq_mutuo_mon if bien == 902
+replace moneda = renta_imp_mon if bien == 902
+replace moneda = 1 if bien == 903
+
+gen mes = pago_alq_mutuo_m if bien == 901
+
+
+
+// servicios
+// global serviciosvar pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m
+
+replace bien = 911 if pagua_monto !=. //servicios
+replace bien = 912 if pelect_monto !=.
+replace bien = 913 if pgas_monto !=.
+replace bien = 914 if pcarbon_monto !=.
+replace bien = 915 if pparafina_monto !=.
+replace bien = 916 if ptelefono_monto !=.
+
+replace gasto = pagua_monto if bien == 911
+replace gasto = pelect_monto if bien == 912
+replace gasto = pgas_monto if bien == 913
+replace gasto = pcarbon_monto if bien == 914
+replace gasto = pparafina_monto if bien == 915
+replace gasto = ptelefono_monto if bien == 916
+
+
+// global educvar cuota_insc_monto compra_utiles_monto costo_men_monto costo_transp_monto otros_gastos_monto cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m
+
+replace bien = 921 if couta_insc_monto !=.
+replace bien = 922 if compra_utiles_monto !=.
+replace bien = 923 if costo_men_monto !=.
+replace bien = 924 if costo_transp_monto !=.
+replace bien = 925 if otros_gastos_monto !=.
+
+// global saludvar cant_pago_consulta mone_pago_consulta mes_pago_consulta pago_remedio mone_pago_remedio mes_pago_remedio pago_examen mone_pago_examen mes_pago_examen cant_remedio_tresmeses mone_remedio_tresmeses mes_remedio_tresmeses cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
+
+replace bien = 931 if cant_pago_consulta != .
+replace bien = 932 if pago_remedio != .
+replace bien = 933 if pago_examen != .
+replace bien = 934 if cant_remedio_tresmeses != .
+replace bien = 935 if cant_pagosegsalud != .
+
+
+// global jubivar d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone cant_aporta_pension mone_aporta_pension
+
+replace bien = 941 if d_sso_cant != .
+replace bien = 942 if d_spf_cant != .
+replace bien = 943 if d_isr_cant != .
+replace bien = 944 if d_cah_cant != .
+replace bien = 945 if d_cpr_cant != .
+replace bien = 946 if d_rpv_cant != .
+replace bien = 947 if d_otro_cant != .
+replace bien = 947 if cant_aporta_pension != .
+
+////////////////////////////
+// GASTO, MONEDA, FECHA  //
+//////////////////////////
+
+// global viviendavar renta_imp pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon
+stop
+
+
+
+
+
 
 
 
@@ -336,16 +512,16 @@ s5q17* //servicios
 *********************************************************************************************************************)*/
 
 use "$mergeddata/individual.dta", replace
-merge 1:1 interview__id interview__key quest using `reference'
+merge m:1 interview__id interview__key quest using `reference'
 keep if _merge ==3
 drop _merge
 
 //select relevant variables
 keep interview__id interview__key quest s7q10* //educacion ///
  s8q8* s8q12* s8q14* s8q16* s8q12* //salud ///
- s9q24* //bienes del negocio que se lleva a su casa (no identificable el tipo de bien) ///
  s9q38* //pension
  
+// excluimos bienes del negocio que se lleva a su casa ya que no es identificable el tipo de bien ///
  
 // educacion
 gen  = gasto if moneda == 1

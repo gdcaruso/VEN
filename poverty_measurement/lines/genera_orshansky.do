@@ -346,16 +346,107 @@ $educvar ///
 $saludvar ///
 $jubivar
 
+////////////////////
+// CLASIFICACION //
+//////////////////
 
-//vivienda
-// global viviendavar tenencia_vivienda pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon titulo_propiedad
+// first we move everything to feb 2020 bolivares, mensual freq. Then we reshape to get a long dataset.
 
-gen bien = 901 if pago_alq_mutuo != . //vivienda
-replace bien = 902 if renta_imp_en !=. 
-replace bien = 903 if renta_imp !=. 
+******************************************vivienda
+// global viviendavar renta_imp pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon
 
-gen moneda +
-SEGUIR!!!!!!!!!!!
+*********************declared rent (mensual)
+// data in bolivares feb2020
+gen gasto901 = pago_alq_mutuo if pago_alq_mutuo_mon ==1 & pago_alq_m == 2
+
+
+// data of March and many currencies
+replace gasto901 = pago_alq_mutuo* `tc2mes3'* `deflactor3' if moneda == 2 & pago_alq_m == 3
+replace gasto901 = pago_alq_mutuo* `tc3mes3'* `deflactor3' if moneda == 3 & pago_alq_m == 3
+replace gasto901 = pago_alq_mutuo* `tc4mes3'* `deflactor3' if moneda == 4 & pago_alq_m == 3
+
+// data in many currencies feb2020
+replace gasto901 = pago_alq_mutuo* `tc2mes2' if moneda == 2 & pago_alq_m == 2
+replace gasto901 = pago_alq_mutuo* `tc3mes2' if moneda == 3 & pago_alq_m == 2
+replace gasto901 = pago_alq_mutuo* `tc4mes2' if moneda == 4 & pago_alq_m == 2
+
+// data of Jan and many currencies
+replace gasto901 = pago_alq_mutuo* `tc2mes1'* `deflactor1' if moneda == 2 & pago_alq_m == 1
+replace gasto901 = pago_alq_mutuo* `tc3mes1'* `deflactor1' if moneda == 3 & pago_alq_m == 1
+replace gasto901 = pago_alq_mutuo* `tc4mes1'* `deflactor1' if moneda == 4 & pago_alq_m == 1
+
+
+// data of Dec and many currencies
+replace gasto901 = pago_alq_mutuo* `tc2mes12'* `deflactor12' if moneda == 2 & pago_alq_m == 12
+replace gasto901 = pago_alq_mutuo* `tc3mes12'* `deflactor12' if moneda == 3 & pago_alq_m == 12
+replace gasto901 = pago_alq_mutuo* `tc4mes12'* `deflactor12' if moneda == 4 & pago_alq_m == 12
+
+// data of Nov and many currencies
+replace gasto901 = pago_alq_mutuo* `tc2mes11'* `deflactor11' if moneda == 2 & pago_alq_m == 11
+replace gasto901 = pago_alq_mutuo* `tc3mes11'* `deflactor11' if moneda == 3 & pago_alq_m == 11
+replace gasto901 = pago_alq_mutuo* `tc4mes11'* `deflactor11' if moneda == 4 & pago_alq_m == 11
+
+*****************renta imputada por el entrevisatado
+
+// data in bolivares feb2020
+gen gasto902 = renta_imp_en if renta_imp_mon == 1
+
+
+// data in many currencies (march)
+replace gasto902 = renta_imp_en* `tc2mes3' * `deflactor3' if renta_imp_mon == 2 & interview_month==3
+replace gasto902 = renta_imp_en* `tc3mes3' * `deflactor3'  if renta_imp_mon == 3 & interview_month==3
+replace gasto902 = renta_imp_en* `tc4mes3' * `deflactor3' if renta_imp_mon == 4 & interview_month==3
+
+// data in many currencies (feb)
+replace gasto902 = renta_imp_en* `tc2mes2' if renta_imp_mon == 2 & interview_month==2
+replace gasto902 = renta_imp_en* `tc3mes2' if renta_imp_mon == 3 & interview_month==2
+replace gasto902 = renta_imp_en* `tc4mes2' if renta_imp_mon == 4 & interview_month==2
+
+// data in many currencies (jan)
+replace gasto902 = renta_imp_en* `tc2mes1' * `deflactor1' if renta_imp_mon == 2 & interview_month==1
+replace gasto902 = renta_imp_en* `tc3mes1' * `deflactor1'  if renta_imp_mon == 3 & interview_month==1
+replace gasto902 = renta_imp_en* `tc4mes1' * `deflactor1' if renta_imp_mon == 4 & interview_month==1
+
+// data in many currencies (dec)
+replace gasto902 = renta_imp_en* `tc2mes12' * `deflactor12' if renta_imp_mon == 2 & interview_month==12
+replace gasto902 = renta_imp_en* `tc3mes12' * `deflactor12'  if renta_imp_mon == 3 & interview_month==12
+replace gasto902 = renta_imp_en* `tc4mes12' * `deflactor12' if renta_imp_mon == 4 & interview_month==12
+
+// data in many currencies (nov)
+replace gasto902 = renta_imp_en* `tc2mes11' * `deflactor11' if renta_imp_mon == 2 & interview_month==11
+replace gasto902 = renta_imp_en* `tc3mes11' * `deflactor11'  if renta_imp_mon == 3 & interview_month==11
+replace gasto902 = renta_imp_en* `tc4mes11' * `deflactor11' if renta_imp_mon == 4 & interview_month==11
+
+
+******************inputed rent by analyst
+// data in bolivares feb2020
+gen gasto903 = renta_imp if renta_imp_mon == 1 //assumed everything was moved in the income module to feb 2020
+
+
+**********************************************services
+
+
+
+
+
+
+
+
+
+
+
+gen gasto = pago_alq_mutuo if bien == 902
+replace gasto = renta_imp if bien == 903
+replace gasto = renta_imp_en if bien == 902 //the order is relevant, we prefer the reported rent than our inputation
+
+gen moneda = pago_alq_mutuo_mon if bien == 902
+replace moneda = renta_imp_mon if bien == 902
+replace moneda = 1 if bien == 903
+
+gen mes = pago_alq_mutuo_m if bien == 901
+
+
+
 // servicios
 // global serviciosvar pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m
 
@@ -365,6 +456,14 @@ replace bien = 913 if pgas_monto !=.
 replace bien = 914 if pcarbon_monto !=.
 replace bien = 915 if pparafina_monto !=.
 replace bien = 916 if ptelefono_monto !=.
+
+replace gasto = pagua_monto if bien == 911
+replace gasto = pelect_monto if bien == 912
+replace gasto = pgas_monto if bien == 913
+replace gasto = pcarbon_monto if bien == 914
+replace gasto = pparafina_monto if bien == 915
+replace gasto = ptelefono_monto if bien == 916
+
 
 // global educvar cuota_insc_monto compra_utiles_monto costo_men_monto costo_transp_monto otros_gastos_monto cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m
 
@@ -393,6 +492,18 @@ replace bien = 945 if d_cpr_cant != .
 replace bien = 946 if d_rpv_cant != .
 replace bien = 947 if d_otro_cant != .
 replace bien = 947 if cant_aporta_pension != .
+
+////////////////////////////
+// GASTO, MONEDA, FECHA  //
+//////////////////////////
+
+// global viviendavar renta_imp pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon
+stop
+
+
+
+
+
 
 
 

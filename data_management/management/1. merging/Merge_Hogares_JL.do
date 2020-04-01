@@ -19,20 +19,20 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lautaa	0   
+		global lautaa	1   
 		
 		* User 4: Malena
 		global male   0
 
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\Documents\GitHub\VEN"
+				global rootpath "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
@@ -48,7 +48,7 @@ Note:
 				global rootpath "C:\Users\wb550905\Github\VEN\"
 		}
 
-global dataofficial "$rootpath\data_management\input\03_26_20"
+global dataofficial "$rootpath\data_management\input\03_31_20"
  // Set the path for the three questionnaires
 	global pathnew "$dataofficial\ENCOVI_3_STATA_All"
 	global pathold "$dataofficial\ENCOVI_MainSurvey_Final_3_STATA_All"

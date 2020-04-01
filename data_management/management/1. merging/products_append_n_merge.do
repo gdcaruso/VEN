@@ -56,7 +56,7 @@ Note:
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\03_16_20"
+global dataofficial "$rootpath\data_management\input\03_31_20"
 ********************************************************************************
 
 /*==============================================================================

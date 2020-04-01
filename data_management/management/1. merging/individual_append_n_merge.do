@@ -22,23 +22,23 @@ Note:
 // Define rootpath according to user
 
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lautaa   0
+		global lautaa   1
 		
 		
 		* User 4: Malena
 		global male   0
 			
 		if $juli {
-				global rootpath ""
+				global rootpath "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
@@ -56,7 +56,7 @@ Note:
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\03_26_20"
+global dataofficial "$rootpath\data_management\input\03_31_20"
 
 ********************************************************************************
 

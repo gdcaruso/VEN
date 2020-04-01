@@ -73,9 +73,12 @@ set more off
 *************************************************************************************************************************************************)*/
 
 // merges with income data
-use "$cleaneddatapath/base_out_nesstar_cedlas_2019.dta", replace
+use "$cleaneddatapath/ENCOVI_2019.dta", replace
 keep if interview_month==2
-rename region_est2 entidad
+
+bysort interview__id interview__key quest: egen miembros = max(com)
+
+
 collapse (max)ipcf_max=ipcf (max) miembros (max) entidad, by (interview__key interview__id quest)
 
 rename ipcf_max ipcf
@@ -85,7 +88,7 @@ rename ipcf_max ipcf
 xtile quant = ipcf, nquantiles(100)
 global pprior = 50
 keep if inrange(quant, $pprior -15, $pprior +15)
-save "$output/reference_metocol.dta"
+save "$output/reference_metocol.dta", replace
 
 /*(************************************************************************************************************************************************* 
 * Remove households eating outside
@@ -132,6 +135,7 @@ restore
 merge 1:m interview__key interview__id quest using `baskets'
 keep if _merge==3
 drop _merge
+
 
 keep interview__key interview__id quest ipcf miembros entidad quant bien cantidad_h Energia_kcal_m Proteina_m
 
@@ -204,7 +208,7 @@ drop if bien == 79
 
 
 //generate caloric requirement
-gen cal_req = 2092
+gen cal_req = 2088
 
 // generate population
 bysort newid: gen first = 1 if _n == 1 

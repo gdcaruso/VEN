@@ -70,6 +70,7 @@ set more off
 *************************************************************************************************************************************************)*/
 
 use "$output/reference_metocol.dta", replace
+tempfile reference
 save `reference'
 
 
@@ -319,15 +320,79 @@ save `conSpending'
 /*(************************************************************************************************************************************************* 
 * // HH section  (wide shape) TODO!
 *********************************************************************************************************************)*/
-use "$mergeddata/household.dta", replace
-merge 1:1 interview__id interview__key quest using `reference'
-keep if _merge ==3
+use "$cleaneddata/ENCOVI_2019.dta", replace
+merge m:1 interview__id interview__key quest using `reference'
+keep if _merge == 3
 drop _merge
 
 
+
 //select relevant variables
-keep interview__id interview__key quest s5q8* s5q7 s5q11* // alquiler e imputado ///
-s5q17* //servicios
+global viviendavar renta_imp pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon
+
+global serviciosvar pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m
+
+global educvar cuota_insc_monto compra_utiles_monto costo_men_monto costo_transp_monto otros_gastos_monto cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m
+
+global saludvar cant_pago_consulta mone_pago_consulta mes_pago_consulta pago_remedio mone_pago_remedio mes_pago_remedio pago_examen mone_pago_examen mes_pago_examen cant_remedio_tresmeses mone_remedio_tresmeses mes_remedio_tresmeses cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
+
+global jubivar d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone cant_aporta_pension mone_aporta_pension
+
+stop
+keep interview__id interview__key quest  ///
+$viviendavar ///
+$serviciosvar ///
+$educvar ///
+$saludvar ///
+$jubivar
+
+
+//vivienda
+// global viviendavar tenencia_vivienda pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon titulo_propiedad
+
+gen bien = 901 if pago_alq_mutuo != . //vivienda
+replace bien = 902 if renta_imp_en !=. 
+replace bien = 903 if renta_imp !=. 
+
+gen moneda +
+SEGUIR!!!!!!!!!!!
+// servicios
+// global serviciosvar pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m
+
+replace bien = 911 if pagua_monto !=. //servicios
+replace bien = 912 if pelect_monto !=.
+replace bien = 913 if pgas_monto !=.
+replace bien = 914 if pcarbon_monto !=.
+replace bien = 915 if pparafina_monto !=.
+replace bien = 916 if ptelefono_monto !=.
+
+// global educvar cuota_insc_monto compra_utiles_monto costo_men_monto costo_transp_monto otros_gastos_monto cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m
+
+replace bien = 921 if couta_insc_monto !=.
+replace bien = 922 if compra_utiles_monto !=.
+replace bien = 923 if costo_men_monto !=.
+replace bien = 924 if costo_transp_monto !=.
+replace bien = 925 if otros_gastos_monto !=.
+
+// global saludvar cant_pago_consulta mone_pago_consulta mes_pago_consulta pago_remedio mone_pago_remedio mes_pago_remedio pago_examen mone_pago_examen mes_pago_examen cant_remedio_tresmeses mone_remedio_tresmeses mes_remedio_tresmeses cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
+
+replace bien = 931 if cant_pago_consulta != .
+replace bien = 932 if pago_remedio != .
+replace bien = 933 if pago_examen != .
+replace bien = 934 if cant_remedio_tresmeses != .
+replace bien = 935 if cant_pagosegsalud != .
+
+
+// global jubivar d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone cant_aporta_pension mone_aporta_pension
+
+replace bien = 941 if d_sso_cant != .
+replace bien = 942 if d_spf_cant != .
+replace bien = 943 if d_isr_cant != .
+replace bien = 944 if d_cah_cant != .
+replace bien = 945 if d_cpr_cant != .
+replace bien = 946 if d_rpv_cant != .
+replace bien = 947 if d_otro_cant != .
+replace bien = 947 if cant_aporta_pension != .
 
 
 
@@ -336,16 +401,16 @@ s5q17* //servicios
 *********************************************************************************************************************)*/
 
 use "$mergeddata/individual.dta", replace
-merge 1:1 interview__id interview__key quest using `reference'
+merge m:1 interview__id interview__key quest using `reference'
 keep if _merge ==3
 drop _merge
 
 //select relevant variables
 keep interview__id interview__key quest s7q10* //educacion ///
  s8q8* s8q12* s8q14* s8q16* s8q12* //salud ///
- s9q24* //bienes del negocio que se lleva a su casa (no identificable el tipo de bien) ///
  s9q38* //pension
  
+// excluimos bienes del negocio que se lleva a su casa ya que no es identificable el tipo de bien ///
  
 // educacion
 gen  = gasto if moneda == 1

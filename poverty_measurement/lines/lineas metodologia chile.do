@@ -75,9 +75,10 @@ global calreq = 2000
 *************************************************************************************************************************************************)*/
 
 // merges with income data
-use "$cleaneddatapath/base_out_nesstar_cedlas_2019.dta", replace
+use "$cleaneddatapath/ENCOVI_2019", replace
 keep if interview_month==2
-rename region_est2 entidad
+bys interview__id interview__key quest: egen miembros = max(com)
+
 collapse (max)ipcf_max=ipcf (max) miembros (max) entidad, by (interview__key interview__id quest)
 
 
@@ -175,7 +176,7 @@ twoway line av_cal quant if quant<99 ///
 || line median_cal quant if quant<99 ///
 || line cal_req quant if quant<99
 restore
-
+stop
 
 // generate a moving window of 20 percentiles and search the first pcentile where the mean caloric intake pc mathces with the requirements
 

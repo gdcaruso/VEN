@@ -64,8 +64,6 @@ set more off
 
 // set paths to dta
 global productdta "$cleaneddatapath\product-hh.dta"
-global householddta  "$mergeddatapath\household.dta"
-global individualdta  "$mergeddatapath\individual.dta"
 
 
 
@@ -78,9 +76,8 @@ import excel "$inputpath/requerimientos_caloricos_2012.xlsx", first
 save "$inputpath/requirements_col.dta", replace
 
 // merge individual data with requirements
-use "$individualdta", replace
-rename (s6q3 s6q5) (hombre edad) //CAMBIAR CUANDO USE DATA CLEAN
-replace hombre=0 if hombre==2 //CAMBIAR CUANDO USE DATA CLEAN
+use "$cleaneddatapath/ENCOVI_2019.dta", replace
+
 
 merge m:1 hombre edad using "$inputpath/requirements_col.dta"
 keep if _merge==3
@@ -91,7 +88,7 @@ gen miembro=1
 collapse (sum) req_cal_col miembro
 global req = req_cal_col/miembro
 
-
+display $req
 
 
 

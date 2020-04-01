@@ -1,7 +1,7 @@
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global emigracion informant_emig hogar_emig numero_emig ///
+global emigra_ENCOVI informant_emig hogar_emig numero_emig ///
 nombre_emig_* edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* ///
 leveledu_emig_* gradedu_emig_* regedu_emig_* anoedu_emig_* semedu_emig_* paisemig_* ///
 opaisemig_* ciuemig_* soloemig_* conemig_* razonemig_* ocupaemig_* ocupnemig_* ///

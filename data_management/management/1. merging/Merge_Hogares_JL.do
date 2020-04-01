@@ -32,7 +32,7 @@ Note:
 
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\Documents\GitHub\VEN"
+				global rootpath "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"

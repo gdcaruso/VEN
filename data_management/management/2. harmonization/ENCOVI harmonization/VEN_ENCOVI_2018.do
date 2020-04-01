@@ -644,11 +644,12 @@ label value razon_dejo_est_comp razon_dejo_est_comp
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global emigra_ENCOVI /*informant_emig*/ hogar_emig numero_emig ///
-/*nombre_emig_**/ edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* ///
-leveledu_emig_* /*gradedu_emig_* regedu_emig_**/ anoedu_emig_* semedu_emig_* paisemig_* ///
-opaisemig_* /*ciuemig_* soloemig_* conemig_**/ razonemig_* /*ocupaemig_* ocupnemig_**/ ///
-volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
+
+global emigra_ENCOVI hogar_emig numero_emig ///
+edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* ///
+leveledu_emig_* anoedu_emig_* semedu_emig_* paisemig_* ///
+opaisemig_* razonemig_*  razonemigot_* ///
+volvioemig_* volvioanoemig_* volviomesemig_* miememig_* numeroemig_*
 
 *--------- Emigrant from the household
  /* 2019-Emigrant(): 1. Duante los últimos 5 años, desde septiembre de 2014, 

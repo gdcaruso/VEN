@@ -1,11 +1,19 @@
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
+<<<<<<< HEAD:data_management/management/2. harmonization/ENCOVI harmonization/Emigration_2018.do
 global emigracion hogar_emig numero_emig ///
  edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* ///
 leveledu_emig_* anoedu_emig_* semedu_emig_* paisemig_* ///
 opaisemig_* razonemig_*  razonemigot_* ///
 volvioemig_* volvioanoemig_* volviomesemig_* miememig_* numeroemig_*
+=======
+global emigra_ENCOVI informant_emig hogar_emig numero_emig ///
+nombre_emig_* edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* ///
+leveledu_emig_* gradedu_emig_* regedu_emig_* anoedu_emig_* semedu_emig_* paisemig_* ///
+opaisemig_* ciuemig_* soloemig_* conemig_* razonemig_* ocupaemig_* ocupnemig_* ///
+volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
+>>>>>>> 1ba3da8608b39dfb727358e0d4ce0d031c73f3c0:data_management/management/2. harmonization/ENCOVI harmonization/Old/Emigration_2018.do
 
 *--------- Emigrant from the household
  /* 2019-Emigrant(): 1. Duante los últimos 5 años, desde septiembre de 2014, 

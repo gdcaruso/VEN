@@ -22,7 +22,7 @@ Note:
 		global juli   1
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
 		global male   0

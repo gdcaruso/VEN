@@ -550,7 +550,7 @@ gen atrasos_alq_mutuo=(s5q9==1) if s5q9!=. & s5q9!=.a
 gen implicancias_nopago=s5q10 if s5q10!=. & s5q10!=.a
 
 *** If you had to rent similar dwelling, how much did you think you should pay?
-gen b_imp_en=s5q11 if s5q11!=. & s5q11!=.a
+gen renta_imp_en=s5q11 if s5q11!=. & s5q11!=.a
 
 *** In which currency ?
 gen renta_imp_mon=s5q11a if s5q11a!=. & s5q11a!=.a

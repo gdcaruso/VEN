@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -1959,6 +1959,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace informant_emig  = 10	if  informant_ref==11
 	replace informant_emig  = 11	if  informant_ref==12
 	replace informant_emig  = 12	if  informant_ref==13
+	drop informant_ref
 	
 	*-- Label variable
 	label var informant_emig "Informant: Emigration"
@@ -2788,151 +2789,198 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 *---------------------------------------- XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES -------------------------------------
 ************************************************************************************************************************************************)*/
 
-global shocks_ENCOVI
+global shocks_ENCOVI informant_shock evento_* evento_ot imp_evento_* veces_evento_* ano_evento_* ///
+reaccion_evento_* reaccionot_evento*
 
-*** Who is the informant in this section?
-gen contesta_ind_eh=s15q00 if (s15q00!=. & s15q00!=.a)
 
-*** Which of the following events have affected to yor household
-/* "1.Muerte o discapacidad de un miembro adulto del hogar que trabajaba
-	2.Muerte de alguien que enviaba remesas al hogar
-	3.Enfermedad de la persona con el ingreso más importante del hogar
-	4.Pérdida de un contacto importante 
-	5.Perdida de trabajo de la persona con el ingreso más importante del hogar
-	6.Salida del miembro del hogar que generaba ingresos debido a separación/divorcio
-	7.Salida del miembro de la familia que generaba ingresos debido al matrimonio
-	8.Salida de un miembro del hogar que generaba ingresos por emigración
-	9.Fracaso empresarial no agrícola/cierre de negocio o emprendimiento
-	10.Robo de cultivos, dinero en efectivo, ganado u otros bienes
-	11.Pérdida de cosecha por incendio/sequía/inundaciones
-	12.Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
-	13.Vivienda dañada / demolida 
-	14.Pérdida de propiedad por incendio o inundación
-	15.Pérdida de tierras
-	16.Muerte de ganado por enfermedad"
-*/
-forv i=1/16{
-gen evento_`i'= s15q1__`i' if (s15q1__`i'!=. & s15q1__`i'!=.a) 
-}
-label var evento_1 "Death or disability of a employed household member"
-label var evento_2 "Death of a household member sending remittances"
-label var evento_3 "Illness of the main earner"
-label var evento_4 "Loss of an important contact"
-label var evento_5 "Loss of work of the person with the most important household incomet"
-label var evento_6 "Departure of the household member who generated income due to separation / divorce"
-label var evento_7 "Departure of the family member who generated income due to marriage"
-label var evento_8 "Departure of a household member who generated income due to emigration"
-label var evento_9 "Non-agricultural business failure/closure of business or entrepreneurship "
-label var evento_10 "Theft of crops, cash,livestock or other property"
-label var evento_11 "Loss of harvest due to fire / drought / flood"
-label var evento_12 "Invasion of pests that caused loss of harvest or loss of storage"
-label var evento_13 "Damaged / demolished dwelling"
-label var evento_14 "Loss of property due to fire or flood"
-label var evento_15 "Loss of land"
-label var evento_16 "Death of cattle due to disease"
-
-/*(************************************************************************************************************************************************ 
-*----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
-************************************************************************************************************************************************)*/
-
-global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
-
-* For children younger than 5 years old
-
-*** Was the child measured?
-	/*s14q1 Fue medido?
-			1=Si
-			2=No 
-	*/
-	gen 	medido = s14q1==1 if age_months<=120 & (s14q1!=. & s14q1!=.a)
-
-*** Why wasn't the child measured?
-	/*s14q2 Por qué no fue medido?
-			1=No estaba en casa al momento de hacer la entrevista
-			2=Estaba enfermo
-			3=No está disponible
-			4=Otra razón 
-	*/
-	gen 	razon_nomedido = s14q2==1 if s14q1==2 & age_months<=120 & (s14q2!=. & s14q2!=.a)
-
-*** Confirm child's reported age (in months)
-	/*s14q3 Confirmar la edad (en meses) reportada del niño
-			1=Si, es correcto
-			2=No, no es correcto
-	*/
-	gen 	confirma_edad = person_confirm==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
+*--------- Informant in this section
+ /* Informante (s15q00): 00. Quién es el informante de esta sección?
+		01 = Jefe del Hogar	
+		02 = Esposa(o) o Compañera(o)
+		03 = Hijo(a)		
+		04 = Hijastro(a)
+		05 = Nieto(a)		
+		06 = Yerno, nuera, suegro (a)
+		07 = Padre, madre       
+		08 = Hermano(a)
+		09 = Cunado(a)         
+		10 = Sobrino(a)
+ */
+	*-- Check values
+	tab s15q00, mi
+	*-- Standarization of missing values
+	replace s15q00=. if s15q00==.a
+	*-- Create auxiliary variable
+	clonevar informant_ref = s15q00
+	*-- Generate variable
+	gen     informant_shock  = 1		if  informant_ref==1
+	replace informant_shock  = 2		if  informant_ref==2
+	replace informant_shock  = 3		if  informant_ref==3  | informant_ref==4
+	replace informant_shock  = 4		if  informant_ref==5  
+	replace informant_shock  = 5		if  informant_ref==6 
+	replace informant_shock  = 6		if  informant_ref==7
+	replace informant_shock  = 7		if  informant_ref==8  
+	replace informant_shock  = 8		if  informant_ref==9
+	replace informant_shock  = 9		if  informant_ref==10
+	replace informant_shock  = 10		if  informant_ref==11
+	replace informant_shock  = 11		if  informant_ref==12
+	replace informant_shock  = 12		if  informant_ref==13
+	drop informant_ref
 	
-*** Was the child able to be alone in the measurement instrument?
-	/*s14q14 Fue capaz de permanecer solo en el instrumento de medición?
-			1=Si
-			2=No 
-	*/
-	gen 	solo_medicion = s14q14==1 if s14q1==1 & age_months<=120 & (s14q14!=. & s14q14!=.a)
+	*-- Label variable
+	label var informant_shock "Informant: Shocks"
+	*-- Label values	
+	label def informant_shock  1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
+							  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
+							  8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" ///
+							  12 "Servicio Domestico"	
+	label value informant_shock  informant_shock 
 
-*** Register the weight in kilograms (twice, third if too much difference between first two)
-	*weight_1 Registre el peso en kilogramos
-	*weight_2 Segundo registro del peso 
-	*weight_3 Tercer registro (si mucha diferencia en los 2 primeros)
-	gen		peso1 = weight_1 if s14q1==1 & age_months<=120 & (weight_1!=. & weight_1!=.a)
-	gen		peso2 = weight_2 if s14q1==1 & age_months<=120 & (weight_2!=. & weight_2!=.a)
-	gen		peso3 = weight_3 if weight_diff12>0.1 & s14q1==1 & age_months<=120 & (weight_3!=. & weight_3!=.a)
 
-*** Weight (in kg) calculated by the survey
-	*weight Peso en kilogramos calculado por la encuesta
-	gen 	peso = weight if s14q1==1 & age_months<=120 & (weight!=. & weight!=.a)
+*--------- Events which affected the household
+ /* Events(s15q1): 1. Cuáles de los siguientes eventos han afectado a
+su hogar desde el año 2017 ?
+         0 = No
+         1 = Si
+ */
+
+	forval i = 1/21{
+	*-- Standarization of missing values
+	replace s15q1__`i'=. if s15q1__`i'==.a
+	tab s15q1__`i', mi
+	*-- Label values (main variable)
+	label def s15q1__`i' 0 "No" 1 "Si"
+	label value s15q1__`i' s15q1__`i'
+	*-- Generate variable
+	gen evento_`i' = s15q1__`i'
+	}
+
+	*-- Other events
+	*-- Check
+	tab s15q1_os, mi
+	*-- Standarization of missing values
+	replace s15q1_os="." if s15q1_os==".a"
+	gen evento_ot = s15q1_os
+	*-- Label variable
+	label var evento_ot "1a.Especifique otro choque"
 	
-*** Register the altitude/longitude in centimeters (twice)
-	*height_1 Registre la altura/longitud en centímetros
-	*height_2 Segundo registro de la altura/longitud
-	*height_3 Tercer registro (si mucha diferencia en los 2 primeros)
-	gen		altura1 = height_1 if s14q1==1 & age_months<=120 & (height_1!=. & height_1!=.a)
-	gen		altura2 = height_2 if s14q1==1 & age_months<=120 & (height_2!=. & height_2!=.a)
-	gen		altura3 = height_3 if height_diff12>0.5 & s14q1==1 & age_months<=120 & (height_3!=. & height_3!=.a)
+ *--------- Most important events
+ /* s15q2: 2. De la lista de eventos acontecidos en su hogar desde el año 2017, 
+ señale cuáles han sido los 3 más significativos?
+Categories: 
+			1:Muerte o discapacidad de un miembro adulto del hogar que trabajaba
+			2:Muerte de alguien que enviaba remesas al hogar 
+			3:Enfermedad de la persona con el ingreso más importante del hogar
+			4:Pérdida de un contacto importante, 
+			5:Perdida de trabajo de la persona con el ingreso más importante del hogar
+			6:Salida del miembro del hogar que generaba ingresos debido a separación/divorcio
+			7:Salida del miembro de la familia que generaba ingresos debido al matrimonio
+			8:Salida de un miembro del hogar que generaba ingresos por emigración
+			9:Fracaso empresarial no agrícola/cierre de negocio o emprendimiento
+			10:Robo de cultivos, dinero en efectivo, ganado u otros bienes
+			11:Pérdida de cosecha por incendio/sequía/inundaciones
+			12:Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
+			13:Vivienda dañada / demolida
+			14:Pérdida de propiedad por incendio o inundación
+			15:Pérdida de tierras, 16:Muerte de ganado por enfermedad
+			17:Incremento en el precio de los insumos
+			18:Caída en el precio de los productos
+			19:Incremento en el precio de los principales alimentos consumidos
+			20:Secuestro/robo/asalto
+			21:Otro
+        
+ */
 
-***Height (in cm) calculated by the survey
-	*height Altura en centímetros calculada por la encuesta 
-	gen		altura = height if s14q1==1 & age_months<=120 & (height!=. & height!=.a)
-
-*** Was the child measured standing or lying down?
-	/* posicion Entrevistador: El menor fue medido de pie o acostado?
-			1=De pie
-			2=Acostado
-	*/
-	*replace	posicion=. if age_months=<120 
-	replace posicion=. if posicion!=.a
+	forval i = 1/22 {
+	rename s15q2__`i' s15q2_`i'
+	*-- Standarization of missing values
+	replace s15q2_`i'=. if s15q2_`i'==.a
+		*-- Generate variable
+		clonevar imp_evento_`i' = s15q2_`i'
+	}
 	
-*** When weighting, was there why you couldn't weight (ex. heavy clothes that the child didn't take out)?
-	/*weight_comments Al pesar, existía algo por lo que pudiera pesar más (por ejemplo ropa pesada que no se le quitó) ?
-			1=Si
-			2=No 
-	*/
-	gen 	problema_pesar = weight_comments if age_months<=120 & (weight_comments!=. & weight_comments!=.a)
-
-*** When measuring, was there something why you could not measure more (ex. thick shoes or accesories)?
-	/*height_comments Al medir, había algo por lo que pudiera medir más (por ejemplo zapatos gruesos o accesorios) ?
-			1=Si
-			2=No 
-	*/
-	gen 	problema_medir = height_comments if age_months<=120 & (height_comments!=. & height_comments!=.a)
-
-*** When measuring, was there irregularities in the surface of the floor where you placed the stadiometer?
-	/*height_comments2 Al medir, había irregularidad en la superficie del piso donde se colocó el tallímetro ?
-			1=Si
-			2=No 
-	*/
-	gen 	problema_medir2 = height_comments2 if age_months<=120 & (height_comments2!=. & height_comments2!=.a)
-
-*** Height for age index, calculated by the survey
-	* hfa Índice de altura para la edad
-	replace hfa =. if age_months<=120 & (hfa!=. & hfa!=.a)
 	
-*** Weight for age index, calculated by the survey
-	* wfa Índice de peso para la edad
-	replace wfa =. if age_months<=120 & (wfa!=. & wfa!=.a)
+ *--------- How many times have the shock occurred since 2017
+ /* (s15q2a)2a. Cuántas veces ocurrió %rostertitle% desde 2017?
+ */
+
+	forval i = 1/21 {
+	*-- Label original variable
+	label var s15q2a_`i' "2a. Cuántas veces ocurrió X desde 2017?"
+	*-- Standarization of missing values
+	replace s15q2a_`i'=. if s15q2a_`i'==.a
+		*-- Generate variable
+		clonevar veces_evento_`i' = s15q2a_`i'
+		*-- Label variable
+		//label var veces_evento_`i' "How many times have the shock occurred since 2017"
+		}
+		
 	
-*** Weight for height index, calculated by the survey
-	* wfh Índice de peso para la altura
-	replace wfh =. if age_months<=120 & (wfh!=. & wfh!=.a)
+ /*
+ *--------- Year of the event
+ (s15q2b) 2b. En qué año ocurrió ?
+        
+ */ 
+
+	forval i = 1/21 {
+	*-- Label original variable
+	label var s15q2b_`i' "2b. En qué año ocurrió?"
+	*-- Standarization of missing values
+	replace s15q2b_`i'=. if s15q2b_`i'==.a
+	*-- Generate variable
+	clonevar ano_evento_`i'  = s15q2b_`i'
+	*-- Label variable
+	label var ano_evento_`i' "Year of the event"
+	}
+	
+
+ *--------- How the houselhold coped with the shock
+ /* (s15q2c): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
+ 
+local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
+	foreach i of local x {
+		forval k = 1/21 {
+	*-- Rename original variable 
+	rename (s15q2c__`i'_`k') (s15q2c_`i'_`k')
+	*-- Label original variable
+	label var s15q2c_`i'_`k' "2c. Cómo se las arregló su hogar con el choque más reciente?"
+	*-- Standarization of missing values
+	replace s15q2c_`i'_`k'=. if s15q2c_`i'_`k'==.a
+	*-- Generate variable
+	clonevar reaccion_evento_`i'_`k' = s15q2c_`i'_`k'
+	*-- Label variable
+	label var reaccion_evento_`i'_`k' "Response to event"
+	*-- Label values
+	label def reaccion_evento_`i'_`k' 0 "No codificado" 1 "Venta de ganado" 2 "Venta de terreno" 3 "Venta de propiedad" ///
+	4 "Envían niños a vivir con amigos" 5 "Se retiraron los niños de escuela" ///
+	6 "Trabajando en otras actividades generadoras de ingreso" ///
+	8 "Asistencia recibida de amigos y familia" 9 "Préstamos de amigos y familia" ///
+	10 "Tomó un préstamo de una institución financiera" ///
+	12 "Miembros del hogar migraron por trabajo" ///
+	13 "Compras al crédito" 14 "Pago retrasado de obligaciones" ///
+	15 "Vendió la cosecha por adelantado" 16 "Reducción del consumo de alimentos" /// 
+	17 "Reducción de consumo de no alimentos" 18 "Usando ahorros" ///
+	19 "Asistencia recibida de ONG" 20 "Tomó pago por adelantado de empleador" ///
+	21 "Asistencia recibida del gobierno" 22 "Cubierto por un seguro" ///
+	23 "No hizo nada" 24 "Otro"
+	label val reaccion_evento_`i'_`k' reaccion_evento_`i'_`k'
+		}
+	}
+	
+ *--------- Other responses to the event
+ /* (s15q2d): 2d. Otro arreglo, especifique */	
+	forval i = 1/21 {
+	*-- Label original variable
+	label var s15q2d_`i' "2d. Otro arreglo, especifique"
+	*-- Standarization of missing values
+	replace s15q2d_`i'="." if s15q2d_`i'==".a"
+	*-- Generate variable
+	clonevar reaccionot_evento`i' = s15q2d_`i'
+	*-- Label variable
+	label var reaccionot_evento`i' "Other responses to the event"
+	*-- Cross check
+	tab reaccionot_evento`i'
+	}
 
 	
 /*(*****************************************************************************************************************************************

@@ -176,7 +176,7 @@ twoway line av_cal quant if quant<99 ///
 || line median_cal quant if quant<99 ///
 || line cal_req quant if quant<99
 restore
-stop
+
 
 // generate a moving window of 20 percentiles and search the first pcentile where the mean caloric intake pc mathces with the requirements
 
@@ -222,7 +222,7 @@ restore
 keep if quant>= `ref'
 keep if quant<= `ref'+19
 
-
+save "$output/reference_metochi.dta", replace
 
 /*(************************************************************************************************************************************************* 
 * 1: generates basket
@@ -317,4 +317,4 @@ gsort -cal_intake
 save "$output/canastapercapita_metochi_sin_outliars.dta", replace
 export excel using "$output/canastapercapita_metocchi_sin_outliars.xlsx", firstrow(var) replace
 
-restore
+

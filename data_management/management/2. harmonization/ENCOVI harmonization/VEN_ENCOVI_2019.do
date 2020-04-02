@@ -130,26 +130,43 @@ rename _all, lower
 
 
 /*(************************************************************************************************************************************************* 
-*-------------------------------------------------------------	II Control de la entrevista  -------------------------------------------------------
+*----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global control_ent entidad municipio nombmun parroquia nombpar centropo nombcp segmento peso_segmento combined_id tipo_muestra gps* id_str statut sector_urb 
+
 rename sample_type tipo_muestra
 rename segment_weight peso_segmento
 rename sector sector_urb
+rename gps_struc__latitude 	gps_struc_latitud
+rename gps_struc__longitude	gps_struc_longitud
+rename gps_struc__accuracy 	gps_struc_exactitud
+rename gps_struc__altitude 	gps_struc_altitud
+rename gps_struc__timestamp	gps_struc_tiempo
+rename gps_coordenadas__latitude 	gps_coord_latitud
+rename gps_coordenadas__longitude 	gps_coord_longitud
+rename gps_coordenadas__accuracy 	gps_coord_exactitud
+rename gps_coordenadas__altitude 	gps_coord_altitud
+rename gps_coordenadas__timestamp	gps_coord_tiempo
 
 /*(************************************************************************************************************************************************* 
-*-------------------------------------------------------------	III Determinacion de hogares  -------------------------------------------------------
+*-------------------------------	III Household determination / Determinacion de hogares  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
+
+* Cuántas personas residen actualmente en esta vivienda?
 gen npers_viv=s3q1 if s3q1!=. & s3q1!=.a
-gen comparte_gasto_viv=s3q2 if s3q2!=. & s3q2!=.a
+* Todas las personas que viven en esta vivienda comparten gastos para la compra de comida?
+gen comparte_gasto_viv=(s3q2==1) if s3q2!=. & s3q2!=.a
+* Cuántos grupos de personas mantienen gastos separados para la compra de comida?
 gen npers_gasto_sep=s3q3 if s3q3!=. & s3q3!=.a
+* Cuántas personas, contándose a usted, comparten gastos para la compra de comida? Este grupo de personas conforma su HOGAR.
 gen npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
 
 /*(************************************************************************************************************************************************* 
-*-------------------------------------------------------------	1.1: Identification Variables --------------------------------------------------
+*-----------------------------------------	1.1: Identification Variables / Variables de identificación --------------------------------------------
 *************************************************************************************************************************************************)*/
 global id_ENCOVI pais ano encuesta id com psu
+
 * Country identifier: country
 	gen pais = "VEN"
 
@@ -207,10 +224,11 @@ global id_ENCOVI pais ano encuesta id com psu
 * Primary Sample Unit: psu  
 gen psu = combined_id
 
+
 /*(************************************************************************************************************************************************* 
-*-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
+*------------------------------------------	1.2: Demographic variables  / Variables demográficas --------------------------------------------------
 *************************************************************************************************************************************************)*/
-global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi pert_2014 razon_incorp_hh ///
+global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi pert_2014 razon_incorp_hh ///
 certificado_naci cedula razon_nocertificado estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
 
 *** Relation to the head:	relacion_en
@@ -270,7 +288,7 @@ rename reltohead relacion_comp
 clonevar sexo = s6q3 if (s6q3!=. & s6q3!=.a)
 label define sexo 1 "Male" 2 "Female"
 label value sexo sexo
-gen hombre = sexo ==1 if sexo!=.
+gen hombre = sexo==1 if sexo!=.
 
 *** Age
 * EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
@@ -287,19 +305,21 @@ clonevar mes_naci = s6q4_month if (s6q4_month!=. & s6q4_month!=.a & s6q4_month!=
 clonevar dia_naci = s6q4_day if (s6q4_day!=. & s6q4_day!=.a & s6q4_day!=9999) 
 
 *** Country of birth
-gen pais_naci = s6q6 if (s6q6!=. & s6q6!=.a)
+clonevar pais_naci = s6q6 if (s6q6!=. & s6q6!=.a)
 
 *** In September 2018 where do you reside?
-gen residencia = s6q7 if (s6q7!=. & s6q7!=.a)
+clonevar residencia = s6q7 if (s6q7!=. & s6q7!=.a)
 
 *** In which state did you reside in September 2018?
-gen resi_estado = s6q7a if (s6q7a!=. & s6q7a!=.a)
+clonevar resi_estado = s6q7a if (s6q7a!=. & s6q7a!=.a)
 
 *** In which county did you reside in September 2018?
-gen resi_municipio = s6q7b if (s6q7b!=. & s6q7b!=.a)
+clonevar resi_municipio = s6q7b if (s6q7b!=. & s6q7b!=.a)
 
 *** Which was the main reason for moving to another residency?
-gen razon_cambio_resi = s6q7c if (s6q7c!=. & s6q7c!=.a)
+clonevar razon_cambio_resi = s6q7c if (s6q7c!=. & s6q7c!=.a)
+
+stop
 
 *** Are you part of this household since the last 5 years?
 gen pert_2014 = (s6q8==1) if (s6q8!=. & s6q8!=.a)
@@ -368,6 +388,9 @@ gen     mes_ult_hijo = s6q16b if s6q14!=0 & (s6q16b!=9999)
 *** Which day was your last son born?
 gen     dia_ult_hijo = s6q16c if s6q14!=0 & (s6q16c!=9999)
 replace dia_ult_hijo = s6q16a if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9999 //wronly codified in year
+
+tab pais_naci
+stop
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
@@ -3778,7 +3801,7 @@ capture label drop nivel
 	gen hstrp=.
 	gen hstrt=.
 	gen hogarsec=0
-	gen     relacion = 1		if  relacion_en==1
+	gen     	relacion = 1		if  relacion_en==1
 		replace relacion = 2		if  relacion_en==2
 		replace relacion = 3		if  relacion_en==3  | relacion_en==4
 		replace relacion = 4		if  relacion_en==7  
@@ -3820,8 +3843,8 @@ replace renta_imp = 0.10*itf_sin_ri  if  propieta_no_paga == 1
 
 include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
 	
-* include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
-* Chequear nuestros labels!!
+* include "$rootpath\data_management\management\2. harmonization\aux_do\Labels_ENCOVI.do"
+* Terminar de chequear nuestros labels!!
 
 compress
 

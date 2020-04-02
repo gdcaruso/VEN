@@ -19,13 +19,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {

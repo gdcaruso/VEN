@@ -63,10 +63,11 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q1=. if s10q1==.a
 	*-- Generate variable
 	clonevar hogar_emig = s10q1
+	replace hogar_emig = 0 if s10q1 == 2
 	*-- Label variable
 	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
 	*-- Label values
-	label def house_emig 1 "Yes" 2 "No"
+	label def house_emig 1 "Yes" 0 "No"
 	label value hogar_emig house_emig
 
 *--------- Number of Emigrants from the household
@@ -147,10 +148,11 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q4_`i'=. if s10q4_`i'==.a
 		*-- Generate variable
 		clonevar sexo_emig_`i' = s10q4_`i'
+		replace sexo_emig_`i' = 0 if  s10q4_`i'==2
 		*-- Label variable
 		label var sexo_emig_`i' "Sex of Emigrants"
 		*-- Label values
-		label def sexo_emig_`i' 1 "Male" 2 "Female"
+		label def sexo_emig_`i' 1 "Male" 0 "Female"
 		label value sexo_emig_`i' sexo_emig_`i'
 		}
 		
@@ -454,12 +456,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q8c_`i'=. if s10q8c_`i'==.a
 	*-- Generate variable
 	clonevar soloemig_`i' = s10q8c_`i'
+	replace soloemig_`i' = 0 if s10q8c_`i'==2
 	*-- Label variable
 	label var soloemig_`i' "Has X emigrated alone"
 	*-- Cross check
 	tab soloemig_`i' hogar_emig
 	*-- Label values
-	label def soloemig_`i' 1 "Yes" 2 "No"
+	label def soloemig_`i' 1 "Yes" 0 "No"
 	label value soloemig_`i' soloemig_`i'
 	}
 
@@ -625,12 +628,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q12_`i'=. if s10q12_`i'==.a
 	*-- Generate variable
 	clonevar volvioemig_`i' = s10q12_`i'
+	clonevar volvioemig_`i' = 0 if s10q12_`i'==2
 	*-- Label variable
 	label var volvioemig_`i' "Does X moved back to the country?"
 	*-- Cross check
 	tab volvioemig_`i' hogar_emig
 	*-- Label values
-	label def volvioemig_`i' 1 "Yes" 2 "No"
+	label def volvioemig_`i' 1 "Yes" 0 "No"
 	label value volvioemig_`i' volvioemig_`i'
 	} 
 
@@ -689,11 +693,12 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q14_`i'=. if s10q14_`i'==.a
 	*-- Generate variable
 	clonevar miememig_`i' = s10q14_`i'
+	clonevar miememig_`i' = 0 if s10q14_`i'==2
 	*-- Label variable
 	label var miememig_`i' "Is X a member of the household?"
 	*-- Cross check
 	tab miememig_`i' hogar_emig
 	*-- Label values
-	label def miememig_`i' 1 "Yes" 2 "No"
+	label def miememig_`i' 1 "Yes" 0 "No"
 	label value miememig_`i' miememig_`i'
 	} 

@@ -19,13 +19,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -131,7 +131,7 @@ save `house'
 	reshape wide EMP*, i(ENNUM) j(LIN)
 	save `emigracion'
 	use `house', clear
-	merge m:1 ENNUM using `emigracion' //NO ME QUEDA CLARO SI SE PUEDE HACER EL CRUCE (no hay identificador unico)
+	merge m:1 ENNUM using `emigracion' 
 	// Hay encuestas que solo aparecen en la seccion de emigracion
 	// Parece que son encuestas que se hicieron en el intento de construir un panel
 	drop if _merge==2

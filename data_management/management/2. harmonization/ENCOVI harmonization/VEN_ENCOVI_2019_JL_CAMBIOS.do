@@ -608,71 +608,99 @@ clonevar fagua_manantial=s5q13__6 if s5q13__6!=. & s5q13__6!=.a
 clonevar fagua_botella=s5q13__7 if s5q13__7!=. & s5q13__7!=.a
 * Otros
 clonevar fagua_otro=s5q13__8 if s5q13__8!=. & s5q13__8!=.a
-//hasta aca
+
+label def aqua 0 "Other" 1 "Primera (1)" 2 "Segunda (2)" 3 "Tercera(3)" 
+label val fagua_acueduc aqua
+label val fagua_estanq aqua
+label val fagua_cisterna aqua
+label val fagua_bomba aqua
+label val fagua_pozo aqua
+label val fagua_manantial aqua
+label val fagua_botella aqua
+label val fagua_otro aqua
+
 *** In your household, is the water treated to make it drinkable
-gen tratamiento_agua=(s5q14==1) if s5q14!=. & s5q14!=.a
+clonevar tratamiento_agua= s5q14 if s5q14!=. & s5q14!=.a
+replace tratamiento_agua= 1 if s5q14==1
+replace tratamiento_agua= 0 if s5q14==2
 
 *** How do you treat the water to make it more safe for drinking
-gen tipo_tratamiento=s5q15 if s5q15!=. & s5q15!=.a
+clonevar tipo_tratamiento=s5q15 if s5q15!=. & s5q15!=.a
 
 *** Which type of fuel do you use for cooking?
-gen comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
+clonevar comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
 
 *** Did you pay for the following utilities?
 * Water
-gen pagua=(s5q17__1==1) if s5q17__1!=. & s5q17__1!=.a 
+clonevar pagua=s5q17__1 if s5q17__1!=. & s5q17__1!=.a 
 * Electricity
-gen pelect=(s5q17__2==1) if s5q17__2!=. & s5q17__2!=.a
+clonevar pelect=s5q17__2 if s5q17__2!=. & s5q17__2!=.a
+replace pelect=1 if s5q17__2==1 
+replace pelect=0 if s5q17__2==2
+
 * Gas
-gen pgas=(s5q17__3==1) if s5q17__3!=. & s5q17__3!=.a
+clonevar pgas=s5q17__3 if s5q17__3!=. & s5q17__3!=.a
+replace pgas=1 if s5q17__3==1
+replace pgas=0 if s5q17__3==2
+
 * Carbon, wood
-gen pcarbon=(s5q17__4==1) if s5q17__4!=. & s5q17__4!=.a
+clonevar pcarbon=s5q17__4 if s5q17__4!=. & s5q17__4!=.a
+replace pcarbon=1 if s5q17__4==1
+replace pcarbon=0 if s5q17__4==2
+
 * Paraffin
-gen pparafina=(s5q17__5==1) if s5q17__5!=. & s5q17__5!=.a
+clonevar pparafina=s5q17__5 if s5q17__5!=. & s5q17__5!=.a
+replace pparafina=1 if s5q17__5==1
+replace pparafina=0 if s5q17__5==2
+
 * Landline, internet and tv cable
-gen ptelefono=(s5q17__7==1) if s5q17__7!=. & s5q17__7!=.a
+clonevar ptelefono=(s5q17__7==1) if s5q17__7!=. & s5q17__7!=.a
+replace ptelefono=1 if s5q17__7==1 
+replace ptelefono=0 if s5q17__7==2
 
 *** How much did you pay for the following utilities?
-gen pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
+clonevar pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
 * Electricity
-gen pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
+clonevar pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
 * Gas
-gen pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
+clonevar pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
 * Carbon, wood
-gen pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
+clonevar pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
 * Paraffin
-gen pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
+clonevar pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
 * Landline, internet and tv cable
-gen ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
+clonevar ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
 
 *** In which currency did you pay for the following utilities?
-gen pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
+clonevar pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
 * Electricity
-gen pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
+clonevar pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
 * Gas
-gen pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
+clonevar pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
 * Carbon, wood
-gen pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
+clonevar pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
 * Paraffin
-gen pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
+clonevar pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
 * Landline, internet and tv cable
-gen ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
+clonevar ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
 
 *** In which month did you pay for the following utilities?
-gen pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
+clonevar pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
 * Electricity
-gen pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
+clonevar pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
 * Gas
-gen pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
+clonevar pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
 * Carbon, wood
-gen pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
+clonevar pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
 * Paraffin
-gen pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
+clonevar pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
 * Landline, internet and tv cable
-gen ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
+clonevar ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
 
 *** In your household, have any home appliences damaged due to blackouts or voltage inestability?
-gen danio_electrodom=(s5q20==1) if s5q20!=. & s5q20!=.a
+clonevar danio_electrodom=s5q20 if s5q20!=. & s5q20!=.a
+replace danio_electrodom=1 if s5q20==1
+replace danio_electrodom=0 if s5q20==2
 
 foreach x in $dwell_ENCOVI {
 replace `x'=. if relacion_en!=1

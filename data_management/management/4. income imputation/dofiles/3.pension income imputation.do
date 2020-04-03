@@ -64,7 +64,7 @@ qui: do "$pathdo\outliers.do"
 
 ********************************************************************************
 ********************************************************************************
-*** Imputation model for pensions: using stochastic regression
+*** Imputation model for pensions: using stochastic regression (or the Gaussian normal regression imputation method)
 ********************************************************************************
 ********************************************************************************
 use "$pathdata\encovi_2014_2018.dta", clear
@@ -195,7 +195,7 @@ matrix drop imp
 ;
 ********************************************************************************
 ********************************************************************************
-*** Labor income imputation model: using chained equations
+*** Imputation model for pensions: using chained equations
 ********************************************************************************
 ********************************************************************************
 *mi unset
@@ -214,41 +214,7 @@ local demo    jefe /*miembros*/ hhsize edad edad2 /*sexo*/ hombre entidad
 local xvar    estado_civil nivel_educ /*categ_ocu categ_nhorast nhorast firm_size contrato*/ seguro_salud misiones ///
               tipo_vivienda propieta /*auto*/ heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas ///
 			  pension_vejez pension_inva pension_otra pension_sobrev contribu_pen 
-sum year 
-local ti=r(min)
-local tf=r(max)
-forv y=`ti'/`tf'{
-	local miss_var_`y' ""
-	local complete_var_`y' ""
-	foreach x in `demo' `xvar' {
-	 qui: mdesc `x' if djubpen==1 & year==`y'
-	 if "`r(miss)'" != "0" {
-		*noi di "There are `r(percent)' % of missing values in variable `ind'"
-		local miss_var_`y' "`miss_var_`y'' `x'"
-	  }
-	 if "`r(miss)'" == "0" {
-		local complete_var_`y' "`complete_var_`y'' `x'"
-	 }
-	}
-display "`y'"
-display "`complete_var_`y''"
-display "`miss_var_`y''"
-}
-*** 2014
-* Completed variables: jefe hhsize edad edad2 hombre entidad tipo_vivienda
-* Incompleted variables: estado_civil propieta nivel_educ categ_ocu categ_nhorast firm_size contrato seguro_salud misiones heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas
-*** 2015
-* Completed variables: jefe hhsize edad hombre entidad 
-* Incompleted variables: estado_civil tipo_vivienda propieta nivel_educ categ_ocu categ_nhorast firm_size contrato seguro_salud misiones heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas
-*** 2016
-* Completed variables: jefe hhsize edad hombre entidad tipo_vivienda 
-* Incompleted variables:  estado_civil propieta nivel_educ categ_ocu categ_nhorast firm_size contrato seguro_salud misiones heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas
-*** 2017
-* Completed variables: jefe hhsize edad hombre entidad tipo_vivienda
-* Incompleted variables: estado_civil propieta nivel_educ categ_ocu categ_nhorast firm_size contrato seguro_salud misiones heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas
-*** 2018
-* Completed variables: jefe hhsize edad hombre entidad tipo_vivienda
-* Incompleted variables:  estado_civil propieta nivel_educ categ_ocu categ_nhorast firm_size contrato seguro_salud misiones heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas
+mdesc `xvar' if djubpen==1
 
 foreach x in pension {
 gen log_`x'=ln(`x')
@@ -256,23 +222,25 @@ gen log_`x'=ln(`x')
 
 mi set flong
 *mi set M=2
-local var_com hombre edad edad2 jefe hhsize i.entidad i.tipo_vivienda_en i.seguro_salud_en i.misiones_en i.propieta_en
-local var_imp estado_civil nivel_educ  ///
+local var_com hombre edad edad2 jefe hhsize i.entidad i.tipo_vivienda_en i.estado_civil i.seguro_salud_en i.misiones_en i.propieta_en ///
+              i.heladera i.lavarropas i.secadora i.computadora i.internet i.televisor i.radio i.calentador i.aire i.tv_cable microondas
+local var_imp /*estado_civil*/ nivel_educ  ///
               pension_vejez pension_inva pension_otra pension_sobrev /*contribu_pen ///
 			  seguro_salud misiones propieta ///
               heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas*/
 			  
 mi register imputed log_pension `var_imp' 
-mi register regular hombre edad edad2 jefe hhsize tipo_vivienda_en seguro_salud_en misiones_en propieta_en
+mi register regular hombre edad edad2 jefe hhsize tipo_vivienda_en estado_civil seguro_salud_en misiones_en propieta_en ///
+                    heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas
 set seed 12345678
   
 mi impute chained (regress) log_pension       ///
-                  (mlogit)  estado_civil   ///
                   (mlogit)  nivel_educ     /// 
 				  (logit)   pension_vejez  ///
 				  (logit)   pension_inva   /// 
-				  (logit)   pension_otra   /// 			  
-   		          (logit)   pension_sobrev /* /// 
+				  (logit)   pension_otra  /* /// 			  
+   		          (logit)   pension_sobrev /// 
+                  (mlogit)  estado_civil   ///
  				  (logit)   contribu_pen   /// 
  				  (logit)   seguro_salud   /// 				  
 				  (logit)   misiones       /// 				  
@@ -288,7 +256,7 @@ mi impute chained (regress) log_pension       ///
 				  (logit)   aire           /// 
 				  (logit)   tv_cable       ///
 				  (logit)   microondas*/ = `var_com' if djubpen==1,    ///				  
-                  add(30) by(year) burnin(50) /*augment savetrace(impstats_linc, replace)*/ force
+                  add(30) by(year) burnin(50) augment /*savetrace(impstats_linc, replace)*/ force
 /*
 use `imp`ti'', clear
 forv y=`ti'/`tf'{

@@ -198,7 +198,7 @@ global id_ENCOVI pais ano encuesta id com psu
 		destring id_numeric, replace
 		format id_numeric %14.0f
 		*Age
-		gen edad = s6q5
+		gen edad = s6q5 if s6q5
 		*Random var
 		set seed 123
 		generate z = runiform()

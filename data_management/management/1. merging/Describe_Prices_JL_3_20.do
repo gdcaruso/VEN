@@ -32,7 +32,7 @@ Note:
 		global male   0
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\Documents\GitHub\VEN"
+				global rootpath "C:\Users\wb563583\GitHub\VEN"
 				global dataout "$rootpath\"
 				
 		}
@@ -50,7 +50,7 @@ Note:
 				global dataout "$rootpath\"
 		}
 
-	global dataofficial "$rootpath\data_management\input\03_19_20"
+	global dataofficial "$rootpath\data_management\input\03_31_20"
 	global dataout "$rootpath\data_management\output"
 	global dataint "$dataout\intermediate"
     // Set the  path for prices
@@ -1512,6 +1512,7 @@ log close
 //	Zanahorias
 *-----------
 
+
 /*(************************************************************************************************************************************************* 
 * 3: Units transformation: general
 *************************************************************************************************************************************************)
@@ -2013,11 +2014,24 @@ log close
 
 */
 
+// Save complete database
+*-----------
+	save "$dataout/Price_database_complete.dta", replace
+
 // Price Distribution
 *----------- 
 	preserve
 	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
 	export excel using "$dataout/resumen_otro_control", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
+	restore	
+
+// Price Distribution (to check expenditure data)
+*----------- 
+	preserve
+	*--- Arroz, harina de maiz, aceite y azucar
+	keep if bien==1 | bien==7 | bien==35 | bien==66 | bien==12 | bien==13 | bien==14 | bien==31
+	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
+	export excel using "$dataout/resumen_canasta1", sheet("Precio") firstrow(varlabels) replace
 	restore	
 
 	
@@ -2028,6 +2042,16 @@ log close
 	save "$dataout/resumen_precio_gramo_bien.dta", replace
 	export excel using "$dataout/resumen_precio_gramo", sheet("Precios estandarizados") firstrow(varlabels) replace
 	restore
+
+// Price per gram by Good (to check expenditure data)
+*----------- 
+	preserve
+	*--- Arroz, harina de maiz, aceite y azucar
+	keep if bien==1 | bien==7 | bien==35 | bien==66 | bien==12 | bien==13 | bien==14 | bien==31
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
+	save "$dataout/resumen_precio_gramo_bien.dta", replace
+	export excel using "$dataout/resumen_canasta2", sheet("Precio gramo") firstrow(varlabels) replace
+	restore
 	
 // Price per gram by Good-Month-Region
 *----------- 
@@ -2037,6 +2061,3 @@ log close
 	save "$dataout/resumen_precio_gramo_L.dta", replace
 	restore	
 
-// Save complete database
-*-----------
-	save "$dataout/Price_database_complete.dta", replace

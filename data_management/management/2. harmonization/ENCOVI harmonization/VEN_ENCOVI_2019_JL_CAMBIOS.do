@@ -293,7 +293,7 @@ gen hombre = sexo==1 if sexo!=.
 *** Age
 * EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
 notes   edad: range of the variable: 0-97
-*clonevar sexo = s6q5 if (s6q5!=. & s6q5!=.a)
+*clonevar edad = s6q5 if (s6q5!=. & s6q5!=.a)
 
 *** Year of birth
 clonevar anio_naci = s6q4_year if (s6q4_year!=. & s6q4_year!=.a & s6q4_year!=9999 & s6q4_year!=9 ) 
@@ -319,7 +319,7 @@ clonevar resi_municipio = s6q7b if (s6q7b!=. & s6q7b!=.a)
 *** Which was the main reason for moving to another residency?
 clonevar razon_cambio_resi = s6q7c if (s6q7c!=. & s6q7c!=.a)
 
-stop
+
 
 *** Are you part of this household since the last 5 years?
 gen pert_2014 = (s6q8==1) if (s6q8!=. & s6q8!=.a)
@@ -477,7 +477,11 @@ label value suministro_agua_comp suministro_agua_comp
 		5 = Nunca
 */
 clonevar frecuencia_agua = s4q6 if (s4q6!=. & s4q6!=.a)	
-
+label def frecuencia_agua 1 "Todos los dias" 2 "Algunos dias de la semana" ///
+		3 "Una vez por semana" ///
+		4 "Una vez cada 15 dias" ///
+		5 "Nunca"
+label val frecuencia_agua frecuencia_agua
 *** Electricity
 /* SERVICIO_ELECTRICO : En los ultimos 3 meses, el servicio electrico ha sido suministrado por?
             s4q7_1 = La red publica
@@ -503,9 +507,7 @@ tab electricidad
 			3 = Alguna vez al mes
 			4 = Nunca se interrumpe			
 */
-gen interrumpe_elect = s4q8 if (s4q8!=. & s4q8!=.a)
-label def interrumpe_elect 1 "Diariamente por varias horas" 2 "Alguna vez a la semana por varias" 3 "Alguna vez al mes" 4 "Nunca se interrumpe" 
-label value interrumpe_elect interrumpe_elect
+clonevar interrumpe_elect = s4q8 if (s4q8!=. & s4q8!=.a)
 
 *** Type of toilet
 /* TIPO_SANITARIO (s4q9): esta vivienda tiene 
@@ -722,6 +724,8 @@ gen     ncarros = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
 replace ncarros = .		if  relacion_en!=1 
 
 *** Year of the most recent car
+* Fix missing values 
+replace s5q5 = . if s5q5==0 & s5q4==1
 gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
 replace anio_auto = . if relacion_en==1
 
@@ -799,6 +803,7 @@ nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/
 
 *** Is the "member" answering by himself/herself?
 gen contesta_ind_e=s7q0 if (s7q0!=. & s7q0!=.a)
+replace contesta_ind_e=0 if s7q0==2
 
 *** Who is answering instead of "member"?
 gen quien_contesta_e=s7q00 if (s7q00!=. & s7q00!=.a)
@@ -826,7 +831,7 @@ gen asistio_educ = s7q1==1 if (s7q1!=. & s7q1!=.a) & edad>=3
 clonevar razon_noasis = s7q2 if s7q1==2 & (s7q2!=. & s7q2!=.a)
 
 *** During the period 2019-2020 did you attend any educational center? //for age +3
-gen asiste= s7q1==1 if (s7q1!=. & s7q1!=.a) & edad>=3
+gen asiste= s7q3==1 if (s7q3!=. & s7q3!=.a) & edad>=3
 replace asiste = .  if  edad<3
 notes   asiste: variable defined for individuals aged 3 and older
 
@@ -964,30 +969,30 @@ gen otros_gastos_monto=s7q10a_6 if s7q10_0__6==1 & (s7q10a_6!=. & s7q10a_6!=.a &
 
 *** Moneda en que se realizo el pago
 * Cuota de inscripción
-gen cuota_insc_mon=s7q10b_1 if s7q10_0__1==1 & (s7q10b_1!=. & s7q10b_1!=.a)
+clonevar cuota_insc_mon=s7q10b_1 if s7q10_0__1==1 & (s7q10b_1!=. & s7q10b_1!=.a)
 * Compra de útiles y libros escolares
-gen compra_utiles_mon=s7q10b_2 if s7q10_0__2==1 & (s7q10b_2!=. & s7q10b_2!=.a)
+clonevar compra_utiles_mon=s7q10b_2 if s7q10_0__2==1 & (s7q10b_2!=. & s7q10b_2!=.a)
 * Compra de uniformes y calzados escolares
-gen compra_uniforme_mon=s7q10b_3 if s7q10_0__3==1 & (s7q10b_3!=. & s7q10b_3!=.a)
+clonevar compra_uniforme_mon=s7q10b_3 if s7q10_0__3==1 & (s7q10b_3!=. & s7q10b_3!=.a)
 * Costo de la mensualidad
-gen costo_men_mon=s7q10b_4 if s7q10_0__4==1 & (s7q10b_4!=. & s7q10b_4!=.a)
+clonevar costo_men_mon=s7q10b_4 if s7q10_0__4==1 & (s7q10b_4!=. & s7q10b_4!=.a)
 * Uso de transporte público o escolar
-gen costo_transp_mon=s7q10b_5 if s7q10_0__5==1 & (s7q10b_5!=. & s7q10b_5!=.a)
+clonevar costo_transp_mon=s7q10b_5 if s7q10_0__5==1 & (s7q10b_5!=. & s7q10b_5!=.a)
 * Otros gastos
-gen otros_gastos_mon=s7q10b_6 if s7q10_0__6==1 & (s7q10b_6!=. & s7q10b_6!=.a)
+clonevar otros_gastos_mon=s7q10b_6 if s7q10_0__6==1 & (s7q10b_6!=. & s7q10b_6!=.a)
 
 *** Mes en que se realizo el pago
-gen cuota_insc_m=s7q10b_1 if s7q10_0__1==1 & (s7q10b_1!=. & s7q10b_1!=.a)
+clonevar cuota_insc_m=s7q10c_1 if s7q10_0__1==1 & (s7q10c_1!=. & s7q10c_1!=.a)
 * Compra de útiles y libros escolares
-gen compra_utiles_m=s7q10b_2 if s7q10_0__2==1 & (s7q10b_2!=. & s7q10b_2!=.a)
+clonevar compra_utiles_m=s7q10c_2 if s7q10_0__2==1 & (s7q10c_2!=. & s7q10c_2!=.a)
 * Compra de uniformes y calzados escolares
-gen compra_uniforme_m=s7q10b_3 if s7q10_0__3==1 & (s7q10b_3!=. & s7q10b_3!=.a)
+clonevar compra_uniforme_m=s7q10c_3 if s7q10_0__3==1 & (s7q10c_3!=. & s7q10c_3!=.a)
 * Costo de la mensualidad
-gen costo_men_m=s7q10b_4 if s7q10_0__4==1 & (s7q10b_4!=. & s7q10b_4!=.a)
+clonevar costo_men_m=s7q10c_4 if s7q10_0__4==1 & (s7q10c_4!=. & s7q10c_4!=.a)
 * Uso de transporte público o escolar
-gen costo_transp_m=s7q10b_5 if s7q10_0__5==1 & (s7q10b_5!=. & s7q10b_5!=.a)
+clonevar costo_transp_m=s7q10c_5 if s7q10_0__5==1 & (s7q10c_5!=. & s7q10c_5!=.a)
 * Otros gastos
-gen otros_gastos_m=s7q10b_6 if s7q10_0__6==1 & (s7q10b_6!=. & s7q10b_6!=.a)
+clonevar otros_gastos_m=s7q10c_6 if s7q10_0__6==1 & (s7q10c_6!=. & s7q10c_6!=.a)
 
 *** Educational attainment
 /* NIVEL_EDUC_EN (s7q11): ¿Cual fue el ultimo nivel educativo en el que aprobo un grado, ano, semetre, trimestre?  
@@ -2023,7 +2028,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	drop informant_ref
 	
 	*-- Label variable
-	label var informant_emig "Informant: Emigration"
+	label var informant_emig "Informante: Emigration"
 	*-- Label values	
 	label def informant_emig  1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
 							  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
@@ -2044,10 +2049,12 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q1=. if s10q1==.a
 	*-- Generate variable
 	clonevar hogar_emig = s10q1
+	*-- Replace values
+	replace hogar_emig = 0 if s10q1==2
 	*-- Label variable
-	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
+	label var hogar_emig "Durante los últimos 5 años ¿alguna persona que vive o vivió con usted en su hogar se fue a vivir a otro país?" 
 	*-- Label values
-	label def house_emig 1 "Yes" 2 "No"
+	label def house_emig 1 "Si" 0 "No"
 	label value hogar_emig house_emig
 
 *--------- Number of Emigrants from the household
@@ -2061,7 +2068,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar numero_emig = s10q2
 	*-- Label variable
-	label var numero_emig "Number of Emigrants from the household"
+	label var numero_emig "Cuántas personas emigraron de ese hogar"
 	*-- Cross check
 	tab numero_emig hogar_emig, mi
 	
@@ -2084,7 +2091,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar nombre_emig_`i' = s10q2a__`i'
 	*-- Label variable
-	label var nombre_emig_`i' "Name of Emigrants from the household"
+	label var nombre_emig_`i' "Nombre de los emigrantes"
 	}
 
 	
@@ -2105,7 +2112,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 		*-- Generate variable
 		clonevar edad_emig_`i' = s10q3_`i'
 		*-- Label variable
-		label var edad_emig_`i' "Age of Emigrants"
+		label var edad_emig_`i' "Edad de los emigrantes"
 		*-- Cross check
 		tab edad_emig_`i' hogar_emig
 	}
@@ -2128,10 +2135,11 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q4_`i'=. if s10q4_`i'==.a
 		*-- Generate variable
 		clonevar sexo_emig_`i' = s10q4_`i'
+		replace sexo_emig_`i' = 0 if s10q4_`i'==2
 		*-- Label variable
-		label var sexo_emig_`i' "Sex of Emigrants"
+		label var sexo_emig_`i' "Sexo del emigrante"
 		*-- Label values
-		label def sexo_emig_`i' 1 "Male" 2 "Female"
+		label def sexo_emig_`i' 1 "Masculino" 0 "Femenino"
 		label value sexo_emig_`i' sexo_emig_`i'
 		}
 		
@@ -2165,7 +2173,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace relemig_`i'  = 11	    if  s10q5_`i'==12
 	replace relemig_`i'  = 12	    if  s10q5_`i'==13
 	*-- Label variable
-	label var relemig_`i' "Emigrant's relationship with the head of the household"
+	label var relemig_`i' "Parentesco del emigrante con el Jefe(a) del hogar"
 	*-- Label values
 	label def remig_`i' 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
 						  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
@@ -2191,7 +2199,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar anoemig_`i' = s10q6a_`i'
 	*-- Label variable
-	label var anoemig_`i' "Year of emigration"
+	label var anoemig_`i' "Año de emigracion"
 	*-- Cross check
 	tab anoemig_`i' hogar_emig
 	}
@@ -2213,7 +2221,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar mesemig_`i' = s10q6b_`i'
 	*-- Label variable
-	label var mesemig_`i' "Month of emigration"
+	label var mesemig_`i' "Mes de emigracion"
 	*-- Cross check
 	tab mesemig_`i' hogar_emig
 	}
@@ -2246,7 +2254,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar leveledu_emig_`i' = s10q7_`i'
 	*-- Label variable
-	label var leveledu_emig_`i' "Education level emigrant"
+	label var leveledu_emig_`i' "Nivel educativo alcanzado por el emigrante"
 	}
 	
 
@@ -2265,9 +2273,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar gradedu_emig_`i' = s10q7a_`i'
 	*-- Label variable
-	label var gradedu_emig_`i' "Education grade emigrant"
-	*-- Cross check
-	tab gradedu_emig_`i' hogar_emig
+	label var gradedu_emig_`i' "Educacion: grado alcanzado por el emigrante"
 	}
 	
 
@@ -2290,11 +2296,11 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar regedu_emig_`i' = s10q7ba_`i'
 	*-- Label variable
-	label var regedu_emig_`i' "Education regime: annual, biannual or quarterly"
+	label var regedu_emig_`i' "Regimen educativo: anual, semestral o trimestral"
 	*-- Cross check
 	tab regedu_emig_`i' hogar_emig
 	*-- Label values
-	label def regedu_emig_`i' 1 "Annual" 2 "Biannual" 3 "Quarterly"
+	label def regedu_emig_`i' 1 "Anual" 2 "Semestral" 3 "Trimestral"
 	label value regedu_emig_`i' regedu_emig_`i'
 	}
 	
@@ -2313,7 +2319,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar anoedu_emig_`i' = s10q7b_`i'
 	*-- Label variable
-	label var anoedu_emig_`i' "Last year of education attained"
+	label var anoedu_emig_`i' "Ultimo AÑO aprobado por el emigrante"
 	*-- Cross check
 	tab anoedu_emig_`i' hogar_emig
 	}
@@ -2333,7 +2339,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar semedu_emig_`i' = s10q7b_`i'
 	*-- Label variable
-	label var semedu_emig_`i' "Last semester of education attained"
+	label var semedu_emig_`i' "Ultimo SEMESTRE aprobado por el emigrante"
 	*-- Cross check
 	tab semedu_emig_`i' hogar_emig
 	}
@@ -2353,7 +2359,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar paisemig_`i' = s10q8_`i'
 	*-- Label variable
-	label var paisemig_`i' "Country in which X lives"
+	label var paisemig_`i' "En cuál país vive actualmente X?"
 	*-- Cross check
 	tab paisemig_`i' hogar_emig
 	}
@@ -2379,7 +2385,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	gen opaisemig_`i' = s10q8_os_`i'
 	*-- Label variable
-	label var opaisemig_`i' "Country in which X lives (Other)"
+	label var opaisemig_`i' "Otro país, especifique"
 	*-- Cross check
 	tab opaisemig_`i' hogar_emig
 	}
@@ -2414,15 +2420,15 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	gen ciuemig_`i' = s10q8b_`i'
 	*-- Label variable
-	label var ciuemig_`i' "City in which X lives"
+	label var ciuemig_`i' "Ciudad donde el emigrante vive"
 	*-- Cross check
 	tab ciuemig_`i' hogar_emig
 	}
 
    *--------- Emigrated alone or not
  /* City (s10q8c): 8c. X emigró solo/a ?	
-					01 Si
-					02 No
+					1 Si
+					0 No
  */
   	*-- Given that the maximum number of emigrantes per household is 10 
 	*-- We will have 10 variables with names
@@ -2435,12 +2441,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q8c_`i'=. if s10q8c_`i'==.a
 	*-- Generate variable
 	clonevar soloemig_`i' = s10q8c_`i'
+	replace soloemig_`i' = 0 if  s10q8c_`i'==2
 	*-- Label variable
-	label var soloemig_`i' "Has X emigrated alone"
+	label var soloemig_`i' "Emigró solo/a"
 	*-- Cross check
 	tab soloemig_`i' hogar_emig
 	*-- Label values
-	label def soloemig_`i' 1 "Yes" 2 "No"
+	label def soloemig_`i' 1 "Si" 2 "No"
 	label value soloemig_`i' soloemig_`i'
 	}
 
@@ -2466,11 +2473,11 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar conemig_`i' = s10q8d_`i'
 	*-- Label variable
-	label var conemig_`i' "Who emigrated with X"
+	label var conemig_`i' "Con quién emigró"
 	*-- Cross check
 	tab conemig_`i' hogar_emig
 	*-- Label values
-	label def conemig_`i' 1 "Father/Mother" 2 "Brother/sister" 3 "Partner" 4 "Son/duther" 5 "Other relative" 6 "Non relative"
+	label def conemig_`i' 1 "Padre/madre" 2 "Hermano/a" 3 "Conyuge/pareja" 4 "Hijos/hijas" 5 "Otro pariente" 6 "No parientes"
 	label value conemig_`i' conemig_`i'
 	} 
 
@@ -2498,7 +2505,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	gen razonemig_`i' = s10q9_os_`i'
 	*-- Label variable
-	label var razonemig_`i' "Why X emigrated"
+	label var razonemig_`i' "Cuál fue el motivo por el que la persona emigro"
 	*-- Cross check
 	tab razonemig_`i' hogar_emig
 	} 
@@ -2530,7 +2537,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar ocupaemig_`i' = s10q10_`i'
 	*-- Label variable
-	label var ocupaemig_`i' "Which was X occupation before leaving"
+	label var ocupaemig_`i' "Cuál era su ocupación principal antes de emigrar"
 	*-- Cross check
 	tab ocupaemig_`i' hogar_emig
 	} 
@@ -2562,7 +2569,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	gen ocupnemig_`i' = s10q11_`i'
 	*-- Label variable
-	label var ocupnemig_`i' "Which is X occupation now"
+	label var ocupnemig_`i' "Cuál es su ocupación principal ahora"
 	*-- Cross check
 	tab ocupnemig_`i' hogar_emig
 	} 
@@ -2570,8 +2577,8 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
  
     *--------- The emigrant moved back to the country
  /*  Moved back (s10q12): 12. X regresó a residenciarse nuevamente al país?
-							01 Si
-							02 No
+							1 Si
+							0 No
 		
  */    
   	*-- Given that the maximum number of emigrantes per household is 10 
@@ -2585,12 +2592,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q12_`i'=. if s10q12_`i'==.a
 	*-- Generate variable
 	clonevar volvioemig_`i' = s10q12_`i'
+	replace volvioemig_`i' =0 if s10q12_`i'==2
 	*-- Label variable
-	label var volvioemig_`i' "Does X moved back to the country?"
+	label var volvioemig_`i' "La persona regresó a residenciarse nuevamente al país"
 	*-- Cross check
 	tab volvioemig_`i' hogar_emig
 	*-- Label values
-	label def volvioemig_`i' 1 "Yes" 2 "No"
+	label def volvioemig_`i' 1 "Si" 0 "No"
 	label value volvioemig_`i' volvioemig_`i'
 	} 
 
@@ -2609,7 +2617,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	gen volvioanoemig_`i' = s10q13a_`i'
 	*-- Label variable
-	label var volvioanoemig_`i' "Year: X moved back to the country?"
+	label var volvioanoemig_`i' "En qué año regresó al pais"
 	*-- Cross check
 	tab volvioanoemig_`i' hogar_emig
 	} 
@@ -2628,7 +2636,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar volviomesemig_`i' = s10q13b_`i'
 	*-- Label variable
-	label var volviomesemig_`i' "Month: X moved back to the country?"
+	label var volviomesemig_`i' "En qué mes regresó al pais"
 	*-- Cross check
 	tab volviomesemig_`i' hogar_emig
 	} 
@@ -2649,12 +2657,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q14_`i'=. if s10q14_`i'==.a
 	*-- Generate variable
 	clonevar miememig_`i' = s10q14_`i'
+	replace miememig_`i' = 0 if s10q14_`i'==2
 	*-- Label variable
-	label var miememig_`i' "Is X a member of the household?"
+	label var miememig_`i' "En el presente: la persona forma parte de este hogar?"
 	*-- Cross check
 	tab miememig_`i' hogar_emig
 	*-- Label values
-	label def miememig_`i' 1 "Yes" 2 "No"
+	label def miememig_`i' 1 "Si" 0 "No"
 	label value miememig_`i' miememig_`i'
 	} 
 
@@ -2889,7 +2898,7 @@ reaccion_evento_* reaccionot_evento*
 	drop informant_ref
 	
 	*-- Label variable
-	label var informant_shock "Informant: Shocks"
+	label var informant_shock "Informante: eventos que afectan a los hogares"
 	*-- Label values	
 	label def informant_shock  1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
 							  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
@@ -2915,6 +2924,29 @@ su hogar desde el año 2017 ?
 	*-- Generate variable
 	gen evento_`i' = s15q1__`i'
 	}
+
+	*-- Label variable
+	label var evento_1 "Desde 2017, el hogar sufrio: Muerte o discapacidad de un miembro adulto del hogar que trabajaba"
+	label var evento_2 "Desde 2017, el hogar sufrio: Muerte de alguien que enviaba remesas al hogar"
+	label var evento_3 "Desde 2017, el hogar sufrio: Enfermedad de la persona con el ingreso más importante del hogar"
+	label var evento_4 "Desde 2017, el hogar sufrio: Pérdida de un contacto importante"
+	label var evento_5 "Desde 2017, el hogar sufrio: Perdida de trabajo de la persona con el ingreso más importante del hogar"
+	label var evento_6 "Desde 2017, el hogar sufrio: Salida del miembro del hogar que generaba ingresos debido a separación/divorcio"
+	label var evento_7 "Desde 2017, el hogar sufrio: Salida del miembro de la familia que generaba ingresos debido al matrimonio"
+	label var evento_8 "Desde 2017, el hogar sufrio: Salida de un miembro del hogar que generaba ingresos por emigración"
+	label var evento_9 "Desde 2017, el hogar sufrio: Fracaso empresarial no agrícola/cierre de negocio o emprendimiento"
+	label var evento_10 "Desde 2017, el hogar sufrio: Robo de cultivos, dinero en efectivo, ganado u otros bienes"
+	label var evento_11 "Desde 2017, el hogar sufrio: Pérdida de cosecha por incendio/sequía/inundaciones"
+	label var evento_12 "Desde 2017, el hogar sufrio: Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento"
+	label var evento_13 "Desde 2017, el hogar sufrio: Vivienda dañada / demolida"
+	label var evento_14 "Desde 2017, el hogar sufrio: Pérdida de propiedad por incendio o inundación"
+	label var evento_15 "Desde 2017, el hogar sufrio: Pérdida de tierras"
+	label var evento_16 "Desde 2017, el hogar sufrio: Muerte de ganado por enfermedad"
+	label var evento_17 "Desde 2017, el hogar sufrio: Incremento en el precio de los insumos"
+	label var evento_18 "Desde 2017, el hogar sufrio: Caída en el precio de los productos"
+	label var evento_19 "Desde 2017, el hogar sufrio: Incremento en el precio de los principales alimentos consumidos"
+	label var evento_20 "Desde 2017, el hogar sufrio: Secuestro/robo/asalto"
+	label var evento_21 "Desde 2017, el hogar sufrio: Otro"
 
 	*-- Other events
 	*-- Check
@@ -2973,7 +3005,7 @@ Categories:
 		*-- Generate variable
 		clonevar veces_evento_`i' = s15q2a_`i'
 		*-- Label variable
-		//label var veces_evento_`i' "How many times have the shock occurred since 2017"
+		label var veces_evento_`i' "Cuántas veces ocurrió X desde 2017?"
 		}
 		
 	
@@ -2991,7 +3023,7 @@ Categories:
 	*-- Generate variable
 	clonevar ano_evento_`i'  = s15q2b_`i'
 	*-- Label variable
-	label var ano_evento_`i' "Year of the event"
+	label var ano_evento_`i' "En qué año ocurrió el evento"
 	}
 	
 
@@ -3010,7 +3042,7 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	*-- Generate variable
 	clonevar reaccion_evento_`i'_`k' = s15q2c_`i'_`k'
 	*-- Label variable
-	label var reaccion_evento_`i'_`k' "Response to event"
+	label var reaccion_evento_`i'_`k' "Cual fue la respuesta de su hogar frente al evento más reciente"
 	*-- Label values
 	label def reaccion_evento_`i'_`k' 0 "No codificado" 1 "Venta de ganado" 2 "Venta de terreno" 3 "Venta de propiedad" ///
 	4 "Envían niños a vivir con amigos" 5 "Se retiraron los niños de escuela" ///
@@ -3038,7 +3070,7 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	*-- Generate variable
 	clonevar reaccionot_evento`i' = s15q2d_`i'
 	*-- Label variable
-	label var reaccionot_evento`i' "Other responses to the event"
+	label var reaccionot_evento`i' "Otras respuestas de los hogares frente al evento"
 	*-- Cross check
 	tab reaccionot_evento`i'
 	}

@@ -855,8 +855,8 @@ replace cantidad_h = cantidad*52.5 if bien==31 & unidad_medida==110 & cantidad<2
 // unit = Litros (3)
 // size = no size
 *density = .92 gr/ml promedios https://www.aceitedelasvaldesas.com/faq/varios/densidad-del-aceite/ (ME)
-replace cantidad_h = cantidad*0.92*1000 if bien==33 & unidad_medida==1 & cantidad<50
-replace cantidad_h = cantidad*0.92 if bien==33 & unidad_medida==1 & cantidad>=50
+replace cantidad_h = cantidad*0.92*1000 if bien==33 & unidad_medida==3 & cantidad<50
+replace cantidad_h = cantidad*0.92 if bien==33 & unidad_medida==3 & cantidad>=50
 
 
 // food = Aceite (33)
@@ -864,8 +864,8 @@ replace cantidad_h = cantidad*0.92 if bien==33 & unidad_medida==1 & cantidad>=50
 // size = no size
 *density = .92 gr/ml promedios https://www.aceitedelasvaldesas.com/faq/varios/densidad-del-aceite/ (ME)
 *ALERT: treshold changed (10)
-replace cantidad_h = cantidad*0.92*1000 if bien==33 & unidad_medida==2 & cantidad<10
-replace cantidad_h = cantidad*0.92 if bien==33 & unidad_medida==2 & cantidad>=10
+replace cantidad_h = cantidad*0.92*1000 if bien==33 & unidad_medida==4 & cantidad<10
+replace cantidad_h = cantidad*0.92 if bien==33 & unidad_medida==4 & cantidad>=10
 
 
 // food = Aceite (33)

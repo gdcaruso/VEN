@@ -64,10 +64,9 @@ qui: do "$pathdo\outliers.do"
 
 ********************************************************************************
 ********************************************************************************
-*** Imputation model for labor income: using stochastic regression
+*** Imputation model for labor income: using stochastic regression (or the Gaussian normal regression imputation method)
 ********************************************************************************
 ********************************************************************************
-
 use "$pathdata\encovi_2014_2018.dta", clear
 bysort year id: gen hhsize=_N
 
@@ -76,16 +75,44 @@ local xvar_en estado_civil_en nivel_educ_en categ_ocu_en categ_nhorast_en firm_s
               tipo_vivienda_en propieta_en ///
               /*auto_en*/ heladera_en lavarropas_en secadora_en computadora_en internet_en televisor_en radio_en calentador_en aire_en tv_cable_en microondas_en ///
               pension_vejez_en pension_inva_en pension_otra_en pension_sobrev_en contribu_pen_en 
-local xvar    estado_civil nivel_educ /*categ_ocu categ_nhorast nhorast firm_size contrato*/ seguro_salud misiones ///
-              tipo_vivienda propieta /*auto*/ heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas ///
-			  pension_vejez pension_inva pension_otra pension_sobrev contribu_pen misiones
-sum year 
-local ti=r(min)
-local tf=r(max)
+local xvar    estado_civil nivel_educ categ_ocu categ_nhorast /*nhorast*/ firm_size contrato seguro_salud misiones ///
+              tipo_vivienda propieta /*auto*/ heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas 
 
+*** Identifying missing values in potential independent variables for Mincer equation
+mdesc `xvar' if ocupado==1  //few % of missinf values except in nivel_educ, categ_ocu, categ_nhorast, firm size, and contract
+/*    Variable    |     Missing          Total     Percent Missing
+----------------+-----------------------------------------------
+   estado_civil |          27         30,308           0.09
+     nivel_educ |       1,443         30,308           4.76
+      categ_ocu |         697         30,308           2.30
+   categ_nhor~t |       1,238         30,308           4.08
+      firm_size |       1,255         30,308           4.14
+       contrato |       1,484         30,308           4.90
+   seguro_salud |         488         30,308           1.61
+       misiones |         181         30,308           0.60
+   tipo_vivie~a |           2         30,308           0.01
+       propieta |          69         30,308           0.23
+       heladera |          63         30,308           0.21
+     lavarropas |          79         30,308           0.26
+       secadora |         161         30,308           0.53
+    computadora |         121         30,308           0.40
+       internet |         140         30,308           0.46
+      televisor |          89         30,308           0.29
+          radio |         120         30,308           0.40
+     calentador |         173         30,308           0.57
+           aire |         145         30,308           0.48
+       tv_cable |         104         30,308           0.34
+     microondas |         180         30,308           0.59
+----------------+-----------------------------------------------
+*/
+			  
 foreach x in linc {
 gen log_`x'=ln(`x')
 }
+
+/* To perform imputation by linear regression all the independent variables need have completed values, so we re-codified missing 
+values in the independent variables as an additional category. The missing values in the dependent variable are estimated from
+the posterior distribution of model parameters or from the large-sample normal approximation of the posterior distribution*/
 
 local xvar1 jefe hhsize edad edad2 hombre i.entidad i.estado_civil_en i.tipo_vivienda_en i.propieta_en i.nivel_educ_en ///
            i.seguro_salud_en i.categ_ocu_en i.categ_nhorast_en i.firm_size_en i.contrato_en i.misiones_en ///
@@ -125,7 +152,7 @@ local j=`j'+1
 drop `x'2
 }	
 mdesc linc if _mi_m==0
-mdesc linc if _mi_m==1
+mdesc linc if _mi_m==1 //cheking we do not have incompleted values in labor income after the imputation
 
 gen imp_id=_mi_m
 *mi unset
@@ -160,6 +187,7 @@ sum year
 local ti=r(min)
 local tf=r(max)
 
+*** Comparing not imputed versus imputed labor income distribution
 foreach x in linc{
 forv y=`ti'/`tf'{
 twoway (kdensity log_`x' if `x'>0 & ocupado==1 & year==`y' [aw=pondera], lcolor(blue) bw(0.45)) ///
@@ -209,9 +237,37 @@ use "$pathdata\encovi_2014_2018.dta", clear
 bysort year id: gen hhsize=_N
 
 local demo    jefe /*miembros*/ hhsize edad edad2 /*sexo*/ hombre entidad 
-local xvar    estado_civil nivel_educ categ_ocu categ_nhorast nhorast firm_size contrato seguro_salud misiones ///
-              tipo_vivienda propieta /*auto*/ heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas ///
-			  /*pension_vejez pension_inva pension_otra pension_sobrev contribu_pen*/ 
+local xvar    estado_civil nivel_educ categ_ocu categ_nhorast /*nhorast*/ firm_size contrato seguro_salud misiones ///
+              tipo_vivienda propieta /*auto*/ heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas 
+mdesc `xvar' if ocupado==1
+
+/*  Variable    |     Missing          Total     Percent Missing
+----------------+-----------------------------------------------
+   estado_civil |          27         30,308           0.09
+     nivel_educ |       1,443         30,308           4.76
+      categ_ocu |         697         30,308           2.30
+   categ_nhor~t |       1,238         30,308           4.08
+      firm_size |       1,255         30,308           4.14
+       contrato |       1,484         30,308           4.90
+   seguro_salud |         488         30,308           1.61
+       misiones |         181         30,308           0.60
+   tipo_vivie~a |           2         30,308           0.01
+       propieta |          69         30,308           0.23
+       heladera |          63         30,308           0.21
+     lavarropas |          79         30,308           0.26
+       secadora |         161         30,308           0.53
+    computadora |         121         30,308           0.40
+       internet |         140         30,308           0.46
+      televisor |          89         30,308           0.29
+          radio |         120         30,308           0.40
+     calentador |         173         30,308           0.57
+           aire |         145         30,308           0.48
+       tv_cable |         104         30,308           0.34
+     microondas |         180         30,308           0.59
+----------------+-----------------------------------------------
+*/
+
+			  
 sum year 
 local ti=r(min)
 local tf=r(max)
@@ -254,20 +310,19 @@ gen log_`x'=ln(`x')
 
 mi set flong
 *mi set M=2
-local var_com hombre edad edad2 jefe hhsize i.entidad i.tipo_vivienda_en i.categ_nhorast_en i.seguro_salud_en i.misiones_en i.propieta_en
-local var_imp estado_civil nivel_educ categ_ocu /*categ_nhorast*/ firm_size contrato /*seguro_salud misiones propieta*/ ///
+local var_com hombre edad edad2 jefe hhsize i.entidad i.tipo_vivienda_en i.estado_civil_en i.seguro_salud_en i.misiones_en i.propieta_en
+local var_imp /*estado_civil*/ nivel_educ categ_ocu categ_nhorast firm_size contrato /* estado_civil seguro_salud misiones propieta*/ ///
                /*heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas*/
 mi register imputed log_linc `var_imp' 
-mi register regular hombre edad edad2 jefe hhsize entidad tipo_vivienda_en categ_nhorast_en seguro_salud_en misiones_en propieta_en
+mi register regular hombre edad edad2 jefe hhsize entidad tipo_vivienda_en estado_civil_en seguro_salud_en misiones_en propieta_en 
 set seed 12345678
   
 mi impute chained (regress) log_linc       ///
-                  (mlogit)  estado_civil   ///
-                  (mlogit)  nivel_educ     /// 
-				  (mlogit)  categ_ocu      ///
-				  (mlogit)  firm_size      /// 
-				  (logit)   contrato       = `var_com' if ocupado==1 & year==2014,    ///				  
-                  add(30)  by(year) burnin(50) augment /*savetrace(impstats_linc, replace)*/ force
+                  (mlogit)  nivel_educ   /// 
+                  (mlogit)  categ_ocu     /// 
+				  (mlogit)  categ_nhorast  ///
+				  (logit)   contrato       = `var_com' if ocupado==1,    ///				  
+                  add(30)  by(year) augment /* burnin(100) savetrace(impstats_linc, replace)*/ force
 
 
 /*
@@ -277,7 +332,7 @@ append using `imp`y''
 }
 */
 save "$pathdata\VEN_linc_imp2.dta", replace
-
+;
 *** Retrieving original variables
 foreach x of varlist linc {
 gen `x'2=.

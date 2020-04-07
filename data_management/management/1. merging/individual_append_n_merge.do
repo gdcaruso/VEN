@@ -4,7 +4,7 @@ level and integrates into a unique dataset at individual level
 ===========================================================================
 Country name:	Venezuela
 Year:			2019
-Survey:			ECOVI
+Survey:			ENCOVI
 Vintage:		
 Project:	
 ---------------------------------------------------------------------------
@@ -25,38 +25,38 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lautaa   1
+		global lautaa   0
 		
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\GitHub\VEN"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
 	    if $lautaa {
-				global rootpath "C:\Users\wb563365\GitHub\VEN\"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563365\GitHub\VEN\"
 		}
 	
 		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		
 		if $male   {
-				global rootpath "C:\Users\wb550905\Github\VEN\"
+				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\03_31_20"
+global dataofficial "$rootpath\data_management\input\04_06_20"
 
 ********************************************************************************
 
@@ -231,4 +231,4 @@ foreach dtafile in $dtalist{
 
 compress
 	
-save "$rootpath\data_management\output\merged\individual.dta", replace
+save "$rootpath\data_management\output\merged\individual.dta" //, replace

@@ -1,5 +1,5 @@
 /*===========================================================================
-Country name:		Venezuela
+Country name:	Venezuela
 Year:			2014
 Survey:			ECNFT
 Vintage:		01M-01A
@@ -25,30 +25,30 @@ Note:
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lautaa	1   
+		global lautaa	0 
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\GitHub\VEN"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 		}
 	    if $lautaa {
-				global rootpath "C:\Users\wb563365\GitHub\VEN"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563365\GitHub\VEN"
 		}
 		if $trini {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		
 		if $male {
-				global rootpath "C:\Users\wb550905\Github\VEN\"
-		}
+				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019"
+		}	
 
-global dataofficial "$rootpath\data_management\input\03_31_20"
+global dataofficial "$rootpath\data_management\input\04_06_20"
  // Set the path for the three questionnaires
 	global pathnew "$dataofficial\ENCOVI_3_STATA_All"
 	global pathold "$dataofficial\ENCOVI_MainSurvey_Final_3_STATA_All"

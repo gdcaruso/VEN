@@ -9,12 +9,9 @@
 		 4 = Tablas
 		 
  VAR: material_piso = s4q1 */
-	*-- Label variable
-	label var material_piso "Type of flooring material"
-	 *-- Label values
-		label def material_piso 1 "Mosaic,granite,vynil, brick.." 2 "Cement" 3 "Ground floor" 4 "Boards" 5 "Other"
-		label value material_piso material_piso
-
+ 
+	* From Harmonization
+	
 *** Type of exterior wall material		 
 /* MATERIAL_PARED_EXTERIOR (s4q2)
 		 1 = Bloque, ladrillo frisado	
@@ -27,13 +24,8 @@
 		 8 = Otros (laminas de zinc, carton, tablas, troncos, piedra, paima, similares)  
 
 	VAR: material_pared_exterior = s4q2  */
-
-	*-- Label variable
-	label var material_pared_exterior "Type of exterior wall material"
-	*-- Label values
-	label def material_pared_exterior 1 "Frieze brick" 2 "Non frieze brick" 3 "Concrete" ///
-	4 "Wood" 5 "Polyvinyl chloride block" 6 "Adobe, mud or frieze bahareque" 7 "Adobe, mud or non frieze bahareque" 8 "Other"
-	label value material_pared_exterior material_pared_exterior
+	
+	* From Harmonization
 
 *** Type of roofing material
 /* MATERIAL_TECHO (s4q3)
@@ -44,14 +36,7 @@
 		 5 = Materiales de desecho (tablon, tablas o similares, palma)
 		 
 	VAR: material_techo = s4q3 	*/
-	*-- Label variable
-	label var material_techo "Type of roofing material"
-	*-- Label values
-	label def material_techo_en 1 "Platabanda (concrete or planks)" ///		
-		 2 "Roof tile or similar"  3 "Asphalt sheet" ///
-		 4 "Metal sheets (zinc, aluminum and the like)" ///
-		 5 "Waste materials (plank, boards or the like, palm)"
-	label val material_techo material_techo_en
+	* From Harmonization
 	
 *** Type of dwelling
 /* TIPO_VIVIENDA (s4q4): Tipo de Vivienda 
@@ -65,15 +50,8 @@
 		
 	VAR: tipo_vivienda = s4q4	
 */
-	*-- Label variable
-	label var tipo_vivienda "Type of dwelling"
-	*-- Label values
-	label def tipo_vivienda_en 1 "Detached house" ///
-		2 "House" 3 "Apartament in building complex" ///
-		4 "Annex in detached house" 5 "Vivienda rustica (rancho)" ///
-		6 "Room in a house or workplace" ///
-		7 "Rancho campesino"
-	label val tipo_vivienda tipo_vivienda_en
+	* From Harmonization
+
 	
 *** Water supply
 /* SUMINISTRO_AGUA (s4q5): Cuales han sido las principales fuentes de suministro de agua en esta vivienda?
@@ -87,18 +65,11 @@
 		VAR: suministro_agua =  s4q5__1
 */
 		*-- Label variable
-		label var suministro_agua "Last 3 months: Water supply (this survey)"		
-
-		*-- Label values
-		label var suministro_agua_en 1 "From pipeline" 2 "Pile or pond" ///
-		3 "Distributed by water tanker truck"	4 "Connected to water pump"	5 "Connected but no water pump" ///
-		6 "Other"
+		label var suministro_agua "Ultimos 3 meses: Cuales han sido las principales fuentes de suministro de agua en esta vivienda? (encuesta)"		
+		
 		*-- Label variable
-		label var suministro_agua_comp "Last 3 months: Water supply (harmonized)"
-		*-- Label values
-		label def suministro_agua_comp_en 1 "From pipeline" 2 "Pile or pond" ///
-		3 "Distributed by water tanker truck" 4 "Other"
-		label value suministro_agua_comp suministro_agua_comp_en
+		label var suministro_agua_comp "Ultimos 3 meses: Cuales han sido las principales fuentes de suministro de agua en esta vivienda? (armonizada)"		
+		
 
 *** Frequency of water supply
 /* FRECUENCIA_AGUA (s4q6): Con que frecuencia ha llegado el agua del acueducto a esta vivienda?
@@ -111,13 +82,8 @@
 		VAR: frecuencia_agua = s4q6
 */
 		*-- Label variable
-		label var frecuencia_agua "Last 3 months: Frequency of water supply"
-		*-- Label values
-		label def frecuencia_agua_en 1 "Every day" 2 "Some days every week" ///
-		3 "Once a week"	4 "Once every two weeks" ///
-		5 "Never"
-		label val frecuencia_agua frecuencia_agua_en
-
+		label var frecuencia_agua "Ultimos 3 meses: Con que frecuencia ha llegado el agua del acueducto a esta vivienda?"
+	
 *** Electricity
 /* SERVICIO_ELECTRICO : En los ultimos 3 meses, el servicio electrico ha sido suministrado por?
             s4q7_1 = La red publica
@@ -127,14 +93,9 @@
 */
 
 		*-- Label variable
-		label var serv_elect_red_pub "Last 3 months, electricity supply: public"
-		*-- Label variable
-		label var serv_elect_planta_priv "Last 3 months, electricity supply: private"
-		*-- Label variable
-		label var serv_elect_otro "Last 3 months, electricity supply: other"
-		*-- Label variable
-		label var  electricidad "Last 3 months, electricity supply: without electricity"
-		label def elec 1 "Yes" 0 "No"
+		label var  electricidad "Ultimos 3 meses: tuvo acceso a electricidad"
+		*-- Label values
+		label def elec 1 "Si" 0 "No"
 		label val serv_elect_red_pub elec
 		label val serv_elect_planta_priv elec
 		label val serv_elect_otro elec

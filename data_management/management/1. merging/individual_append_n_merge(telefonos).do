@@ -38,7 +38,7 @@ Note:
 		global male   0
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\Documents\GitHub\VEN"
+				global rootpath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019"
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
@@ -56,7 +56,7 @@ Note:
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\03_26_20"
+global dataofficial "$rootpath\data_management\input\04_06_20"
 
 ********************************************************************************
 

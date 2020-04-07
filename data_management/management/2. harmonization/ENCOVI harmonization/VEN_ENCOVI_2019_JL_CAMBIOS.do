@@ -198,7 +198,7 @@ global id_ENCOVI pais ano encuesta id com psu
 		destring id_numeric, replace
 		format id_numeric %14.0f
 		*Age
-		gen edad = s6q5
+		gen edad = s6q5 if (s6q5!=. & s6q5!=.a)
 		*Random var
 		set seed 123
 		generate z = runiform()
@@ -508,7 +508,7 @@ tab electricidad
 			4 = Nunca se interrumpe			
 */
 clonevar interrumpe_elect = s4q8 if (s4q8!=. & s4q8!=.a)
-
+tab interrumpe_elect 
 *** Type of toilet
 /* TIPO_SANITARIO (s4q9): esta vivienda tiene 
 		1 = Poceta a cloaca
@@ -527,6 +527,7 @@ label value tipo_sanitario_comp tipo_sanitario_comp
 *** Number of rooms used exclusively to sleep
 * NDORMITORIOS (s5q1): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
 clonevar ndormi= s5q1 if (s5q1!=. & s5q1!=.a) //up to 9
+replace ndormi=. if s5q1>20
 
 *** Bath with shower 
 * BANIO (s5q2): Su hogar tiene uso exclusivo de bano con ducha o regadera?
@@ -611,7 +612,7 @@ clonevar fagua_botella=s5q13__7 if s5q13__7!=. & s5q13__7!=.a
 * Otros
 clonevar fagua_otro=s5q13__8 if s5q13__8!=. & s5q13__8!=.a
 
-label def aqua 0 "Other" 1 "Primera (1)" 2 "Segunda (2)" 3 "Tercera(3)" 
+label def aqua 0 "Otra" 1 "Primera (1)" 2 "Segunda (2)" 3 "Tercera(3)" 
 label val fagua_acueduc aqua
 label val fagua_estanq aqua
 label val fagua_cisterna aqua
@@ -625,6 +626,10 @@ label val fagua_otro aqua
 clonevar tratamiento_agua= s5q14 if s5q14!=. & s5q14!=.a
 replace tratamiento_agua= 1 if s5q14==1
 replace tratamiento_agua= 0 if s5q14==2
+* Label values
+label def tratamiento_agua 1 "Si" 0 "No"
+label val tratamiento_agua tratamiento_agua
+
 
 *** How do you treat the water to make it more safe for drinking
 clonevar tipo_tratamiento=s5q15 if s5q15!=. & s5q15!=.a

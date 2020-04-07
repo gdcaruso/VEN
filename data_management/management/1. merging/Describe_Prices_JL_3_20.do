@@ -2047,12 +2047,13 @@ log close
 *----------- 
 	preserve
 	*--- Arroz, harina de maiz, aceite y azucar
-	keep if bien==1 | bien==7 | bien==35 | bien==66 | bien==12 | bien==13 | bien==14 | bien==31
-	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
+	keep if bien==1 | bien==2 | bien==7 | bien==35 | bien==66 | bien==12 | bien==13 | bien==14 | bien==31
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u , by (bien)
 	save "$dataout/resumen_precio_gramo_bien.dta", replace
 	export excel using "$dataout/resumen_canasta2", sheet("Precio gramo") firstrow(varlabels) replace
 	restore
 	
+	//(max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u
 // Price per gram by Good-Month-Region
 *----------- 
 	preserve

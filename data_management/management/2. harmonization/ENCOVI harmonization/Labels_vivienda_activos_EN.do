@@ -133,7 +133,7 @@
 		*-- Label variable
 		label var serv_elect_otro "Last 3 months, electricity supply: other"
 		*-- Label variable
-		label var  electricidad "Last 3 months, electricity supply: without electricity"
+		label var  electricidad "Last 3 months: had access to electricity"
 		label def elec 1 "Yes" 0 "No"
 		label val serv_elect_red_pub elec
 		label val serv_elect_planta_priv elec
@@ -148,14 +148,9 @@
 			4 = Nunca se interrumpe			
 	VAR: interrumpe_elect = s4q8		
 */
-		*-- Label variable
-		label var interrumpe_elect "Electric power interruptions"
-		*-- Label values
-		label def interrumpe_elect_en 1 "Daily for long hours" ///
-		2 "Once a week for long hours" ///
-		3 "Once a month" 4 "Never" 
-		label value interrumpe_elect interrumpe_elect_en
 
+ * Label from harmonization
+ 
 *** Type of toilet
 /* TIPO_SANITARIO (s4q9): esta vivienda tiene 
 		1 = Poceta a cloaca
@@ -173,44 +168,41 @@
 		4 "No tiene poseta o excusado"
 */
 		*-- Label variable
-		label var tipo_sanitario "Type of toilet (this survey)"
+		label var tipo_sanitario "Tipo sanitario (encuesta)"
 		*-- Label values
-		label def tipo_sanitario 1 "Toilet with flush (connected to public sewerage system)" ///
-		2 "Toilet with flush (connected to cesspit)" ///
-		3 "Toilet but not connected" ///
-		4 "Toilet without flush" ///
-		5 "Without toilet"
+		label def tipo_sanitario 1 "Poceta a cloaca" ///
+		2 "Pozo septico" ///
+		3 "Poceta sin conexion (tubo)" ///
+		4 "Excusado de hoyo o letrina" ///
+		5 "No tiene poceta o excusado" 
 		label val tipo_sanitario tipo_sanitario
 		
 		*-- Label variable
-		label var tipo_sanitario_comp "Type of toilet (harmonized)"
+		label var tipo_sanitario_comp "Tipo sanitario (armonizacion)"
 		*-- Label values
-		label def tipo_sanitario_comp_en 1 "Toilet with flush (connected to public sewerage system of cesspit)" ///
-		2 "Toilet but not connected" 3 "Toilet without flush" ///
-		4 "Without toilet"
+		label def tipo_sanitario_comp_en 1 "Poceta a cloaca/Pozo septico" ///
+		2 "Poceta sin conexion" ///
+		3 "Excusado de hoyo o letrina" ///
+		4 "No tiene poseta o excusado"
 		label value tipo_sanitario_comp tipo_sanitario_comp_en
 
 *** Number of rooms used exclusively to sleep
 /* NDORMITORIOS (s5q1): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
 	VAR: ndormi= s5q1  //up to 9 */
  
-		*-- Label variable
-		label var ndormi "Number of rooms used exclusively to sleep"
+ * Label from harmonization
 		
 *** Bath with shower 
 /* BANIO (s5q2): Su hogar tiene uso exclusivo de bano con ducha o regadera?
 VAR: banio_con_ducha = s5q2*/
-		*-- Label variable
-		label var banio_con_ducha "Bath with shower"
-		*-- Label values
-		label def banio_con_ducha_en 1 "Yes" 0 "No"
-		label val banio_con_ducha banio_con_ducha_en
+
+ * Label from harmonization
 		
 *** Number of bathrooms with shower
 /* NBANIOS (s5q3): cuantos banos con ducha o regadera?
 clonevar nbanios = s5q3 if banio_con_ducha==1 */
-		*-- Label variable
-		label var nbanios "Number of bathrooms with shower"
+
+ * Label from harmonization
 		
 *** Housing tenure
 /* TENENCIA_VIVIENDA (s5q7): régimen de  de la vivienda  
@@ -226,240 +218,198 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		10 = Otra */
 		
 		*-- Label variable
-		label var tenencia_vivienda "Housing tenure (this survey)"
-		*-- Label values
-		label def tenencia_vivienda_en 1 "Own housing (paid)" 2 "Own housing (paying)" ///
-				3 "Rented housing" 4 "Rented part of the housing" ///
-				5 "Awarded-Social housing: Gran Mision Vivienda (paying)" /// 
-				6 "Awarded-Social housing: Gran Mision Vivienda"
-				7 "Borrowed for work reasons"
-				8 "Borrowed by relative or friend"
-				9 "Taken over"
-			   10 "Other"
-		label val tenencia_vivienda tenencia_vivienda_en
-
+		label var tenencia_vivienda "Regimen de tenencia de la vivienda (encuesta)"
 		*-- Label variable
-		label var tenencia_vivienda_comp "Housing tenure (harmonized)"
-		*-- Label values
-		label def tenencia_vivienda_comp 1 "Own housing (paid)" 2 "Own housing (paying)" ///
-		3 "Rented housing" 4 "Borrowed" 5 "Taken over" 6 "Social housing: Government program" 7 "Other"
-		label value tenencia_vivienda_comp tenencia_vivienda_comp
+		label var tenencia_vivienda_comp "Regimen de tenencia de la vivienda (armonizada)"
 
+		
 		*** How much did you pay for rent or mortgage the last month?
 		*-- Label variable
-		label var pago_alq_mutuo "How much did you pay for rent or mortgage the last month?"
-
+		* Label from harmonization
+		
 		*** In which currency did you make the payment?
 		*-- Label variable
-		label var pago_alq_mutuo_mon "In which currency did you make the payment?"
-
+		* Label from harmonization
+		
 		*** In which month did you make the payment?
 		*-- Label variable
-		label var pago_alq_mutuo_m "In which month did you make the payment?"
-		*-- Label values
-		label def month 1 "January" 2 "February" 3 "March" 4 "April" ///
-		5 "May" 6 "June" 7 "July" 8 "August" 9 "September" 10 "October" 11 "November" 12 "December"
-		label val pago_alq_mutuo_m month
-		
+		* Label from harmonization
+	
 		*** During the last year, have you had arrears in payments?
 		*-- Label variable
-		label var atrasos_alq_mutuo "During the last year, have you had arrears in payments?"
-		*-- Label values
-		label def yesno 1 "Yes" 0 "No"
-		label val atrasos_alq_mutuo yesno
+		* Label from harmonization
 		
 		*** What consequences did the arrears in payments had?
 		*-- Label variable
-		label var implicancias_nopago "What consequences did the arrears in payments had?"
-		*-- Label values
-		label def implicancias_nopago 1 "Sold assets from the household to cancel debt" ///
-							          2 "Asked your relatives for help" ///
-									  3 "Sublease a room in the house" /// 
-									  4 "Looked for a second job" ///
-                                      5 "Other"
-		label val implicancias_nopago implicancias_nopago
-		
+	    * Label from harmonization
+
 		*** If you had to rent similar dwelling, how much did you think you should pay?
 		*-- Label variable
-		label var renta_imp_en "If you had to rent similar dwelling, how much did you think you should pay?"
-				
+	    * Label from harmonization
+
 		*** In which currency ?
 		*-- Label variable
-		label var renta_imp_mon "In which currency?"
+	    * Label from harmonization
 
 		*** What type of property title do you have?
 		*-- Label variable
-		label var titulo_propiedad "What type of property title do you have?"
-		*-- Label values
-		label def titulo_propiedad 1 "Título supletorio" ///
-                    2 "Ownership certificate" ///                 
-					3 "Without certificate" ///
-                    4 "Other"
-		label val titulo_propiedad titulo_propiedad 
+	    * Label from harmonization
 
 *** What are the main sources of drinking water in your household?
 		* Acueducto
 		*-- Label variable
-		label var fagua_acueduc "Main sources of drinking water in your household? Pipeline"
+	    * Label from harmonization
+		
 		* Pila o estanque
 		*-- Label variable
-		label var fagua_estanq "Main sources of drinking water in your household? Pile or pond"
+	    * Label from harmonization
+		
 		* Camión cisterna
 		*-- Label variable
-		label var fagua_cisterna "Main sources of drinking water in your household? Water tanker truck"
+	    * Label from harmonization
+		
 		* Pozo con bomba
 		*-- Label variable
-		label var fagua_bomba "Main sources of drinking water in your household? Water pump"
+	    * Label from harmonization
+		
 		* Pozo protegido
 		*-- Label variable
-		label var fagua_pozo "Main sources of drinking water in your household? Well water"
+	    * Label from harmonization
+		
 		* Aguas superficiales (manantial,río, lago, canal de irrigación)
 		*-- Label variable
-		label var fagua_manantial "Main sources of drinking water in your household? Spring, river, lake, irrigation canal"
+	    * Label from harmonization
+		
 		* Agua embotellada
 		*-- Label variable
-		label var fagua_botella "Main sources of drinking water in your household? Bottled water"
+	    * Label from harmonization
+		
 		* Otros
 		*-- Label variable
-		label var fagua_otro "Main sources of drinking water in your household? Other"
-
-		*-- Label values
-		label def aqua 0 "Other" 1 "First (1)" 2 "Second (2)" 3 "Third (3)" 
-		label val fagua_acueduc aqua
-		label val fagua_estanq aqua
-		label val fagua_cisterna aqua
-		label val fagua_bomba aqua
-		label val fagua_pozo aqua
-		label val fagua_manantial aqua
-		label val fagua_botella aqua
-		label val fagua_otro aqua
+	    * Label from harmonization
 
 		*** In your household, is the water treated to make it drinkable
-		*-- Label variable
-		label var tratamiento_agua "In your household, is the water treated to make it drinkable"
-		*-- Label values
-		label val tratamiento_agua yesno
+	    * Label from harmonization
 		
 		*** How do you treat the water to make it more safe for drinking
-		*-- Label variable
-		label var tipo_tratamiento "How do you treat the water to make it more safe for drinking"
-		label def tipo_tratamiento 1 "Boil the water" 2 "Add bleach" ///
-						   3 "Use a filter for water" 4 "Boil and filter" ///
-						   5 "Other"
-	    label val tipo_tratamiento tipo_tratamiento
+	    * Label from harmonization
 		
 		*** Which type of fuel do you use for cooking?
 		*-- Label variable
-		label var comb_cocina "Which type of fuel do you use for cooking?"
-		*-- Label values
-		!label def comb_cocina 1 "Gas (direct)" 2 "Gas por bombona" 3 "Electricity" 4 "Wood" 5 "Other" 6 "Do not cook"
-		label val comb_cocina comb_cocina
+	    * Label from harmonization
 
 *** Did you pay for the following utilities?
 * Water
-		*-- Label variable
-		label var pagua "Did you pay for the following utilities? Water"
+	    * Label from harmonization
 		*-- Label values
-		label val pagua yesno
+		label def pagua 1 "Si" 0 "No"
+		label val pagua pagua
 
 * Electricity
-		*-- Label variable
-		label var pelect "Did you pay for the following utilities? Electricity"
-		* Gas
-		*-- Label variable
-		label var pgas "Did you pay for the following utilities? Gas"
-		* Carbon, wood
-		*-- Label variable
-		label var pcarbon "Did you pay for the following utilities? Carbon, wood"
-		* Paraffin
-		*-- Label variable
-		label var pparafina "Did you pay for the following utilities? Paraffin"
-		* Landline, internet and tv cable
-		*-- Label variable
-		label var ptelefono "Did you pay for the following utilities? Landline, internet and tv cable"
-		
+	    * Label from harmonization
 		*-- Label values
-		label val pelect yesno
-		label val pgas yesno
-		label val pcarbon yesno
-		label val pparafina yesno
-		label val ptelefono yesno
+		label def pelect 1 "Si" 0 "No"
+		label val pelect pelect
+		
+		* Gas
+	    * Label from harmonization
+		label def pgas 1 "Si" 0 "No"
+		label val pgas pgas
 
-*** How much did you pay for the following utilities?
-		*-- Label variable
+		* Carbon, wood
+	    * Label from harmonization
+		label def pcarbon 1 "Si" 0 "No"
+		label val pcarbon pcarbon
+		
+		* Paraffin
+	    * Label from harmonization
+		label def pparafina 1 "Si" 0 "No"
+		label val pparafina pparafina 
+		
+		* Landline, internet and tv cable
+	    * Label from harmonization
+		label def ptelefono 1 "Si" 0 "No"
+		label val ptelefono ptelefono
+		
+*** How much did you pay for the following utilities?		
 		* Water
-		label var pagua_monto "How much did you pay for the following utilities? Water"
+		*-- Label variable
+		label var pagua_monto "Monto pagado por servicio de: Agua"
+		
 		* Electricity
 		*-- Label variable
-		label var pelect_monto "How much did you pay for the following utilities? Electricity"
+		label var pelect_monto "Monto pagado por servicio de: Electricidad y eliminacion de basura"
+		
 		* Gas
 		*-- Label variable
-		label var pgas_monto "How much did you pay for the following utilities? Gas"
+		label var pgas_monto "Monto pagado por servicio de: Gas"
+		
 		* Carbon, wood
 		*-- Label variable
-		label var pcarbon_monto "How much did you pay for the following utilities? Carbon, wood"
+		label var pcarbon_monto "Monto pagado por servicio de: Carbon,leña"
+		
 		* Paraffin
 		*-- Label variable
-		label var pparafina_monto "How much did you pay for the following utilities? Paraffin"
+		label var pparafina_monto "Monto pagado por servicio de: Vela, parafina (alumbrado)"
+		
 		* Landline, internet and tv cable
 		*-- Label variable
-		label var ptelefono_monto "How much did you pay for the following utilities? Landline, internet and tv cable"
+		label var ptelefono_monto "Monto pagado por servicio de: Teléfono fijo, Internet y TV por cable"
 
 *** In which currency did you pay for the following utilities?
 		* Water
 		*-- Label variable
-		label var pagua_mon "In which currency did you pay for the following utilities? Water"
+		label var pagua_mon "Moneda en que pago: Agua"
+		
 		* Electricity
 		*-- Label variable
-		label var pelect_mon "In which currency did you pay for the following utilities? Electricity"
+		label var pelect_mon "Moneda en que pago: Electricidad y eliminacion de basura"
+		
 		* Gas
 		*-- Label variable
-		label var pgas_mon"In which currency did you pay for the following utilities? Gas"
+		label var pgas_mon "Moneda en que pago: Gas"
+		
 		* Carbon, wood
 		*-- Label variable
-		label var pcarbon_mon"In which currency did you pay for the following utilities? Carbon, wood"
+		label var pcarbon_mon "Moneda en que pago: Carbon,leña"
+		
 		* Paraffin
 		*-- Label variable
-		label var pparafina_mon"In which currency did you pay for the following utilities? Paraffin"
+		label var pparafina_mon "Moneda en que pago: Vela, parafina (alumbrado)"
+		
 		* Landline, internet and tv cable
 		*-- Label variable
-		label var ptelefono_mon "In which currency did you pay for the following utilities? Landline, internet and tv cable"
+		label var ptelefono_mon "Moneda en que pago: Teléfono fijo, Internet y TV por cable"
 
 *** In which month did you pay for the following utilities?
 		* Water
 		*-- Label variable
-		label var pagua_m "In which month did you pay for the following utilities? Water"
-		*-- Label values
-		label val pagua_m month 
+		label var pagagua_m "Mes en que pago: Agua"
+		
 		* Electricity
-		*-- Label variable
-		label var pelect_m "In which month did you pay for the following utilities? Electricity"
-		*-- Label values
-		label val pelect_m month
+		*-- Label variable		
+		label var pelect_m "Mes en que pago: Electricidad y eliminacion de basura"
+		
 		* Gas
-		*-- Label variable
-		label var pgas_m "In which month did you pay for the following utilities? Gas"
-		*-- Label values
-		label val pgas month
+		*-- Label variable		
+		label var pgas_m "Mes en que pago: Gas"
+		
 		* Carbon, wood
-		label var pcarbon_m "In which month did you pay for the following utilities? Carbon, wood"
-		*-- Label values
-		label val pcarbon_m month
+		*-- Label variable
+		label var pcarbon_m "Mes en que pago: Carbon,leña"
+		
 		* Paraffin
 		*-- Label variable
-		label var pparafina_m "In which month did you pay for the following utilities? Paraffin"
-		*-- Label values
-		label val pparafina_m month
+		label var pparafina_m "Mes en que pago: Vela, parafina (alumbrado)"
+		
 		* Landline, internet and tv cable
 		*-- Label variable
-		label var ptelefono_m "In which month did you pay for the following utilities? Landline, internet and tv cable"
-		*-- Label values
-		label val ptelefono_m month
+		label var ptelefono_m "Mes en que pago: Teléfono fijo, Internet y TV por cable"
 
 *** In your household, have any home appliences damaged due to blackouts or voltage inestability?
 		*-- Label variable
-		label var danio_electrodom "In your household, have any home appliences damaged due to blackouts or voltage inestability?"
 		*-- Label values
+		label def danio_electrodom 1 "Si" 0 "No"
 		label val danio_electrodom yesno
 
 

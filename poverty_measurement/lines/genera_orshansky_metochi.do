@@ -151,30 +151,11 @@ replace type_good = 7 if inrange(bien, 301,322) //entretenimiento y turismo
 
 // b) define non current goods
 gen current_good = .
-
 replace current_good = 1 if inlist(type_good,1,2,3,4,6,7) 
 replace current_good = 0 if type_good==5 //bienes durables (TV, plancha)
+drop if current_good !=1
 
-// c) homogenize currencies
-	* We move everything to bolivares February 2020, given that there we have more sample size // 2=dolares, 3=euros, 4=colombianos // 
-		*Nota: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 
-/* tab moneda (number of spending obs. by currency)
-
-      10b. Moneda |      Freq.     Percent        Cum.
-------------------+-----------------------------------
-        Bolívares |    131,356       91.18       91.18
-          Dólares |      2,488        1.73       92.90
-            Euros |         20        0.01       92.92
-Pesos Colombianos |     10,205        7.08      100.00
-------------------+-----------------------------------
-            Total |    144,069      100.00
-*/
-		
-gen gasto_bol = gasto if moneda == 1
-replace gasto_bol = gasto * `tc2mes2' if moneda == 2
-replace gasto_bol = gasto * `tc3mes2' if moneda == 3
-replace gasto_bol = gasto * `tc4mes2' if moneda == 4
 
 
 // d) define date of purchases
@@ -199,8 +180,11 @@ alcohol&smoke |        47         68         12          6          1 |       13
 // FOR eatingout 7 days
 // FOR entertainment last month	
 
+// FOOD AND ALCOHOL
+
 Solution:
-For food and alcohol&smoke, a) we reimputate month of purchase to january if he or she answered last 15 days or more that 15 days and the date of the survey is earlier that Feb 15th.
+a) we reimputate month of purchase to january if he or she answered more that 15 days and the date of the survey is earlier that Feb 14th.
+b) we reimputate month of purchase to jan if he/she answered that they bought 7 days before and date is earlier than 7th
 
 
            |   8. ¿Cuando fue la
@@ -234,11 +218,20 @@ mption_sur |        hogar?
 // selects purchases done 7 to 15 days before and previous to 7Feb20
 gen inflate = 1 if date_consumption_survey<=date("2/7/20","MDY", 2050) & fecha==3 & (type_good ==1 | type_good ==2)
 
-replace inflate = 1 if date_consumption_survey<=date("2/15/20","MDY", 2050)  & fecha==4 & (type_good ==1 | type_good ==2)
-*/
-gen gasto_feb20 = gasto_bol
-replace gasto_feb20 = gasto_bol*`deflactor1' if inflate==1
+replace inflate = 1 if date_consumption_survey<=date("2/14/20","MDY", 2050)  & fecha==4 & (type_good ==1 | type_good ==2)
 
+//homogenize currencies
+// feb
+gen gasto_feb20 = gasto if moneda == 1 & (type_good ==1 | type_good ==2)
+replace gasto_feb20 = gasto * `tc2mes2' if moneda == 2  & (type_good ==1 | type_good ==2)
+replace gasto_feb20 = gasto * `tc3mes2' if moneda == 3  & (type_good ==1 | type_good ==2)
+replace gasto_feb20 = gasto * `tc4mes2' if moneda == 4  & (type_good ==1 | type_good ==2)
+
+// jan (alredy food only)
+replace gasto_feb20 = gasto*`deflactor1' if inflate==1 & moneda ==1
+replace gasto_feb20 = gasto*`deflactor1' * `tc2mes1' if inflate==1 & moneda ==2
+replace gasto_feb20 = gasto*`deflactor1' * `tc3mes1' if inflate==1 & moneda ==3
+replace gasto_feb20 = gasto*`deflactor1' * `tc4mes1' if inflate==1 & moneda ==4
 
 
 
@@ -262,17 +255,49 @@ mption_sur |        hogar?
 
 
 // selects purchases done in first days of march that need to take to feb
+// march (alredy food only)
 gen deflate = 1 if date_consumption_survey<=date("3/1/20","MDY", 2050) & fecha==1 & (type_good ==1 | type_good ==2)
 replace deflate = 1 if date_consumption_survey<=date("3/7/20","MDY", 2050) & fecha==2 & (type_good ==1 | type_good ==2)
 
-replace gasto_feb20 = gasto_bol*`deflactor3' if deflate==1
+replace gasto_feb20 = gasto*`deflactor3' if deflate==1 & moneda ==1
+replace gasto_feb20 = gasto*`deflactor3' * `tc2mes3' if deflate==1 & moneda ==2
+replace gasto_feb20 = gasto*`deflactor3' * `tc3mes3' if deflate==1 & moneda ==3
+replace gasto_feb20 = gasto*`deflactor3' * `tc4mes3' if deflate==1 & moneda ==4
 
 	 
 /*
 c)
 For the rest, we cannot discriminate between a purchase done within the timespan of the question, so we keep the spending date in FEB2020
 
+// c) homogenize currencies
+	* We move everything to bolivares February 2020, given that there we have more sample size // 2=dolares, 3=euros, 4=colombianos // 
+		*Nota: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 
+ tab moneda (number of spending obs. by currency)
+
+      10b. Moneda |      Freq.     Percent        Cum.
+------------------+-----------------------------------
+        Bolívares |    131,356       91.18       91.18
+          Dólares |      2,488        1.73       92.90
+            Euros |         20        0.01       92.92
+Pesos Colombianos |     10,205        7.08      100.00
+------------------+-----------------------------------
+            Total |    144,069      100.00
+*/
+			
+			
+// all purchases except some food are assumed as feb based, with no better options
+// examples: entretenimiento "ultimo mes", ropa "ultimos tres meses"
+replace gasto_feb20 = gasto if moneda == 1 & !(type_good ==1 | type_good ==2)
+replace gasto_feb20 = gasto * `tc2mes2' if moneda == 2  & !(type_good ==1 | type_good ==2)
+replace gasto_feb20 = gasto * `tc3mes2' if moneda == 3  & !(type_good ==1 | type_good ==2)
+replace gasto_feb20 = gasto * `tc4mes2' if moneda == 4  & !(type_good ==1 | type_good ==2)
+
+
+
+
+
+/*
 
 // e) define frequency of purchases
 // problem:
@@ -311,10 +336,14 @@ replace gasto_mensual = gasto_feb20/3 if type_good==4
 replace gasto_mensual = gasto_feb20* 30.42/7 if type_good==5
 replace gasto_mensual = gasto_feb20* 30.42/15 if type_good==6
 replace gasto_mensual = round(gasto_mensual)
+
+
+
+
+
+
 tempfile conSpending
 save `conSpending'
-
-
 
 
 /*(************************************************************************************************************************************************* 
@@ -325,7 +354,6 @@ drop ipcf
 merge m:1 interview__id interview__key quest using `reference'
 keep if _merge == 3
 drop _merge
-
 
 
 //select relevant variables
@@ -362,66 +390,53 @@ gen gasto901 = pago_alq_mutuo if pago_alq_mutuo_mon ==1 & pago_alq_mutuo_m == 2
 
 
 // data of March and many currencies
+replace gasto901 = pago_alq_mutuo* `deflactor3' if pago_alq_mutuo_mon == 1 & pago_alq_mutuo_m == 3
 replace gasto901 = pago_alq_mutuo* `tc2mes3'* `deflactor3' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 3
 replace gasto901 = pago_alq_mutuo* `tc3mes3'* `deflactor3' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 3
 replace gasto901 = pago_alq_mutuo* `tc4mes3'* `deflactor3' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 3
 
 // data in many currencies feb2020
+
 replace gasto901 = pago_alq_mutuo* `tc2mes2' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 2
 replace gasto901 = pago_alq_mutuo* `tc3mes2' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 2
 replace gasto901 = pago_alq_mutuo* `tc4mes2' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 2
 
 // data of Jan and many currencies
+replace gasto901 = pago_alq_mutuo* `deflactor1' if pago_alq_mutuo_mon == 1 & pago_alq_mutuo_m == 1
 replace gasto901 = pago_alq_mutuo* `tc2mes1'* `deflactor1' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 1
 replace gasto901 = pago_alq_mutuo* `tc3mes1'* `deflactor1' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 1
 replace gasto901 = pago_alq_mutuo* `tc4mes1'* `deflactor1' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 1
 
 
 // data of Dec and many currencies
+replace gasto901 = pago_alq_mutuo* `deflactor12' if pago_alq_mutuo_mon == 1 & pago_alq_mutuo_m == 12
 replace gasto901 = pago_alq_mutuo* `tc2mes12'* `deflactor12' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 12
 replace gasto901 = pago_alq_mutuo* `tc3mes12'* `deflactor12' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 12
 replace gasto901 = pago_alq_mutuo* `tc4mes12'* `deflactor12' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 12
 
 // data of Nov and many currencies
+replace gasto901 = pago_alq_mutuo* `deflactor11' if pago_alq_mutuo_mon == 1 & pago_alq_mutuo_m == 11
 replace gasto901 = pago_alq_mutuo* `tc2mes11'* `deflactor11' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 11
 replace gasto901 = pago_alq_mutuo* `tc3mes11'* `deflactor11' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 11
 replace gasto901 = pago_alq_mutuo* `tc4mes11'* `deflactor11' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 11
 
+
+
 *****************renta imputada por el entrevisatado
 
 // data in bolivares feb2020
-gen gasto902 = renta_imp_en if renta_imp_mon == 1
+gen gasto902 = renta_imp_en if renta_imp_mon == 1 // the pop of reference is already based on feb2020
 
-
-// data in many currencies (march)
-replace gasto902 = renta_imp_en* `tc2mes3' * `deflactor3' if renta_imp_mon == 2 & interview_month==3
-replace gasto902 = renta_imp_en* `tc3mes3' * `deflactor3'  if renta_imp_mon == 3 & interview_month==3
-replace gasto902 = renta_imp_en* `tc4mes3' * `deflactor3' if renta_imp_mon == 4 & interview_month==3
 
 // data in many currencies (feb)
-replace gasto902 = renta_imp_en* `tc2mes2' if renta_imp_mon == 2 & interview_month==2
-replace gasto902 = renta_imp_en* `tc3mes2' if renta_imp_mon == 3 & interview_month==2
-replace gasto902 = renta_imp_en* `tc4mes2' if renta_imp_mon == 4 & interview_month==2
-
-// data in many currencies (jan)
-replace gasto902 = renta_imp_en* `tc2mes1' * `deflactor1' if renta_imp_mon == 2 & interview_month==1
-replace gasto902 = renta_imp_en* `tc3mes1' * `deflactor1'  if renta_imp_mon == 3 & interview_month==1
-replace gasto902 = renta_imp_en* `tc4mes1' * `deflactor1' if renta_imp_mon == 4 & interview_month==1
-
-// data in many currencies (dec)
-replace gasto902 = renta_imp_en* `tc2mes12' * `deflactor12' if renta_imp_mon == 2 & interview_month==12
-replace gasto902 = renta_imp_en* `tc3mes12' * `deflactor12'  if renta_imp_mon == 3 & interview_month==12
-replace gasto902 = renta_imp_en* `tc4mes12' * `deflactor12' if renta_imp_mon == 4 & interview_month==12
-
-// data in many currencies (nov)
-replace gasto902 = renta_imp_en* `tc2mes11' * `deflactor11' if renta_imp_mon == 2 & interview_month==11
-replace gasto902 = renta_imp_en* `tc3mes11' * `deflactor11'  if renta_imp_mon == 3 & interview_month==11
-replace gasto902 = renta_imp_en* `tc4mes11' * `deflactor11' if renta_imp_mon == 4 & interview_month==11
-
+replace gasto902 = renta_imp_en* `tc2mes2' if renta_imp_mon == 2
+replace gasto902 = renta_imp_en* `tc3mes2' if renta_imp_mon == 3
+replace gasto902 = renta_imp_en* `tc4mes2' if renta_imp_mon == 4
 
 ******************inputed rent by analyst
 // data in bolivares feb2020
 gen gasto903 = renta_imp if renta_imp_mon == 1 //assumed everything was moved in the income module to feb 2020
+
 
 
 **********************************************services
@@ -1296,6 +1311,8 @@ gen gasto909 = gasto903
 replace gasto909 = gasto902 if (gasto901==. | gasto901==0) & !(gasto902==. | gasto902==0)
 replace gasto909 = gasto901 if !(gasto901==. | gasto901==0)
 
+//drop old rents and keep agregator
+drop gasto901 gasto902 gasto903
 
 // now we reshape the wide data to make it long
 reshape long gasto, i(interview__id interview__key quest ipcf miembros entidad) j(bien)
@@ -1311,6 +1328,8 @@ replace type_good = 9 if bien>910 & bien<920
 replace type_good = 10 if bien>920 & bien<930
 replace type_good = 11 if bien>930 & bien<940
 replace type_good = 12 if bien>940 & bien<950
+
+
 
 tempfile hhSpending
 save `hhSpending'
@@ -1329,14 +1348,13 @@ save "$output/expenditure_reference_chi.dta", replace
 
 
 /*(************************************************************************************************************************************************* 
-* 1: calculates poverty line
+* 1:orshanky
 *************************************************************************************************************************************************)*/
 
 // chilenean metodolgy does not refer to avoid durables consumtion like TV, so we keep this muted
 // keep if current_good==1
 
-//selects only 1 hh expenditure in cases where are many potential sources (we have prevously done the proper agregation in gasto909 variable)
-drop if inlist(gasto, 901, 902, 903)
+
 
 //drop smoke and alcohol intake
 drop if type_good == 2
@@ -1370,6 +1388,26 @@ gen non_food_exp = exp-food_exp
 //calculates olshansky per hh 
 gen olshansky = exp/food_exp
 
+//remove outliars
+xtile ols_quant = olshansky, nq(100)
+
+
+sort olshansky
+gen obs = _n
+twoway line olshansky obs if ols_quant<98 
+
+xtile exp_quant = exp, nq(100)
+
+drop if ols_quant>98
+sum olshansky, detail
+
+local values 1 3 4 7 8 9 10 11 12 
+
+foreach i in `values'{
+	egen total`i' = total(gasto_mensual`i')
+	}
+
+stop
 //calculates orshansky for all population of reference
 egen total_exp = total(exp)
 egen total_food_exp = total(food_exp)
@@ -1380,4 +1418,3 @@ gen olshansky_ref = total_exp/ total_food_exp
 egen total_miembros = total(miembros)
 gen lp_pc = total_exp/total_miembros
 gen miembros_phh = total_miembros/_N
-stop

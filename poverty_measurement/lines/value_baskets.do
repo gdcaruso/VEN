@@ -139,7 +139,7 @@ collapse (mean) precio=precio, by (mes COD_GASTO LABEL_GASTO)
 
 // merge prices with representative baskets
 rename COD_GASTO bien
-merge m:1 bien using "$input/canastapercapita_metocol_sin_outliars.dta"
+merge m:1 bien using "$input/canastapercapita_metochi_sin_outliars.dta"
 
 // cleaning
 keep if _merge==3
@@ -155,7 +155,7 @@ drop label_bien
 
 // generate value of each products
 bysort mes: gen valor = precio * cantidad
-export excel "$output/valor_canasta_nacional_metocol.xlsx", firstrow(variables) replace
+export excel "$output/valor_canasta_nacional_metochi.xlsx", firstrow(variables) replace
 
 
 //generate baskets by month and state
@@ -183,8 +183,8 @@ format t %tm
 
 sort t
 
-export excel "$output/indice_precios_nacional_metocol.xlsx", firstrow(variables) replace
-save "$output/indice_precio_nacional_metocol.dta", replace
+export excel "$output/indice_precios_nacional_metochi.xlsx", firstrow(variables) replace
+save "$output/indice_precio_nacional_metochi.dta", replace
 
 
 

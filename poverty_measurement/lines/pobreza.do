@@ -1,12 +1,14 @@
 use "C:\Users\wb563365\GitHub\VEN\data_management\output\cleaned\ENCOVI_2019.dta" , replace
 
-gen le_chi = 2281370
+gen le_chi = 82757*30.4*0.2
 
-gen le_col =  2449419
+gen le_col = . //2449419
 
-gen lp_chi = 2.4*le_chi
+gen ols = 2.32
 
-gen lp_col = 2.4*le_col
+gen lp_chi = ols*le_chi
+
+gen lp_col = ols*le_col
 
 gen lp19 = 1.9 *30.4 * 2.92 * (76555.93+1) * (1914.12+1) /100000
 gen lp32 = 3.2 *30.4 * 2.92 * (76555.93+1) * (1914.12+1) /100000
@@ -65,10 +67,9 @@ graph twoway line ipcf obs, lcolor("black") ///
 || line lp32 obs, lcolor("blue") ///
 || line lp55 obs, lcolor("blue") ///
 || line lp_chi obs, lcolor("red") ///
-|| line lp_col obs, lcolor("yellow") ///
 || line le_chi obs, lcolor("red") ///
-|| line le_col obs, lcolor("yellow") ///
 || line le_ofi obs, lcolor("green") ///
 || line lp_ofi obs, lcolor("green") 
-
+// || line le_col obs, lcolor("yellow") ///
+// || line lp_col obs, lcolor("yellow") ///
 bro

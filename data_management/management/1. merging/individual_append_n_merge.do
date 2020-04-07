@@ -56,7 +56,7 @@ Note:
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\04_06_20"
+global dataofficial "$rootpath\data_management\input\04_07_20"
 
 ********************************************************************************
 
@@ -231,4 +231,4 @@ foreach dtafile in $dtalist{
 
 compress
 	
-save "$rootpath\data_management\output\merged\individual.dta" //, replace
+save "$rootpath\data_management\output\merged\individual.dta", replace

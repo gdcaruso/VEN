@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -1473,20 +1473,23 @@ gen     inactivo= inrange(labor_status,5,9)
 gen     pea = (ocupado==1 | desocupa ==1)
 
 
-/*(*********************************************************************************************************************************************** 
+/*(*****************************************************************************************************************************************
 *---------------------------------------------------------- 1.9: Income Variables ----------------------------------------------------------
-***********************************************************************************************************************************************)*/	
+*****************************************************************************************************************************************)*/
 
-* Checks: negative variables
+* Check for negative variables
 	forvalues i = 1(1)12 {	
 	tab s9q19a_`i' if s9q19a_`i'<0
 	}
 	forvalues i = 1(1)9 {	
 	tab s9q21a_`i' if s9q21a_`i'<0
 	}
-	
-	* Qué hacer con las preguntas 20 y 22?
-	
+	forvalues i = 1(1)6 {	
+	tab s9q20a_`i' if s9q20a_`i'<0
+	}
+	forvalues i = 1(1)7 {	
+	tab s9q22a_`i' if s9q22a_`i'<0
+	}
 	tab s9q23a if s9q23a<0
 	tab s9q24a if s9q24a<0
 	tab s9q25a if s9q25a<0
@@ -1495,13 +1498,14 @@ gen     pea = (ocupado==1 | desocupa ==1)
 	forvalues i = 1(1)11 {		
 	tab s9q28a_`i' if s9q28a_`i'<0
 	}
-	* Una vale menos de 0, la cambio por 0
+	* One is negative (less than 0), change for 0
 	replace s9q28a_11=0 if s9q28a_11<0
 	forvalues i = 1(1)9 {
 	tab s9q29b_`i' if s9q29b_`i'<0
 	}
 
-			
+	* What to do with questions 20, 22, 26 y 27? We take them as "auxiliares", they won't end up counting for the final income aggregates
+	
 ********** A. LABOR INCOME **********
 	
 ****** 9.0. SET-UP ******
@@ -1706,31 +1710,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 			* SUBSTRACTED FROM MONETARY PAYMENTS (s9q27): El mes pasado, ¿cuánto dinero gastó para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?
 */
 
-* Ingreso laboral monetario, segun si recibieron o no en el ultimo mes
-	gen recibe_ingresolab_mon = .
-	replace recibe_ingresolab_mon = 1 if (s9q19__1==1 | s9q19__2==1 | s9q19__3==1 | s9q19__4==1 | s9q19__5==1 | s9q19__6==1 | s9q19__7==1 | s9q19__8==1 | s9q19__9==1 | s9q19__10==1 | s9q19__11==1 | s9q19__12==1) | s9q19_petro==1 | s9q23==1 | s9q26==1 // Recibió ingreso monetario en algún concepto
-	replace recibe_ingresolab_mon = 0 if (s9q19__1==0 & s9q19__2==0 & s9q19__3==0 & s9q19__4==0 & s9q19__5==0 & s9q19__6==0 & s9q19__7==0 & s9q19__8==0 & s9q19__9==0 & s9q19__10==0 & s9q19__11==0 & s9q19__12==0) & s9q19_petro==2 & s9q23==2 & s9q26==2 // No recibió ingreso monetario en ningún concepto
-
-* Checks: labor status and reception of monetary labor income
-	tab labor_status recibe_ingresolab_mon, missing
-
-	/*	  labor_status |      recibe_ingresolab_mon
-					   |         1          . |     Total
-			-----------+----------------------+----------
-					 1 |     3,942        826 |     4,768 
-					 2 |        75         65 |       140 
-					 3 |         0        206 |       206 
-					 5 |         0      2,111 |     2,111 
-					 6 |         0        394 |       394 
-					 7 |         0        455 |       455 
-					 8 |         0      1,718 |     1,718 
-					 9 |         0        707 |       707 
-					 . |         0      1,934 |     1,934 
-			-----------+----------------------+----------
-				 Total |     4,017      8,416 |    12,433 */
-		/* There is no unemployed (3), inactive (5-9), or person with missing (.) labor status reporting they receive labor income */
-
-		
+	
 * Creating local (not foreign) variables
 
 	* Note: while respondants can register different concepts with different currencies, they can't register one concept with multiple currencies (ej. "sueldo y salario" paid in 2 different currencies) 
@@ -1745,9 +1725,8 @@ gen     pea = (ocupado==1 | desocupa ==1)
 			* Obs: The last parenthesis controls for cases where they say they were paid in a certain money, but don't say how much (same later for employers and self-employed)
 	}
 		gen ingresoslab_monpe = . 	// Those who received payment in Petro
+		replace ingresoslab_monpe = s9q19_petromonto 	if s9q19_petro==1 & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19_petro!=. & s9q19_petro!=.a)	// Al final no usamos esto
 		gen ingresoslab_monpe_dummy = .
-		replace ingresoslab_monpe = s9q19_petromonto 	if s9q19_petro==1 & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19_petro!=. & s9q19_petro!=.a)	
-		replace ingresoslab_monpe_dummy = 0 	if recibe_ingresolab_mon==1 & ingresoslab_monpe==. // Dicen que reciben pero no reportan cuánto
 		replace ingresoslab_monpe_dummy = 1 	if ingresoslab_monpe>=0 & ingresoslab_monpe!=.
 		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
 		gen ingresoslab_monpe_bolfeb  = ingresoslab_monpe_dummy	* 30 * 73460.1238 		if ingresoslab_monpe_dummy==1
@@ -1787,14 +1766,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 
 	egen ingresoslab_mon = rowtotal(ingresoslab_mon_local ingresoslab_mon_afuera), missing
 	sum ingresoslab_mon
-		
-	*Dummies
-		gen ingresoslab_mon_dummy = .
-		replace ingresoslab_mon_dummy = 0 	if recibe_ingresolab_mon==1 & ingresoslab_mon==. // Dicen que reciben pero no reportan cuánto
-		replace ingresoslab_mon_dummy = 1 	if ingresoslab_mon>=0 & ingresoslab_mon!=.
-		
-		tab ingresoslab_mon_dummy
-		sum ingresoslab_mon
+	
 
 	
 *** NON-MONETARY
@@ -1821,34 +1793,8 @@ gen     pea = (ocupado==1 | desocupa ==1)
 		* CURRENCY (s9q24b): Currency
 */
 		
-* Ingresos laboral no monetario, segun si recibieron o no en el ultimo mes
-	gen recibe_ingresolab_nomon = .
-	replace recibe_ingresolab_nomon = 1 if (s9q21__1==1 | s9q21__2==1 | s9q21__3==1 | s9q21__4==1 | s9q21__5==1 | s9q21__6==1 | s9q21__7==1 | s9q21__8==1 | s9q21__9==1 ) | s9q24==1 // Recibió ingreso no monetario en algún concepto
-	replace recibe_ingresolab_nomon = 0 if (s9q21__1==0 & s9q21__2==0 & s9q21__3==0 & s9q21__4==0 & s9q21__5==0 & s9q21__6==0 & s9q21__7==0 & s9q21__8==0 & s9q21__9==0 ) & s9q24==2 // No recibió ingreso no monetario en ningún concepto
-
-* Situacion laboral y recepcion de ingreso monetario
-	tab labor_status recibe_ingresolab_nomon, missing
-
-	/*    labor_status |     recibe_ingresolab_nomon
-					   |         1          . |     Total
-			-----------+----------------------+----------
-					 1 |       365      4,403 |     4,768 
-					 2 |         8        132 |       140 
-					 3 |         0        206 |       206 
-					 5 |         0      2,111 |     2,111 
-					 6 |         0        394 |       394 
-					 7 |         0        455 |       455 
-					 8 |         0      1,718 |     1,718 
-					 9 |         0        707 |       707 
-					 . |         0      1,934 |     1,934 
-			-----------+----------------------+----------
-				 Total |       373     12,060 |    12,433   */
-		/* There is no unemployed (3), inactive (5-9), or person with missing (.) labor status reporting they receive labor income */
-
-		
 	gen ingresoslab_bene = .
-	gen ingresoslab_bene_dummy = .
-			
+		
 	forvalues i = 1(1)9 {
 			
 		*For the not self-employed or employers (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9)
@@ -1861,11 +1807,6 @@ gen     pea = (ocupado==1 | desocupa ==1)
 		replace ingresoslab_bene = s9q24a_bolfeb 					if ingresoslab_bene==. & s9q15==5 & (s9q24!=. & s9q24a!=.a)
 		replace ingresoslab_bene = ingresoslab_bene + s9q24a_bolfeb if ingresoslab_bene!=. & s9q15==5 & (s9q24!=. & s9q24a!=.a)
 		
-		*Putting all together for dummy
-		replace ingresoslab_bene_dummy = 0 	if recibe_ingresolab_nomon==1 & ingresoslab_bene==. // Dicen que reciben pero no reportan cuánto
-		replace ingresoslab_bene_dummy = 1 	if ingresoslab_bene>=0 & ingresoslab_bene!=.
-		
-		tab ingresoslab_bene_dummy
 		sum ingresoslab_bene
 
 	/* Note: by February 26, of the people who reported having benefits, 89.5% reported their value in Bolívares, 2.7% in Dollars, 6.2% in Colombian pesos, and none in Euros.
@@ -1933,6 +1874,8 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	gen     ictapnp_nm = .
 	gen     iolnp_nm = .
 
+
+		
 ********** B. NON-LABOR INCOME **********
 
 ****** 9.3.NON-LABOR INCOME ******
@@ -1942,59 +1885,45 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	3) Transferencias privadas y estatales
 */
 
-*Locales (no provenientes del exterior)
-	*Jubilaciones y pensiones // ijubi_m
-		gen ing_nlb_pi = 1   if s9q28__1==1 // Pensión de incapacidad, orfandad, sobreviviente
-		gen ing_nlb_pv = 1   if s9q28__2==1 // Pensión de vejez por el seguro social
-		gen ing_nlb_jt = 1   if s9q28__3==1 // Jubilación por trabajo
-		gen ing_nlb_pd = 1   if s9q28__4==1 // Pensión por divorcio, separación, alimentación
-		gen ing_nlb_pe = 1   if s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
-	*Transferencias estatales // itrane_o_m 
-		gen ing_nlb_epu = 1  if s9q28__5==1 // Beca o ayuda escolar pública 
-		gen ing_nlb_apu = 1  if s9q28__7==1 // Ayuda de instituciones públicas
-	*Transferencias privadas // itranp_o_m 
-		gen ing_nlb_epr = 1  if s9q28__6==1 // Beca o ayuda escolar privada
-		gen ing_nlb_apr = 1  if s9q28__8==1 // Ayuda de instituciones privadas
-		gen ing_nlb_afh = 1  if s9q28__9==1 // Ayudas familiares o contribuciones de otros hogares
-		gen ing_nlb_afm = 1  if s9q28__10==1 // Asignación familiar por menores a su cargo
-	*Transferencias (no claro si públicas o privadas) // otro - itrane_ns 	
-		gen ing_nlb_ot = 1   if s9q28__11==1 
-*Provenientes del exterior
-	*Jubilaciones y pensiones
-		gen ing_nlb_xpj = 1  if s9q29a__5==1 // Pensión y jubilaciones // ijubi_m
-	*Transferencias privadas y estatales
-		gen ing_nlb_xr = 1   if s9q29a__4==1 // Remesas o ayudas periódicas de otros hogares del exterior  //  rem
-		gen ing_nlb_xba = 1  if s9q29a__7==1 // Becas y/o ayudas escolares // itranp_ns
-	*Ingresos de capital //  icap_m
-		gen ing_nlb_xid = 1  if s9q29a__6==1 // Intereses y dividendos
-		gen ing_nlb_xa = 1   if s9q29a__9==1 // Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)
-	* Ingresos no laborales extraordinarios
- 		gen ing_nlb_xte = 1  if s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord o inla_otro
-		gen ing_nlb_xi = 1   if s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord o inla_otro
+*Organization
+	*Locales (no provenientes del exterior)
+		*Jubilaciones y pensiones // ijubi_m
+			* s9q28__1==1 // Pensión de incapacidad, orfandad, sobreviviente
+			* s9q28__2==1 // Pensión de vejez por el seguro social
+			* s9q28__3==1 // Jubilación por trabajo
+			* s9q28__4==1 // Pensión por divorcio, separación, alimentación
+			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
+		*Transferencias estatales // itrane_o_m 
+			* s9q28__5==1 // Beca o ayuda escolar pública 
+			* s9q28__7==1 // Ayuda de instituciones públicas
+		*Transferencias privadas // itranp_o_m 
+			* s9q28__6==1 // Beca o ayuda escolar privada
+			* s9q28__8==1 // Ayuda de instituciones privadas
+			* s9q28__9==1 // Ayudas familiares o contribuciones de otros hogares
+			* s9q28__10==1 // Asignación familiar por menores a su cargo
+		*Transferencias (no claro si públicas o privadas) // otro - itrane_ns 	
+			* s9q28__11==1 
+	*Provenientes del exterior
+		*Jubilaciones y pensiones
+			* s9q29a__5==1 // Pensión y jubilaciones // ijubi_m
+		*Transferencias privadas y estatales
+			* s9q29a__4==1 // Remesas o ayudas periódicas de otros hogares del exterior  //  rem
+			* s9q29a__7==1 // Becas y/o ayudas escolares // itranp_ns
+		*Ingresos de capital //  icap_m
+			* s9q29a__6==1 // Intereses y dividendos
+			* s9q29a__9==1 // Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)
+		* Ingresos no laborales extraordinarios
+			* s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord o inla_otro
+			* s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord o inla_otro
 
-*How many non-labor incomes do people receive?
-	egen    recibe = rowtotal(ing_nlb_*), mi
-	tab recibe
-
-	/*       recibe |      Freq.     Percent        Cum.
-		------------+-----------------------------------
-				  1 |      2,462       59.64       59.64
-				  2 |      1,083       26.24       85.88
-				  3 |        433       10.49       96.37
-				  4 |        124        3.00       99.37
-				  5 |         22        0.53       99.90
-				  6 |          3        0.07       99.98
-				  7 |          1        0.02      100.00
-		------------+-----------------------------------
-			  Total |      4,128      100.00			*/ 
-
+  
 ****** 9.3.1.JUBILACIONES Y PENSIONES ******	  
 	
 	/* 	s9q12==6 // Está jubilado o pensionado
 
 	s9q28__1 // Recibe pensión de sobreviviente, orfandad, incapacidad
 	s9q28__2 // Recibe pensión de vejez por el seguro social
-	s9q28__4 // Recibe pensión por divorcio, separación, alimentacion
+	s9q28__4 // Recibe pensión por divorcio, separación, alimentación
 
 	s9q28__3 // Recibe jubilación por trabajo
 
@@ -2088,7 +2017,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		}		
 			sum icap_m
 
-		
 	* No monetario	
 	gen     icap_nm=.
 	notes icap_nm: the survey does not include information to define this variable
@@ -2106,7 +2034,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	}		
 		sum rem 
 	
-		
 	
 ****** 9.3.4.TRANSFERENCIAS PRIVADAS ******	
 		
@@ -2179,7 +2106,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	sum itrane_ns
 	
 		
-	
 ***** iV) OTROS INGRESOS NO LABORALES / V) INGRESOS NO LABORALES EXTRAORDINARIOS 
 
 	gen inla_extraord = .
@@ -2191,25 +2117,132 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 
 	rename  inla_extraord inla_otro // Because it appeared like this in CEDLAS' do_file_1_variables
 	
-/*
-****** 9.3.7 INGRESOS DE LA OCUPACION PRINCIPAL ******
 
-gen     ip_m = tmhp42bs //	Ingreso monetario en la ocupación principal 
-gen     ip   = .	    // Ingreso total en la ocupación principal 
+	
+****** PLUS: INCOME ANALYSIS ******
 
-****** 9.3.8 INGRESOS TODAS LAS OCUPACIONES ******
+* MONETARY LABOR INCOME
 
-gen     ila_m  = tmhp42bs    // Ingreso monetario en todas las ocupaciones 
-gen     ila    = .           // Ingreso total en todas las ocupaciones 
-gen     perila = .   // Perceptores de ingresos laborales 
+	* Ingreso laboral monetario (empleados y empleadores), segun si recibieron o no en el ultimo mes
+		gen recibe_ingresolab_mon_mes = .
+		replace recibe_ingresolab_mon_mes = 1 if (s9q19__1==1 | s9q19__2==1 | s9q19__3==1 | s9q19__4==1 | s9q19__5==1 | s9q19__6==1 | s9q19__7==1 | s9q19__8==1 | s9q19__9==1 | s9q19__10==1 | s9q19__11==1 | s9q19__12==1) ///
+			| s9q19_petro==1 | s9q23==1 // Recibió ingreso monetario en algún concepto en el último mes (no usamos s9q26 porque se decidió que s9q25 engloba ambas 26 y 27)
+		replace recibe_ingresolab_mon_mes = 0 if inlist(s9q19__1,0,.,.a) & inlist(s9q19__2,0,.,.a) & inlist(s9q19__3,0,.,.a) & inlist(s9q19__4,0,.,.a) & inlist(s9q19__5,0,.) & inlist(s9q19__6,0,.,.a) & inlist(s9q19__7,0,.,.a) & inlist(s9q19__8,0,.,.a) & inlist(s9q19__9,0,.,.a) & inlist(s9q19__10,0,.,.a) & inlist(s9q19__11,0,.,.a) & inlist(s9q19__12,0,.,.a) ///
+			& inlist(s9q19_petro,2,.,.a) & inlist(s9q23,2,.,.a) // No recibió ingreso laboral monetario en ningún concepto mensual
+		* Problem: income from abroad for salaries/wages and net benefits for independent workers (s9q29a_1 and _2), and local benefits/utilities of independent workers (s9q25) are measured on a yearly basis, not monthly as the others
+		* If we include them in this dummy, there ends up being some unemployed or inactives who report labor income.
+	
+	*Ingreso laboral monetario (independientes y otros), , segun si recibieron o no en el ultimo año
+		* Thus, analysis on the side for imputation for those 3 variables, create a new variables
+		gen recibe_ingresolab_mon_ano = .
+		replace recibe_ingresolab_mon_ano = 1 if s9q25==1 | (s9q29a__1==1 | s9q29a__2==1)
+		replace recibe_ingresolab_mon_ano = 0 if s9q25==2 & s9q29a__1==0 & s9q29a__2==0
+	
+	* Checks (data April 6)
+	tab recibe_ingresolab_mon_ano recibe_ingresolab_mon_mes, missing // 157 observations have =1 in both
+	tab labor_status recibe_ingresolab_mon_mes, missing // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving monetary labor income
+	tab labor_status recibe_ingresolab_mon_ano, missing // 32 observations not OK (unemployed or inactive who have labor income, reasonable they could have earned it before)
+	
+	gen recibe_ingresolab_mon = .
+	replace recibe_ingresolab_mon = 0 if recibe_ingresolab_mon_mes==0 & recibe_ingresolab_mon_ano==0
+	replace recibe_ingresolab_mon = 1 if recibe_ingresolab_mon_mes==1
+	replace recibe_ingresolab_mon = 2 if recibe_ingresolab_mon_ano==1
+	replace recibe_ingresolab_mon = 3 if recibe_ingresolab_mon_mes==1 & recibe_ingresolab_mon_ano==1
+		label def recibe_ingresolab_mon 0 "Dice que no recibe nada" 1 "Dice que recibio en el ultimo mes" 2 "Dice que recibio en el último año" 3 "Dice que en el último mes Y último año"
+		label values recibe_ingresolab_mon recibe_ingresolab_mon
+	
+	tab recibe_ingresolab_mon, mi 
+	
+		* Crossed with the amount of income
+		gen report_inglabmon_perocuanto = .
+		replace report_inglabmon_perocuanto = 0 	if inlist(recibe_ingresolab_mon,1,2,3) & ingresoslab_mon==. // Dicen que reciben ila monetario, pero no reportan cuánto
+		replace report_inglabmon_perocuanto = 1 	if inlist(recibe_ingresolab_mon,1,2,3) & ingresoslab_mon>=0 & ingresoslab_mon!=.
+		*replace report_inglabmon_perocuanto = 1 	if ingresoslab_mon>=0 & ingresoslab_mon!=. // Same result as above line
+		
+	tab report_inglabmon_perocuanto, mi // We will have to impute 287 observations that declare to have earned monetary labor income but don't say how much
+	
+	
+* NON-MONETARY LABOR INCOME
+	
+	* Ingreso laboral no monetario: todo analizado para el último mes (más fácil)
+		gen recibe_ingresolab_nomon = .
+		replace recibe_ingresolab_nomon = 1 if (s9q21__1==1 | s9q21__2==1 | s9q21__3==1 | s9q21__4==1 | s9q21__5==1 | s9q21__6==1 | s9q21__7==1 | s9q21__8==1 | s9q21__9==1 ) | s9q24==1 // Recibió ingreso no monetario en algún concepto
+		replace recibe_ingresolab_nomon = 0 if inlist(s9q21__1,0,.,.a) & inlist(s9q21__2,0,.,.a) & inlist(s9q21__3,0,.,.a) & inlist(s9q21__4,0,.,.a) & inlist(s9q21__5,0,.) & inlist(s9q21__6,0,.,.a) & inlist(s9q21__7,0,.,.a) & inlist(s9q21__8,0,.,.a) & inlist(s9q21__9,0,.,.a) & inlist(s9q24,2,.,.a) // No recibió ingreso laboral no monetario en ningún concepto
+		
+	* Checks (data April 6)
+	tab labor_status recibe_ingresolab_nomon, mi  // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving non monetary labor income
+	tab recibe_ingresolab_nomon, mi  
+	
+		* Crossed with the amount of income
+		gen report_inglabnomon_perocuanto = .
+		replace report_inglabnomon_perocuanto = 0 	if recibe_ingresolab_nomon==1 & ingresoslab_bene==. // Dicen que reciben ila no monetario, pero no reportan cuánto
+		replace report_inglabnomon_perocuanto = 1 	if recibe_ingresolab_nomon==1 & ingresoslab_bene>=0 & ingresoslab_bene!=.
+		*replace report_inglabnomon_perocuanto = 1 	if ingresoslab_bene>=0 & ingresoslab_bene!=. // Same result as above line
+		
+	tab report_inglabnomon_perocuanto, mi // We will have to impute 26 observations that declare to have earned non-monetary labor income but don't say how much
 
-****** 9.3.9 INGRESOS LABORALES HORARIOS ******
+	
+* NON-LABOR (MONETARY) INCOME
+	
+	* Number of non-labor income sources that people received
+	egen cuantasinlarecibe = rowtotal(inla_pens_soi	inla_pens_vss inla_jubi_emp inla_pens_dsa inla_beca_pub inla_beca_pri inla_ayuda_pu inla_ayuda_pr inla_ayuda_fa inla_asig_men inla_otros inla_petro ///
+					iext_indemn	iext_remesa	iext_penjub	iext_intdiv	iext_becaes	iext_extrao iext_alquil), mi
+	tab cuantasinlarecibe, mi // By April 7th, 8.1% received 0, 11.1% received 1, 0.5% missing, and the rest more than 1
 
-gen     wage_m= ip_m/(hstrp*4)  // Ingreso laboral horario monetario en la ocupación principal
-gen wage=    // Ingreso laboral horario total en la ocupación principal 
-gen ilaho_m	// Ingreso laboral horario monetario en todos los trabajos 
-gen ilaho   // Ingreso laboral horario total en todos los trabajos 
-*/
+	/*      cuantasinla |
+				 recibe |      Freq.     Percent        Cum.
+			------------+-----------------------------------
+					  0 |      2,589        8.08        8.08
+					  1 |        975        3.04       11.12
+					  2 |     19,794       61.74       72.86
+					  3 |      6,717       20.95       93.81
+					  4 |      1,563        4.88       98.69
+					  5 |        244        0.76       99.45
+					  6 |         22        0.07       99.52
+					  7 |          2        0.01       99.53
+					  8 |          1        0.00       99.53
+					  . |        151        0.47      100.00
+			------------+-----------------------------------
+				  Total |     32,058      100.00				*/ 
+
+				  
+	* Ingreso no laboral monetario (local), segun si recibieron o no en el ultimo mes
+		gen recibe_ingresonolab_mes = .
+		replace recibe_ingresonolab_mes = 1 if (s9q28__1==1 | s9q28__2==1 | s9q28__3==1 | s9q28__4==1 | s9q28__5==1 | s9q28__6==1 | s9q28__7==1 | s9q28__8==1 | s9q28__9==1 | s9q28__10==1 | s9q28__11==1 ) ///
+			| s9q28_petro==1 | (s9q29a__3==1 | s9q29a__4==1 | s9q29a__5==1 | s9q29a__6==1 | s9q29a__7==1 | s9q29a__8==1 | s9q29a__9==1) // Recibió ingreso monetario no laboral en algún concepto en el último mes
+		replace recibe_ingresonolab_mes = 0 if inlist(s9q28__1,0,.,.a) & inlist(s9q28__2,0,.,.a) & inlist(s9q28__3,0,.,.a) & inlist(s9q28__4,0,.,.a) & inlist(s9q28__5,0,.) & inlist(s9q28__6,0,.,.a) & inlist(s9q28__7,0,.,.a) & inlist(s9q28__8,0,.,.a) & inlist(s9q28__9,0,.,.a) & inlist(s9q28__10,0,.,.a) & inlist(s9q28__11,0,.,.a) ///
+			& inlist(s9q28_petro,2,.,.a) & inlist(s9q29b_3,0,.,.a) & inlist(s9q29b_4,0,.,.a) & inlist(s9q29b_5,0,.,.a) & inlist(s9q29b_6,0,.,.a) & inlist(s9q29b_7,0,.,.a) & inlist(s9q29b_8,0,.,.a) & inlist(s9q29b_9,0,.,.a) // No recibió ingreso laboral monetario en ningún concepto mensual
+		* Problem: income from abroad (s9q29a_3 to _9) are measured on a yearly basis, not monthly as the others.
+	
+	*Ingreso no laboral monetario (proveniente del exterior), segun si recibieron o no en el ultimo año
+		* Thus, analysis on the side for imputation for those 3 variables, create a new variables
+		gen recibe_ingresonolab_ano = .
+		replace recibe_ingresonolab_ano = 1 if (s9q29a__3==1 | s9q29a__4==1 | s9q29a__5==1 | s9q29a__6==1 | s9q29a__7==1 | s9q29a__8==1 | s9q29a__9==1)
+		replace recibe_ingresonolab_ano = 0 if inlist(s9q29a__3,0,.,.a) & inlist(s9q29a__4,0,.,.a) & inlist(s9q29a__5,0,.,.a) & inlist(s9q29a__6,0,.,.a) & inlist(s9q29a__7,0,.,.a) & inlist(s9q29a__8,0,.,.a) & inlist(s9q29a__9,0,.,.a)
+	
+	* Checks (data April 7)
+	tab recibe_ingresonolab_ano recibe_ingresonolab_mes, missing // 1,448 observations have =1 in both
+	tab labor_status recibe_ingresonolab_mes, missing 
+	tab labor_status recibe_ingresonolab_ano, missing 
+	
+	gen recibe_ingresonolab = .
+	replace recibe_ingresonolab = 0 if recibe_ingresonolab_mes==0 & recibe_ingresonolab_ano==0
+	replace recibe_ingresonolab = 1 if recibe_ingresonolab_mes==1
+	replace recibe_ingresonolab = 2 if recibe_ingresonolab_ano==1
+	replace recibe_ingresonolab = 3 if recibe_ingresonolab_mes==1 & recibe_ingresonolab_ano==1
+		label def recibe_ingresonolab 0 "Dice que no recibe nada" 1 "Dice que recibio en el ultimo mes" 2 "Dice que recibio en el último año" 3 "Dice que en el último mes Y último año"
+		label values recibe_ingresonolab recibe_ingresonolab
+	
+	tab recibe_ingresonolab, mi 
+	
+		* Crossed with the amount of income
+		egen inla_aux = rsum(inla_otro itrane_ns itrane_o_m itranp_ns itranp_o_m rem icap_m ijubi_m), mi
+		gen report_ingnolab_perocuanto = .
+		replace report_ingnolab_perocuanto = 0 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux==. // Dicen que reciben ila monetario, pero no reportan cuánto
+		replace report_ingnolab_perocuanto = 1 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux>=0 & inla_aux!=.
+		*replace report_ingnolab_perocuanto = 1 	if inla_aux>=0 & inla_aux!=. // Same result as above line
+		
+	tab report_ingnolab_perocuanto, mi // We will have to impute 124 observations that declare to have received non labor income but don't say how much
 
 
 /*(************************************************************************************************************************************************ 
@@ -2345,7 +2378,7 @@ enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_c
 relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
 iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 /*pobreza_enc pobreza_extrema_enc*/ lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc /*pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/ ///
-interview_month interview__id interview__key quest // to match with hh consumption
+interview_month
 				
 keep pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
 region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
@@ -2356,8 +2389,7 @@ enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_c
 relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
 iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 /*pobreza_enc pobreza_extrema_enc*/ lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc /*pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/  ///
-interview_month interview__id interview__key quest // to match with hh consumption
-
+interview_month interview__key interview__id quest ///
 
 *Obs: We are missing the weights to be able to generate these in the aux do_file_2_variables: "pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11"
 notes: Venezuela changed its currency during the recolection of data. Income variables were changed to be expressed in bolivares of February 2020.

@@ -231,7 +231,7 @@ label var    psu	     	 "Primary sampling unit"
 
 
 /*(************************************************************************************************************************************************* 
-*------------------------------------------	1.2: Demographic variables  / Variables demográficas --------------------------------------------------
+*------------------------------------------	1.2: Demographic variables / Variables demográficas --------------------------------------------------
 *************************************************************************************************************************************************)*/
 label var	relacion_en 	"Relationship with head of household (this survey)"
 label def 	relacion_en	 	1 "Head" 2 "Spouse/Partner" 3 "Son/Daughter" 4 "Stepson/Stepdaughter" 5 "Granddaughter/Grandson" ///
@@ -611,3 +611,9 @@ label var  	cant_aporta_pension  	"How much did you pay last month for pension f
 label var  	mone_aporta_pension		"Currency" 
 	label def	mone_aporta_pension	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
 	label values mone_aporta_pension mone_aporta_pension
+	
+
+/*(*********************************************************************************************************************************************** 
+*---------------------------------- 9: Otros ingresos y pensiones / Other income and pensions ----------------------------------------------------
+***********************************************************************************************************************************************)*/	
+

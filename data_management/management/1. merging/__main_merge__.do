@@ -24,16 +24,16 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
-		global lauta   1
+		global lauta   0
 		
 		* User 4: Malena
 		global male   0
 			
 		if $juli {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
+				global rootpath "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
 		global rootpath "C:\Users\wb563365\GitHub\VEN"

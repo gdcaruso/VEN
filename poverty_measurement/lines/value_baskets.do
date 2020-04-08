@@ -155,6 +155,10 @@ drop label_bien
 
 // generate value of each products
 bysort mes: gen valor = precio * cantidad
+rename bien bien_desc
+gen bien = bien_desc
+
+keep if mes=="02"
 export excel "$output/valor_canasta_nacional_metochi.xlsx", firstrow(variables) replace
 
 

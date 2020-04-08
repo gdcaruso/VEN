@@ -1401,13 +1401,31 @@ xtile exp_quant = exp, nq(100)
 drop if ols_quant>98
 sum olshansky, detail
 
+stop
+
+keep if olshansky <2.32*1.30
+
+keep if olshansky >2.32*0.7
+
+twoway scatter food ingreso if food< 10000000, msize(tiny) ///
+|| lfit food ingreso if food<10000000 ///
+|| line food food if food<10000000, sort
+
+gen flag = food > ingreso
+tab flag
+
 local values 1 3 4 7 8 9 10 11 12 
 
 foreach i in `values'{
 	egen total`i' = total(gasto_mensual`i')
 	}
 
+bro
+
+	
 stop
+
+	
 //calculates orshansky for all population of reference
 egen total_exp = total(exp)
 egen total_food_exp = total(food_exp)

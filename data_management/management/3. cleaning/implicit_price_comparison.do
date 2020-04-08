@@ -336,7 +336,7 @@ gen food ="Harina de maiz"
 keep gasto cantidad unit food tamano
 
 //	Harina de maiz
-
+stop
 	drop if food=="Harina de maiz" & unit=="Kilogramos" & cantidad==1 & gasto>999999 | food=="Harina de maiz" & unit=="Kilogramos" & cantidad==1 & gasto<10000			
 	drop if food=="Harina de maiz" & unit=="Kilogramos" & cantidad==2 & gasto>999999 | food=="Harina de maiz" & unit=="Kilogramos" & cantidad==2 & gasto<10	
 	replace gasto=gasto*2000 if food=="Harina de maiz" & unit=="Kilogramos" & cantidad==2 & gasto>10 & gasto<200		

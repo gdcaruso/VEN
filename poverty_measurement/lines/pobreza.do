@@ -1,6 +1,6 @@
 use "C:\Users\wb563365\GitHub\VEN\data_management\output\cleaned\ENCOVI_2019.dta" , replace
 
-gen le_chi = 82757*30.4*0.2
+gen le_chi = 72619*30.4
 
 gen le_col = . //2449419
 
@@ -24,7 +24,7 @@ gen pobre_col = ipcf<lp_col
 gen ext_col = ipcf<le_col
 
 gen ext_ofi = ipcf<le_ofi
-gen pob_ofi = ipcf<lp_ofi
+gen pobreza_ofi = ipcf<lp_ofi
 
 
 gen ext_chi = ipcf<le_chi
@@ -58,6 +58,9 @@ tab pobreza_32, mi
 tab pobreza_55, mi
 
 
+tab pobreza_ofi, mi
+
+
 sort ipcf
 gen obs = _n
 preserve
@@ -72,4 +75,4 @@ graph twoway line ipcf obs, lcolor("black") ///
 || line lp_ofi obs, lcolor("green") 
 // || line le_col obs, lcolor("yellow") ///
 // || line lp_col obs, lcolor("yellow") ///
-bro
+

@@ -314,6 +314,7 @@ replace cantidad_ajustada = cantidad_ajustada/population
 replace cantidad_h = cantidad_h/population
 gen cal_intake = cantidad_ajustada*cal/100
 gsort -cal_intake
+stop
 save "$output/canastapercapita_metochi_sin_outliars.dta", replace
 export excel using "$output/canastapercapita_metocchi_sin_outliars.xlsx", firstrow(var) replace
 

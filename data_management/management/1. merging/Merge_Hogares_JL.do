@@ -109,8 +109,9 @@ local vsp      "01"	// version ASPIRE
 	// Create a tempfile for approved surveys
     tempfile approved_surveys
 	
-	// Create identification for completed surveys
-	bys interview__key interview__id (date): keep if action==6 // 6=Approved by HQ 
+	// Create identification for completed surveys /  Keep aproved interviews by HQ
+	bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step) 
+
 
 	// To identify unique interviews according the last date and time entered
     bys interview__key interview__id (date time) : keep if _n==_N

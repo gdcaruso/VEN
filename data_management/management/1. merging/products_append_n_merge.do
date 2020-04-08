@@ -87,9 +87,8 @@ replace quest=2 if quest==. & quest!=1
 append using "$pathpixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
-//	Create a temporary db with surveys approved by HQ 
-
-bys quest interview__key interview__id (date): keep if action==6 // 6=approved by HQ
+// Keep aproved interviews by HQ
+bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step) 
 
 // check, log and delete duplicates
 duplicates tag interview__key interview__id quest, generate(dupli)

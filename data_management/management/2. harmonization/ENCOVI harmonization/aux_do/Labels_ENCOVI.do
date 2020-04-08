@@ -1769,6 +1769,9 @@ label var  	mone_aporta_pension		"Currency"
 	label def	mone_aporta_pension	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
 	label values mone_aporta_pension mone_aporta_pension
 	
+label var 	labor_status
+label def	labor_status 1 "Trabajando" 2 "No trabajó, pero tiene trabajo" 3 "Buscando trabajo" 5 "En quehaceres del hogar" 6 "Incapacitado" 7 "Otra situacion" 8 "Estudiando o de vacaciones escolares" 9 "Pensionado o jubilado"
+
 
 /*(*********************************************************************************************************************************************** 
 *---------------------------------- 9: Otros ingresos y pensiones / Other income and pensions ----------------------------------------------------

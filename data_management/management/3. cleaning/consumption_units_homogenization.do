@@ -31,7 +31,7 @@ Note:
 		global lauta   0
 		
 		* User 3: Lautaro
-		global lauta2   1
+		global lauta   1
 		
 		
 		* User 4: Malena
@@ -40,10 +40,8 @@ Note:
 		if $juli {
 				global rootpath ""
 		}
+
 	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-		}
-	    if $lauta2 {
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 

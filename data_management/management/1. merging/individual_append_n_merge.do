@@ -1,6 +1,5 @@
 /*===========================================================================
-Puropose: this scripts takes raw data of the 2019 ENCOVY survey at individual
-level and integrates into a unique dataset at individual level
+Puropose: Merge and append raw data to make a dataset at individual level
 ===========================================================================
 Country name:	Venezuela
 Year:			2019
@@ -11,9 +10,9 @@ Project:
 Authors:			Lautaro Chittaro
 
 Dependencies:		The World Bank
-Creation Date:		12th Feb, 2020
+Creation Date:		7th April, 2020
 Modification Date:  
-Output:			sedlac do-file template
+Output:			
 
 Note: 
 =============================================================================*/
@@ -28,99 +27,74 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
-		
-		* User 3: Lautaro
-		global lautaa   0
-		
+		global lauta   1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 			
 		if $juli {
 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
 		}
-	    if $lauta {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+	    if $lauta {"C:\Users\wb563365\GitHub\VEN\"
 		}
-	    if $lautaa {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563365\GitHub\VEN\"
-		}
-	
 		if $trini   {
 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
-		
 		if $male   {
 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\04_06_20"
+global raw "$rootpath\data_management\input\04_07_20"
+global output "$rootpath\data_management\output\merged"
 
 ********************************************************************************
 
 /*==============================================================================
-0: Program set up
+Program set up
 ==============================================================================*/
 version 14
 drop _all
 set more off
 
 
-
 /*==============================================================================
-1: Construction of aproved surveys
-==============================================================================*/
-// There are different "actions" during the data collection of a survey such as
-// first data input, completed, approved by supervisor, approved by HQ, rejected
-// We will keep only the approved by HQ
-
-
-/*==============================================================================
-1: Construction of aproved surveys
+Construction of aproved surveys
 ==============================================================================*/
 // There are different "actions" during the data collection of a survey such as
 // first data input, completed, approved by supervisor, approved by HQ, rejected
 // We will keep only the approved by HQ
 
 // set the path for our 3 types of questionaires
-global pathnew "$dataofficial\ENCOVI_3_STATA_All"
-global pathold "$dataofficial\ENCOVI_MainSurvey_Final_3_STATA_All"
-global pathpixel "$dataofficial\ENCOVI_pixel_Qx_9_STATA_All"
+global new "$raw\ENCOVI_3_STATA_All"
+global old "$raw\ENCOVI_MainSurvey_Final_3_STATA_All"
+global pixel "$raw\ENCOVI_pixel_Qx_9_STATA_All"
 
 // load and append data of the 3 questionaires
-use  "$pathold\interview__actions.dta", clear
+use  "$old\interview__actions.dta", clear
 gen quest=1
 
-append using "$pathnew\interview__actions.dta"
+append using "$new\interview__actions.dta"
 replace quest=2 if quest==. & quest!=1
 
-append using "$pathpixel\interview__actions.dta"
+append using "$pixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
-	// Create identification for completed surveys
-	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
+// Keep aproved interviews by HQ
+bys interview__key interview__id (date): keep if action==6 // 3=Completed 
 
-	// To identify unique interviews according the last date and time entered
-    bys interview__key interview__id (date time) : keep if _n==_N
-	
+// To identify unique interviews according the last date and time entered
+bys interview__key interview__id (date time) : keep if _n==_N
 
-//	Create a temporary db with surveys approved by HQ 
+//check, log and delete duplicates
+duplicates tag interview__key interview__id quest, generate(dupli)
 
-//bys quest interview__key interview__id (date): keep if action==6 // 6=approved by HQ
-	
-// check, log and delete duplicates
-//duplicates tag interview__key interview__id quest, generate(dupli)
-
-//preserve
-//keep if dupli >= 1
-//save "$rootpath\data_management\output\merged\duplicates-ind.dta", replace
-//restore	
-//drop if dupli >= 1
-
-//keep interview* origina responsible__name quest date
-
+//drop duplicates, (but saved in a log)
+preserve
+keep if dupli >= 1
+save "$output\duplicates-ind.dta", replace
+restore	
+drop if dupli >= 1
 
 // formatting
 keep interview__key interview__id quest date
@@ -128,7 +102,6 @@ replace date = subinstr(date, "-", "/",.)
 gen approved_date=date(date,"YMD")
 format approved_date %td
 drop date
-
 
 // test if is id
 isid interview__key interview__id quest
@@ -146,13 +119,13 @@ save `approved_surveys'
 
 // Append main indiviudal dataset across questionnaires
 
-use  "$pathold\Miembro.dta", clear
+use  "$old\Miembro.dta", clear
 gen quest=1
 
-append using "$pathnew\Miembro.dta"
+append using "$new\Miembro.dta"
 replace quest=2 if quest==.
 
-append using "$pathpixel\Miembro.dta"
+append using "$pixel\Miembro.dta"
 replace quest=3 if quest==.
 
 
@@ -184,13 +157,13 @@ foreach dtafile in $dtalist{
 	preserve // the main individual level dataset
 
 	// append the 3 types of questionnaires of this sub-individual level dataset
-	use  "$pathold/`dtafile'.dta", clear
+	use  "$old/`dtafile'.dta", clear
 	gen quest=1
 
-	append using "$pathnew/`dtafile'.dta"
+	append using "$new/`dtafile'.dta"
 	replace quest=2 if quest==.
 
-	append using "$pathpixel/`dtafile'.dta"
+	append using "$pixel/`dtafile'.dta"
 	replace quest=3 if quest==.
 
 
@@ -231,4 +204,4 @@ foreach dtafile in $dtalist{
 
 compress
 	
-save "$rootpath\data_management\output\merged\individual.dta" //, replace
+save "$rootpath\data_management\output\merged\individual.dta", replace

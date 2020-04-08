@@ -21,42 +21,38 @@ Note:
 
 // Define rootpath according to user
 
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta   0
-		
-		* User 3: Lautaro
-		global lauta2   1
-		
-
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath ""
-		}
-	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-		}
-	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\GitHub\VEN\"
-
-		}
-		if $trini   {
-				global rootpath ""
-		}
-		
-		if $male   {
-				global rootpath ""
-		}
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta  1
+//		
+//
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath ""
+// 		}
+// 	    if $lauta {
+// 				global rootpath "C:\Users\wb563365\GitHub\VEN\"
+//
+// 		}
+// 		if $trini   {
+// 				global rootpath ""
+// 		}
+//		
+// 		if $male   {
+// 				global rootpath ""
+// 		}
 
 // set raw data path
-global dataofficial "$rootpath\data_management\input\03_31_20"
+// global input "$rootpath\data_management\input\04_07_20"
+// global output "$rootpath\data_management\output"
+
 ********************************************************************************
 
 /*==============================================================================
@@ -76,9 +72,9 @@ set more off
 // We will keep only the approved by HQ
 
 // set the path for our 3 types of questionaires
-global pathnew "$dataofficial\ENCOVI_3_STATA_All"
-global pathold "$dataofficial\ENCOVI_MainSurvey_Final_3_STATA_All"
-global pathpixel "$dataofficial\ENCOVI_pixel_Qx_9_STATA_All"
+global pathnew "$input\ENCOVI_3_STATA_All"
+global pathold "$input\ENCOVI_MainSurvey_Final_3_STATA_All"
+global pathpixel "$input\ENCOVI_pixel_Qx_9_STATA_All"
 
 
 // load and append data of the 3 questionaires
@@ -554,7 +550,7 @@ drop s12aq1*_os
 
 
 // save the product-household dataset
-save "$rootpath\data_management\output\merged\product-hh.dta", replace
+save "$output\product-hh.dta", replace
 
 
 

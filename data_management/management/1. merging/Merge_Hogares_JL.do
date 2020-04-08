@@ -5,7 +5,7 @@ Survey:			ECNFT
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
+Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra, Malena Acuña
 
 Dependencies:		The World Bank -- Poverty Unit
 Creation Date:		February, 2020
@@ -15,44 +15,45 @@ Output:			Merged Dataset ENCOVI
 Note: 
 =============================================================================*/
 ********************************************************************************
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta   0
-		
-		* User 3: Lautaro
-		global lautaa	0 
-		
-		* User 4: Malena
-		global male   1
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//
+//			
+// 		if $juli {
+// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
+// 		}
+// 	    if $lauta {
+// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+// 		}
+// 	    if $lautaa {
+// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563365\GitHub\VEN"
+// 		}
+// 		if $trini {
+// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+//		
+// 		if $male {
+// 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019"
+// 		}	
+//
 
-			
-		if $juli {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
-		}
-	    if $lauta {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-		}
-	    if $lautaa {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563365\GitHub\VEN"
-		}
-		if $trini {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-		}
-		
-		if $male {
-				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019"
-		}	
 
-global dataofficial "$rootpath\data_management\input\04_06_20"
- // Set the path for the three questionnaires
-	global pathnew "$dataofficial\ENCOVI_3_STATA_All"
-	global pathold "$dataofficial\ENCOVI_MainSurvey_Final_3_STATA_All"
-	global pathpixel "$dataofficial\ENCOVI_pixel_Qx_9_STATA_All"
+// global input "$rootpath\data_management\input\04_06_20"
+// global output "$rootpath\data_management\output\merged"
+
+// Set the path for the three questionnaires
+global pathnew "$input\ENCOVI_3_STATA_All"
+global pathold "$input\ENCOVI_MainSurvey_Final_3_STATA_All"
+global pathpixel "$input\ENCOVI_pixel_Qx_9_STATA_All"
 
 
 ********************************************************************************
@@ -109,7 +110,7 @@ local vsp      "01"	// version ASPIRE
     tempfile approved_surveys
 	
 	// Create identification for completed surveys
-	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
+	bys interview__key interview__id (date): keep if action==6 // 6=Approved by HQ 
 
 	// To identify unique interviews according the last date and time entered
     bys interview__key interview__id (date time) : keep if _n==_N
@@ -279,5 +280,5 @@ foreach file in `com_data' {
 	compress
 *-------- Save 
 
-save "$rootpath\data_management\output\merged\household.dta", replace
+save "$output\household.dta", replace
 

@@ -15,42 +15,43 @@ Output:			    Merged Dataset ENCOVI (Prices)
 Note: 
 =============================================================================*/
 ********************************************************************************
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta   1
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath "C:\Users\wb563583\Documents\GitHub\ENCOVI-2019"
-				global dataout "$rootpath\"
-				
-		}
-	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-				global dataout "$rootpath\"
-		}
-		if $trini   {
-				global rootpath ""
-				global dataout "$rootpath\"
-		}
-		
-		if $male   {
-				global rootpath ""
-				global dataout "$rootpath\"
-		}
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath "C:\Users\wb563583\Documents\GitHub\ENCOVI-2019"
+// 				global dataout "$rootpath\"
+//				
+// 		}
+// 	    if $lauta {
+// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+// 				global dataout "$rootpath\"
+// 		}
+// 		if $trini   {
+// 				global rootpath ""
+// 				global dataout "$rootpath\"
+// 		}
+//		
+// 		if $male   {
+// 				global rootpath ""
+// 				global dataout "$rootpath\"
+// 		}
 
-	global dataofficial "$rootpath\data_management\input\03_04_20"
-	global dataout "$rootpath\data_management\output"
-	global dataint "$dataout\intermediate"
+// 	global input "$rootpath\data_management\input\04_07_20"
+// 	global output "$rootpath\data_management\output\merged"
+
     // Set the  path for prices
-	global pathprc "$dataofficial\ENCOVI_prices_2_STATA_All"
+	global dataint "$rootpath\data_management\output\intermediate"
+	global pathprc "$input\ENCOVI_prices_2_STATA_All"
 	
 ********************************************************************************
 	
@@ -74,7 +75,7 @@ Note:
 	duplicates tag interview__key interview__id, generate(dupli)
 	preserve
 	keep if dupli >= 1
-	save "$rootpath\data_management\output\merged\duplicates-price.dta", replace
+	save "$output\duplicates-price.dta", replace
 	restore	
 	drop if dupli >= 1
 	
@@ -346,4 +347,4 @@ save "$dataint/`dtafile'", replace
 *-------- Save prices dataset
 // save the product-household dataset
 compress
-save "$rootpath\data_management\output\merged\prices.dta", replace
+save "$output\prices.dta", replace

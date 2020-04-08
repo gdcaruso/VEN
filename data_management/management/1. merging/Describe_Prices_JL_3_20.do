@@ -50,7 +50,7 @@ Note:
 				global dataout "$rootpath\"
 		}
 
-	global dataofficial "$rootpath\data_management\input\03_31_20"
+	global dataofficial "$rootpath\data_management\input\04_07_20"
 	global dataout "$rootpath\data_management\output"
 	global dataint "$dataout\intermediate"
     // Set the  path for prices
@@ -2062,3 +2062,8 @@ log close
 	save "$dataout/resumen_precio_gramo_L.dta", replace
 	restore	
 
+	preserve
+	keep if bien==7
+	keep bien precio_u
+	save "$dataout/maiz_precio_gramo.dta", replace
+	restore

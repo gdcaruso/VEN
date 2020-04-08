@@ -5,7 +5,7 @@ Survey:			ECNFT
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
+Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra, Malena Acuña
 
 Dependencies:		The World Bank -- Poverty Unit
 Creation Date:		February, 2020

@@ -19,32 +19,35 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
 				global rootpath "C:\Users\wb563583\GitHub\VEN"
+				global dataout 	PONGAN ONE DRIVE PORQUE YA ES MUY PESADA (VER ABAJO EN MALE)
 		}
 	    if $lauta {
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
+				global dataout 	PONGAN ONE DRIVE PORQUE YA ES MUY PESADA (VER ABAJO EN MALE)
 		}
 		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"  
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN" 
+				global dataout 	PONGAN ONE DRIVE PORQUE YA ES MUY PESADA (VER ABAJO EN MALE)
 		}
 		
 		if $male   {
 				global rootpath "C:\Users\wb550905\Github\VEN"
+				global dataout "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
 		}
 
 		
 // Set output data path
-global dataout "$rootpath\data_management\output\cleaned"
 global dataofficial "$rootpath\data_management\output\merged"
 
 ********************************************************************************
@@ -154,13 +157,13 @@ rename gps_coordenadas__timestamp	gps_coord_tiempo
 global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
 
 * Cuántas personas residen actualmente en esta vivienda?
-gen npers_viv=s3q1 if s3q1!=. & s3q1!=.a
+clonevar npers_viv=s3q1 if s3q1!=. & s3q1!=.a
 * Todas las personas que viven en esta vivienda comparten gastos para la compra de comida?
 gen comparte_gasto_viv=(s3q2==1) if s3q2!=. & s3q2!=.a
 * Cuántos grupos de personas mantienen gastos separados para la compra de comida?
-gen npers_gasto_sep=s3q3 if s3q3!=. & s3q3!=.a
+clonevar npers_gasto_sep=s3q3 if s3q3!=. & s3q3!=.a
 * Cuántas personas, contándose a usted, comparten gastos para la compra de comida? Este grupo de personas conforma su HOGAR.
-gen npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
+clonevar npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
 
 /*(************************************************************************************************************************************************* 
 *-----------------------------------------	1.1: Identification Variables / Variables de identificación --------------------------------------------
@@ -198,7 +201,7 @@ global id_ENCOVI pais ano encuesta id com psu
 		destring id_numeric, replace
 		format id_numeric %14.0f
 		*Age
-		gen edad = s6q5 if s6q5
+		gen edad = s6q5 if (s6q5!=. & s6q5!=.a)
 		*Random var
 		set seed 123
 		generate z = runiform()
@@ -228,11 +231,11 @@ gen psu = combined_id
 /*(************************************************************************************************************************************************* 
 *------------------------------------------	1.2: Demographic variables  / Variables demográficas --------------------------------------------------
 *************************************************************************************************************************************************)*/
-global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi pert_2014 razon_incorp_hh ///
-certificado_naci cedula razon_nocertificado estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
+global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi razon_cambio_resi_o pert_2014 razon_incorp_hh razon_incorp_hh_o ///
+certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
 
-*** Relation to the head:	relacion_en
-/* Categories of the new harmonized variable:
+*** Relation to the head:
+/* Categories of the new harmonized variable: relacion_comp
 		01 = Jefe del Hogar	
 		02 = Esposa(o) o Compañera(o)
 		03 = Hijo(a)/Hijastro(a)
@@ -293,7 +296,7 @@ gen hombre = sexo==1 if sexo!=.
 *** Age
 * EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
 notes   edad: range of the variable: 0-97
-*clonevar sexo = s6q5 if (s6q5!=. & s6q5!=.a)
+*clonevar edad = s6q5 if (s6q5!=. & s6q5!=.a)
 
 *** Year of birth
 clonevar anio_naci = s6q4_year if (s6q4_year!=. & s6q4_year!=.a & s6q4_year!=9999 & s6q4_year!=9 ) 
@@ -318,23 +321,31 @@ clonevar resi_municipio = s6q7b if (s6q7b!=. & s6q7b!=.a)
 
 *** Which was the main reason for moving to another residency?
 clonevar razon_cambio_resi = s6q7c if (s6q7c!=. & s6q7c!=.a)
+replace  razon_cambio_resi = . if s6q7b==.
 
-stop
+*** Specify others
+clonevar razon_cambio_resi_o = s6q7d if s6q7c==7
 
 *** Are you part of this household since the last 5 years?
 gen pert_2014 = (s6q8==1) if (s6q8!=. & s6q8!=.a)
 
 *** Reason for incorporating to the household
-gen razon_incorp_hh = (s6q9==1) if (s6q9!=. & s6q9!=.a)
+clonevar razon_incorp_hh = s6q9 if (s6q9!=. & s6q9!=.a) & s6q8==1
+
+*** Other reason
+clonevar razon_incorp_hh_o = s6q9_os if s6q9==12
 
 *** Birth certificate
-gen certificado_naci = (s6q10==1) if (s6q10!=. & s6q10!=.a)
+gen certificado_naci = (s6q10==1) if (s6q10!=. & s6q10!=.a) & s6q5<18
 
 *** ID card
 gen cedula = (s6q11==1) if (s6q11!=. & s6q11!=.a)
 
 *** Reasons for not having birth certificate
-gen razon_nocertificado = (s6q12==1) if (s6q12!=. & s6q12!=.a)
+clonevar razon_nocertificado = s6q12 if (s6q12!=. & s6q12!=.a) & s6q10==2
+
+*** Other reason
+clonevar razon_nocertificado_o = s6q12_os if (s6q12!=. & s6q12!=.a) & s6q12==7
 
 * Marital status
 /* ESTADO_CIVIL_ENCUESTA (s6q13): Cual es su situacion conyugal
@@ -348,7 +359,7 @@ gen razon_nocertificado = (s6q12==1) if (s6q12!=. & s6q12!=.a)
 	   8 = soltero /nunca unido		
 	   98 = No aplica
 	   99 = NS/NR 
-* Estado civil
+* estado_civil
 	   1 = married
 	   2 = never married
 	   3 = living together
@@ -367,12 +378,12 @@ label value marital_status marital_status
 rename marital_status estado_civil
 
 *** Number of sons/daughters born alive
-gen     hijos_nacidos_vivos = s6q14 if (s6q14!=. & s6q14!=.a)
+clonevar     hijos_nacidos_vivos = s6q14 if (s6q14!=. & s6q14!=.a)
 
 *** From the total of sons/daughters born alive, how many are currently alive?
-gen     hijos_vivos = s6q15 if s6q14!=0 & s6q15 <=s6q14 & (s6q15!=. & s6q15!=.a)
+clonevar     hijos_vivos = s6q15 if s6q14!=0 & s6q15<=s6q14 & (s6q15!=. & s6q15!=.a)
 
-*** Which year was your last son born?
+*** Which year was your last son/daughter born?
 gen     anio_ult_hijo = s6q16a if s6q14!=0 & (s6q16a!=9999 & s6q16a!=. & s6q16a!=.a)
 replace anio_ult_hijo = 2005 if anio_ult_hijo==20005
 replace anio_ult_hijo = 2011 if anio_ult_hijo==20011
@@ -382,15 +393,13 @@ replace anio_ult_hijo = 2012 if anio_ult_hijo==212
 replace anio_ult_hijo = s6q16c if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9999 //wronly codified in day
 replace anio_ult_hijo = . if s6q16a<1000
 
-*** Which month was your last son born?
-gen     mes_ult_hijo = s6q16b if s6q14!=0 & (s6q16b!=9999)
+*** Which month was your last son/daughter born?
+clonevar	mes_ult_hijo = s6q16b if s6q14!=0 & (s6q16b!=9999)
 
-*** Which day was your last son born?
+*** Which day was your last son/daughter born?
 gen     dia_ult_hijo = s6q16c if s6q14!=0 & (s6q16c!=9999)
 replace dia_ult_hijo = s6q16a if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9999 //wronly codified in year
 
-tab pais_naci
-stop
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
@@ -477,7 +486,11 @@ label value suministro_agua_comp suministro_agua_comp
 		5 = Nunca
 */
 clonevar frecuencia_agua = s4q6 if (s4q6!=. & s4q6!=.a)	
-
+label def frecuencia_agua 1 "Todos los dias" 2 "Algunos dias de la semana" ///
+		3 "Una vez por semana" ///
+		4 "Una vez cada 15 dias" ///
+		5 "Nunca"
+label val frecuencia_agua frecuencia_agua
 *** Electricity
 /* SERVICIO_ELECTRICO : En los ultimos 3 meses, el servicio electrico ha sido suministrado por?
             s4q7_1 = La red publica
@@ -503,10 +516,8 @@ tab electricidad
 			3 = Alguna vez al mes
 			4 = Nunca se interrumpe			
 */
-gen interrumpe_elect = s4q8 if (s4q8!=. & s4q8!=.a)
-label def interrumpe_elect 1 "Diariamente por varias horas" 2 "Alguna vez a la semana por varias" 3 "Alguna vez al mes" 4 "Nunca se interrumpe" 
-label value interrumpe_elect interrumpe_elect
-
+clonevar interrumpe_elect = s4q8 if (s4q8!=. & s4q8!=.a)
+tab interrumpe_elect 
 *** Type of toilet
 /* TIPO_SANITARIO (s4q9): esta vivienda tiene 
 		1 = Poceta a cloaca
@@ -525,6 +536,7 @@ label value tipo_sanitario_comp tipo_sanitario_comp
 *** Number of rooms used exclusively to sleep
 * NDORMITORIOS (s5q1): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
 clonevar ndormi= s5q1 if (s5q1!=. & s5q1!=.a) //up to 9
+replace ndormi=. if s5q1>20
 
 *** Bath with shower 
 * BANIO (s5q2): Su hogar tiene uso exclusivo de bano con ducha o regadera?
@@ -608,71 +620,101 @@ clonevar fagua_manantial=s5q13__6 if s5q13__6!=. & s5q13__6!=.a
 clonevar fagua_botella=s5q13__7 if s5q13__7!=. & s5q13__7!=.a
 * Otros
 clonevar fagua_otro=s5q13__8 if s5q13__8!=. & s5q13__8!=.a
-//hasta aca
+
+label def aqua 0 "Otra" 1 "Primera (1)" 2 "Segunda (2)" 3 "Tercera(3)" 
+label val fagua_acueduc aqua
+label val fagua_estanq aqua
+label val fagua_cisterna aqua
+label val fagua_bomba aqua
+label val fagua_pozo aqua
+label val fagua_manantial aqua
+label val fagua_botella aqua
+label val fagua_otro aqua
+
 *** In your household, is the water treated to make it drinkable
-gen tratamiento_agua=(s5q14==1) if s5q14!=. & s5q14!=.a
+clonevar tratamiento_agua= s5q14 if s5q14!=. & s5q14!=.a
+replace tratamiento_agua= 1 if s5q14==1
+replace tratamiento_agua= 0 if s5q14==2
+* Label values
+label def tratamiento_agua 1 "Si" 0 "No"
+label val tratamiento_agua tratamiento_agua
+
 
 *** How do you treat the water to make it more safe for drinking
-gen tipo_tratamiento=s5q15 if s5q15!=. & s5q15!=.a
+clonevar tipo_tratamiento=s5q15 if s5q15!=. & s5q15!=.a
 
 *** Which type of fuel do you use for cooking?
-gen comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
+clonevar comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
 
 *** Did you pay for the following utilities?
 * Water
-gen pagua=(s5q17__1==1) if s5q17__1!=. & s5q17__1!=.a 
+clonevar pagua=s5q17__1 if s5q17__1!=. & s5q17__1!=.a 
 * Electricity
-gen pelect=(s5q17__2==1) if s5q17__2!=. & s5q17__2!=.a
+clonevar pelect=s5q17__2 if s5q17__2!=. & s5q17__2!=.a
+replace pelect=1 if s5q17__2==1 
+replace pelect=0 if s5q17__2==2
+
 * Gas
-gen pgas=(s5q17__3==1) if s5q17__3!=. & s5q17__3!=.a
+clonevar pgas=s5q17__3 if s5q17__3!=. & s5q17__3!=.a
+replace pgas=1 if s5q17__3==1
+replace pgas=0 if s5q17__3==2
+
 * Carbon, wood
-gen pcarbon=(s5q17__4==1) if s5q17__4!=. & s5q17__4!=.a
+clonevar pcarbon=s5q17__4 if s5q17__4!=. & s5q17__4!=.a
+replace pcarbon=1 if s5q17__4==1
+replace pcarbon=0 if s5q17__4==2
+
 * Paraffin
-gen pparafina=(s5q17__5==1) if s5q17__5!=. & s5q17__5!=.a
+clonevar pparafina=s5q17__5 if s5q17__5!=. & s5q17__5!=.a
+replace pparafina=1 if s5q17__5==1
+replace pparafina=0 if s5q17__5==2
+
 * Landline, internet and tv cable
 gen ptelefono=(s5q17__7==1) if s5q17__7!=. & s5q17__7!=.a
 
 *** How much did you pay for the following utilities?
-gen pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
+clonevar pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
 * Electricity
-gen pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
+clonevar pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
 * Gas
-gen pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
+clonevar pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
 * Carbon, wood
-gen pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
+clonevar pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
 * Paraffin
-gen pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
+clonevar pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
 * Landline, internet and tv cable
-gen ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
+clonevar ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
 
 *** In which currency did you pay for the following utilities?
-gen pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
+clonevar pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
 * Electricity
-gen pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
+clonevar pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
 * Gas
-gen pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
+clonevar pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
 * Carbon, wood
-gen pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
+clonevar pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
 * Paraffin
-gen pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
+clonevar pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
 * Landline, internet and tv cable
-gen ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
+clonevar ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
 
 *** In which month did you pay for the following utilities?
-gen pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
+clonevar pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
 * Electricity
-gen pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
+clonevar pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
 * Gas
-gen pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
+clonevar pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
 * Carbon, wood
-gen pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
+clonevar pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
 * Paraffin
-gen pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
+clonevar pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
 * Landline, internet and tv cable
-gen ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
+clonevar ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
 
 *** In your household, have any home appliences damaged due to blackouts or voltage inestability?
-gen danio_electrodom=(s5q20==1) if s5q20!=. & s5q20!=.a
+clonevar danio_electrodom=s5q20 if s5q20!=. & s5q20!=.a
+replace danio_electrodom=1 if s5q20==1
+replace danio_electrodom=0 if s5q20==2
 
 foreach x in $dwell_ENCOVI {
 replace `x'=. if relacion_en!=1
@@ -694,6 +736,8 @@ gen     ncarros = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
 replace ncarros = .		if  relacion_en!=1 
 
 *** Year of the most recent car
+* Fix missing values 
+replace s5q5 = . if s5q5==0 & s5q4==1
 gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
 replace anio_auto = . if relacion_en==1
 
@@ -771,6 +815,7 @@ nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/
 
 *** Is the "member" answering by himself/herself?
 gen contesta_ind_e=s7q0 if (s7q0!=. & s7q0!=.a)
+replace contesta_ind_e=0 if s7q0==2
 
 *** Who is answering instead of "member"?
 gen quien_contesta_e=s7q00 if (s7q00!=. & s7q00!=.a)
@@ -798,7 +843,7 @@ gen asistio_educ = s7q1==1 if (s7q1!=. & s7q1!=.a) & edad>=3
 clonevar razon_noasis = s7q2 if s7q1==2 & (s7q2!=. & s7q2!=.a)
 
 *** During the period 2019-2020 did you attend any educational center? //for age +3
-gen asiste= s7q1==1 if (s7q1!=. & s7q1!=.a) & edad>=3
+gen asiste= s7q3==1 if (s7q3!=. & s7q3!=.a) & edad>=3
 replace asiste = .  if  edad<3
 notes   asiste: variable defined for individuals aged 3 and older
 
@@ -936,30 +981,30 @@ gen otros_gastos_monto=s7q10a_6 if s7q10_0__6==1 & (s7q10a_6!=. & s7q10a_6!=.a &
 
 *** Moneda en que se realizo el pago
 * Cuota de inscripción
-gen cuota_insc_mon=s7q10b_1 if s7q10_0__1==1 & (s7q10b_1!=. & s7q10b_1!=.a)
+clonevar cuota_insc_mon=s7q10b_1 if s7q10_0__1==1 & (s7q10b_1!=. & s7q10b_1!=.a)
 * Compra de útiles y libros escolares
-gen compra_utiles_mon=s7q10b_2 if s7q10_0__2==1 & (s7q10b_2!=. & s7q10b_2!=.a)
+clonevar compra_utiles_mon=s7q10b_2 if s7q10_0__2==1 & (s7q10b_2!=. & s7q10b_2!=.a)
 * Compra de uniformes y calzados escolares
-gen compra_uniforme_mon=s7q10b_3 if s7q10_0__3==1 & (s7q10b_3!=. & s7q10b_3!=.a)
+clonevar compra_uniforme_mon=s7q10b_3 if s7q10_0__3==1 & (s7q10b_3!=. & s7q10b_3!=.a)
 * Costo de la mensualidad
-gen costo_men_mon=s7q10b_4 if s7q10_0__4==1 & (s7q10b_4!=. & s7q10b_4!=.a)
+clonevar costo_men_mon=s7q10b_4 if s7q10_0__4==1 & (s7q10b_4!=. & s7q10b_4!=.a)
 * Uso de transporte público o escolar
-gen costo_transp_mon=s7q10b_5 if s7q10_0__5==1 & (s7q10b_5!=. & s7q10b_5!=.a)
+clonevar costo_transp_mon=s7q10b_5 if s7q10_0__5==1 & (s7q10b_5!=. & s7q10b_5!=.a)
 * Otros gastos
-gen otros_gastos_mon=s7q10b_6 if s7q10_0__6==1 & (s7q10b_6!=. & s7q10b_6!=.a)
+clonevar otros_gastos_mon=s7q10b_6 if s7q10_0__6==1 & (s7q10b_6!=. & s7q10b_6!=.a)
 
 *** Mes en que se realizo el pago
-gen cuota_insc_m=s7q10b_1 if s7q10_0__1==1 & (s7q10b_1!=. & s7q10b_1!=.a)
+clonevar cuota_insc_m=s7q10c_1 if s7q10_0__1==1 & (s7q10c_1!=. & s7q10c_1!=.a)
 * Compra de útiles y libros escolares
-gen compra_utiles_m=s7q10b_2 if s7q10_0__2==1 & (s7q10b_2!=. & s7q10b_2!=.a)
+clonevar compra_utiles_m=s7q10c_2 if s7q10_0__2==1 & (s7q10c_2!=. & s7q10c_2!=.a)
 * Compra de uniformes y calzados escolares
-gen compra_uniforme_m=s7q10b_3 if s7q10_0__3==1 & (s7q10b_3!=. & s7q10b_3!=.a)
+clonevar compra_uniforme_m=s7q10c_3 if s7q10_0__3==1 & (s7q10c_3!=. & s7q10c_3!=.a)
 * Costo de la mensualidad
-gen costo_men_m=s7q10b_4 if s7q10_0__4==1 & (s7q10b_4!=. & s7q10b_4!=.a)
+clonevar costo_men_m=s7q10c_4 if s7q10_0__4==1 & (s7q10c_4!=. & s7q10c_4!=.a)
 * Uso de transporte público o escolar
-gen costo_transp_m=s7q10b_5 if s7q10_0__5==1 & (s7q10b_5!=. & s7q10b_5!=.a)
+clonevar costo_transp_m=s7q10c_5 if s7q10_0__5==1 & (s7q10c_5!=. & s7q10c_5!=.a)
 * Otros gastos
-gen otros_gastos_m=s7q10b_6 if s7q10_0__6==1 & (s7q10b_6!=. & s7q10b_6!=.a)
+clonevar otros_gastos_m=s7q10c_6 if s7q10_0__6==1 & (s7q10c_6!=. & s7q10c_6!=.a)
 
 *** Educational attainment
 /* NIVEL_EDUC_EN (s7q11): ¿Cual fue el ultimo nivel educativo en el que aprobo un grado, ano, semetre, trimestre?  
@@ -1071,11 +1116,11 @@ label value razon_dejo_est_comp razon_dejo_est_comp
 
 
 /*(************************************************************************************************************************************************ 
-*------------------------------------------------------------- VIII. HEALTH VARIABLES ---------------------------------------------------------------
+*------------------------------------------------------ VIII. HEALTH / SALUD ---------------------------------------------------------------------
 ************************************************************************************************************************************************)*/
 
-global health_ENCOVI enfermo enfermedad visita razon_no_medico medico_o_quien lugar_consulta pago_consulta cant_pago_consulta mone_pago_consulta ///
-	mes_pago_consulta receto_remedio recibio_remedio donde_remedio pago_remedio mone_pago_remedio mes_pago_remedio pago_estudio pago_examen ///
+global health_ENCOVI enfermo enfermedad enfermedad_o visita razon_no_medico razon_no_medico_o medico_o_quien medico_o_quien_o lugar_consulta lugar_consulta_o pago_consulta cant_pago_consulta mone_pago_consulta ///
+	mes_pago_consulta receto_remedio recibio_remedio donde_remedio donde_remedio_o pago_remedio mone_pago_remedio mes_pago_remedio pago_examen cant_pago_examen ///
 	mone_pago_examen mes_pago_examen remedio_tresmeses cant_remedio_tresmeses mone_remedio_tresmeses mes_remedio_tresmeses seguro_salud ///
 	afiliado_segsalud pagosegsalud quien_pagosegsalud cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
 
@@ -1102,7 +1147,11 @@ gen    enfermo = s8q1==1 & (s8q1!=. & s8q1!=.a)
 		12 = Diabetes
 		13 = Meningitis
 		14 = Otro */
-gen enfermedad = s8q2 if (s8q1!=. & s8q1!=.a) & s8q1==1
+clonevar enfermedad = s8q2 if (s8q1!=. & s8q1!=.a) & s8q1==1
+
+*** Other
+* Otro
+clonevar enfermedad_o = s8q2_os if s8q1==1 & s8q2==14
 
 *** Have you gone to get healthcare in the last 30 days?
 /* s8q3 ¿Ha consultado un servicio de salud (incluida una farmacia) o con un curandero tradicional en los últimos 30 días debido a este problema de salud?: visita
@@ -1121,7 +1170,11 @@ gen    visita = s8q3==1 if s8q1==1 & (s8q3!=. & s8q3!=.a)
 		6 = Hay que esperar mucho tiempo
 		7 = No lo atendieron
 		8 = Otra	*/
-gen    razon_no_medico = s8q4 if (s8q4!=. & s8q4!=.a) & (s8q1==1 & s8q3==2)
+clonevar	razon_no_medico = s8q4 if (s8q4!=. & s8q4!=.a) & (s8q1==1 & s8q3==2)
+
+***Other
+*Otra
+clonevar	razon_no_medico_o = s8q4_os if s9q4==9
 
 *** Who did you mainly consult to treat the sickness or accident?
 /*	s8q5 ¿A quién consultó principalmente para tratar esta enfermedad síntoma o malestar y/o accidente?
@@ -1130,8 +1183,12 @@ gen    razon_no_medico = s8q4 if (s8q4!=. & s8q4!=.a) & (s8q1==1 & s8q3==2)
 		3 = Farmacéutico
 		4 = Curandero, yerbatero o brujo
 		5 = Otro 	*/
-gen    medico_o_quien = s8q5 if (s8q5!=. & s8q5!=.a) & (s8q1==1 & s8q3==1)
-		
+clonevar   medico_o_quien = s8q5 if (s8q5!=. & s8q5!=.a) & (s8q1==1 & s8q3==1)
+
+***Other
+*Otro
+clonevar medico_o_quien_o = s8q5_os if (s8q1==1 & s8q3==1) & s8q5==5
+
 *** Where did you go for healthcare attention?
 /* 	s8q6 ¿Donde acudió para su atención?: lugar_consulta
 		1 = Ambulatorio/clínica popular/ CDI
@@ -1142,33 +1199,37 @@ gen    medico_o_quien = s8q5 if (s8q5!=. & s8q5!=.a) & (s8q1==1 & s8q3==1)
 		6 = Servicio médico en el lugar de trabajo
 		7 = Farmacia
 		8 = Otro	 */
-gen    lugar_consulta = s8q6 if (s8q6!=. & s8q6!=.a) & (s8q1==1 & s8q3==1)
+clonevar lugar_consulta = s8q6 if (s8q6!=. & s8q6!=.a) & (s8q1==1 & s8q3==1)
 
-*** Did you pay for consulting or healthcare attention?
+***Other
+*Otro
+clonevar lugar_consulta_o = s8q6_os if (s8q1==1 & s8q3==1) & s8q6==8
+
+*** Did you pay for consultation or healthcare attention?
 /* 	s8q7 ¿Pagó por consultas o atención médica?: pago_consulta
 	 	1 = si 
 		2 = no  */
-gen    	pago_consulta = s8q7==1 & (s8q1==1 & s8q3==1)
+gen	pago_consulta = s8q7==1 & (s8q1==1 & s8q3==1) & (s8q7!=. & s8q7!=.a)
 
 *** How much did you pay? 
 * 	s8q8a ¿Cuánto pagó?: cant_pago_consulta
-gen    	cant_pago_consulta = s8q8a if s8q1==1 & s8q3==1 & s8q7==1
+clonevar   	cant_pago_consulta = s8q8a if s8q1==1 & s8q3==1 & s8q7==1
 
 *** In which currency did you pay?
 /* 	s8q8b ¿En qué moneda realizó el pago?: mone_pago_consulta
 	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
-gen    	mone_pago_consulta = s8q8b if (s8q8b!=. & s8q8b!=.a) & (s8q1==1 & s8q3==1 & s8q7==1)
+clonevar	mone_pago_consulta = s8q8b if (s8q8b!=. & s8q8b!=.a) & (s8q1==1 & s8q3==1 & s8q7==1)
 
 *** In which month did you pay?
 /* 	s8q8c ¿En qué mes pagó?: mes_pago_consulta
 	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
-gen    mes_pago_consulta = s8q8c if (s8q8c!=. & s8q8c!=.a) & (s8q1==1 & s8q3==1 & s8q7==1)
+clonevar	mes_pago_consulta = s8q8c if (s8q8c!=. & s8q8c!=.a) & (s8q1==1 & s8q3==1 & s8q7==1)
 		
 *** Did you get any medicine prescribed for the illness of accident?
 /* s8q9 ¿Se recetó a algún medicamento para la enferemedad o accidente?: receto_remedio
 		 	1 = Si
 			2 = No */
-gen     receto_remedio = s8q9==1 if (s8q1==1 & s8q3==1)
+gen     receto_remedio = s8q9==1 if (s8q1==1 & s8q3==1) & s8q9!=. & s8q9!=.a
 
 *** How did you get the medicines?
 /* s8q10 ¿Cómo obtuvo los medicamentos?: recibio_remedio
@@ -1178,76 +1239,79 @@ gen     receto_remedio = s8q9==1 if (s8q1==1 & s8q3==1)
 			4 = Compró algunos
 			5 = Recibió algunos gratis y los otros no pudo comprarlos
 			6 = No pudo obtener ninguno */
-gen  	recibio_remedio = s8q10 if (s8q1==1 & s8q9==1) & (s8q10!=. & s8q10!=.a) 
+clonevar 	recibio_remedio = s8q10 if (s8q1==1 & s8q9==1) & (s8q10!=. & s8q10!=.a) 
 
 *** Where did you buy the medicines?
 /* s8q11 ¿Dónde compró los medicamentos?
 			1 = Boticas o farmacias populares
 			2 = Otras farmacias comerciales
-			3 = Institutos de Previsión Social u otras fundaciones ( IPAS-ME, IPSFA, otros)
+			3 = Institutos de Previsión Social u otras fundaciones (IPAS-ME, IPSFA, otros)
 			4 = Otro	*/		
-gen     donde_remedio = s8q11==1 if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
-		
+clonevar    donde_remedio = s8q11 if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
+	
+***Other
+* Otro
+clonevar    donde_remedio_o = s8q11_os if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4) & s8q11==4
+
 *** How much did you pay for the medicines?
 * s8q12a ¿Cuánto pagó por los medicamentos?: pago_remedio
-gen     pago_remedio = s8q12a if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
+clonevar	pago_remedio = s8q12a if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
 
-*** In which currency did you pay?
+*** In which currency did you pay for the medicines?
 /* 	s8q12b ¿En qué moneda realizó el pago?: moneda_pago_remedio
 	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
-gen    	mone_pago_remedio = s8q12b if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
+clonevar   	mone_pago_remedio = s8q12b if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
 
-*** In which month did you pay?
+*** In which month did you pay for the medicines?
 /* 	s8q12c ¿En qué mes pagó?: mes_pago_remedio
 	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
-gen    	mes_pago_remedio = s8q12c if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
+clonevar   	mes_pago_remedio = s8q12c if s8q1==1 & (s8q10==2 | s8q10==3 | s8q10==4)
 
 *** Did you pay for Xrays, lab exams or similar?
-/* s8q13 ¿Pagó por radiografías, exámenes de laboratorio o similares?: pago_estudio
+/* s8q13 ¿Pagó por radiografías, exámenes de laboratorio o similares?: pago_examen
 			1 = Si
 			2 = No 		*/
-gen 	pago_estudio = s8q13==1 if s8q1==1 & s8q3==1 
+gen 	pago_examen = s8q13==1 if s8q1==1 & s8q3==1 & (s8q13!=. & s8q13!=.a)
 			
-*** How much did you pay?
-* s8q14a ¿Cuánto pagó?: pago_examen
-gen     pago_examen = s8q14a if s8q1==1 & s8q3==1 
+*** How much did you pay for Xrays, lab exams or similar?
+* s8q14a ¿Cuánto pagó?: cant_pago_examen
+clonevar     cant_pago_examen = s8q14a if s8q1==1 & s8q3==1 
 
-*** In which currency did you pay?
+*** In which currency did you pay for Xrays, lab exams or similar?
 /* 	s8q14b ¿En qué moneda realizó el pago?: mone_pago_examen
 	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
-gen    	mone_pago_examen = s8q14b if s8q1==1 & s8q3==1 
+clonevar   	mone_pago_examen = s8q14b if s8q1==1 & s8q3==1 
 
-*** In which month did you pay?
+*** In which month did you pay for Xrays, lab exams or similar?
 /* 	s8q14c ¿En qué mes pagó?: mes_pago_examen
 	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
-gen    	mes_pago_examen = s8q14c if s8q1==1 & s8q3==1 
+clonevar   	mes_pago_examen = s8q14c if s8q1==1 & s8q3==1 
 
-*** Although you answered you did not have any health problem, illness or accident in the last month, did you spend money in medicines due to illnesses, accidents or health problems in the last 3 months?
-/*  s8q15 Aunque usted ya indicó que no consultó a ningún personal médico, ¿gastó dinero en los ultimos 3 meses en medicinas por enfermedad, accidente, o quebrantos de salud que tuvo ?
+*** Although you answered you didn't have any health problem, illness or accident in the last month, did you spend money in medicines due to illnesses, accidents or health problems in the last 3 months?
+/*  s8q15 Aunque usted ya indicó que no consultó a ningún personal médico, ¿gastó dinero en los ultimos 3 meses en medicinas por enfermedad, accidente, o quebrantos de salud que tuvo?
 			1 = Si
 			2 = No 		*/
-gen 	remedio_tresmeses = s8q15==1 if s8q1==2
+gen 	remedio_tresmeses = s8q15==1 if s8q1==2 & (s8q15!=. & s8q15!=.a)
 
-*** How much did you pay?
+*** How much did you pay for medicines in the last 3 months?
 * s8q16a ¿Cuánto gastó?: cant_remedio_tresmeses
-gen     cant_remedio_tresmeses = s8q16a if s8q1==2 & s8q15==1
+clonevar    cant_remedio_tresmeses = s8q16a if s8q1==2 & s8q15==1
 
-*** In which currency did you pay?
+*** In which currency did you pay for medicines in the last 3 months?
 /* 	s8q16b ¿En qué moneda realizó el pago?: mone_remedio_tresmeses
 	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
-gen    	mone_remedio_tresmeses = s8q16b if s8q1==2 & s8q15==1
+clonevar   	mone_remedio_tresmeses = s8q16b if s8q1==2 & s8q15==1
 
-*** In which month did you pay?
+*** In which month did you pay for medicines in the last 3 months?
 /* 	s8q16c ¿En qué mes pagó?: mes_remedio_tresmeses
 	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
-gen    	mes_remedio_tresmeses = s8q16c if s8q1==2 & s8q15==1
+clonevar   	mes_remedio_tresmeses = s8q16c if s8q1==2 & s8q15==1
 
 *** Are you affiliated to health insurance?
 /* 	s8q17 ¿Está afiliado a algún seguro medico?: seguro_salud
 			1 = si
 			2 = no	 */
-gen     seguro_salud = 1	if  s8q17==1
-replace seguro_salud = 0	if  s8q17==2
+gen     seguro_salud = s8q17==1	if (s8q17!=. & s8q17!=.a)
 
 *** Which is the main health insurance or that with greatest coverage you are affiliated to?
 /* s8q18: ¿Cuál es el seguro médico principal o de mayor cobertura al cual está afiliado?: afiliado_segsalud
@@ -1256,19 +1320,13 @@ replace seguro_salud = 0	if  s8q17==2
 		3 = Seguro medico contratado por institucion publica
 		4 = Seguro medico contratado por institucion privada
 		5 = Seguro medico privado contratado de forma particular */
-gen 	afiliado_segsalud = s8q18   if s8q17==1 & (s8q18!=. & s8q18!=.a) 
-label 	define afiliado_segsalud ///
-		1 "Instituto Venezolano de los Seguros Sociales (IVSS)" ///
-		2 "Instituto de prevision social publico (IPASME, IPSFA, otros)" ///
-		3 "Seguro medico contratado por institucion publica" ///
-		4 "Seguro medico contratado por institucion privada" ///
-		5 "Seguro medico privado contratado de forma particular"
+clonevar 	afiliado_segsalud = s8q18   if s8q17==1 & (s8q18!=. & s8q18!=.a) 
 
 *** Did you pay for health insurance?
 /* 	s8q19 ¿Pagó por el seguro médico?: pagosegsalud
 		1 = si
 		2 = no	 */
-gen     pagosegsalud = s8q19==1  if s8q17==1
+gen     pagosegsalud = s8q19==1 if s8q17==1 & (s8q19!=. & s8q19!=.a)
 
 *** Who paid for the health insurance?
 /* s8q20 ¿Quién pagó por el seguro médico?: quien_pagosegsalud
@@ -1276,41 +1334,45 @@ gen     pagosegsalud = s8q19==1  if s8q17==1
 		2 = Familiar en el exterior
 		3 = Otro miembro del hogar
 		4 = Otro (especifique) */
-gen     quien_pagosegsalud = s8q19==1  if s8q17==1 & s8q18==5
+clonevar	quien_pagosegsalud = s8q20  if s8q17==1 & s8q18==5
 
-*** How much did you pay?
+*** Other
+* Otro
+clonevar	quien_pagosegsalud_o = s8q20_os  if s8q17==1 & s8q18==5 & s8q20==4
+
+*** How much did you pay for the health insurance?
 * s8q21a ¿Cuál fue el monto pagado por el seguro de salud?: cant_pagosegsalud
-gen     cant_pagosegsalud = s8q21a if s8q19==1
+clonevar	cant_pagosegsalud = s8q21a if s8q19==1 & (s8q21a!=. & s8q21a!=.a)
 
-*** In which currency did you pay?
+*** In which currency did you pay for the health insurance?
 /* 	s8q21b ¿En qué moneda realizó el pago?: mone_pagosegsalud
 	1=bolivares, 2=dolares, 3=euros, 4=colombianos */
-gen    	mone_pagosegsalud = s8q21b if s8q19==1
+clonevar   	mone_pagosegsalud = s8q21b if s8q19==1 & (s8q21b!=. & s8q21b!=.a)
 
-*** In which month did you pay?
+*** In which month did you pay for the health insurance?
 /* 	s8q21c ¿En qué mes pagó?: mes_pagosegsalud
 	1=Enero, 2=Febrero, 3=Marzo, 4=Abril, 5=Mayo, 6=Junio, 7=Julio, 8=Agosto, 9=Septiembre, 10=Octubre, 11=Noviembre, 12=Diciembre */
-gen    	mes_pagosegsalud= s8q21c if s8q19==1
-		
+clonevar   	mes_pagosegsalud = s8q21c if s8q19==1 & (s8q21c!=. & s8q21c!=.a)
+
 
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- IX: LABOR / EMPLEO ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
-como_busco_semana razon_no_busca actividades_inactivos tarea sector_encuesta categ_ocu hstr_ppal trabajo_secundario hstr_todos im_sueldo im_hsextra ///
-im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_sueldo_cant im_hsextra_cant ///
-im_propina_cant im_comision_cant im_ticket_cant im_guarderia_cant im_beca_cant im_hijos_cant im_antiguedad_cant im_transporte_cant im_rendimiento_cant ///
-im_otro_cant i_sueldo_mone i_hsextra_mone i_propina_mone i_comision_mone i_ticket_mone i_guarderia_mone i_beca_mone i_hijos_mone i_antiguedad_mone ///
-i_transporte_mone i_rendimiento_mone i_otro_mone c_sso c_rpv c_spf c_aca c_sps c_otro c_sso_cant c_rpv_cant c_spf_cant c_aca_cant c_sps_cant c_otro_cant ///
-c_sso_mone c_rpv_mone c_spf_mone c_aca_mone c_sps_mone c_otro_mone inm_comida inm_productos inm_transporte inm_vehiculo inm_estaciona inm_telefono ///
-inm_servicios inm_guarderia inm_otro inm_comida_cant inm_productos_cant inm_transporte_cant inm_vehiculo_cant inm_estaciona_cant inm_telefono_cant ///
-inm_servicios_cant inm_guarderia_cant inm_otro_cant inm_comida_mone inm_productos_mone inm_transporte_mone inm_vehiculo_mone inm_estaciona_mone ///
-inm_telefono_mone inm_servicios_mone inm_guarderia_mone inm_otro_mone d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro d_sso_cant d_spf_cant d_isr_cant ///
-d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone im_patron im_patron_cant ///
-im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone i_indep_mes i_indep_mes_cant i_indep_mes_mone g_indep_mes_cant ///
-g_indep_mes_mone razon_menoshs deseamashs buscamashs razon_nobusca cambiotr razon_cambiotr aporta_pension pension_IVSS pension_publi pension_priv pension_otro ///
-aporte_pension cant_aporta_pension mone_aporta_pension 
+global labor_ENCOVI trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
+dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto ///
+como_busco_semana razon_no_busca razon_no_busca_o actividades_inactivos tarea sector_encuesta categ_ocu hstr_ppal trabajo_secundario hstr_todos /// 
+im_sueldo im_hsextra im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_petro ///
+im_sueldo_cant im_hsextra_cant im_propina_cant im_comision_cant im_ticket_cant im_guarderia_cant im_beca_cant im_hijos_cant im_antiguedad_cant im_transporte_cant im_rendimiento_cant im_otro_cant im_petro_cant ///
+im_sueldo_mone im_hsextra_mone im_propina_mone im_comision_mone im_ticket_mone im_guarderia_mone im_beca_mone im_hijos_mone im_antiguedad_mone im_transporte_mone im_rendimiento_mone im_otro_mone ///
+c_sso c_rpv c_spf c_aca c_sps c_otro c_sso_cant c_rpv_cant c_spf_cant c_aca_cant c_sps_cant c_otro_cant c_sso_mone c_rpv_mone c_spf_mone c_aca_mone c_sps_mone c_otro_mone ///
+inm_comida inm_productos inm_transporte inm_vehiculo inm_estaciona inm_telefono inm_servicios inm_guarderia inm_otro ///
+inm_comida_cant inm_productos_cant inm_transporte_cant inm_vehiculo_cant inm_estaciona_cant inm_telefono_cant inm_servicios_cant inm_guarderia_cant inm_otro_cant ///
+inm_comida_mone inm_productos_mone inm_transporte_mone inm_vehiculo_mone inm_estaciona_mone inm_telefono_mone inm_servicios_mone inm_guarderia_mone inm_otro_mone ///
+d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone ///
+im_patron im_patron_cant im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone i_indep_mes i_indep_mes_cant i_indep_mes_mone ///
+g_indep_mes_cant g_indep_mes_mone razon_menoshs razon_menoshs_o deseamashs buscamashs razon_nobusca razon_nobusca_o cambiotr razon_cambiotr razon_cambiotr_o ///
+aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension 
 
 *Notes: interviews done if age>9
 
@@ -1327,7 +1389,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			1 = Realizar una actividad que le proporcionó ingresos
 			2 = Ayudar en las tierras o en el negocio de un familiar o de otra persona
 			3 = No trabajó la semana pasada	 */
-	gen     trabajo_semana_2 = s9q2 if s9q1==2 & (s9q2!=. & s9q2!=.a) 
+	clonevar	trabajo_semana_2 = s9q2 if s9q1==2 & (s9q2!=. & s9q2!=.a) 
 
 	*** Despite you already said you didnt work last week, do you have any job, business, or do you do any activity on your own? 
 	/* 	s9q3 Aunque ya me dijo que no trabajó la semana pasada, ¿tiene algún empleo, negocio o realiza alguna actividad por su cuenta?: trabajo_independiente
@@ -1349,8 +1411,12 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			10 = Nuevo empleo a empezar en 30 días
 			11 = Factores estacionales
 			16 = Otro 	*/
-	gen     razon_no_trabajo = s9q4 if s9q3==1 & (s9q2!=. & s9q2!=.a) 
+	clonevar	razon_no_trabajo = s9q4 if s9q3==1 & (s9q2!=. & s9q2!=.a) 
 		
+	***Other reason
+	*Otra razón
+	clonevar	razon_no_trabajo_o = s9q4_os if s9q4==16
+	
 	*** Last week did you receive wages or benefits? 
 	/* 	s9q5 Durante la semana pasada recibió sueldo o ganancias?: sueldo_semana
 			1 = si
@@ -1369,7 +1435,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			2 = no	*/
 	gen     empezo_negocio = s9q7==1 if (s9q6==2 & s9q3==2 & s9q1==2 & s9q2==3) & (s9q7!=. & s9q7!=.a) 
 
-	*** When was the last time did you did something to find a job or start a business joinlty or alone?
+	*** When was the last time you did something to find a job or start a business jointly or alone?
 	/* s9q8 Cuándo fue la última vez que hizo algo para conseguir trabajo o establecer un negocio solo o asociado? (para quienes no buscaron en las últimas 4 semanas): cuando_buscotr
 			1 = En los últimos 2 meses
 			2 = En los últimos 12 meses
@@ -1387,22 +1453,22 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			6 = Compra de insumos o materia prima
 			7 = Contacto personal
 			8 = Otra diligencia		*/
-	gen     dili_agencia 	= s9q9__1==1 if (s9q6==1 | s9q7==1) & (s9q9__1!=. & s9q9__1!=.a) 
-	gen     dili_aviso 		= s9q9__2==1 if (s9q6==1 | s9q7==1) & (s9q9__2!=. & s9q9__2!=.a) 
-	gen     dili_planilla 	= s9q9__3==1 if (s9q6==1 | s9q7==1) & (s9q9__3!=. & s9q9__3!=.a) 
-	gen     dili_credito 	= s9q9__4==1 if (s9q6==1 | s9q7==1) & (s9q9__4!=. & s9q9__4!=.a) 
-	gen     dili_tramite 	= s9q9__5==1 if (s9q6==1 | s9q7==1) & (s9q9__5!=. & s9q9__5!=.a) 
-	gen     dili_compra 	= s9q9__6==1 if (s9q6==1 | s9q7==1) & (s9q9__6!=. & s9q9__6!=.a) 
-	gen     dili_contacto 	= s9q9__7==1 if (s9q6==1 | s9q7==1) & (s9q9__7!=. & s9q9__7!=.a) 
-	gen     dili_otro	 	= s9q9__8==1 if (s9q6==1 | s9q7==1) & (s9q9__8!=. & s9q9__8!=.a) 
+	clonevar dili_agencia 	= s9q9__1 if (s9q6==1 | s9q7==1) & (s9q9__1!=. & s9q9__1!=.a) 
+	clonevar dili_aviso 	= s9q9__2 if (s9q6==1 | s9q7==1) & (s9q9__2!=. & s9q9__2!=.a) 
+	clonevar dili_planilla 	= s9q9__3 if (s9q6==1 | s9q7==1) & (s9q9__3!=. & s9q9__3!=.a) 
+	clonevar dili_credito 	= s9q9__4 if (s9q6==1 | s9q7==1) & (s9q9__4!=. & s9q9__4!=.a) 
+	clonevar dili_tramite 	= s9q9__5 if (s9q6==1 | s9q7==1) & (s9q9__5!=. & s9q9__5!=.a) 
+	clonevar dili_compra 	= s9q9__6 if (s9q6==1 | s9q7==1) & (s9q9__6!=. & s9q9__6!=.a) 
+	clonevar dili_contacto 	= s9q9__7 if (s9q6==1 | s9q7==1) & (s9q9__7!=. & s9q9__7!=.a) 
+	clonevar dili_otro	 	= s9q9__8 if (s9q6==1 | s9q7==1) & (s9q9__8!=. & s9q9__8!=.a) 
 	
-	*** Have you carried out any of these proceedings last week?
+	*** Have you carried out any of those proceedings last week?
 	/* s9q10 ¿Realizó alguna de esas diligencias la semana pasada?: como_busco_semana
 			1 = si
 			2 = no	*/
 	gen     como_busco_semana = s9q10==1 if (s9q9__1!=. | s9q9__2!=. | s9q9__3!=. | s9q9__4!=. | s9q9__5!=. | s9q9__6!=. | s9q9__7!=. | s9q9__8!=.) & (s9q10!=. & s9q10!=.a) 
 
-	*** Have you carried out any of these proceedings in that period? (4 weeks)
+	*** Why aren't you currently looking for a job?
 	/* s9q11 ¿Por cuál de estos motivos no está buscando trabajo actualmente?: razon_no_busca
 			1 = Está cansado de buscar trabajo
 			2 = No encuentra el trabajo apropiado
@@ -1413,8 +1479,12 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			7 = No tiene quién le cuide los niños
 			8 = Está enfermo/motivos de salud
 			9 = Otro motivo ? Especifique */
-	gen     razon_no_busca = s9q11 if (s9q8==1|2|3|4) & (s9q11!=. & s9q11!=.a) 
+	clonevar  razon_no_busca = s9q11 if inlist(s9q8,1,2,3,4) & (s9q11!=. & s9q11!=.a) 
 
+	***Other reason
+	*Otra razón
+	clonevar	razon_no_busca_o = s9q11_os if s9q11==9
+	
 	*** What are you doing right now? (only for those who did not work)
 	/* s9q12 ¿Qué es lo que está haciendo actualmente? (sólo para aquellos que no trabajaron): actividades_inactivos
 			1 = Estudiando
@@ -1428,7 +1498,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			9 = Trabajo voluntario
 			10 = Trabajo caridad
 			11 = Actividades culturales o de ocio	*/
-	gen     actividades_inactivos = s9q12 if (s9q11==1|2|3|4|5|6|7|8|9) & (s9q12!=. & s9q12!=.a) 
+	clonevar	actividades_inactivos = s9q12 if (s9q11==1|2|3|4|5|6|7|8|9) & (s9q12!=. & s9q12!=.a) 
 
 * For all the economically active
 
@@ -1444,7 +1514,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			8 = Operador de instalaciones fijas y máquinas y maquinarias
 			9 = Ocupaciones elementales
 			10 = Ocupaciones militares */
-	gen     tarea = s9q13 		if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q13!=. & s9q13!=.a) // the first parenthesis means being economically active
+	clonevar	tarea = s9q13 		if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q13!=. & s9q13!=.a) // the first parenthesis means being economically active
 
 	*** What does the business, institution or firm in which you work do?
 	/* s9q14 ¿A que se dedica el negocio, organismo o empresa en la que trabaja/desempaña su trabajo principal?: sector_encuesta
@@ -1458,10 +1528,10 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			8 = Entidades financieras y de seguros, inmobiliarias, profesionales, cientificas y tecnicas; y servicios administrativos de apoyo
 			9 = Administración publica y defensa, enseñanza, salud, asistencia social, arte, entretenimiento, embajadas
 			10 = Otras actividades de servicios como reparaciones, limpieza, peluqueria, funeraria y servicio domestico	*/
-	gen 	sector_encuesta = s9q14 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q14!=. & s9q14!=.a) // the first parenthesis means being economically active
+	clonevar 	sector_encuesta = s9q14 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q14!=. & s9q14!=.a) // the first parenthesis means being economically active
 
-	*** In your work you are...
-	/* s9q15 En su trabajo se desempña como...: categ_ocu
+	*** In your work you work as...
+	/* s9q15 En su trabajo se desempeña como...: categ_ocu
 			1 = Empleado u obrero en el sector publico
 				*Obs: 1 used to be divided in 2 before, thats why number 2 is skipped.
 			3 = Empleado u obrero en empresa privada		
@@ -1471,12 +1541,12 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			7 = Miembro de cooperativas
 			8 = Ayudante familiar remunerado/no remunerado
 			9 = Servicio domestico		*/
-	gen 	categ_ocu = s9q15 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q15!=. & s9q15!=.a) // the first parenthesis means being economically active
+	clonevar 	categ_ocu = s9q15 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q15!=. & s9q15!=.a) // the first parenthesis means being economically active
 	*Obs. CAPI1: s9q15==(1|2|3|4|7|8|9) i.e. workers not self-employed or employer
 
 	*** How many hours did you work last week in your main occupation?
 	/* s9q16 ¿Cuántas horas trabajó durante la semana pasada en su ocupación principal?: hstr_ppal	*/
-	gen     hstr_ppal = s9q16 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q16!=. & s9q16!=.a) 
+	clonevar	hstr_ppal = s9q16 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q16!=. & s9q16!=.a) 
 
 	*** Besides your main occupation, did you do any other activity through which you received income, such as selling things, contracted work, etc?
 	/* s9q17 Además de su trabajo principal, ¿realizó la semana pasada alguna otra actividad por la que percibió ingresos tales como, venta de artículos, trabajos contratados, etc?: trabajo_secundario
@@ -1487,7 +1557,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 	*** How many hours do you normally work weekly in all your jobs or businesses?
 	/* s9q18 ¿Cuántas horas trabaja normalmente a la semana en todos sus trabajos o negocios?: hstr_todos */
 		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	gen     hstr_todos = s9q18 if s9q17==1 & (s9q18!=. & s9q18!=.a) 
+	clonevar hstr_todos = s9q18 if s9q17==1 & (s9q18!=. & s9q18!=.a) 
 
 		*Problem: it should not be possible but there is at least one case in which the total hours worked appears to be greater than the hours worked for the main job
 		
@@ -1509,52 +1579,54 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 				12 = Otros bonos y compensaciones */
 			*Note: im stands for ingreso monetario
 			*Note2: For those not self-employed or employers (s9q15==1|3|7|8|9)	// CAPI1=true
-	gen     im_sueldo 		= s9q19__1==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__1!=. & s9q19__1!=.a) 
-	gen     im_hsextra 		= s9q19__2==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__2!=. & s9q19__2!=.a) 
-	gen     im_propina 		= s9q19__3==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__3!=. & s9q19__3!=.a) 
-	gen     im_comision	 	= s9q19__4==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__4!=. & s9q19__4!=.a) 
-	gen 	im_ticket		= s9q19__5==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__5!=. & s9q19__5!=.a) 
-	gen 	im_guarderia	= s9q19__6==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__6!=. & s9q19__6!=.a) 
-	gen 	im_beca			= s9q19__7==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__7!=. & s9q19__7!=.a) 
-	gen 	im_hijos		= s9q19__8==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__8!=. & s9q19__8!=.a) 
-	gen 	im_antiguedad 	= s9q19__9==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__9!=. & s9q19__9!=.a) 
-	gen 	im_transporte	= s9q19__10==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__10!=. & s9q19__10!=.a) 
-	gen 	im_rendimiento	= s9q19__11==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__11!=. & s9q19__11!=.a) 
-	gen 	im_otro			= s9q19__12==1 if s9q15==(1|2|3|4|7|8|9) & (s9q19__12!=. & s9q19__12!=.a) 
-		
+	clonevar	im_sueldo 		= s9q19__1 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__1!=. & s9q19__1!=.a) 
+	clonevar	im_hsextra 		= s9q19__2 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__2!=. & s9q19__2!=.a) 
+	clonevar	im_propina 		= s9q19__3 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__3!=. & s9q19__3!=.a) 
+	clonevar	im_comision	 	= s9q19__4 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__4!=. & s9q19__4!=.a) 
+	clonevar	im_ticket		= s9q19__5 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__5!=. & s9q19__5!=.a) 
+	clonevar	im_guarderia	= s9q19__6 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__6!=. & s9q19__6!=.a) 
+	clonevar	im_beca			= s9q19__7 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__7!=. & s9q19__7!=.a) 
+	clonevar	im_hijos		= s9q19__8 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__8!=. & s9q19__8!=.a) 
+	clonevar	im_antiguedad 	= s9q19__9 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__9!=. & s9q19__9!=.a) 
+	clonevar	im_transporte	= s9q19__10 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__10!=. & s9q19__10!=.a) 
+	clonevar	im_rendimiento	= s9q19__11 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__11!=. & s9q19__11!=.a) 
+	clonevar	im_otro			= s9q19__12 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__12!=. & s9q19__12!=.a) 
+	clonevar	im_petro		= s9q19_petro if (s9q19_petro!=. & s9q19_petro!=.a) // Does the petro question also haven "inlist(s9q15,1,2,3,4,7,8,9)"? Does not appear in questionnaire 
+	
 	*** Amount received (1 variable for each of the 12 options)
 	* s9q19a_* Monto recibido: im_*_cant
 	* Note: cant stands for cantidad/quantity
-	gen     im_sueldo_cant 		= s9q19a_1 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_1!=. & s9q19a_1!=.a) 
-	gen     im_hsextra_cant 	= s9q19a_2 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_2!=. & s9q19a_2!=.a) 
-	gen     im_propina_cant		= s9q19a_3 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_3!=. & s9q19a_3!=.a) 
-	gen     im_comision_cant	= s9q19a_4 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_4!=. & s9q19a_4!=.a) 
-	gen 	im_ticket_cant		= s9q19a_5 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_5!=. & s9q19a_5!=.a) 
-	gen 	im_guarderia_cant 	= s9q19a_6 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_6!=. & s9q19a_6!=.a) 
-	gen 	im_beca_cant		= s9q19a_7 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_7!=. & s9q19a_7!=.a) 
-	gen 	im_hijos_cant		= s9q19a_8 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_8!=. & s9q19a_8!=.a) 
-	gen 	im_antiguedad_cant	= s9q19a_9 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_9!=. & s9q19a_9!=.a) 
-	gen 	im_transporte_cant	= s9q19a_10 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_10!=. & s9q19a_10!=.a) 
-	gen 	im_rendimiento_cant	= s9q19a_11 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_11!=. & s9q19a_11!=.a) 
-	gen 	im_otro_cant		= s9q19a_12 if s9q15==(1|2|3|4|7|8|9) & (s9q19a_12!=. & s9q19a_12!=.a) 
-
+	clonevar    im_sueldo_cant 		= s9q19a_1 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_1!=. & s9q19a_1!=.a) 
+	clonevar    im_hsextra_cant 	= s9q19a_2 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_2!=. & s9q19a_2!=.a) 
+	clonevar    im_propina_cant		= s9q19a_3 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_3!=. & s9q19a_3!=.a) 
+	clonevar    im_comision_cant	= s9q19a_4 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_4!=. & s9q19a_4!=.a) 
+	clonevar 	im_ticket_cant		= s9q19a_5 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_5!=. & s9q19a_5!=.a) 
+	clonevar 	im_guarderia_cant 	= s9q19a_6 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_6!=. & s9q19a_6!=.a) 
+	clonevar 	im_beca_cant		= s9q19a_7 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_7!=. & s9q19a_7!=.a) 
+	clonevar 	im_hijos_cant		= s9q19a_8 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_8!=. & s9q19a_8!=.a) 
+	clonevar 	im_antiguedad_cant	= s9q19a_9 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_9!=. & s9q19a_9!=.a) 
+	clonevar 	im_transporte_cant	= s9q19a_10 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_10!=. & s9q19a_10!=.a) 
+	clonevar 	im_rendimiento_cant	= s9q19a_11 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_11!=. & s9q19a_11!=.a) 
+	clonevar 	im_otro_cant		= s9q19a_12 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_12!=. & s9q19a_12!=.a) 
+	clonevar	im_petro_cant		= s9q19_petromonto if (s9q19_petromonto!=. & s9q19_petromonto!=.a) // Does the petro question also haven "inlist(s9q15,1,2,3,4,7,8,9)"? Does not appear in questionnaire 
+	
 	*** In which currency? (1 variable for each of the 12 options)
-	* s9q19b_* En qué moneda?: i_*_mone
+	* s9q19b_* En qué moneda?: im_*_mone
 	* 1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos
-	gen     i_sueldo_mone 		= s9q19b_1 if s9q19__1!=. & (s9q19b_1!=. & s9q19b_1!=.a) 
-	gen     i_hsextra_mone 		= s9q19b_2 if s9q19__2!=. & (s9q19b_2!=. & s9q19b_2!=.a) 
-	gen     i_propina_mone		= s9q19b_3 if s9q19__3!=. & (s9q19b_3!=. & s9q19b_3!=.a) 
-	gen     i_comision_mone		= s9q19b_4 if s9q19__4!=. & (s9q19b_4!=. & s9q19b_4!=.a) 
-	gen 	i_ticket_mone		= s9q19b_5 if s9q19__5!=. & (s9q19b_5!=. & s9q19b_5!=.a) 
-	gen 	i_guarderia_mone 	= s9q19b_6 if s9q19__6!=. & (s9q19b_6!=. & s9q19b_6!=.a) 
-	gen 	i_beca_mone			= s9q19b_7 if s9q19__7!=. & (s9q19b_7!=. & s9q19b_7!=.a) 
-	gen 	i_hijos_mone		= s9q19b_8 if s9q19__8!=. & (s9q19b_8!=. & s9q19b_8!=.a) 
-	gen 	i_antiguedad_mone	= s9q19b_9 if s9q19__9!=. & (s9q19b_9!=. & s9q19b_9!=.a) 
-	gen 	i_transporte_mone	= s9q19b_10 if s9q19__10!=. & (s9q19b_10!=. & s9q19b_10!=.a) 
-	gen 	i_rendimiento_mone 	= s9q19b_11 if s9q19__11!=. & (s9q19b_11!=. & s9q19b_11!=.a) 
-	gen 	i_otro_mone			= s9q19b_12 if s9q19__12!=. & (s9q19b_12!=. & s9q19b_12!=.a)
+	clonevar    im_sueldo_mone 		= s9q19b_1 if s9q19__1!=. & (s9q19b_1!=. & s9q19b_1!=.a) 
+	clonevar    im_hsextra_mone 	= s9q19b_2 if s9q19__2!=. & (s9q19b_2!=. & s9q19b_2!=.a) 
+	clonevar    im_propina_mone		= s9q19b_3 if s9q19__3!=. & (s9q19b_3!=. & s9q19b_3!=.a) 
+	clonevar    im_comision_mone	= s9q19b_4 if s9q19__4!=. & (s9q19b_4!=. & s9q19b_4!=.a) 
+	clonevar 	im_ticket_mone		= s9q19b_5 if s9q19__5!=. & (s9q19b_5!=. & s9q19b_5!=.a) 
+	clonevar 	im_guarderia_mone 	= s9q19b_6 if s9q19__6!=. & (s9q19b_6!=. & s9q19b_6!=.a) 
+	clonevar 	im_beca_mone		= s9q19b_7 if s9q19__7!=. & (s9q19b_7!=. & s9q19b_7!=.a) 
+	clonevar 	im_hijos_mone		= s9q19b_8 if s9q19__8!=. & (s9q19b_8!=. & s9q19b_8!=.a) 
+	clonevar 	im_antiguedad_mone	= s9q19b_9 if s9q19__9!=. & (s9q19b_9!=. & s9q19b_9!=.a) 
+	clonevar 	im_transporte_mone	= s9q19b_10 if s9q19__10!=. & (s9q19b_10!=. & s9q19b_10!=.a) 
+	clonevar 	im_rendimiento_mone = s9q19b_11 if s9q19__11!=. & (s9q19b_11!=. & s9q19b_11!=.a) 
+	clonevar 	im_otro_mone		= s9q19b_12 if s9q19__12!=. & (s9q19b_12!=. & s9q19b_12!=.a)
 
-	*** With respect to last month, did you receive in your jobs contributions from your employer to social security for any of the folowing concepts? (each one is a dummy)
+	*** With respect to last month, did you receive in your jobs contributions from your employer to social security for any of the following concepts? (each one is a dummy)
 	/* s9q20__* ¿Con respecto al mes pasado recibió en su trabajo u otros empleos, contribuciones de los patronos a la seguridad social por los siguientes conceptos?: c_*
 				1 = Seguro social obligatorio
 				2 = Régimen de prestaciones Vivienda y hábitat
@@ -1563,31 +1635,31 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 				5 = Contribuciones al sistema privado de seguros
 				6 = Otras contribuciones */
 			* Note: For those not self-employed or employers (s9q15==1|3|7|8|9) // CAPI1=true	
-	gen     c_sso 		= s9q20__1==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__1!=. & s9q20__1!=.a) 
-	gen     c_rpv 		= s9q20__2==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__2!=. & s9q20__2!=.a) 
-	gen     c_spf 		= s9q20__3==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__3!=. & s9q20__3!=.a) 
-	gen     c_aca	 	= s9q20__4==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__4!=. & s9q20__4!=.a) 
-	gen 	c_sps		= s9q20__5==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__5!=. & s9q20__5!=.a) 
-	gen 	c_otro		= s9q20__6==1 if s9q15==(1|2|3|4|7|8|9) & (s9q20__6!=. & s9q20__6!=.a) 
+	clonevar    c_sso 		= s9q20__1 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20__1!=. & s9q20__1!=.a) 
+	clonevar    c_rpv 		= s9q20__2 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20__2!=. & s9q20__2!=.a) 
+	clonevar    c_spf 		= s9q20__3 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20__3!=. & s9q20__3!=.a) 
+	clonevar    c_aca	 	= s9q20__4 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20__4!=. & s9q20__4!=.a) 
+	clonevar 	c_sps		= s9q20__5 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20__5!=. & s9q20__5!=.a) 
+	clonevar 	c_otro		= s9q20__6 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20__6!=. & s9q20__6!=.a) 
 		
 	*** Amount received (1 variable for each of the 6 options)
 	* s9q20a_* Monto recibido: c_*_cant
-	gen     c_sso_cant 		= s9q20a_1 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_1!=. & s9q20a_1!=.a) 
-	gen     c_rpv_cant 		= s9q20a_2 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_2!=. & s9q20a_2!=.a) 
-	gen     c_spf_cant  	= s9q20a_3 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_3!=. & s9q20a_3!=.a) 
-	gen     c_aca_cant 	 	= s9q20a_4 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_4!=. & s9q20a_4!=.a) 
-	gen 	c_sps_cant 		= s9q20a_5 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_5!=. & s9q20a_5!=.a) 
-	gen 	c_otro_cant 	= s9q20a_6 if s9q15==(1|2|3|4|7|8|9) & (s9q20a_6!=. & s9q20a_6!=.a)
+	clonevar    c_sso_cant 	= s9q20a_1 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20a_1!=. & s9q20a_1!=.a) 
+	clonevar    c_rpv_cant 	= s9q20a_2 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20a_2!=. & s9q20a_2!=.a) 
+	clonevar    c_spf_cant  = s9q20a_3 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20a_3!=. & s9q20a_3!=.a) 
+	clonevar    c_aca_cant 	= s9q20a_4 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20a_4!=. & s9q20a_4!=.a) 
+	clonevar 	c_sps_cant 	= s9q20a_5 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20a_5!=. & s9q20a_5!=.a) 
+	clonevar 	c_otro_cant = s9q20a_6 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q20a_6!=. & s9q20a_6!=.a)
 
 	*** In which currency? (1 variable for each of the 12 options)
 	* s9q20b_* En qué moneda?: c_*_mone
 	* 1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos
-	gen     c_sso_mone 		= s9q20b_1 if s9q20__1!=. & (s9q20b_1!=. & s9q20b_1!=.a) 
-	gen     c_rpv_mone 		= s9q20b_2 if s9q20__2!=. & (s9q20b_2!=. & s9q20b_2!=.a) 
-	gen     c_spf_mone  	= s9q20b_3 if s9q20__3!=. & (s9q20b_3!=. & s9q20b_3!=.a) 
-	gen     c_aca_mone 	 	= s9q20b_4 if s9q20__4!=. & (s9q20b_4!=. & s9q20b_4!=.a) 
-	gen 	c_sps_mone 		= s9q20b_5 if s9q20__5!=. & (s9q20b_5!=. & s9q20b_5!=.a) 
-	gen 	c_otro_mone 	= s9q20b_6 if s9q20__6!=. & (s9q20b_6!=. & s9q20b_6!=.a)
+	clonevar    c_sso_mone 	= s9q20b_1 if s9q20__1!=. & (s9q20b_1!=. & s9q20b_1!=.a) 
+	clonevar    c_rpv_mone 	= s9q20b_2 if s9q20__2!=. & (s9q20b_2!=. & s9q20b_2!=.a) 
+	clonevar    c_spf_mone  = s9q20b_3 if s9q20__3!=. & (s9q20b_3!=. & s9q20b_3!=.a) 
+	clonevar    c_aca_mone 	= s9q20b_4 if s9q20__4!=. & (s9q20b_4!=. & s9q20b_4!=.a) 
+	clonevar 	c_sps_mone 	= s9q20b_5 if s9q20__5!=. & (s9q20b_5!=. & s9q20b_5!=.a) 
+	clonevar 	c_otro_mone = s9q20b_6 if s9q20__6!=. & (s9q20b_6!=. & s9q20b_6!=.a)
 
 	*** With respect to last month, did you receive any of the following benefits in your work or other jobs? (each one is a dummy)
 	/* s9q21__* ¿Con respecto al mes pasado, recibió alguno de los siguientes beneficios en su trabajo u otros empleos? 
@@ -1602,40 +1674,40 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 				9 = Otros beneficios	*/
 		* Note: For those not self-employed or employers (s9q15==1|3|7|8|9)	// CAPI1=true
 		* Note 2: inm stands for ingreso no monetario
-	gen     inm_comida 			= s9q21__1==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__1!=. & s9q21__1!=.a) 
-	gen     inm_productos 		= s9q21__2==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__2!=. & s9q21__2!=.a) 
-	gen     inm_transporte 		= s9q21__3==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__3!=. & s9q21__3!=.a) 
-	gen     inm_vehiculo	 	= s9q21__4==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__4!=. & s9q21__4!=.a) 
-	gen 	inm_estaciona		= s9q21__5==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__5!=. & s9q21__5!=.a) 
-	gen 	inm_telefono		= s9q21__6==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__6!=. & s9q21__6!=.a) 
-	gen 	inm_servicios		= s9q21__7==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__7!=. & s9q21__7!=.a) 
-	gen 	inm_guarderia		= s9q21__8==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__8!=. & s9q21__8!=.a) 
-	gen 	inm_otro	 		= s9q21__9==1 if s9q15==(1|2|3|4|7|8|9) & (s9q21__9!=. & s9q21__9!=.a) 
+	clonevar	inm_comida 			= s9q21__1 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__1!=. & s9q21__1!=.a) 
+	clonevar    inm_productos 		= s9q21__2 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__2!=. & s9q21__2!=.a) 
+	clonevar    inm_transporte 		= s9q21__3 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__3!=. & s9q21__3!=.a) 
+	clonevar    inm_vehiculo	 	= s9q21__4 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__4!=. & s9q21__4!=.a) 
+	clonevar 	inm_estaciona		= s9q21__5 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__5!=. & s9q21__5!=.a) 
+	clonevar 	inm_telefono		= s9q21__6 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__6!=. & s9q21__6!=.a) 
+	clonevar 	inm_servicios		= s9q21__7 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__7!=. & s9q21__7!=.a) 
+	clonevar 	inm_guarderia		= s9q21__8 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__8!=. & s9q21__8!=.a) 
+	clonevar 	inm_otro	 		= s9q21__9 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21__9!=. & s9q21__9!=.a) 
 		
 	*** Amount received, or estimation of how much they would have paid for the benefit (1 variable for each of the 9 options)
 	* s9q21a_*: Monto recibido (Si no percibe el beneficio en dinero, estime cuánto tendría que haber pagado por ese concepto (p.e. pago de guardería infantil, comedor en la empresa o transporte))
-	gen     inm_comida_cant 	= s9q21a_1 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_1!=. & s9q21a_1!=.a) 
-	gen     inm_productos_cant 	= s9q21a_2 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_2!=. & s9q21a_2!=.a) 
-	gen     inm_transporte_cant	= s9q21a_3 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_3!=. & s9q21a_3!=.a) 
-	gen     inm_vehiculo_cant	= s9q21a_4 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_4!=. & s9q21a_4!=.a) 
-	gen 	inm_estaciona_cant	= s9q21a_5 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_5!=. & s9q21a_5!=.a) 
-	gen 	inm_telefono_cant 	= s9q21a_6 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_6!=. & s9q21a_6!=.a) 
-	gen 	inm_servicios_cant	= s9q21a_7 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_7!=. & s9q21a_7!=.a) 
-	gen 	inm_guarderia_cant	= s9q21a_8 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_8!=. & s9q21a_8!=.a) 
-	gen 	inm_otro_cant 		= s9q21a_9 if s9q15==(1|2|3|4|7|8|9) & (s9q21a_9!=. & s9q21a_9!=.a) 
+	clonevar    inm_comida_cant 	= s9q21a_1 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_1!=. & s9q21a_1!=.a) 
+	clonevar    inm_productos_cant 	= s9q21a_2 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_2!=. & s9q21a_2!=.a) 
+	clonevar    inm_transporte_cant	= s9q21a_3 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_3!=. & s9q21a_3!=.a) 
+	clonevar    inm_vehiculo_cant	= s9q21a_4 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_4!=. & s9q21a_4!=.a) 
+	clonevar 	inm_estaciona_cant	= s9q21a_5 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_5!=. & s9q21a_5!=.a) 
+	clonevar 	inm_telefono_cant 	= s9q21a_6 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_6!=. & s9q21a_6!=.a) 
+	clonevar 	inm_servicios_cant	= s9q21a_7 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_7!=. & s9q21a_7!=.a) 
+	clonevar 	inm_guarderia_cant	= s9q21a_8 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_8!=. & s9q21a_8!=.a) 
+	clonevar 	inm_otro_cant 		= s9q21a_9 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q21a_9!=. & s9q21a_9!=.a) 
 
 	*** In which currency? (1 variable for each of the 12 options)
 	* s9q21b_* En qué moneda?: inm_*_moneda
 	* 1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos
-	gen     inm_comida_mone 	= s9q21b_1 if s9q21__1!=. & (s9q21b_1!=. & s9q21b_1!=.a) 
-	gen     inm_productos_mone 	= s9q21b_2 if s9q21__2!=. & (s9q21b_2!=. & s9q21b_2!=.a) 
-	gen     inm_transporte_mone	= s9q21b_3 if s9q21__3!=. & (s9q21b_3!=. & s9q21b_3!=.a) 
-	gen     inm_vehiculo_mone	= s9q21b_4 if s9q21__4!=. & (s9q21b_4!=. & s9q21b_4!=.a) 
-	gen 	inm_estaciona_mone	= s9q21b_5 if s9q21__5!=. & (s9q21b_5!=. & s9q21b_5!=.a) 
-	gen 	inm_telefono_mone 	= s9q21b_6 if s9q21__6!=. & (s9q21b_6!=. & s9q21b_6!=.a) 
-	gen 	inm_servicios_mone	= s9q21b_7 if s9q21__7!=. & (s9q21b_7!=. & s9q21b_7!=.a) 
-	gen 	inm_guarderia_mone	= s9q21b_8 if s9q21__8!=. & (s9q21b_8!=. & s9q21b_8!=.a) 
-	gen 	inm_otro_mone		= s9q21b_9 if s9q21__9!=. & (s9q21b_9!=. & s9q21b_9!=.a)
+	clonevar    inm_comida_mone 	= s9q21b_1 if s9q21__1!=. & (s9q21b_1!=. & s9q21b_1!=.a) 
+	clonevar    inm_productos_mone 	= s9q21b_2 if s9q21__2!=. & (s9q21b_2!=. & s9q21b_2!=.a) 
+	clonevar    inm_transporte_mone	= s9q21b_3 if s9q21__3!=. & (s9q21b_3!=. & s9q21b_3!=.a) 
+	clonevar    inm_vehiculo_mone	= s9q21b_4 if s9q21__4!=. & (s9q21b_4!=. & s9q21b_4!=.a) 
+	clonevar 	inm_estaciona_mone	= s9q21b_5 if s9q21__5!=. & (s9q21b_5!=. & s9q21b_5!=.a) 
+	clonevar 	inm_telefono_mone 	= s9q21b_6 if s9q21__6!=. & (s9q21b_6!=. & s9q21b_6!=.a) 
+	clonevar 	inm_servicios_mone	= s9q21b_7 if s9q21__7!=. & (s9q21b_7!=. & s9q21b_7!=.a) 
+	clonevar 	inm_guarderia_mone	= s9q21b_8 if s9q21__8!=. & (s9q21b_8!=. & s9q21b_8!=.a) 
+	clonevar 	inm_otro_mone		= s9q21b_9 if s9q21__9!=. & (s9q21b_9!=. & s9q21b_9!=.a)
 
 	*** With respect to last month, how much was discounted from your monthly labor income as part of…? (each one is a dummy)
 	/* s9q22__* Con respecto al mes pasado, ¿cuánto fue descontado del ingreso mensual de en su empleo por concepto de…?: d_*
@@ -1647,35 +1719,35 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 				6 = Régimen de Prestaciones de Vivienda y Hábitat
 				7 = Otros	*/
 		* Note: For those not self-employed or employers (s9q15==1|3|7|8|9)	// CAPI1=true
-	gen     d_sso	 	= s9q22__1==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__1!=. & s9q22__1!=.a) 
-	gen     d_spf	 	= s9q22__2==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__2!=. & s9q22__2!=.a) 
-	gen     d_isr 		= s9q22__3==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__3!=. & s9q22__3!=.a) 
-	gen     d_cah		= s9q22__4==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__4!=. & s9q22__4!=.a) 
-	gen 	d_cpr		= s9q22__5==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__5!=. & s9q22__5!=.a) 
-	gen 	d_rpv		= s9q22__6==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__6!=. & s9q22__6!=.a) 
-	gen 	d_otro		= s9q22__7==1 if s9q15==(1|2|3|4|7|8|9) & (s9q22__7!=. & s9q22__7!=.a) 
+	clonevar    d_sso	 	= s9q22__1 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22__1!=. & s9q22__1!=.a) 
+	clonevar    d_spf	 	= s9q22__2 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22__2!=. & s9q22__2!=.a) 
+	clonevar    d_isr 		= s9q22__3 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22__3!=. & s9q22__3!=.a) 
+	clonevar    d_cah		= s9q22__4 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22__4!=. & s9q22__4!=.a) 
+	clonevar 	d_cpr		= s9q22__5 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22__5!=. & s9q22__5!=.a) 
+	clonevar 	d_rpv		= s9q22__6 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22__6!=. & s9q22__6!=.a) 
+	clonevar 	d_otro		= s9q22__7 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22__7!=. & s9q22__7!=.a) 
 		
-	*** Amount received, or estimation of how much they would have paid for the benefit (1 variable for each of the 9 options)
-	* s9q22a_*: Monto recibido (Si no percibe el beneficio en dinero, estime cuánto tendría que haber pagado por ese concepto (p.e. pago de guardería infantil, comedor en la empresa o transporte))
-	gen     d_sso_cant 	= s9q22a_1 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_1!=. & s9q22a_1!=.a) 
-	gen     d_spf_cant 	= s9q22a_2 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_2!=. & s9q22a_2!=.a) 
-	gen     d_isr_cant 	= s9q22a_3 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_3!=. & s9q22a_3!=.a) 
-	gen     d_cah_cant 	= s9q22a_4 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_4!=. & s9q22a_4!=.a) 
-	gen 	d_cpr_cant 	= s9q22a_5 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_5!=. & s9q22a_5!=.a) 
-	gen 	d_rpv_cant  = s9q22a_6 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_6!=. & s9q22a_6!=.a) 
-	gen 	d_otro_cant = s9q22a_7 if s9q15==(1|2|3|4|7|8|9) & (s9q22a_7!=. & s9q22a_7!=.a) 
+	*** Amount discounted
+	* s9q22a_*: Monto descontado
+	clonevar    d_sso_cant 	= s9q22a_1 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22a_1!=. & s9q22a_1!=.a) 
+	clonevar    d_spf_cant 	= s9q22a_2 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22a_2!=. & s9q22a_2!=.a) 
+	clonevar    d_isr_cant 	= s9q22a_3 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22a_3!=. & s9q22a_3!=.a) 
+	clonevar    d_cah_cant 	= s9q22a_4 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22a_4!=. & s9q22a_4!=.a) 
+	clonevar 	d_cpr_cant 	= s9q22a_5 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22a_5!=. & s9q22a_5!=.a) 
+	clonevar 	d_rpv_cant  = s9q22a_6 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22a_6!=. & s9q22a_6!=.a) 
+	clonevar 	d_otro_cant = s9q22a_7 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q22a_7!=. & s9q22a_7!=.a) 
 
 	*** In which currency? (1 variable for each of the 7 options)
 	/* s9q22b_* En qué moneda?: d_*_moneda
 		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
-	gen     d_sso_mone 	= s9q22b_1 if s9q22__1!=. & (s9q22b_1!=. & s9q22b_1!=.a) 
-	gen     d_spf_mone 	= s9q22b_2 if s9q22__2!=. & (s9q22b_2!=. & s9q22b_2!=.a) 
-	gen     d_isr_mone	= s9q22b_3 if s9q22__3!=. & (s9q22b_3!=. & s9q22b_3!=.a) 
-	gen     d_cah_mone	= s9q22b_4 if s9q22__4!=. & (s9q22b_4!=. & s9q22b_4!=.a) 
-	gen 	d_cpr_mone	= s9q22b_5 if s9q22__5!=. & (s9q22b_5!=. & s9q22b_5!=.a) 
-	gen 	d_rpv_mone 	= s9q22b_6 if s9q22__6!=. & (s9q22b_6!=. & s9q22b_6!=.a) 
-	gen 	d_otro_mone	= s9q22b_7 if s9q22__7!=. & (s9q22b_7!=. & s9q22b_7!=.a)
-
+	clonevar    d_sso_mone 	= s9q22b_1 if s9q22__1!=. & (s9q22b_1!=. & s9q22b_1!=.a) 
+	clonevar    d_spf_mone 	= s9q22b_2 if s9q22__2!=. & (s9q22b_2!=. & s9q22b_2!=.a) 
+	clonevar    d_isr_mone	= s9q22b_3 if s9q22__3!=. & (s9q22b_3!=. & s9q22b_3!=.a) 
+	clonevar    d_cah_mone	= s9q22b_4 if s9q22__4!=. & (s9q22b_4!=. & s9q22b_4!=.a) 
+	clonevar 	d_cpr_mone	= s9q22b_5 if s9q22__5!=. & (s9q22b_5!=. & s9q22b_5!=.a) 
+	clonevar 	d_rpv_mone 	= s9q22b_6 if s9q22__6!=. & (s9q22b_6!=. & s9q22b_6!=.a) 
+	clonevar 	d_otro_mone	= s9q22b_7 if s9q22__7!=. & (s9q22b_7!=. & s9q22b_7!=.a)
+	
 * For employers (s9q15==5) // CAPI2=true
 	
 	*** Last month did you receive money due to the selling of products, goods, or services from your business or activity?
@@ -1687,14 +1759,14 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 		
 	*** Amount received
 	* s9q23a: Monto recibido: im_patron_cant
-	gen     im_patron_cant 	= s9q23a if s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
+	clonevar	im_patron_cant 	= s9q23a if s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
 
 	*** In which currency?
 	/* s9q23b En qué moneda?
 		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
-	gen     im_patron_mone 	= s9q23b if s9q15==5 & (s9q23b!=. & s9q23b!=.a) 
+	clonevar	im_patron_mone 	= s9q23b if s9q15==5 & (s9q23b!=. & s9q23b!=.a) 
 
-	*** Last month did you take products from your business or activity you own or your household's consumption?
+	*** Last month did you take products from your business or activity for you own or your household's consumption?
 	/* s9q24 ¿El mes pasado retiró productos del negocio o actividad para consumo propio o de su hogar?: inm_patron
 				1 = si
 				2 = no*/
@@ -1703,12 +1775,12 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 		
 	*** How much you would have had to pay for these products?
 	* s9q24a: ¿Cuánto hubiera tenido que pagar por esos productos?: inm_patron_cant
-	gen     inm_patron_cant 	= s9q24a if s9q15==5 & (s9q24a!=. & s9q24a!=.a) 
+	clonevar	inm_patron_cant 	= s9q24a if s9q15==5 & (s9q24a!=. & s9q24a!=.a) 
 
 	*** In which currency? 
 	/* s9q24b ¿En qué moneda?: inm_patron_mone
 		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
-	gen     inm_patron_mone 	= s9q24b if s9q15==5 & (s9q24b!=. & s9q24b!=.a)
+	clonevar	inm_patron_mone 	= s9q24b if s9q15==5 & (s9q24b!=. & s9q24b!=.a)
 
 * For self-employed workers (s9q15==6) // CAPI3=true
 	
@@ -1721,39 +1793,39 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 		
 	*** Amount received
 	* s9q25a: Cuánto recibió?: im_indep_cant
-	gen     im_indep_cant 	= s9q25a if s9q15==6 & (s9q25a!=. & s9q25a!=.a) 
+	clonevar     im_indep_cant 	= s9q25a if s9q15==6 & (s9q25a!=. & s9q25a!=.a) 
 
 	*** In which currency? 
 	/* s9q25b En qué moneda?: im_indep_mone
 		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
-	gen     im_indep_mone 	= s9q25b if s9q15==6 & (s9q25b!=. & s9q25b!=.a) 
+	clonevar     im_indep_mone 	= s9q25b if s9q15==6 & (s9q25b!=. & s9q25b!=.a) 
 
 	*** Last month did you receive income from your activity for own expenses or from your household?
-	/* s9q26 ¿El mes pasado, recibió ingresos por su actividad para gastos propios o de su hogar?: inm_indep
+	/* s9q26 ¿El mes pasado, recibió ingresos por su actividad para gastos propios o de su hogar?: i_indep_mes
 				1 = si
 				2 = no	*/
 		* Note: For self-employed workers (s9q15==6) // CAPI3=true	
 	gen     i_indep_mes 	= s9q26==1 if s9q15==6 & (s9q26!=. & s9q26!=.a) 
 		
 	*** How much did you receive?
-	* s9q26a: Cuánto recibió?: i_indep_cant
-	gen     i_indep_mes_cant 	= s9q26a if s9q15==6 & (s9q26a!=. & s9q26a!=.a) 
+	* s9q26a: Cuánto recibió?: i_indep_mes_cant
+	clonevar     i_indep_mes_cant 	= s9q26a if s9q15==6 & (s9q26a!=. & s9q26a!=.a) 
 
 	*** In which currency? 
-	/* s9q26b En qué moneda?: i_indep_mone
+	/* s9q26b En qué moneda?: i_indep_mes_mone
 		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
-	gen     i_indep_mes_mone 	= s9q26b if s9q15==5 & (s9q26b!=. & s9q26b!=.a)
-
+	clonevar     i_indep_mes_mone 	= s9q26b if s9q15==5 & (s9q26b!=. & s9q26b!=.a)
+	
 	*** Last month, how much money did you spend to generate income (e.g. office renting, transport expenditures, cleaning products)?
-	* s9q27: El mes pasado, ¿cuánto dinero gastó  para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?: gm_indep_cant
+	* s9q27: El mes pasado, ¿cuánto dinero gastó  para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?: gm_indep_mes_cant
 		* Note: For self-employed workers (s9q15==6) // CAPI3=true	
 		* Note2: g stands for gasto monetario
-	gen     g_indep_mes_cant 	= s9q27 if s9q15==5 & (s9q27!=. & s9q27!=.a) 
+	clonevar     g_indep_mes_cant 	= s9q27 if s9q15==5 & (s9q27!=. & s9q27!=.a) 
 		
 	*** In which currency? 
-	/* s9q27b En qué moneda?: inm_indep_mone
+	/* s9q27b En qué moneda?: inm_indep_mes_mone
 		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
-	gen     g_indep_mes_mone 	= s9q27a if s9q15==5 & (s9q27a!=. & s9q27a!=.a)
+	clonevar     g_indep_mes_mone 	= s9q27a if s9q15==5 & (s9q27a!=. & s9q27a!=.a)
 
 * For part-time workers (those who worked less than 35 hours last week in all their jobs) // CAPI4
 				
@@ -1766,7 +1838,11 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 		5 = Escasez de materiales o equipos en reparación
 		6 = Otra (Especifique)	*/
 		*Note: for part-time workers, i.e. those who worked less than 35 hours last week in all their jobs // CAPI4
-	gen 	razon_menoshs = s9q30 if s9q18<35 & (s9q30!=. & s9q30!=.a) 
+	clonevar 	razon_menoshs = s9q30 if s9q18<35 & (s9q30!=. & s9q30!=.a) 
+
+	***Other
+	* Otra
+	clonevar 	razon_menoshs_o = s9q30_os if s9q18<35 & s9q30==6
 
 	*** Would you prefer to work more than 35 hs per week?
 	/* s9q31 ¿Preferiría trabajar más de 35 horas por semana? 
@@ -1796,7 +1872,11 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 			10 = Enfermedad o discapacidad
 			11 = Otra (Especifique)	*/
 		* Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	gen 	razon_nobusca = s9q33 if s9q18<35 & (s9q33!=. & s9q33!=.a)
+	clonevar	razon_nobusca = s9q33 if s9q18<35 & (s9q33!=. & s9q33!=.a)
+	
+	*** Other reason
+	*Otra razón
+	clonevar 	razon_nobusca_o = s9q33_os if s9q18<35 & s9q33==11
 	
 * For all workers
 
@@ -1806,7 +1886,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 				2 = no	*/
 	gen 	cambiotr = s9q34==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q34!=. & s9q34!=.a)
 
-	*** What is the main reason why you changed jobs?
+	*** Which is the main reason why you changed jobs?
 	/* s9q35 ¿Cuál fue la razón principal por la que cambió de trabajo?
 		1 = Conseguir ingresos más altos
 		2 = Tener un trabajo más adecuado
@@ -1814,24 +1894,28 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 		4 = Dificultades con la empresa (despido, reducción de personal, cierre de la empresa)
 		5 = Dificultades económica (falta de materiales e insumos para trabajar)
 		6 = Otra (Especifique)	*/
-	gen		razon_cambiotr = s9q35 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q35!=. & s9q35!=.a)
+	clonevar	razon_cambiotr = s9q35 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q35!=. & s9q35!=.a)
 
+	*** Other reason
+	*Otra razón
+	clonevar razon_cambiotr_o = s9q35_os if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & s9q35==6
+		
 	*** Do you make contributions to any pension fund?
 	/* s9q36 ¿Realiza aportes para algún fondo de pensiones?	
 				1 = si
 				2 = no	*/
 	gen		aporta_pension = s9q36==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q36!=. & s9q36!=.a)
 
-	*** Which pension fund?
+	*** To which pension fund?
 	/* s9q37__* ¿A cuál fondo de pensión?	
 				1 = El IVSS
 				2 = Otra institución o empresa pública
 				3 = Para institución o empresa privada
 				4 = Otro	*/
-	gen		pension_IVSS 	= s9q37__1==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__1!=. & s9q37__1!=.a)
-	gen		pension_publi 	= s9q37__2==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__2!=. & s9q37__2!=.a)
-	gen		pension_priv 	= s9q37__3==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__3!=. & s9q37__3!=.a)
-	gen		pension_otro 	= s9q37__4==1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__4!=. & s9q37__4!=.a)
+	clonevar	pension_IVSS 	= s9q37__1 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__1!=. & s9q37__1!=.a)
+	clonevar	pension_publi 	= s9q37__2 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__2!=. & s9q37__2!=.a)
+	clonevar	pension_priv 	= s9q37__3 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__3!=. & s9q37__3!=.a)
+	clonevar	pension_otro 	= s9q37__4 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q37__4!=. & s9q37__4!=.a)
 	
 	/* Bringing together s9q36 & s9q37__* to match previous ENCOVIs: aporte_pension
 			1 = Si, para el IVSS
@@ -1845,16 +1929,20 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 	replace aporte_pension = 4 if s9q36==1 & s9q37__4==1
 	replace aporte_pension = 5 if s9q36==2
 	
+	***Other
+	*Otro
+	clonevar	pension_otro_o = s9q37_os if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & s9q37__4==1
+	
 	*** How much did you pay last month for pension funds?
 	* s9q38 En el último mes, ¿cuánto pagó en total por fondos de pensiones? 
-	gen		cant_aporta_pension = s9q38 if s9q36==1 & (s9q38!=. & s9q38!=.a)
+	clonevar	cant_aporta_pension = s9q38 if s9q36==1 & (s9q38!=. & s9q38!=.a)
 
 	*** In which currency?
 	/* s9q39a ¿En qué moneda? 
 		1=bolivares, 2=dolares, 3=euros, 4=colombianos */
-	gen		mone_aporta_pension = s9q39a if s9q36==1 & (s9q39a!=. & s9q39a!=.a)
+	clonevar	mone_aporta_pension = s9q39a if s9q36==1 & (s9q39a!=. & s9q39a!=.a)
 
-* From CEDLAS which might be useful
+* From CEDLAS, which might be useful
 
 	/* LABOR_STATUS: La semana pasada estaba:
         1 = Trabajando
@@ -1876,7 +1964,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 	replace labor_status = 9 if s9q3==2 & (s9q6==1 | (s9q6==2 & s9q7==2) ) & s9q12==6
 	tab labor_status
 
-	/* RELAB (FROM CEDLAS, might be useful):
+	/* RELAB:
 			1 = Empleador
 			2 = Empleado (asalariado)
 			3 = Independiente (cuenta propista)
@@ -1893,7 +1981,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 
 	* Asalariado en la ocupacion principal: asal
 		* Dummy "asalariado" entre trabajadores
-		gen     asal = (relab==2) if (relab>=1 & relab<=4)
+	gen     asal = (relab==2) if (relab>=1 & relab<=4)
 
 	* Employed:	ocupado
 	gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
@@ -1907,6 +1995,7 @@ aporte_pension cant_aporta_pension mone_aporta_pension
 	* Economically active population: pea	
 	gen     pea = (ocupado==1 | desocupa ==1)
 
+	
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- XVI: BANKING / BANCARIZACIÓN ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
@@ -1950,9 +2039,124 @@ gen pagomovil_f=s16q7 if (s16q7!=. & s16q7!=.a)
 *** Reasons for not holding any bank account or card?
 gen razon_nobanco=s16q7 if (s16q7!=. & s16q7!=.a)
 
-
 /*(*********************************************************************************************************************************************** 
-*---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
+*---------------------------------- 9: Otros ingresos y pensiones / Other income and pensions ----------------------------------------------------
+***********************************************************************************************************************************************)*/	
+
+global otherinc_ENCOVI inla_pens_soi	inla_pens_vss	inla_jubi_emp	inla_pens_dsa	inla_beca_pub	inla_beca_pri	inla_ayuda_pu	inla_ayuda_pr	inla_ayuda_fa	inla_asig_men	inla_otros	inla_petro ///
+inla_pens_soi_cant	inla_pens_vss_cant	inla_jubi_emp_cant	inla_pens_dsa_cant	inla_beca_pub_cant	inla_beca_pri_cant	inla_ayuda_pu_cant	inla_ayuda_pr_cant	inla_ayuda_fa_cant	inla_asig_men_cant	inla_otros_cant	inla_petro_cant ///
+inla_pens_soi_mone	inla_pens_vss_mone	inla_jubi_emp_mone	inla_pens_dsa_mone	inla_beca_pub_mone	inla_beca_pri_mone	inla_ayuda_pu_mone	inla_ayuda_pr_mone	inla_ayuda_fa_mone	inla_asig_men_mone	inla_otros_mone ///
+iext_sueldo	iext_ingnet	iext_indemn	iext_remesa	iext_penjub	iext_intdiv	iext_becaes	iext_extrao iext_alquil ///
+iext_sueldo_cant	iext_ingnet_cant	iext_indemn_cant	iext_remesa_cant	iext_penjub_cant	iext_intdiv_cant	iext_becaes_cant	iext_extrao_cant    iext_alquil_cant ///
+iext_sueldo_mone	iext_ingnet_mone	iext_indemn_mone	iext_remesa_mone	iext_penjub_mone	iext_intdiv_mone	iext_becaes_mone	iext_extrao_mone	iext_alquil_mone
+
+
+*** Did you receive last month income for any of the following concepts and how much? (each one is a dummy)
+	/* s9q28__* Recibió el mes pasado ingresos por alguno de los siguientes conceptos y cuánto?
+				1=Pensión de sobreviviente, orfandad, incapacidad
+				2=Pensión de vejez por el seguro social
+				3=Jubilación por trabajo
+				4=Pensión por divorcio, separación, alimentación
+				5=Beca o ayuda escolar pública
+				6=Beca o ayuda escolar privada
+				7=Ayuda de instituciones públicas
+				8=Ayuda de instituciones privadas
+				9=Ayudas familiares o contribuciones de otros hogares
+				10=Asignación familiar por menores a su cargo
+				11=Otro	*/
+	clonevar    inla_pens_soi	= s9q28__1 if (s9q28__1!=. & s9q28__1!=.a) 
+	clonevar    inla_pens_vss	= s9q28__2 if (s9q28__2!=. & s9q28__2!=.a) 
+	clonevar    inla_jubi_emp	= s9q28__3 if (s9q28__3!=. & s9q28__3!=.a) 
+	clonevar    inla_pens_dsa	= s9q28__4 if (s9q28__4!=. & s9q28__4!=.a) 
+	clonevar 	inla_beca_pub	= s9q28__5 if (s9q28__5!=. & s9q28__5!=.a) 
+	clonevar 	inla_beca_pri	= s9q28__6 if (s9q28__6!=. & s9q28__6!=.a) 
+	clonevar 	inla_ayuda_pu	= s9q28__7 if (s9q28__7!=. & s9q28__7!=.a)
+	clonevar 	inla_ayuda_pr	= s9q28__8 if (s9q28__8!=. & s9q28__8!=.a)
+	clonevar 	inla_ayuda_fa	= s9q28__9 if (s9q28__9!=. & s9q28__9!=.a)
+	clonevar 	inla_asig_men	= s9q28__10 if (s9q28__10!=. & s9q28__10!=.a)
+	clonevar 	inla_otros		= s9q28__11 if (s9q28__11!=. & s9q28__11!=.a)
+	clonevar	inla_petro		= s9q28_petro if (s9q28_petro!=. & s9q28_petro!=.a)
+	
+	*** Amount discounted
+	* s9q28a_*: Monto descontado *_cant
+	clonevar    inla_pens_soi_cant	= s9q28a_1 if (s9q28a_1!=. & s9q28a_1!=.a) 
+	clonevar    inla_pens_vss_cant	= s9q28a_2 if (s9q28a_2!=. & s9q28a_2!=.a) 
+	clonevar    inla_jubi_emp_cant	= s9q28a_3 if (s9q28a_3!=. & s9q28a_3!=.a) 
+	clonevar    inla_pens_dsa_cant	= s9q28a_4 if (s9q28a_4!=. & s9q28a_4!=.a) 
+	clonevar 	inla_beca_pub_cant	= s9q28a_5 if (s9q28a_5!=. & s9q28a_5!=.a) 
+	clonevar 	inla_beca_pri_cant	= s9q28a_6 if (s9q28a_6!=. & s9q28a_6!=.a) 
+	clonevar 	inla_ayuda_pu_cant	= s9q28a_7 if (s9q28a_7!=. & s9q28a_7!=.a)
+	clonevar 	inla_ayuda_pr_cant	= s9q28a_8 if (s9q28a_8!=. & s9q28a_8!=.a)
+	clonevar 	inla_ayuda_fa_cant	= s9q28a_9 if (s9q28a_9!=. & s9q28a_9!=.a)
+	clonevar 	inla_asig_men_cant	= s9q28a_10 if (s9q28a_10!=. & s9q28a_10!=.a)
+	clonevar 	inla_otros_cant		= s9q28a_11 if (s9q28a_11!=. & s9q28a_11!=.a)
+	clonevar	inla_petro_cant		= s9q28_petromonto if (s9q28_petromonto!=. & s9q28_petromonto!=.a)
+	
+	*** In which currency?
+	/* s9q28b_* En qué moneda?: *_mone
+		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
+	clonevar    inla_pens_soi_mone	= s9q28b_1 if (s9q28b_1!=. & s9q28b_1!=.a) 
+	clonevar    inla_pens_vss_mone	= s9q28b_2 if (s9q28b_2!=. & s9q28b_2!=.a) 
+	clonevar    inla_jubi_emp_mone	= s9q28b_3 if (s9q28b_3!=. & s9q28b_3!=.a) 
+	clonevar    inla_pens_dsa_mone	= s9q28b_4 if (s9q28b_4!=. & s9q28b_4!=.a) 
+	clonevar 	inla_beca_pub_mone	= s9q28b_5 if (s9q28b_5!=. & s9q28b_5!=.a) 
+	clonevar 	inla_beca_pri_mone	= s9q28b_6 if (s9q28b_6!=. & s9q28b_6!=.a) 
+	clonevar 	inla_ayuda_pu_mone	= s9q28b_7 if (s9q28b_7!=. & s9q28b_7!=.a)
+	clonevar 	inla_ayuda_pr_mone	= s9q28b_8 if (s9q28b_8!=. & s9q28b_8!=.a)
+	clonevar 	inla_ayuda_fa_mone	= s9q28b_9 if (s9q28b_9!=. & s9q28b_9!=.a)
+	clonevar 	inla_asig_men_mone	= s9q28b_10 if (s9q28b_10!=. & s9q28b_10!=.a)
+	clonevar 	inla_otros_mone		= s9q28b_11 if (s9q28b_11!=. & s9q28b_11!=.a)
+
+	
+	*** Did you receive last month income for any of the following concepts and how much? (each one is a dummy)
+	/* s9q29a__* Con respecto a los últimos 12 meses, ¿recibió ingresos provenientes del extreior por alguno de los siguientes conceptos y cuánto?
+				1=Sueldos o salarios
+				2=Ingresos netos de los trabajadores independientes
+				3=Indemnizaciones por enfermedad o accidente
+				4=Remesas o ayudas periódicas de otros hogares del exterior
+				5=Pensión y jubilaciones
+				6=Intereses y dividendos
+				7=Becas y/o ayudas escolares
+				8=Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)
+				9=Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)? */
+	clonevar    iext_sueldo	= s9q29a__1 if (s9q29a__1!=. & s9q29a__1!=.a) 
+	clonevar    iext_ingnet	= s9q29a__2 if (s9q29a__2!=. & s9q29a__2!=.a) 
+	clonevar 	iext_indemn	= s9q29a__3 if (s9q29a__3!=. & s9q29a__3!=.a) 
+	clonevar 	iext_remesa	= s9q29a__4 if (s9q29a__4!=. & s9q29a__4!=.a) 
+	clonevar 	iext_penjub	= s9q29a__5 if (s9q29a__5!=. & s9q29a__5!=.a)
+	clonevar 	iext_intdiv	= s9q29a__6 if (s9q29a__6!=. & s9q29a__6!=.a)
+	clonevar 	iext_becaes	= s9q29a__7 if (s9q29a__7!=. & s9q29a__7!=.a)
+	clonevar 	iext_extrao	= s9q29a__8 if (s9q29a__8!=. & s9q29a__8!=.a)
+	clonevar 	iext_alquil	= s9q29a__9 if (s9q29a__9!=. & s9q29a__9!=.a)
+
+	*** Amount discounted
+	* s9q29b_*: Monto descontado *_cant
+	clonevar    iext_sueldo_cant	= s9q29b_1 if (s9q29b_1!=. & s9q29b_1!=.a) 
+	clonevar    iext_ingnet_cant	= s9q29b_2 if (s9q29b_2!=. & s9q29b_2!=.a) 
+	clonevar    iext_indemn_cant	= s9q29b_3 if (s9q29b_3!=. & s9q29b_3!=.a) 
+	clonevar    iext_remesa_cant	= s9q29b_4 if (s9q29b_4!=. & s9q29b_4!=.a) 
+	clonevar 	iext_penjub_cant	= s9q29b_5 if (s9q29b_5!=. & s9q29b_5!=.a) 
+	clonevar 	iext_intdiv_cant	= s9q29b_6 if (s9q29b_6!=. & s9q29b_6!=.a) 
+	clonevar 	iext_becaes_cant	= s9q29b_7 if (s9q29b_7!=. & s9q29b_7!=.a)
+	clonevar 	iext_extrao_cant	= s9q29b_8 if (s9q29b_8!=. & s9q29b_8!=.a)
+	clonevar 	iext_alquil_cant	= s9q29b_9 if (s9q29b_9!=. & s9q29b_9!=.a)
+
+	*** In which currency?
+	/* s9q29c_* En qué moneda?: *_mone
+		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
+	clonevar    iext_sueldo_mone	= s9q29c_1 if (s9q29c_1!=. & s9q29c_1!=.a) 
+	clonevar    iext_ingnet_mone	= s9q29c_2 if (s9q29c_2!=. & s9q29c_2!=.a) 
+	clonevar    iext_indemn_mone	= s9q29c_3 if (s9q29c_3!=. & s9q29c_3!=.a) 
+	clonevar    iext_remesa_mone	= s9q29c_4 if (s9q29c_4!=. & s9q29c_4!=.a) 
+	clonevar 	iext_penjub_mone	= s9q29c_5 if (s9q29c_5!=. & s9q29c_5!=.a) 
+	clonevar 	iext_intdiv_mone	= s9q29c_6 if (s9q29c_6!=. & s9q29c_6!=.a) 
+	clonevar 	iext_becaes_mone	= s9q29c_7 if (s9q29c_7!=. & s9q29c_7!=.a)
+	clonevar 	iext_extrao_mone	= s9q29c_8 if (s9q29c_8!=. & s9q29c_8!=.a)
+	clonevar 	iext_alquil_mone	= s9q29c_9 if (s9q29c_9!=. & s9q29c_9!=.a)
+
+	
+/*(*********************************************************************************************************************************************** 
+*----------------------------------------------- 10: Emigración / Emigration ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
 
 global emigra_ENCOVI informant_emig hogar_emig numero_emig nombre_emig_* edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* leveledu_emig_* ///
@@ -3022,16 +3226,19 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 
 global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_otro
 
-* Checks: negative variables
+* Check for negative variables
 	forvalues i = 1(1)12 {	
 	tab s9q19a_`i' if s9q19a_`i'<0
 	}
 	forvalues i = 1(1)9 {	
 	tab s9q21a_`i' if s9q21a_`i'<0
 	}
-	
-	* Qué hacer con las preguntas 20 y 22?
-	
+	forvalues i = 1(1)6 {	
+	tab s9q20a_`i' if s9q20a_`i'<0
+	}
+	forvalues i = 1(1)7 {	
+	tab s9q22a_`i' if s9q22a_`i'<0
+	}
 	tab s9q23a if s9q23a<0
 	tab s9q24a if s9q24a<0
 	tab s9q25a if s9q25a<0
@@ -3040,13 +3247,14 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 	forvalues i = 1(1)11 {		
 	tab s9q28a_`i' if s9q28a_`i'<0
 	}
-	* Una vale menos de 0, la cambio por 0
+	* One is negative (less than 0), change for 0
 	replace s9q28a_11=0 if s9q28a_11<0
 	forvalues i = 1(1)9 {
 	tab s9q29b_`i' if s9q29b_`i'<0
 	}
 
-			
+	* What to do with questions 20, 22, 26 y 27? We take them as "auxiliares", they won't end up counting for the final income aggregates
+	
 ********** A. LABOR INCOME **********
 	
 ****** 9.0. SET-UP ******
@@ -3251,31 +3459,7 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			* SUBSTRACTED FROM MONETARY PAYMENTS (s9q27): El mes pasado, ¿cuánto dinero gastó para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?
 */
 
-* Ingreso laboral monetario, segun si recibieron o no en el ultimo mes
-	gen recibe_ingresolab_mon = .
-	replace recibe_ingresolab_mon = 1 if (s9q19__1==1 | s9q19__2==1 | s9q19__3==1 | s9q19__4==1 | s9q19__5==1 | s9q19__6==1 | s9q19__7==1 | s9q19__8==1 | s9q19__9==1 | s9q19__10==1 | s9q19__11==1 | s9q19__12==1) | s9q19_petro==1 | s9q23==1 | s9q26==1 // Recibió ingreso monetario en algún concepto
-	replace recibe_ingresolab_mon = 0 if (s9q19__1==0 & s9q19__2==0 & s9q19__3==0 & s9q19__4==0 & s9q19__5==0 & s9q19__6==0 & s9q19__7==0 & s9q19__8==0 & s9q19__9==0 & s9q19__10==0 & s9q19__11==0 & s9q19__12==0) & s9q19_petro==2 & s9q23==2 & s9q26==2 // No recibió ingreso monetario en ningún concepto
-
-* Checks: labor status and reception of monetary labor income
-	tab labor_status recibe_ingresolab_mon, missing
-
-	/*	  labor_status |      recibe_ingresolab_mon
-					   |         1          . |     Total
-			-----------+----------------------+----------
-					 1 |     3,942        826 |     4,768 
-					 2 |        75         65 |       140 
-					 3 |         0        206 |       206 
-					 5 |         0      2,111 |     2,111 
-					 6 |         0        394 |       394 
-					 7 |         0        455 |       455 
-					 8 |         0      1,718 |     1,718 
-					 9 |         0        707 |       707 
-					 . |         0      1,934 |     1,934 
-			-----------+----------------------+----------
-				 Total |     4,017      8,416 |    12,433 */
-		/* There is no unemployed (3), inactive (5-9), or person with missing (.) labor status reporting they receive labor income */
-
-		
+	
 * Creating local (not foreign) variables
 
 	* Note: while respondants can register different concepts with different currencies, they can't register one concept with multiple currencies (ej. "sueldo y salario" paid in 2 different currencies) 
@@ -3290,9 +3474,8 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			* Obs: The last parenthesis controls for cases where they say they were paid in a certain money, but don't say how much (same later for employers and self-employed)
 	}
 		gen ingresoslab_monpe = . 	// Those who received payment in Petro
+		replace ingresoslab_monpe = s9q19_petromonto 	if s9q19_petro==1 & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19_petro!=. & s9q19_petro!=.a)	// Al final no usamos esto
 		gen ingresoslab_monpe_dummy = .
-		replace ingresoslab_monpe = s9q19_petromonto 	if s9q19_petro==1 & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19_petro!=. & s9q19_petro!=.a)	
-		replace ingresoslab_monpe_dummy = 0 	if recibe_ingresolab_mon==1 & ingresoslab_monpe==. // Dicen que reciben pero no reportan cuánto
 		replace ingresoslab_monpe_dummy = 1 	if ingresoslab_monpe>=0 & ingresoslab_monpe!=.
 		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
 		gen ingresoslab_monpe_bolfeb  = ingresoslab_monpe_dummy	* 30 * 73460.1238 		if ingresoslab_monpe_dummy==1
@@ -3332,14 +3515,7 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 
 	egen ingresoslab_mon = rowtotal(ingresoslab_mon_local ingresoslab_mon_afuera), missing
 	sum ingresoslab_mon
-		
-	*Dummies
-		gen ingresoslab_mon_dummy = .
-		replace ingresoslab_mon_dummy = 0 	if recibe_ingresolab_mon==1 & ingresoslab_mon==. // Dicen que reciben pero no reportan cuánto
-		replace ingresoslab_mon_dummy = 1 	if ingresoslab_mon>=0 & ingresoslab_mon!=.
-		
-		tab ingresoslab_mon_dummy
-		sum ingresoslab_mon
+	
 
 	
 *** NON-MONETARY
@@ -3366,34 +3542,8 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 		* CURRENCY (s9q24b): Currency
 */
 		
-* Ingresos laboral no monetario, segun si recibieron o no en el ultimo mes
-	gen recibe_ingresolab_nomon = .
-	replace recibe_ingresolab_nomon = 1 if (s9q21__1==1 | s9q21__2==1 | s9q21__3==1 | s9q21__4==1 | s9q21__5==1 | s9q21__6==1 | s9q21__7==1 | s9q21__8==1 | s9q21__9==1 ) | s9q24==1 // Recibió ingreso no monetario en algún concepto
-	replace recibe_ingresolab_nomon = 0 if (s9q21__1==0 & s9q21__2==0 & s9q21__3==0 & s9q21__4==0 & s9q21__5==0 & s9q21__6==0 & s9q21__7==0 & s9q21__8==0 & s9q21__9==0 ) & s9q24==2 // No recibió ingreso no monetario en ningún concepto
-
-* Situacion laboral y recepcion de ingreso monetario
-	tab labor_status recibe_ingresolab_nomon, missing
-
-	/*    labor_status |     recibe_ingresolab_nomon
-					   |         1          . |     Total
-			-----------+----------------------+----------
-					 1 |       365      4,403 |     4,768 
-					 2 |         8        132 |       140 
-					 3 |         0        206 |       206 
-					 5 |         0      2,111 |     2,111 
-					 6 |         0        394 |       394 
-					 7 |         0        455 |       455 
-					 8 |         0      1,718 |     1,718 
-					 9 |         0        707 |       707 
-					 . |         0      1,934 |     1,934 
-			-----------+----------------------+----------
-				 Total |       373     12,060 |    12,433   */
-		/* There is no unemployed (3), inactive (5-9), or person with missing (.) labor status reporting they receive labor income */
-
-		
 	gen ingresoslab_bene = .
-	gen ingresoslab_bene_dummy = .
-			
+		
 	forvalues i = 1(1)9 {
 			
 		*For the not self-employed or employers (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9)
@@ -3406,11 +3556,6 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 		replace ingresoslab_bene = s9q24a_bolfeb 					if ingresoslab_bene==. & s9q15==5 & (s9q24!=. & s9q24a!=.a)
 		replace ingresoslab_bene = ingresoslab_bene + s9q24a_bolfeb if ingresoslab_bene!=. & s9q15==5 & (s9q24!=. & s9q24a!=.a)
 		
-		*Putting all together for dummy
-		replace ingresoslab_bene_dummy = 0 	if recibe_ingresolab_nomon==1 & ingresoslab_bene==. // Dicen que reciben pero no reportan cuánto
-		replace ingresoslab_bene_dummy = 1 	if ingresoslab_bene>=0 & ingresoslab_bene!=.
-		
-		tab ingresoslab_bene_dummy
 		sum ingresoslab_bene
 
 	/* Note: by February 26, of the people who reported having benefits, 89.5% reported their value in Bolívares, 2.7% in Dollars, 6.2% in Colombian pesos, and none in Euros.
@@ -3478,6 +3623,8 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	gen     ictapnp_nm = .
 	gen     iolnp_nm = .
 
+
+		
 ********** B. NON-LABOR INCOME **********
 
 ****** 9.3.NON-LABOR INCOME ******
@@ -3487,59 +3634,45 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	3) Transferencias privadas y estatales
 */
 
-*Locales (no provenientes del exterior)
-	*Jubilaciones y pensiones // ijubi_m
-		gen ing_nlb_pi = 1   if s9q28__1==1 // Pensión de incapacidad, orfandad, sobreviviente
-		gen ing_nlb_pv = 1   if s9q28__2==1 // Pensión de vejez por el seguro social
-		gen ing_nlb_jt = 1   if s9q28__3==1 // Jubilación por trabajo
-		gen ing_nlb_pd = 1   if s9q28__4==1 // Pensión por divorcio, separación, alimentación
-		gen ing_nlb_pe = 1   if s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
-	*Transferencias estatales // itrane_o_m 
-		gen ing_nlb_epu = 1  if s9q28__5==1 // Beca o ayuda escolar pública 
-		gen ing_nlb_apu = 1  if s9q28__7==1 // Ayuda de instituciones públicas
-	*Transferencias privadas // itranp_o_m 
-		gen ing_nlb_epr = 1  if s9q28__6==1 // Beca o ayuda escolar privada
-		gen ing_nlb_apr = 1  if s9q28__8==1 // Ayuda de instituciones privadas
-		gen ing_nlb_afh = 1  if s9q28__9==1 // Ayudas familiares o contribuciones de otros hogares
-		gen ing_nlb_afm = 1  if s9q28__10==1 // Asignación familiar por menores a su cargo
-	*Transferencias (no claro si públicas o privadas) // otro - itrane_ns 	
-		gen ing_nlb_ot = 1   if s9q28__11==1 
-*Provenientes del exterior
-	*Jubilaciones y pensiones
-		gen ing_nlb_xpj = 1  if s9q29a__5==1 // Pensión y jubilaciones // ijubi_m
-	*Transferencias privadas y estatales
-		gen ing_nlb_xr = 1   if s9q29a__4==1 // Remesas o ayudas periódicas de otros hogares del exterior  //  rem
-		gen ing_nlb_xba = 1  if s9q29a__7==1 // Becas y/o ayudas escolares // itranp_ns
-	*Ingresos de capital //  icap_m
-		gen ing_nlb_xid = 1  if s9q29a__6==1 // Intereses y dividendos
-		gen ing_nlb_xa = 1   if s9q29a__9==1 // Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)
-	* Ingresos no laborales extraordinarios
- 		gen ing_nlb_xte = 1  if s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord o inla_otro
-		gen ing_nlb_xi = 1   if s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord o inla_otro
+*Organization
+	*Locales (no provenientes del exterior)
+		*Jubilaciones y pensiones // ijubi_m
+			* s9q28__1==1 // Pensión de incapacidad, orfandad, sobreviviente
+			* s9q28__2==1 // Pensión de vejez por el seguro social
+			* s9q28__3==1 // Jubilación por trabajo
+			* s9q28__4==1 // Pensión por divorcio, separación, alimentación
+			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
+		*Transferencias estatales // itrane_o_m 
+			* s9q28__5==1 // Beca o ayuda escolar pública 
+			* s9q28__7==1 // Ayuda de instituciones públicas
+		*Transferencias privadas // itranp_o_m 
+			* s9q28__6==1 // Beca o ayuda escolar privada
+			* s9q28__8==1 // Ayuda de instituciones privadas
+			* s9q28__9==1 // Ayudas familiares o contribuciones de otros hogares
+			* s9q28__10==1 // Asignación familiar por menores a su cargo
+		*Transferencias (no claro si públicas o privadas) // otro - itrane_ns 	
+			* s9q28__11==1 
+	*Provenientes del exterior
+		*Jubilaciones y pensiones
+			* s9q29a__5==1 // Pensión y jubilaciones // ijubi_m
+		*Transferencias privadas y estatales
+			* s9q29a__4==1 // Remesas o ayudas periódicas de otros hogares del exterior  //  rem
+			* s9q29a__7==1 // Becas y/o ayudas escolares // itranp_ns
+		*Ingresos de capital //  icap_m
+			* s9q29a__6==1 // Intereses y dividendos
+			* s9q29a__9==1 // Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)
+		* Ingresos no laborales extraordinarios
+			* s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord o inla_otro
+			* s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord o inla_otro
 
-*How many non-labor incomes do people receive?
-	egen    recibe = rowtotal(ing_nlb_*), mi
-	tab recibe
-
-	/*       recibe |      Freq.     Percent        Cum.
-		------------+-----------------------------------
-				  1 |      2,462       59.64       59.64
-				  2 |      1,083       26.24       85.88
-				  3 |        433       10.49       96.37
-				  4 |        124        3.00       99.37
-				  5 |         22        0.53       99.90
-				  6 |          3        0.07       99.98
-				  7 |          1        0.02      100.00
-		------------+-----------------------------------
-			  Total |      4,128      100.00			*/ 
-
+  
 ****** 9.3.1.JUBILACIONES Y PENSIONES ******	  
 	
 	/* 	s9q12==6 // Está jubilado o pensionado
 
 	s9q28__1 // Recibe pensión de sobreviviente, orfandad, incapacidad
 	s9q28__2 // Recibe pensión de vejez por el seguro social
-	s9q28__4 // Recibe pensión por divorcio, separación, alimentacion
+	s9q28__4 // Recibe pensión por divorcio, separación, alimentación
 
 	s9q28__3 // Recibe jubilación por trabajo
 
@@ -3633,7 +3766,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		}		
 			sum icap_m
 
-		
 	* No monetario	
 	gen     icap_nm=.
 	notes icap_nm: the survey does not include information to define this variable
@@ -3651,7 +3783,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	}		
 		sum rem 
 	
-		
 	
 ****** 9.3.4.TRANSFERENCIAS PRIVADAS ******	
 		
@@ -3724,7 +3855,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	sum itrane_ns
 	
 		
-	
 ***** iV) OTROS INGRESOS NO LABORALES / V) INGRESOS NO LABORALES EXTRAORDINARIOS 
 
 	gen inla_extraord = .
@@ -3736,27 +3866,139 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 
 	rename  inla_extraord inla_otro // Because it appeared like this in CEDLAS' do_file_1_variables
 	
-/*
-****** 9.3.7 INGRESOS DE LA OCUPACION PRINCIPAL ******
 
-gen     ip_m = tmhp42bs //	Ingreso monetario en la ocupación principal 
-gen     ip   = .	    // Ingreso total en la ocupación principal 
+	
+****** PLUS: INCOME ANALYSIS ******
 
-****** 9.3.8 INGRESOS TODAS LAS OCUPACIONES ******
+global ilaanalysis_ENCOVI 	recibe_ingresolab_mon_mes recibe_ingresolab_mon_ano recibe_ingresolab_mon report_inglabmon_perocuanto ///
+							recibe_ingresolab_nomon report_inglabnomon_perocuanto ///
+							cuantasinlarecibe recibe_ingresonolab report_ingnolab_perocuanto ///
+							labor_status
 
-gen     ila_m  = tmhp42bs    // Ingreso monetario en todas las ocupaciones 
-gen     ila    = .           // Ingreso total en todas las ocupaciones 
-gen     perila = .   // Perceptores de ingresos laborales 
+* MONETARY LABOR INCOME
 
-****** 9.3.9 INGRESOS LABORALES HORARIOS ******
+	* Ingreso laboral monetario (empleados y empleadores), segun si recibieron o no en el ultimo mes
+		gen recibe_ingresolab_mon_mes = .
+		replace recibe_ingresolab_mon_mes = 1 if (s9q19__1==1 | s9q19__2==1 | s9q19__3==1 | s9q19__4==1 | s9q19__5==1 | s9q19__6==1 | s9q19__7==1 | s9q19__8==1 | s9q19__9==1 | s9q19__10==1 | s9q19__11==1 | s9q19__12==1) ///
+			| s9q19_petro==1 | s9q23==1 // Recibió ingreso monetario en algún concepto en el último mes (no usamos s9q26 porque se decidió que s9q25 engloba ambas 26 y 27)
+		replace recibe_ingresolab_mon_mes = 0 if inlist(s9q19__1,0,.,.a) & inlist(s9q19__2,0,.,.a) & inlist(s9q19__3,0,.,.a) & inlist(s9q19__4,0,.,.a) & inlist(s9q19__5,0,.) & inlist(s9q19__6,0,.,.a) & inlist(s9q19__7,0,.,.a) & inlist(s9q19__8,0,.,.a) & inlist(s9q19__9,0,.,.a) & inlist(s9q19__10,0,.,.a) & inlist(s9q19__11,0,.,.a) & inlist(s9q19__12,0,.,.a) ///
+			& inlist(s9q19_petro,2,.,.a) & inlist(s9q23,2,.,.a) // No recibió ingreso laboral monetario en ningún concepto mensual
+		* Problem: income from abroad for salaries/wages and net benefits for independent workers (s9q29a_1 and _2), and local benefits/utilities of independent workers (s9q25) are measured on a yearly basis, not monthly as the others
+		* If we include them in this dummy, there ends up being some unemployed or inactives who report labor income.
+	
+	*Ingreso laboral monetario (independientes y otros), , segun si recibieron o no en el ultimo año
+		* Thus, analysis on the side for imputation for those 3 variables, create a new variables
+		gen recibe_ingresolab_mon_ano = .
+		replace recibe_ingresolab_mon_ano = 1 if s9q25==1 | (s9q29a__1==1 | s9q29a__2==1)
+		replace recibe_ingresolab_mon_ano = 0 if s9q25==2 & s9q29a__1==0 & s9q29a__2==0
+	
+	* Checks (data April 6)
+	tab recibe_ingresolab_mon_ano recibe_ingresolab_mon_mes, missing // 157 observations have =1 in both
+	tab labor_status recibe_ingresolab_mon_mes, missing // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving monetary labor income
+	tab labor_status recibe_ingresolab_mon_ano, missing // 32 observations not OK (unemployed or inactive who have labor income, reasonable they could have earned it before)
+	
+	gen recibe_ingresolab_mon = .
+	replace recibe_ingresolab_mon = 0 if recibe_ingresolab_mon_mes==0 & recibe_ingresolab_mon_ano==0
+	replace recibe_ingresolab_mon = 1 if recibe_ingresolab_mon_mes==1
+	replace recibe_ingresolab_mon = 2 if recibe_ingresolab_mon_ano==1
+	replace recibe_ingresolab_mon = 3 if recibe_ingresolab_mon_mes==1 & recibe_ingresolab_mon_ano==1
+		label def recibe_ingresolab_mon 0 "Dice que no recibe nada" 1 "Dice que recibio en el ultimo mes" 2 "Dice que recibio en el último año" 3 "Dice que en el último mes Y último año"
+		label values recibe_ingresolab_mon recibe_ingresolab_mon
+	
+	tab recibe_ingresolab_mon, mi 
+	
+		* Crossed with the amount of income
+		gen report_inglabmon_perocuanto = .
+		replace report_inglabmon_perocuanto = 0 	if inlist(recibe_ingresolab_mon,1,2,3) & ingresoslab_mon==. // Dicen que reciben ila monetario, pero no reportan cuánto
+		replace report_inglabmon_perocuanto = 1 	if inlist(recibe_ingresolab_mon,1,2,3) & ingresoslab_mon>=0 & ingresoslab_mon!=.
+		*replace report_inglabmon_perocuanto = 1 	if ingresoslab_mon>=0 & ingresoslab_mon!=. // Same result as above line
+		
+	tab report_inglabmon_perocuanto, mi // We will have to impute 287 observations that declare to have earned monetary labor income but don't say how much
+	
+	
+* NON-MONETARY LABOR INCOME
+	
+	* Ingreso laboral no monetario: todo analizado para el último mes (más fácil)
+		gen recibe_ingresolab_nomon = .
+		replace recibe_ingresolab_nomon = 1 if (s9q21__1==1 | s9q21__2==1 | s9q21__3==1 | s9q21__4==1 | s9q21__5==1 | s9q21__6==1 | s9q21__7==1 | s9q21__8==1 | s9q21__9==1 ) | s9q24==1 // Recibió ingreso no monetario en algún concepto
+		replace recibe_ingresolab_nomon = 0 if inlist(s9q21__1,0,.,.a) & inlist(s9q21__2,0,.,.a) & inlist(s9q21__3,0,.,.a) & inlist(s9q21__4,0,.,.a) & inlist(s9q21__5,0,.) & inlist(s9q21__6,0,.,.a) & inlist(s9q21__7,0,.,.a) & inlist(s9q21__8,0,.,.a) & inlist(s9q21__9,0,.,.a) & inlist(s9q24,2,.,.a) // No recibió ingreso laboral no monetario en ningún concepto
+		
+	* Checks (data April 6)
+	tab labor_status recibe_ingresolab_nomon, mi  // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving non monetary labor income
+	tab recibe_ingresolab_nomon, mi  
+	
+		* Crossed with the amount of income
+		gen report_inglabnomon_perocuanto = .
+		replace report_inglabnomon_perocuanto = 0 	if recibe_ingresolab_nomon==1 & ingresoslab_bene==. // Dicen que reciben ila no monetario, pero no reportan cuánto
+		replace report_inglabnomon_perocuanto = 1 	if recibe_ingresolab_nomon==1 & ingresoslab_bene>=0 & ingresoslab_bene!=.
+		*replace report_inglabnomon_perocuanto = 1 	if ingresoslab_bene>=0 & ingresoslab_bene!=. // Same result as above line
+		
+	tab report_inglabnomon_perocuanto, mi // We will have to impute 26 observations that declare to have earned non-monetary labor income but don't say how much
 
-gen     wage_m= ip_m/(hstrp*4)  // Ingreso laboral horario monetario en la ocupación principal
-gen wage=    // Ingreso laboral horario total en la ocupación principal 
-gen ilaho_m	// Ingreso laboral horario monetario en todos los trabajos 
-gen ilaho   // Ingreso laboral horario total en todos los trabajos 
-*/
+	
+* NON-LABOR (MONETARY) INCOME
+	
+	* Number of non-labor income sources that people received
+	egen cuantasinlarecibe = rowtotal(inla_pens_soi	inla_pens_vss inla_jubi_emp inla_pens_dsa inla_beca_pub inla_beca_pri inla_ayuda_pu inla_ayuda_pr inla_ayuda_fa inla_asig_men inla_otros inla_petro ///
+					iext_indemn	iext_remesa	iext_penjub	iext_intdiv	iext_becaes	iext_extrao iext_alquil), mi
+	tab cuantasinlarecibe, mi // By April 7th, 8.1% received 0, 11.1% received 1, 0.5% missing, and the rest more than 1
 
+	/*      cuantasinla |
+				 recibe |      Freq.     Percent        Cum.
+			------------+-----------------------------------
+					  0 |      2,589        8.08        8.08
+					  1 |        975        3.04       11.12
+					  2 |     19,794       61.74       72.86
+					  3 |      6,717       20.95       93.81
+					  4 |      1,563        4.88       98.69
+					  5 |        244        0.76       99.45
+					  6 |         22        0.07       99.52
+					  7 |          2        0.01       99.53
+					  8 |          1        0.00       99.53
+					  . |        151        0.47      100.00
+			------------+-----------------------------------
+				  Total |     32,058      100.00				*/ 
 
+				  
+	* Ingreso no laboral monetario (local), segun si recibieron o no en el ultimo mes
+		gen recibe_ingresonolab_mes = .
+		replace recibe_ingresonolab_mes = 1 if (s9q28__1==1 | s9q28__2==1 | s9q28__3==1 | s9q28__4==1 | s9q28__5==1 | s9q28__6==1 | s9q28__7==1 | s9q28__8==1 | s9q28__9==1 | s9q28__10==1 | s9q28__11==1 ) ///
+			| s9q28_petro==1 | (s9q29a__3==1 | s9q29a__4==1 | s9q29a__5==1 | s9q29a__6==1 | s9q29a__7==1 | s9q29a__8==1 | s9q29a__9==1) // Recibió ingreso monetario no laboral en algún concepto en el último mes
+		replace recibe_ingresonolab_mes = 0 if inlist(s9q28__1,0,.,.a) & inlist(s9q28__2,0,.,.a) & inlist(s9q28__3,0,.,.a) & inlist(s9q28__4,0,.,.a) & inlist(s9q28__5,0,.) & inlist(s9q28__6,0,.,.a) & inlist(s9q28__7,0,.,.a) & inlist(s9q28__8,0,.,.a) & inlist(s9q28__9,0,.,.a) & inlist(s9q28__10,0,.,.a) & inlist(s9q28__11,0,.,.a) ///
+			& inlist(s9q28_petro,2,.,.a) & inlist(s9q29b_3,0,.,.a) & inlist(s9q29b_4,0,.,.a) & inlist(s9q29b_5,0,.,.a) & inlist(s9q29b_6,0,.,.a) & inlist(s9q29b_7,0,.,.a) & inlist(s9q29b_8,0,.,.a) & inlist(s9q29b_9,0,.,.a) // No recibió ingreso laboral monetario en ningún concepto mensual
+		* Problem: income from abroad (s9q29a_3 to _9) are measured on a yearly basis, not monthly as the others.
+	
+	*Ingreso no laboral monetario (proveniente del exterior), segun si recibieron o no en el ultimo año
+		* Thus, analysis on the side for imputation for those 3 variables, create a new variables
+		gen recibe_ingresonolab_ano = .
+		replace recibe_ingresonolab_ano = 1 if (s9q29a__3==1 | s9q29a__4==1 | s9q29a__5==1 | s9q29a__6==1 | s9q29a__7==1 | s9q29a__8==1 | s9q29a__9==1)
+		replace recibe_ingresonolab_ano = 0 if inlist(s9q29a__3,0,.,.a) & inlist(s9q29a__4,0,.,.a) & inlist(s9q29a__5,0,.,.a) & inlist(s9q29a__6,0,.,.a) & inlist(s9q29a__7,0,.,.a) & inlist(s9q29a__8,0,.,.a) & inlist(s9q29a__9,0,.,.a)
+	
+	* Checks (data April 7)
+	tab recibe_ingresonolab_ano recibe_ingresonolab_mes, missing // 1,448 observations have =1 in both
+	tab labor_status recibe_ingresonolab_mes, missing 
+	tab labor_status recibe_ingresonolab_ano, missing 
+	
+	gen recibe_ingresonolab = .
+	replace recibe_ingresonolab = 0 if recibe_ingresonolab_mes==0 & recibe_ingresonolab_ano==0
+	replace recibe_ingresonolab = 1 if recibe_ingresonolab_mes==1
+	replace recibe_ingresonolab = 2 if recibe_ingresonolab_ano==1
+	replace recibe_ingresonolab = 3 if recibe_ingresonolab_mes==1 & recibe_ingresonolab_ano==1
+		label def recibe_ingresonolab 0 "Dice que no recibe nada" 1 "Dice que recibio en el ultimo mes" 2 "Dice que recibio en el último año" 3 "Dice que en el último mes Y último año"
+		label values recibe_ingresonolab recibe_ingresonolab
+	
+	tab recibe_ingresonolab, mi 
+	
+		* Crossed with the amount of income
+		egen inla_aux = rsum(inla_otro itrane_ns itrane_o_m itranp_ns itranp_o_m rem icap_m ijubi_m), mi
+		gen report_ingnolab_perocuanto = .
+		replace report_ingnolab_perocuanto = 0 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux==. // Dicen que reciben ila monetario, pero no reportan cuánto
+		replace report_ingnolab_perocuanto = 1 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux>=0 & inla_aux!=.
+		*replace report_ingnolab_perocuanto = 1 	if inla_aux>=0 & inla_aux!=. // Same result as above line
+		
+	tab report_ingnolab_perocuanto, mi // We will have to impute 124 observations that declare to have received non labor income but don't say how much
+
+	
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: PRECIOS  ------------------------------------------------------------------
 ************************************************************************************************************************************************)*/
@@ -3852,8 +4094,9 @@ replace renta_imp = 0.10*itf_sin_ri  if  propieta_no_paga == 1
 *replace renta_imp = renta_imp / ipc_rel 
 
 include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
+* El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 	
-* include "$rootpath\data_management\management\2. harmonization\aux_do\Labels_ENCOVI.do"
+include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
 * Terminar de chequear nuestros labels!!
 
 compress
@@ -3869,11 +4112,11 @@ compress
 
 sort id com
 
-order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
+order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI /*$ilaanalysis_ENCOVI mutear analisis luego*/ ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 interview_month interview__id interview__key quest // to match with hh consumption
 
-keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
+keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI /*$ilaanalysis_ENCOVI mutear analisis luego*/ ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 interview_month interview__id interview__key quest // to match with hh consumption
 

@@ -133,7 +133,7 @@
 		*-- Label variable
 		label var serv_elect_otro "Last 3 months, electricity supply: other"
 		*-- Label variable
-		label var  electricidad "Last 3 months, electricity supply: without electricity"
+		label var  electricidad "Last 3 months, had access to electricity"
 		label def elec 1 "Yes" 0 "No"
 		label val serv_elect_red_pub elec
 		label val serv_elect_planta_priv elec

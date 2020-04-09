@@ -1,95 +1,97 @@
 /*===========================================================================
-Purpose: 
-1) Generate descriptive statistics for prices from ENCOVI Survey 2019
-2) Clean price data
-3) Generate the price database for Poverty Calculation 
-(ONLY for completed surveys)
+Purpose: merge raw data on prices from ENCOVI Survey 2019
 
 Country name:	Venezuela
-Year:			2019
+Year:			2014
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Julieta Ladronis & Daniel Pereira
+Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
 
 Dependencies:		The World Bank -- Poverty Unit
 Creation Date:		February, 2020
 Modification Date:  
-Output:			    Claned Price Database 
+Output:			    Merged Dataset ENCOVI (Prices)
 
 Note: 
 =============================================================================*/
 ********************************************************************************
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   1
-		
-		* User 3: Lautaro
-		global lauta   0
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath "C:\Users\wb563583\GitHub\VEN"
-				global dataout "$rootpath\"
-				
-		}
-	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-				global dataout "$rootpath\"
-		}
-		if $trini   {
-				global rootpath ""
-				global dataout "$rootpath\"
-		}
-		
-		if $male   {
-				global rootpath ""
-				global dataout "$rootpath\"
-		}
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath "C:\Users\wb563583\Documents\GitHub\ENCOVI-2019"
+// 				global dataout "$rootpath\"
+//				
+// 		}
+// 	    if $lauta {
+// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+// 				global dataout "$rootpath\"
+// 		}
+// 		if $trini   {
+// 				global rootpath ""
+// 				global dataout "$rootpath\"
+// 		}
+//		
+// 		if $male   {
+// 				global rootpath ""
+// 				global dataout "$rootpath\"
+// 		}
 
-	global dataofficial "$rootpath\data_management\input\04_07_20"
-	global dataout "$rootpath\data_management\output"
-	global dataint "$dataout\intermediate"
+// 	global input "$rootpath\data_management\input\04_07_20"
+// 	global output "$rootpath\data_management\output\merged"
+
     // Set the  path for prices
-	global pathprc "$dataofficial\ENCOVI_prices_2_STATA_All"
-	global exch_rate "$rootpath\data_management\management\1. merging\exchange rates"
+	global dataint "$rootpath\data_management\output\intermediate"
+	global pathprc "$input\ENCOVI_prices_2_STATA_All"
+	
 ********************************************************************************
 	
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Merge prices data   --------------------------------------------------
 
 *************************************************************************************************************************************************)*/ 
-**** Preliminary information: completed surveys
 
-	//Keep completed by HQ 
+**** Preliminary information: approved surveys
+
+	//Keep approved by HQ 
 	use "$pathprc\interview__actions.dta", clear
 	
-	// Create a tempfile for completed surveys
-    tempfile completed_surveys
+	// Create a tempfile for approved surveys	
+    tempfile approved_surveys
 	
-	// Create identification for completed surveys
-	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
+	// Create identification for approved surveys
+	bys interview__key interview__id (date): keep if action==6 // 6=approved by HQ
 
-	// To identify unique interviews according the last date and time entered
-    bys interview__key interview__id (date time) : keep if _n==_N
+	// check, log and delete duplicates
+	duplicates tag interview__key interview__id, generate(dupli)
+	preserve
+	keep if dupli >= 1
+	save "$output\duplicates-price.dta", replace
+	restore	
+	drop if dupli >= 1
+	
+	keep interview* origina responsible__name date
 
 	// Change format
+	rename ori interviewer
+	rename respo coordinator
 	replace date = subinstr(date, "-", "/",.)
 	gen edate=date(date,"YMD")
-	format edate %td	
-	
-	// Check duplicates 
-	duplicates report interview__key interview__id 
-	duplicates report interview__key interview__id date time
-	
-	// save temporary db with surveys completed
+	format edate %td
+	drop date
+	// save temporary db with surveys approved
+	save `approved_surveys'	
 
-	save `completed_surveys'	
 
-	
 **** Main price data 
 	
 	*-------- Append households 
@@ -98,64 +100,62 @@ Note:
 	
 	// To Old questionnaire
 	use "$pathprc\ENCOVI_prices.dta", clear
-    duplicates report interview__key interview__id
-	
-	// Selecting only the completed by HQ
-	merge 1:1 interview__key interview__id using `completed_surveys', keep(matched)
+
+	// Selecting only the approved by HQ
+	merge 1:1 interview__key interview__id using `approved_surveys' , keep(using matched)
 	drop _merge
 	
-	// Check duplicates 
-	duplicates report interview__key interview__id
-	duplicates report interview__key interview__id date time
-
     // Save the temporary file
     save `main_prices'
 
+	// This file has a wide format while the other carctheristics have a long format
+	// The following files: shocks, mortalidad, services and emigration are transformed 
+	// in the following section before merging with the household data
 
 **** Complementary price data
 
-	global sec_prices aceites_grasas azucares_edulcorantes bebidas cafe_te carne cereales ///
-	condimentos_salsas frutas_frescas leche_queso leguminosas nueces Papa_yuca_tuberculos ///
-	pescado tabaco vegetales_Frescos
+global sec_prices aceites_grasas azucares_edulcorantes bebidas cafe_te carne cereales ///
+condimentos_salsas frutas_frescas leche_queso leguminosas nueces Papa_yuca_tuberculos ///
+pescado tabaco vegetales_Frescos
 
-	foreach dtafile in $sec_prices{
+foreach dtafile in $sec_prices{
 
-	// Select each database
-	use "$pathprc/`dtafile'.dta", replace
+// Select each database
+use "$pathprc/`dtafile'.dta", replace
 
-	// Generate a variable with the name of the file
-	gen file_name = "`dtafile'"
+// Generate a variable with the name of the file
+gen file_name = "`dtafile'"
 
-	// Prepare names format for append
-	rename (`dtafile'*id) (bien)
-	rename (s2q8_*) (unidad_medida)
-	rename (s2q8a_*) (unidad_medida_ot)
-	rename (s2q9_*) (cantidad)
-	rename (s2q10_*) (precio)
-	rename (s2q11_*) (moneda)
+// Prepare names format for append
+rename (`dtafile'*id) (bien)
+rename (s2q8_*) (unidad_medida)
+rename (s2q8a_*) (unidad_medida_ot)
+rename (s2q9_*) (cantidad)
+rename (s2q10_*) (precio)
+rename (s2q11_*) (moneda)
 
-	save "$dataint\`dtafile'", replace
-	}
+save "$dataint/`dtafile'", replace
+}
 
-// Append the data files	
-	 use "$dataint\aceites_grasas.dta", clear
-	 append using "$dataint\azucares_edulcorantes"
-	 append using "$dataint\bebidas" 
-	 append using "$dataint\cafe_te" 
-	 append using "$dataint\carne"
-	 append using "$dataint\cereales"
-	 append using "$dataint\condimentos_salsas"
-	 append using "$dataint\frutas_frescas" 
-	 append using "$dataint\leche_queso" 
-	 append using "$dataint\leguminosas" 
-	 append using "$dataint\nueces" 
-	 append using "$dataint\Papa_yuca_tuberculos" 
-	 append using "$dataint\pescado" 
-	 append using "$dataint\tabaco" 
-	 append using "$dataint\vegetales_Frescos"
+// Append the datafiles	
+ use "$dataint/aceites_grasas.dta", clear
+ append using "$dataint/azucares_edulcorantes"
+ append using "$dataint/bebidas" 
+ append using "$dataint/cafe_te" 
+ append using "$dataint/carne"
+ append using "$dataint/cereales"
+ append using "$dataint/condimentos_salsas"
+ append using "$dataint/frutas_frescas" 
+ append using "$dataint/leche_queso" 
+ append using "$dataint/leguminosas" 
+ append using "$dataint/nueces" 
+ append using "$dataint/Papa_yuca_tuberculos" 
+ append using "$dataint/pescado" 
+ append using "$dataint/tabaco" 
+ append using "$dataint/vegetales_Frescos"
 
  //Rename a variable whcih only was included in of the datasets
-	 rename (s2q9a_*) (tamano)
+ rename (s2q9a_*) (tamano)
  
 *-------- Recode file name identification
 // Replace the variable file name according to the secton number of the survey
@@ -187,7 +187,7 @@ Note:
 *-------- Combine with main prices data
 
 	merge m:1 interview__key interview__id using `main_prices', keep(matched)
-    drop _merge
+	drop _merge
 
 *-------- Recode labels
 *-------- UNITS
@@ -344,6 +344,7 @@ Note:
     
 	label values file_name section_label
 	
+<<<<<<< HEAD
 /*(************************************************************************************************************************************************* 
 *     Currency transformation
 *************************************************************************************************************************************************)
@@ -2117,3 +2118,9 @@ stop
 	export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
 	save "$dataout/resumen_precio_gramo_L.dta", replace
 	restore	
+=======
+*-------- Save prices dataset
+// save the product-household dataset
+compress
+save "$output\prices.dta", replace
+>>>>>>> b44415933b1e9460e51bfb27d637eca52a40189f

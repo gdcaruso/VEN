@@ -29,7 +29,7 @@ Note:
 			
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\Documents\GitHub\ENCOVI-2019\data_management\management\1. merging\exchange rates" 
+				global rootpath "C:\Users\wb563583\VEN\data_management\management\1. merging\exchange rates" 
 				global dataout "$rootpath\"
 				
 		}
@@ -118,14 +118,14 @@ Note:
 *--------------- 1T 2020	
 *--------------- Set the dates of the exchange rate as a local 
 * These are the names of the excel spreadsheet which contain daily data for each trimester
-	local fechas_T4 26022020 21022020 20022020 19022020	18022020 17022020 14022020 ///
+	local fechas_T4 31032020 30032020 27032020 26032020 25032020 24032020 23032020 20032020 18032020 17032020 16032020 13032020 12032020 11032020 10032020 09032020 06032020 05032020 04032020 03032020 02032020 28022020 27022020 26022020 21022020 20022020 19022020	18022020 17022020 14022020 ///
 	13022020 12022020 11022020 10022020 07022020 06022020 05022020 04022020 03022020 31012020 ///
 	30012020 29012020 28012020 27012020	24012020 23012020 22012020 21012020	17012020 ///
 	16012020 15012020 14012020 13012020 10012020 09012020 08012020 07012020 03012020 02012020	
 foreach i of local fechas_T4 {
           cap import excel using "$rootpath\2_1_2a20.xls", sheet(`i') cellrange(B9:G47) firstrow clear	  
 	gen date="`i'"
-	if `i'==26022020 {
+	if `i'==31032020 {
 	tempfile exch2
 	save `exch2'
 	}

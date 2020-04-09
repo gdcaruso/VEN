@@ -1987,7 +1987,7 @@ log close
 	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
 	export excel using "$dataout/resumen_otro", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
 	restore	
-stop
+
 /*(************************************************************************************************************************************************* 
 * 4: Price transformation: From gram, liters or unit to grams
 *************************************************************************************************************************************************)*/

@@ -50,7 +50,7 @@ Note:
 // 		}
 
 // set raw data path
-// global input "$rootpath\data_management\input\latest"
+// global input "$rootpath\data_management\input\04_07_20"
 // global output "$rootpath\data_management\output"
 
 ********************************************************************************

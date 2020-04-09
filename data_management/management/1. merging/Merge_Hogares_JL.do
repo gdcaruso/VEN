@@ -29,16 +29,16 @@ Note:
 //
 //			
 // 		if $juli {
-// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
+// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
 // 		}
 // 	    if $lauta {
 // 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 // 		}
 // 	    if $lautaa {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563365\GitHub\VEN"
 // 		}
 // 		if $trini {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 // 		}
 //		
 // 		if $male {
@@ -47,7 +47,7 @@ Note:
 //
 
 
-// global input "$rootpath\data_management\input\latest"
+// global input "$rootpath\data_management\input\04_06_20"
 // global output "$rootpath\data_management\output\merged"
 
 // Set the path for the three questionnaires

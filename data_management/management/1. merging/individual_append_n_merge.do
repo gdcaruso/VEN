@@ -33,19 +33,19 @@ Note:
 		global male   0
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\GitHub\VEN"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {"C:\Users\wb563365\GitHub\VEN\"
 		}
 		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
-				global rootpath "C:\Users\wb550905\GitHub\VEN\"
+				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
 
 // set raw data path
-global raw "$rootpath\data_management\input\latest"
+global raw "$rootpath\data_management\input\04_07_20"
 global output "$rootpath\data_management\output\merged"
 
 ********************************************************************************

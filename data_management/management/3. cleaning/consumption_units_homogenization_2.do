@@ -974,18 +974,6 @@ replace cantidad_h = cantidad if bien==35 & unidad_medida==1 & cantidad>=50
 // size = Pequeña (3)
 
 
-// food = Azucar (68)
-// unit = Kilogramos (1)
-// size = no size
-replace cantidad_h = cantidad*1000 if bien==68 & unidad_medida==1 & cantidad<50
-replace cantidad_h = cantidad if bien==68 & unidad_medida==1 & cantidad>=50
-
-// food = Azucar (68)
-// unit = Gramos (2)
-// size = no size
-replace cantidad_h = cantidad*1000 if bien==35 & unidad_medida==2 & cantidad<10
-replace cantidad_h = cantidad if bien==35 & unidad_medida==2 & cantidad>=10
-
 stop
 *AB = reportado por la Universidad Catolica Andres Bello
 *ME = investigacion priopia

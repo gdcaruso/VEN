@@ -1,97 +1,95 @@
 /*===========================================================================
-Purpose: merge raw data on prices from ENCOVI Survey 2019
+Purpose: 
+1) Generate descriptive statistics for prices from ENCOVI Survey 2019
+2) Clean price data
+3) Generate the price database for Poverty Calculation 
+(ONLY for completed surveys)
 
 Country name:	Venezuela
-Year:			2014
+Year:			2019
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
+Authors:			Julieta Ladronis & Daniel Pereira
 
 Dependencies:		The World Bank -- Poverty Unit
 Creation Date:		February, 2020
 Modification Date:  
-Output:			    Merged Dataset ENCOVI (Prices)
+Output:			    Claned Price Database 
 
 Note: 
 =============================================================================*/
 ********************************************************************************
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath "C:\Users\wb563583\Documents\GitHub\ENCOVI-2019"
-// 				global dataout "$rootpath\"
-//				
-// 		}
-// 	    if $lauta {
-// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-// 				global dataout "$rootpath\"
-// 		}
-// 		if $trini   {
-// 				global rootpath ""
-// 				global dataout "$rootpath\"
-// 		}
-//		
-// 		if $male   {
-// 				global rootpath ""
-// 				global dataout "$rootpath\"
-// 		}
+	    * User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   1
+		
+		* User 3: Lautaro
+		global lauta   0
+		
+		* User 4: Malena
+		global male   0
+			
+		if $juli {
+				global rootpath "C:\Users\wb563583\GitHub\VEN"
+				global dataout "$rootpath\"
+				
+		}
+	    if $lauta {
+				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+				global dataout "$rootpath\"
+		}
+		if $trini   {
+				global rootpath ""
+				global dataout "$rootpath\"
+		}
+		
+		if $male   {
+				global rootpath ""
+				global dataout "$rootpath\"
+		}
 
-// 	global input "$rootpath\data_management\input\04_07_20"
-// 	global output "$rootpath\data_management\output\merged"
-
+	global dataofficial "$rootpath\data_management\input\04_07_20"
+	global dataout "$rootpath\data_management\output"
+	global dataint "$dataout\intermediate"
     // Set the  path for prices
-	global dataint "$rootpath\data_management\output\intermediate"
-	global pathprc "$input\ENCOVI_prices_2_STATA_All"
-	
+	global pathprc "$dataofficial\ENCOVI_prices_2_STATA_All"
+	global exch_rate "$rootpath\data_management\management\1. merging\exchange rates"
 ********************************************************************************
 	
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Merge prices data   --------------------------------------------------
 
 *************************************************************************************************************************************************)*/ 
+**** Preliminary information: completed surveys
 
-**** Preliminary information: approved surveys
-
-	//Keep approved by HQ 
+	//Keep completed by HQ 
 	use "$pathprc\interview__actions.dta", clear
 	
-	// Create a tempfile for approved surveys	
-    tempfile approved_surveys
+	// Create a tempfile for completed surveys
+    tempfile completed_surveys
 	
-	// Create identification for approved surveys
-	bys interview__key interview__id (date): keep if action==6 // 6=approved by HQ
+	// Create identification for completed surveys
+	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
 
-	// check, log and delete duplicates
-	duplicates tag interview__key interview__id, generate(dupli)
-	preserve
-	keep if dupli >= 1
-	save "$output\duplicates-price.dta", replace
-	restore	
-	drop if dupli >= 1
-	
-	keep interview* origina responsible__name date
+	// To identify unique interviews according the last date and time entered
+    bys interview__key interview__id (date time) : keep if _n==_N
 
 	// Change format
-	rename ori interviewer
-	rename respo coordinator
 	replace date = subinstr(date, "-", "/",.)
 	gen edate=date(date,"YMD")
-	format edate %td
-	drop date
-	// save temporary db with surveys approved
-	save `approved_surveys'	
+	format edate %td	
+	
+	// Check duplicates 
+	duplicates report interview__key interview__id 
+	duplicates report interview__key interview__id date time
+	
+	// save temporary db with surveys completed
 
+	save `completed_surveys'	
 
+	
 **** Main price data 
 	
 	*-------- Append households 
@@ -100,62 +98,64 @@ Note:
 	
 	// To Old questionnaire
 	use "$pathprc\ENCOVI_prices.dta", clear
-
-	// Selecting only the approved by HQ
-	merge 1:1 interview__key interview__id using `approved_surveys' , keep(using matched)
+    duplicates report interview__key interview__id
+	
+	// Selecting only the completed by HQ
+	merge 1:1 interview__key interview__id using `completed_surveys', keep(matched)
 	drop _merge
 	
+	// Check duplicates 
+	duplicates report interview__key interview__id
+	duplicates report interview__key interview__id date time
+
     // Save the temporary file
     save `main_prices'
 
-	// This file has a wide format while the other carctheristics have a long format
-	// The following files: shocks, mortalidad, services and emigration are transformed 
-	// in the following section before merging with the household data
 
 **** Complementary price data
 
-global sec_prices aceites_grasas azucares_edulcorantes bebidas cafe_te carne cereales ///
-condimentos_salsas frutas_frescas leche_queso leguminosas nueces Papa_yuca_tuberculos ///
-pescado tabaco vegetales_Frescos
+	global sec_prices aceites_grasas azucares_edulcorantes bebidas cafe_te carne cereales ///
+	condimentos_salsas frutas_frescas leche_queso leguminosas nueces Papa_yuca_tuberculos ///
+	pescado tabaco vegetales_Frescos
 
-foreach dtafile in $sec_prices{
+	foreach dtafile in $sec_prices{
 
-// Select each database
-use "$pathprc/`dtafile'.dta", replace
+	// Select each database
+	use "$pathprc/`dtafile'.dta", replace
 
-// Generate a variable with the name of the file
-gen file_name = "`dtafile'"
+	// Generate a variable with the name of the file
+	gen file_name = "`dtafile'"
 
-// Prepare names format for append
-rename (`dtafile'*id) (bien)
-rename (s2q8_*) (unidad_medida)
-rename (s2q8a_*) (unidad_medida_ot)
-rename (s2q9_*) (cantidad)
-rename (s2q10_*) (precio)
-rename (s2q11_*) (moneda)
+	// Prepare names format for append
+	rename (`dtafile'*id) (bien)
+	rename (s2q8_*) (unidad_medida)
+	rename (s2q8a_*) (unidad_medida_ot)
+	rename (s2q9_*) (cantidad)
+	rename (s2q10_*) (precio)
+	rename (s2q11_*) (moneda)
 
-save "$dataint/`dtafile'", replace
-}
+	save "$dataint\`dtafile'", replace
+	}
 
-// Append the datafiles	
- use "$dataint/aceites_grasas.dta", clear
- append using "$dataint/azucares_edulcorantes"
- append using "$dataint/bebidas" 
- append using "$dataint/cafe_te" 
- append using "$dataint/carne"
- append using "$dataint/cereales"
- append using "$dataint/condimentos_salsas"
- append using "$dataint/frutas_frescas" 
- append using "$dataint/leche_queso" 
- append using "$dataint/leguminosas" 
- append using "$dataint/nueces" 
- append using "$dataint/Papa_yuca_tuberculos" 
- append using "$dataint/pescado" 
- append using "$dataint/tabaco" 
- append using "$dataint/vegetales_Frescos"
+// Append the data files	
+	 use "$dataint\aceites_grasas.dta", clear
+	 append using "$dataint\azucares_edulcorantes"
+	 append using "$dataint\bebidas" 
+	 append using "$dataint\cafe_te" 
+	 append using "$dataint\carne"
+	 append using "$dataint\cereales"
+	 append using "$dataint\condimentos_salsas"
+	 append using "$dataint\frutas_frescas" 
+	 append using "$dataint\leche_queso" 
+	 append using "$dataint\leguminosas" 
+	 append using "$dataint\nueces" 
+	 append using "$dataint\Papa_yuca_tuberculos" 
+	 append using "$dataint\pescado" 
+	 append using "$dataint\tabaco" 
+	 append using "$dataint\vegetales_Frescos"
 
  //Rename a variable whcih only was included in of the datasets
- rename (s2q9a_*) (tamano)
+	 rename (s2q9a_*) (tamano)
  
 *-------- Recode file name identification
 // Replace the variable file name according to the secton number of the survey
@@ -187,7 +187,7 @@ save "$dataint/`dtafile'", replace
 *-------- Combine with main prices data
 
 	merge m:1 interview__key interview__id using `main_prices', keep(matched)
-	drop _merge
+    drop _merge
 
 *-------- Recode labels
 *-------- UNITS
@@ -344,7 +344,6 @@ save "$dataint/`dtafile'", replace
     
 	label values file_name section_label
 	
-<<<<<<< HEAD
 /*(************************************************************************************************************************************************* 
 *     Currency transformation
 *************************************************************************************************************************************************)
@@ -433,12 +432,6 @@ Pieza (bistec,chuleta, similares) |          6        0.08       87.00
 * 1: Units (missing values) correction 
 *************************************************************************************************************************************************)*/
 
-// Missing values correction
-	local errormis cantidad unidad_medida 
-	foreach x of local errormis {
-	replace `x'=. if `x'==.a
-	}
-	
 // Kilograms
 	// For Azucar we can replace missing values of units if the quantity is 1
 	// We assume it is 1 kg
@@ -1420,11 +1413,6 @@ log close
 	replace unidad_medida=92 if food=="Huevos (unidades)" & unidad_medida==110 & precio_b==150000
 	replace unidad_medida=91 if food=="Huevos (unidades)" & unidad_medida==110 & precio_b==150000
 	replace unidad_medida=91 if food=="Huevos (unidades)" & unidad_medida==110 & precio_b>=260000
-	replace cantidad=1 if food=="Huevos (unidades)" & unidad_medida==91 & (cantidad==3 | cantidad==8 | cantidad==12 | cantidad==15 | cantidad==30 | cantidad==36 | cantidad==40 | cantidad==60 | cantidad==80 | cantidad==150 | cantidad==200 | cantidad==300 | cantidad==500) & precio_b>200000 & precio_b<400000
-	replace cantidad=1 if food=="Huevos (unidades)" & unidad_medida==92 
-	replace cantidad=1 if food=="Huevos (unidades)" & unidad_medida==110 & cantidad==60 & precio_b==10000
-	replace unidad_medida=91 if food=="Huevos (unidades)" & unidad_medida==1
-	drop if food=="Huevos (unidades)" & unidad_medida==92 & precio_b==10828733440
 	
 //	Leche en polvo, completa o descremada
 *-----------
@@ -1979,16 +1967,7 @@ log close
 	tab bien unidad_medida if cantidad_3==. & unidad_3==.
 	tab bien unidad_medida if cantidad_3==. & unidad_3==., nolab
 	
-	preserve
-	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida tamano cantidad)
-	export excel using "$dataout/resumen_unidad", sheet("Unidad") firstrow(varlabels) replace
-	restore	
 
-	preserve
-	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
-	export excel using "$dataout/resumen_otro", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
-	restore	
-stop
 /*(************************************************************************************************************************************************* 
 * 4: Price transformation: From gram, liters or unit to grams
 *************************************************************************************************************************************************)*/
@@ -2028,19 +2007,20 @@ stop
 	gen precio_u=(precio_b/cantidad_h)
 	label var precio_u "Precio estandarizado"
 	
-
+	
 /*(************************************************************************************************************************************************* 
 *  Final databases
 *************************************************************************************************************************************************)
 
 */
+
 // Save complete database
 *-----------
 	save "$dataout/Price_database_complete.dta", replace
 
 // Price Distribution
 *----------- 
-/*	preserve
+	preserve
 	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
 	export excel using "$dataout/resumen_otro_control", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
 	restore	
@@ -2058,7 +2038,6 @@ stop
 // Price per gram by Good
 *----------- 
 	preserve
-	keep if 
 	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
 	save "$dataout/resumen_precio_gramo_bien.dta", replace
 	export excel using "$dataout/resumen_precio_gramo", sheet("Precios estandarizados") firstrow(varlabels) replace
@@ -2075,11 +2054,9 @@ stop
 	restore
 	
 	//(max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u
-*/
 // Price per gram by Good-Month-Region
 *----------- 
 	preserve
-	keep if mes=="02" 
 	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien ENTIDAD mes)
 	export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
 	save "$dataout/resumen_precio_gramo_L.dta", replace
@@ -2090,37 +2067,3 @@ stop
 	keep bien precio_u
 	save "$dataout/maiz_precio_gramo.dta", replace
 	restore
-	
-/*(************************************************************************************************************************************************* 
-*  Comparison with prices from expenditure survey
-*************************************************************************************************************************************************)*/
-
-*----------- Popularity filter
-// This means that we are going to look for the most popular "presentations" for each good(bien unidad_medida tamano cantidad) and filter less popular
-	preserve
-	collapse (count) count=unidad_medida, by(bien)
-	by bien: egen total = total(count)
-	gen pop = count/total
-	keep if pop>.15 //parametro clave, permite encontrar observaciones en todos los productos. revisar tab bien _merge luego del proximo merge antes de cambiar
-	tempfile popular
-	save `popular'
-	restore
-	
-*----------- Popularity filter applied to February
-	keep if mes=="02"
-	merge m:1 bien using `popular'
-	tab bien _merge
-	keep if _merge == 3
-
-	preserve
-	keep if mes=="02" 
-	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
-	export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
-	save "$dataout/resumen_precio_gramo_L.dta", replace
-	restore	
-=======
-*-------- Save prices dataset
-// save the product-household dataset
-compress
-save "$output\prices.dta", replace
->>>>>>> b44415933b1e9460e51bfb27d637eca52a40189f

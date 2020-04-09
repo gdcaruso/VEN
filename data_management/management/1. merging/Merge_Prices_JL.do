@@ -68,8 +68,8 @@ Note:
 	// Create a tempfile for approved surveys	
     tempfile approved_surveys
 	
-	// Create identification for approved surveys / Keep aproved interviews by HQ
-	bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step) 
+	// Create identification for approved surveys
+	bys interview__key interview__id (date): keep if action==6 // 6=approved by HQ
 
 	// check, log and delete duplicates
 	duplicates tag interview__key interview__id, generate(dupli)

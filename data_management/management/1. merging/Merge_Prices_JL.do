@@ -50,7 +50,7 @@ Note:
 				global dataout "$rootpath\"
 		}
 
-	global dataofficial "$rootpath\data_management\input\04_07_20"
+	global dataofficial "$rootpath\data_management\input\latest"
 	global dataout "$rootpath\data_management\output"
 	global dataint "$dataout\intermediate"
     // Set the  path for prices
@@ -71,8 +71,8 @@ Note:
     tempfile completed_surveys
 	
 	// Create identification for completed surveys
-	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
-
+	bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step)
+	
 	// To identify unique interviews according the last date and time entered
     bys interview__key interview__id (date time) : keep if _n==_N
 

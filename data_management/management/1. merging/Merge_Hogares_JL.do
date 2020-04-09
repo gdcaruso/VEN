@@ -35,10 +35,10 @@ Note:
 // 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
 // 		}
 // 	    if $lautaa {
-// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563365\GitHub\VEN"
+// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
 // 		}
 // 		if $trini {
-// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 // 		}
 //		
 // 		if $male {
@@ -47,7 +47,7 @@ Note:
 //
 
 
-// global input "$rootpath\data_management\input\04_06_20"
+// global input "$rootpath\data_management\input\latest"
 // global output "$rootpath\data_management\output\merged"
 
 // Set the path for the three questionnaires
@@ -110,8 +110,8 @@ local vsp      "01"	// version ASPIRE
     tempfile approved_surveys
 	
 	// Create identification for completed surveys
-	bys interview__key interview__id (date): keep if action==6 // 6=Approved by HQ 
-
+	bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step)
+	
 	// To identify unique interviews according the last date and time entered
     bys interview__key interview__id (date time) : keep if _n==_N
 	

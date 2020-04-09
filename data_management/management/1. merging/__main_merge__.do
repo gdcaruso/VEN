@@ -33,16 +33,16 @@ Note:
 		global male   0
 			
 		if $juli {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
+				global rootpath "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
 		global rootpath "C:\Users\wb563365\GitHub\VEN"
 		}
 		if $trini   {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
-				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+				global rootpath "C:\Users\wb550905\GitHub\VEN"
 		}
 
 ********************************************************************************
@@ -57,7 +57,7 @@ drop _all
 set more off
 
 // set path for dofiles
-global input "$rootpath\data_management\input\04_07_20"
+global input "$rootpath\data_management\input\latest"
 global merging "$rootpath\data_management\management\1. merging"
 global output "$rootpath\data_management\output\merged"
 

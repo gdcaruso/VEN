@@ -22,23 +22,23 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
 				global rootpath "C:\Users\wb563583\GitHub\VEN"
-				global dataout 	PONGAN ONE DRIVE PORQUE YA ES MUY PESADA (VER ABAJO EN MALE)
+				global dataout 	AL FINAL DEJÉ INPUTS DESDE GITHUB PERO OUTPUT ONEDRIVE PQ MUY PESADA PLEASE
 		}
 	    if $lauta {
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-				global dataout 	"$rootpath/data_management\output\cleaned"
+				global dataout 	AL FINAL DEJÉ INPUTS DESDE GITHUB PERO OUTPUT ONEDRIVE PQ MUY PESADA PLEASE "$rootpath/data_management\output\cleaned"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN" 
-				global dataout 	PONGAN ONE DRIVE PORQUE YA ES MUY PESADA (VER ABAJO EN MALE)
+				global dataout 	AL FINAL DEJÉ INPUTS DESDE GITHUB PERO OUTPUT ONEDRIVE PQ MUY PESADA PLEASE
 		}
 		
 		if $male   {
@@ -135,7 +135,7 @@ rename _all, lower
 /*(************************************************************************************************************************************************* 
 *----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
-global control_ent entidad municipio nombmun parroquia nombpar centropo nombcp segmento peso_segmento combined_id tipo_muestra gps* id_str statut sector_urb 
+global control_ent entidad region_est1 municipio nombmun parroquia nombpar centropo nombcp segmento peso_segmento combined_id tipo_muestra gps* id_str statut sector_urb 
 
 rename sample_type tipo_muestra
 rename segment_weight peso_segmento
@@ -150,6 +150,20 @@ rename gps_coordenadas__longitude 	gps_coord_longitud
 rename gps_coordenadas__accuracy 	gps_coord_exactitud
 rename gps_coordenadas__altitude 	gps_coord_altitud
 rename gps_coordenadas__timestamp	gps_coord_tiempo
+
+gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   //Region Central
+replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
+replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental
+replace region_est1 =  4 if entidad==23                                            // Region Zuliana
+replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes
+replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental
+replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular
+replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana
+replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital
+label var region_es1 "Region"
+label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
+          5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
+label value region_est1 region_est1
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------	III Household determination / Determinacion de hogares  -------------------------------------------------------
@@ -1382,7 +1396,7 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 	/* 	s9q1 ¿La semana pasada trabajó al menos una hora?: trabajo_semana
 			1 = si
 			2 = no	 */
-	gen     trabajo_semana = s9q1==1 & (s9q1!=. & s9q1!=.a) 
+	gen     trabajo_semana = s9q1==1 if (s9q1!=. & s9q1!=.a) 
 
 	*** Independently of last answer, did you dedicate last week at least one hour to: 
 	/* 	s9q2 Independientemente de lo que me acaba de decir, ¿le dedicó la semana pasada, al menos una hora a...: trabajo_semana_2
@@ -1591,7 +1605,7 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 	clonevar	im_transporte	= s9q19__10 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__10!=. & s9q19__10!=.a) 
 	clonevar	im_rendimiento	= s9q19__11 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__11!=. & s9q19__11!=.a) 
 	clonevar	im_otro			= s9q19__12 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__12!=. & s9q19__12!=.a) 
-	clonevar	im_petro		= s9q19_petro if (s9q19_petro!=. & s9q19_petro!=.a) // Does the petro question also haven "inlist(s9q15,1,2,3,4,7,8,9)"? Does not appear in questionnaire 
+	clonevar	im_petro		= s9q19_petro if (s9q19_petro!=. & s9q19_petro!=.a) & (s9q19__12!=. & s9q19__12!=.a) 
 	
 	*** Amount received (1 variable for each of the 12 options)
 	* s9q19a_* Monto recibido: im_*_cant
@@ -2931,6 +2945,8 @@ hnoedadfallecio11 hnoedadfallecio12 hnoedadfallecio13 hnoedadfallecio14 hnoedadf
 *----------------------------------- XII: FOOD CONSUMPTION / CONSUMO DE ALIMENTO --------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
+global foodcons_ENCOVI clap clap_cuando
+
 *Most variables are part of the consumption module, but we will add the 2 questions on CLAP here
 
 *** This household has been beneficiary of the "Bolsa-Caja" of CLAP for households?
@@ -2938,14 +2954,14 @@ hnoedadfallecio11 hnoedadfallecio12 hnoedadfallecio13 hnoedadfallecio14 hnoedadf
 				1 = si
 				2 = no	*/
 		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	gen 	CLAP = s12aq10==1 & (s12aq10!=. & s12aq10!=.a)
+	gen 	clap = s12aq10==1 & (s12aq10!=. & s12aq10!=.a)
 	
 *** When was the last time that the "Bolsa-Caja" CLAP arrived to the household?
 	/* s12aq10_a Cuándo fue la última vez que llegó la Bolsa-Caja del CLAP al hogar?
 				1 = Últimos 7 días
 				2 = Últimos 15 días
 				3 = Más de 15 días	*/
-	gen 	CLAP_cuando = s12aq10_a if s12aq10==1 & (s12aq10_a!=. & s12aq10_a!=.a)
+	gen 	clap_cuando = s12aq10_a if s12aq10==1 & (s12aq10_a!=. & s12aq10_a!=.a)
 
 
 /*(************************************************************************************************************************************************ 
@@ -4112,11 +4128,11 @@ compress
 
 sort id com
 
-order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI /*$ilaanalysis_ENCOVI mutear analisis luego*/ ///
+order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $food_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI /*$ilaanalysis_ENCOVI mutear analisis luego*/ ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 interview_month interview__id interview__key quest // to match with hh consumption
 
-keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI /*$ilaanalysis_ENCOVI mutear analisis luego*/ ///
+keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $food_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI /*$ilaanalysis_ENCOVI mutear analisis luego*/ ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
 interview_month interview__id interview__key quest // to match with hh consumption
 

@@ -432,6 +432,12 @@ Pieza (bistec,chuleta, similares) |          6        0.08       87.00
 * 1: Units (missing values) correction 
 *************************************************************************************************************************************************)*/
 
+// Missing values correction
+	local errormis cantidad unidad_medida 
+	foreach x of local errormis {
+	replace `x'=. if `x'==.a
+	}
+	
 // Kilograms
 	// For Azucar we can replace missing values of units if the quantity is 1
 	// We assume it is 1 kg
@@ -1413,6 +1419,11 @@ log close
 	replace unidad_medida=92 if food=="Huevos (unidades)" & unidad_medida==110 & precio_b==150000
 	replace unidad_medida=91 if food=="Huevos (unidades)" & unidad_medida==110 & precio_b==150000
 	replace unidad_medida=91 if food=="Huevos (unidades)" & unidad_medida==110 & precio_b>=260000
+	replace cantidad=1 if food=="Huevos (unidades)" & unidad_medida==91 & (cantidad==3 | cantidad==8 | cantidad==12 | cantidad==15 | cantidad==30 | cantidad==36 | cantidad==40 | cantidad==60 | cantidad==80 | cantidad==150 | cantidad==200 | cantidad==300 | cantidad==500) & precio_b>200000 & precio_b<400000
+	replace cantidad=1 if food=="Huevos (unidades)" & unidad_medida==92 
+	replace cantidad=1 if food=="Huevos (unidades)" & unidad_medida==110 & cantidad==60 & precio_b==10000
+	replace unidad_medida=91 if food=="Huevos (unidades)" & unidad_medida==1
+	drop if food=="Huevos (unidades)" & unidad_medida==92 & precio_b==10828733440
 	
 //	Leche en polvo, completa o descremada
 *-----------
@@ -1967,7 +1978,16 @@ log close
 	tab bien unidad_medida if cantidad_3==. & unidad_3==.
 	tab bien unidad_medida if cantidad_3==. & unidad_3==., nolab
 	
+	preserve
+	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida tamano cantidad)
+	export excel using "$dataout/resumen_unidad", sheet("Unidad") firstrow(varlabels) replace
+	restore	
 
+	preserve
+	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
+	export excel using "$dataout/resumen_otro", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
+	restore	
+stop
 /*(************************************************************************************************************************************************* 
 * 4: Price transformation: From gram, liters or unit to grams
 *************************************************************************************************************************************************)*/
@@ -2007,20 +2027,19 @@ log close
 	gen precio_u=(precio_b/cantidad_h)
 	label var precio_u "Precio estandarizado"
 	
-	
+
 /*(************************************************************************************************************************************************* 
 *  Final databases
 *************************************************************************************************************************************************)
 
 */
-
 // Save complete database
 *-----------
 	save "$dataout/Price_database_complete.dta", replace
 
 // Price Distribution
 *----------- 
-	preserve
+/*	preserve
 	collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
 	export excel using "$dataout/resumen_otro_control", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
 	restore	
@@ -2038,6 +2057,7 @@ log close
 // Price per gram by Good
 *----------- 
 	preserve
+	keep if 
 	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
 	save "$dataout/resumen_precio_gramo_bien.dta", replace
 	export excel using "$dataout/resumen_precio_gramo", sheet("Precios estandarizados") firstrow(varlabels) replace
@@ -2054,9 +2074,11 @@ log close
 	restore
 	
 	//(max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u
+*/
 // Price per gram by Good-Month-Region
 *----------- 
 	preserve
+	keep if mes=="02" 
 	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien ENTIDAD mes)
 	export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
 	save "$dataout/resumen_precio_gramo_L.dta", replace
@@ -2067,3 +2089,31 @@ log close
 	keep bien precio_u
 	save "$dataout/maiz_precio_gramo.dta", replace
 	restore
+	
+/*(************************************************************************************************************************************************* 
+*  Comparison with prices from expenditure survey
+*************************************************************************************************************************************************)*/
+
+*----------- Popularity filter
+// This means that we are going to look for the most popular "presentations" for each good(bien unidad_medida tamano cantidad) and filter less popular
+	preserve
+	collapse (count) count=unidad_medida, by(bien)
+	by bien: egen total = total(count)
+	gen pop = count/total
+	keep if pop>.15 //parametro clave, permite encontrar observaciones en todos los productos. revisar tab bien _merge luego del proximo merge antes de cambiar
+	tempfile popular
+	save `popular'
+	restore
+	
+*----------- Popularity filter applied to February
+	keep if mes=="02"
+	merge m:1 bien using `popular'
+	tab bien _merge
+	keep if _merge == 3
+
+	preserve
+	keep if mes=="02" 
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
+	export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
+	save "$dataout/resumen_precio_gramo_L.dta", replace
+	restore	

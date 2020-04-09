@@ -46,7 +46,7 @@ Note:
 // 				global dataout "$rootpath\"
 // 		}
 
-// 	global input "$rootpath\data_management\input\04_07_20"
+// 	global input "$rootpath\data_management\input\latest"
 // 	global output "$rootpath\data_management\output\merged"
 
     // Set the  path for prices

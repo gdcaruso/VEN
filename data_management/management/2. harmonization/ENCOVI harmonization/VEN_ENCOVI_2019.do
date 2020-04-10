@@ -47,7 +47,7 @@ Note:
 		}
 
 		
-// Set output data path
+// Set paths
 global dataofficial "$rootpath\data_management\output\merged"
 global input "$rootpath\data_management\input"
 
@@ -79,9 +79,10 @@ local vr       "01"     // version renta
 		* Deflactor
 			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-			*use "$rootpath\data_management\management\output\cleaned\inflacion\InflacionVerdadera_04-09-20.dta", clear
-			use "$rootpath\data_management\management\output\cleaned\inflacion\Inflacion_PARA NOMINAL.dta", clear
+			*use "$rootpath\data_management\output\cleaned\inflacion\InflacionVerdadera_04-09-20.dta", clear
+			*use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_PARA NOMINAL.dta", clear
 			*use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
+			use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
 			
 			forvalues j = 11(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -4038,5 +4039,6 @@ interview_month interview__id interview__key quest labor_status miembros s9q28a_
 
 
 *save "$dataout\ENCOVI_2019.dta", replace
-save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
+*save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
 *save "$dataout\ENCOVI_2019_PRECIOS IMPLICITOS.dta", replace
+save "$dataout\ENCOVI_2019_Asamblea Nacional.dta", replace

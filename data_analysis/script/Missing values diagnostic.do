@@ -33,7 +33,7 @@ if $luz   {
 
 tempfile pfile
 tempname pname
-postfile `pname' str45(year indicator value) using `pfile', replace
+postfile `pname' str30(year indicator value) using `pfile', replace
 
 forvalues y = 2014/2018 {
 	di in y "Imputation for year `y'"
@@ -94,7 +94,7 @@ postclose `pname'
 use `pfile', clear
 destring year indicator value , replace
 	
-export excel using "${output}\Income Analysis ENCOVI 2014-2019.xlsx", firstrow(variables) sheet(Income 2014-2018 others) sheetreplace
+export excel using "${output}\Income Analysis ENCOVI 2014-2019.xlsx", firstrow(variables) sheetreplace sheet("Inc 2014-2018 others") 
 
 
 

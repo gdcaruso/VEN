@@ -152,6 +152,11 @@ rename gps_coordenadas__accuracy 	gps_coord_exactitud
 rename gps_coordenadas__altitude 	gps_coord_altitud
 rename gps_coordenadas__timestamp	gps_coord_tiempo
 
+* We identify interview_month for the observations with missing
+gen string_interview_month = substr(s4_start,6,2)
+gen new_interview_month = real(string_interview_month)
+replace interview_month = new_interview_month if (interview_month==.a | interview_month==.)
+
 gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   //Region Central
 replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
 replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental
@@ -1606,7 +1611,9 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 	clonevar	im_transporte	= s9q19__10 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__10!=. & s9q19__10!=.a) 
 	clonevar	im_rendimiento	= s9q19__11 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__11!=. & s9q19__11!=.a) 
 	clonevar	im_otro			= s9q19__12 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19__12!=. & s9q19__12!=.a) 
-	clonevar	im_petro		= s9q19_petro if (s9q19_petro!=. & s9q19_petro!=.a) & (s9q19__12!=. & s9q19__12!=.a) 
+	gen			im_petro		= (s9q19_petro==1) if (s9q19_petro!=. & s9q19_petro!=.a) & (s9q19__12!=. & s9q19__12!=.a)
+		label def im_petro 1 "Sí" 0 "No"
+		label values im_petro im_petro
 	
 	*** Amount received (1 variable for each of the 12 options)
 	* s9q19a_* Monto recibido: im_*_cant
@@ -1623,7 +1630,7 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 	clonevar 	im_transporte_cant	= s9q19a_10 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_10!=. & s9q19a_10!=.a) 
 	clonevar 	im_rendimiento_cant	= s9q19a_11 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_11!=. & s9q19a_11!=.a) 
 	clonevar 	im_otro_cant		= s9q19a_12 if inlist(s9q15,1,2,3,4,7,8,9) & (s9q19a_12!=. & s9q19a_12!=.a) 
-	clonevar	im_petro_cant		= s9q19_petromonto if (s9q19_petromonto!=. & s9q19_petromonto!=.a) // Does the petro question also haven "inlist(s9q15,1,2,3,4,7,8,9)"? Does not appear in questionnaire 
+	clonevar	im_petro_cant		= s9q19_petromonto if (s9q19_petromonto!=. & s9q19_petromonto!=.a) 
 	
 	*** In which currency? (1 variable for each of the 12 options)
 	* s9q19b_* En qué moneda?: im_*_mone
@@ -2090,7 +2097,9 @@ iext_sueldo_mone	iext_ingnet_mone	iext_indemn_mone	iext_remesa_mone	iext_penjub_
 	clonevar 	inla_ayuda_fa	= s9q28__9 if (s9q28__9!=. & s9q28__9!=.a)
 	clonevar 	inla_asig_men	= s9q28__10 if (s9q28__10!=. & s9q28__10!=.a)
 	clonevar 	inla_otros		= s9q28__11 if (s9q28__11!=. & s9q28__11!=.a)
-	clonevar	inla_petro		= s9q28_petro if (s9q28_petro!=. & s9q28_petro!=.a)
+	gen			inla_petro		= (s9q28_petro==1) if (s9q28_petro!=. & s9q28_petro!=.a)
+		label def inla_petro 1 "Sí" 0 "No"
+		label values inla_petro inla_petro
 	
 	*** Amount discounted
 	* s9q28a_*: Monto descontado *_cant
@@ -3413,7 +3422,7 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			cap replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes4'					if interview_month==4 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
 		}
 
-	local incomevar29 _1 _2 _3 _4 _5 _6 _7 _8 _9  
+	local incomevar29 _1 _2 _3 _4 _5 _6 _7 _8 _9
 	foreach i of local incomevar21 {
 		* Bolívares
 			gen s9q29b`i'_bolfeb = s9q29b`i'					* `deflactor11'	if interview_month==11 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
@@ -3905,137 +3914,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	
 
 	
-****** PLUS: INCOME ANALYSIS ******
-
-global ilaanalysis_ENCOVI 	recibe_ingresolab_mon_mes recibe_ingresolab_mon_ano recibe_ingresolab_mon report_inglabmon_perocuanto ///
-							recibe_ingresolab_nomon report_inglabnomon_perocuanto ///
-							cuantasinlarecibe recibe_ingresonolab report_ingnolab_perocuanto ///
-							labor_status
-
-* MONETARY LABOR INCOME
-
-	* Ingreso laboral monetario (empleados y empleadores), segun si recibieron o no en el ultimo mes
-		gen recibe_ingresolab_mon_mes = .
-		replace recibe_ingresolab_mon_mes = 1 if (s9q19__1==1 | s9q19__2==1 | s9q19__3==1 | s9q19__4==1 | s9q19__5==1 | s9q19__6==1 | s9q19__7==1 | s9q19__8==1 | s9q19__9==1 | s9q19__10==1 | s9q19__11==1 | s9q19__12==1) ///
-			| s9q19_petro==1 | s9q23==1 // Recibió ingreso monetario en algún concepto en el último mes (no usamos s9q26 porque se decidió que s9q25 engloba ambas 26 y 27)
-		replace recibe_ingresolab_mon_mes = 0 if inlist(s9q19__1,0,.,.a) & inlist(s9q19__2,0,.,.a) & inlist(s9q19__3,0,.,.a) & inlist(s9q19__4,0,.,.a) & inlist(s9q19__5,0,.) & inlist(s9q19__6,0,.,.a) & inlist(s9q19__7,0,.,.a) & inlist(s9q19__8,0,.,.a) & inlist(s9q19__9,0,.,.a) & inlist(s9q19__10,0,.,.a) & inlist(s9q19__11,0,.,.a) & inlist(s9q19__12,0,.,.a) ///
-			& inlist(s9q19_petro,2,.,.a) & inlist(s9q23,2,.,.a) // No recibió ingreso laboral monetario en ningún concepto mensual
-		* Problem: income from abroad for salaries/wages and net benefits for independent workers (s9q29a_1 and _2), and local benefits/utilities of independent workers (s9q25) are measured on a yearly basis, not monthly as the others
-		* If we include them in this dummy, there ends up being some unemployed or inactives who report labor income.
-	
-	*Ingreso laboral monetario (independientes y otros), , segun si recibieron o no en el ultimo año
-		* Thus, analysis on the side for imputation for those 3 variables, create a new variables
-		gen recibe_ingresolab_mon_ano = .
-		replace recibe_ingresolab_mon_ano = 1 if s9q25==1 | (s9q29a__1==1 | s9q29a__2==1)
-		replace recibe_ingresolab_mon_ano = 0 if s9q25==2 & s9q29a__1==0 & s9q29a__2==0
-	
-	* Checks (data April 6)
-	tab recibe_ingresolab_mon_ano recibe_ingresolab_mon_mes, missing // 157 observations have =1 in both
-	tab labor_status recibe_ingresolab_mon_mes, missing // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving monetary labor income
-	tab labor_status recibe_ingresolab_mon_ano, missing // 32 observations not OK (unemployed or inactive who have labor income, reasonable they could have earned it before)
-	
-	gen recibe_ingresolab_mon = .
-	replace recibe_ingresolab_mon = 0 if recibe_ingresolab_mon_mes==0 & recibe_ingresolab_mon_ano==0
-	replace recibe_ingresolab_mon = 1 if recibe_ingresolab_mon_mes==1
-	replace recibe_ingresolab_mon = 2 if recibe_ingresolab_mon_ano==1
-	replace recibe_ingresolab_mon = 3 if recibe_ingresolab_mon_mes==1 & recibe_ingresolab_mon_ano==1
-		label def recibe_ingresolab_mon 0 "Dice que no recibe nada" 1 "Dice que recibio en el ultimo mes" 2 "Dice que recibio en el último año" 3 "Dice que en el último mes Y último año"
-		label values recibe_ingresolab_mon recibe_ingresolab_mon
-	
-	tab recibe_ingresolab_mon, mi 
-	
-		* Crossed with the amount of income
-		gen report_inglabmon_perocuanto = .
-		replace report_inglabmon_perocuanto = 0 	if inlist(recibe_ingresolab_mon,1,2,3) & ingresoslab_mon==. // Dicen que reciben ila monetario, pero no reportan cuánto
-		replace report_inglabmon_perocuanto = 1 	if inlist(recibe_ingresolab_mon,1,2,3) & ingresoslab_mon>=0 & ingresoslab_mon!=.
-		*replace report_inglabmon_perocuanto = 1 	if ingresoslab_mon>=0 & ingresoslab_mon!=. // Same result as above line
-		
-	tab report_inglabmon_perocuanto, mi // We will have to impute 287 observations that declare to have earned monetary labor income but don't say how much
-	
-	
-* NON-MONETARY LABOR INCOME
-	
-	* Ingreso laboral no monetario: todo analizado para el último mes (más fácil)
-		gen recibe_ingresolab_nomon = .
-		replace recibe_ingresolab_nomon = 1 if (s9q21__1==1 | s9q21__2==1 | s9q21__3==1 | s9q21__4==1 | s9q21__5==1 | s9q21__6==1 | s9q21__7==1 | s9q21__8==1 | s9q21__9==1 ) | s9q24==1 // Recibió ingreso no monetario en algún concepto
-		replace recibe_ingresolab_nomon = 0 if inlist(s9q21__1,0,.,.a) & inlist(s9q21__2,0,.,.a) & inlist(s9q21__3,0,.,.a) & inlist(s9q21__4,0,.,.a) & inlist(s9q21__5,0,.) & inlist(s9q21__6,0,.,.a) & inlist(s9q21__7,0,.,.a) & inlist(s9q21__8,0,.,.a) & inlist(s9q21__9,0,.,.a) & inlist(s9q24,2,.,.a) // No recibió ingreso laboral no monetario en ningún concepto
-		
-	* Checks (data April 6)
-	tab labor_status recibe_ingresolab_nomon, mi  // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving non monetary labor income
-	tab recibe_ingresolab_nomon, mi  
-	
-		* Crossed with the amount of income
-		gen report_inglabnomon_perocuanto = .
-		replace report_inglabnomon_perocuanto = 0 	if recibe_ingresolab_nomon==1 & ingresoslab_bene==. // Dicen que reciben ila no monetario, pero no reportan cuánto
-		replace report_inglabnomon_perocuanto = 1 	if recibe_ingresolab_nomon==1 & ingresoslab_bene>=0 & ingresoslab_bene!=.
-		*replace report_inglabnomon_perocuanto = 1 	if ingresoslab_bene>=0 & ingresoslab_bene!=. // Same result as above line
-		
-	tab report_inglabnomon_perocuanto, mi // We will have to impute 26 observations that declare to have earned non-monetary labor income but don't say how much
-
-	
-* NON-LABOR (MONETARY) INCOME
-	
-	* Number of non-labor income sources that people received
-	egen cuantasinlarecibe = rowtotal(inla_pens_soi	inla_pens_vss inla_jubi_emp inla_pens_dsa inla_beca_pub inla_beca_pri inla_ayuda_pu inla_ayuda_pr inla_ayuda_fa inla_asig_men inla_otros inla_petro ///
-					iext_indemn	iext_remesa	iext_penjub	iext_intdiv	iext_becaes	iext_extrao iext_alquil), mi
-	tab cuantasinlarecibe, mi // By April 7th, 8.1% received 0, 11.1% received 1, 0.5% missing, and the rest more than 1
-
-	/*      cuantasinla |
-				 recibe |      Freq.     Percent        Cum.
-			------------+-----------------------------------
-					  0 |      2,589        8.08        8.08
-					  1 |        975        3.04       11.12
-					  2 |     19,794       61.74       72.86
-					  3 |      6,717       20.95       93.81
-					  4 |      1,563        4.88       98.69
-					  5 |        244        0.76       99.45
-					  6 |         22        0.07       99.52
-					  7 |          2        0.01       99.53
-					  8 |          1        0.00       99.53
-					  . |        151        0.47      100.00
-			------------+-----------------------------------
-				  Total |     32,058      100.00				*/ 
-
-				  
-	* Ingreso no laboral monetario (local), segun si recibieron o no en el ultimo mes
-		gen recibe_ingresonolab_mes = .
-		replace recibe_ingresonolab_mes = 1 if (s9q28__1==1 | s9q28__2==1 | s9q28__3==1 | s9q28__4==1 | s9q28__5==1 | s9q28__6==1 | s9q28__7==1 | s9q28__8==1 | s9q28__9==1 | s9q28__10==1 | s9q28__11==1 ) ///
-			| s9q28_petro==1 | (s9q29a__3==1 | s9q29a__4==1 | s9q29a__5==1 | s9q29a__6==1 | s9q29a__7==1 | s9q29a__8==1 | s9q29a__9==1) // Recibió ingreso monetario no laboral en algún concepto en el último mes
-		replace recibe_ingresonolab_mes = 0 if inlist(s9q28__1,0,.,.a) & inlist(s9q28__2,0,.,.a) & inlist(s9q28__3,0,.,.a) & inlist(s9q28__4,0,.,.a) & inlist(s9q28__5,0,.) & inlist(s9q28__6,0,.,.a) & inlist(s9q28__7,0,.,.a) & inlist(s9q28__8,0,.,.a) & inlist(s9q28__9,0,.,.a) & inlist(s9q28__10,0,.,.a) & inlist(s9q28__11,0,.,.a) ///
-			& inlist(s9q28_petro,2,.,.a) & inlist(s9q29b_3,0,.,.a) & inlist(s9q29b_4,0,.,.a) & inlist(s9q29b_5,0,.,.a) & inlist(s9q29b_6,0,.,.a) & inlist(s9q29b_7,0,.,.a) & inlist(s9q29b_8,0,.,.a) & inlist(s9q29b_9,0,.,.a) // No recibió ingreso laboral monetario en ningún concepto mensual
-		* Problem: income from abroad (s9q29a_3 to _9) are measured on a yearly basis, not monthly as the others.
-	
-	*Ingreso no laboral monetario (proveniente del exterior), segun si recibieron o no en el ultimo año
-		* Thus, analysis on the side for imputation for those 3 variables, create a new variables
-		gen recibe_ingresonolab_ano = .
-		replace recibe_ingresonolab_ano = 1 if (s9q29a__3==1 | s9q29a__4==1 | s9q29a__5==1 | s9q29a__6==1 | s9q29a__7==1 | s9q29a__8==1 | s9q29a__9==1)
-		replace recibe_ingresonolab_ano = 0 if inlist(s9q29a__3,0,.,.a) & inlist(s9q29a__4,0,.,.a) & inlist(s9q29a__5,0,.,.a) & inlist(s9q29a__6,0,.,.a) & inlist(s9q29a__7,0,.,.a) & inlist(s9q29a__8,0,.,.a) & inlist(s9q29a__9,0,.,.a)
-	
-	* Checks (data April 7)
-	tab recibe_ingresonolab_ano recibe_ingresonolab_mes, missing // 1,448 observations have =1 in both
-	tab labor_status recibe_ingresonolab_mes, missing 
-	tab labor_status recibe_ingresonolab_ano, missing 
-	
-	gen recibe_ingresonolab = .
-	replace recibe_ingresonolab = 0 if recibe_ingresonolab_mes==0 & recibe_ingresonolab_ano==0
-	replace recibe_ingresonolab = 1 if recibe_ingresonolab_mes==1
-	replace recibe_ingresonolab = 2 if recibe_ingresonolab_ano==1
-	replace recibe_ingresonolab = 3 if recibe_ingresonolab_mes==1 & recibe_ingresonolab_ano==1
-		label def recibe_ingresonolab 0 "Dice que no recibe nada" 1 "Dice que recibio en el ultimo mes" 2 "Dice que recibio en el último año" 3 "Dice que en el último mes Y último año"
-		label values recibe_ingresonolab recibe_ingresonolab
-	
-	tab recibe_ingresonolab, mi 
-	
-		* Crossed with the amount of income
-		egen inla_aux = rsum(inla_otro itrane_ns itrane_o_m itranp_ns itranp_o_m rem icap_m ijubi_m), mi
-		gen report_ingnolab_perocuanto = .
-		replace report_ingnolab_perocuanto = 0 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux==. // Dicen que reciben ila monetario, pero no reportan cuánto
-		replace report_ingnolab_perocuanto = 1 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux>=0 & inla_aux!=.
-		*replace report_ingnolab_perocuanto = 1 	if inla_aux>=0 & inla_aux!=. // Same result as above line
-		
-	tab report_ingnolab_perocuanto, mi // We will have to impute 124 observations that declare to have received non labor income but don't say how much
-
-	
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: PRECIOS  ------------------------------------------------------------------
 ************************************************************************************************************************************************)*/
@@ -4149,13 +4027,13 @@ compress
 
 sort id com
 
-order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $food_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI $ilaanalysis_ENCOVI /*mutear analisis luego*/ ///
+order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $food_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-interview_month interview__id interview__key quest miembros // to match with hh consumption
+interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb  // additional
 
-keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $food_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI $ilaanalysis_ENCOVI /*mutear analisis luego*/ ///
+keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $food_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-interview_month interview__id interview__key quest miembros // to match with hh consumption
+interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb  // additional
 
 
 *save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace

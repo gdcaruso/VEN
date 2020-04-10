@@ -73,7 +73,7 @@ set more off
 * Deflactor DEPRECIATED
 *Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-use "$cleaned\InflacionVerdadera_26-3-20.dta", clear
+//use "$cleaned\InflacionVerdadera_26-3-20.dta", clear
 //		
 // forvalues j = 11(1)12 {
 // 	sum indice if mes==`j' & ano==2019
@@ -107,7 +107,7 @@ local deflactor3 1
 local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 local meses 1 2 3 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 
-use "$cleaned\exchenge_rate_price.dta", clear
+use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
 
 destring mes, replace
 foreach i of local monedas {

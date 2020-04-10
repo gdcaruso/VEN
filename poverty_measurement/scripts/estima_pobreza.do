@@ -21,34 +21,34 @@ Note:
 
 // Define rootpath according to user
 
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		
-		* User 3: Lautaro
-		global lauta   1
-		
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath ""
-		}
-
-	    if $lauta {
-				global rootpath "C:\Users\wb563365\GitHub\VEN"
-		}
-
-// set raw data path
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+//		
+// 		* User 3: Lautaro
+// 		global lauta   1
+//		
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath ""
+// 		}
+//
+// 	    if $lauta {
+// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 		}
+//
+// // set raw data path
 // global cleaned "$rootpath\data_management\output\cleaned"
 // global merged "$rootpath\data_management\output\merged"
 // global input  "$rootpath\poverty_measurement\input"
 // global output "$rootpath\poverty_measurement\output"
-// global orsh = 2.4
+// global orsh = 2.32
 
 
 ********************************************************************************
@@ -76,13 +76,13 @@ di $costodiario
 use "$cleaned\ENCOVI_2019.dta" , replace
 
 // gen new lines
-gen le_new = $costodiario * 30.4
-gen lp_new = $orsh * le_new
+gen le_new = $costodiario * 30.42
+gen lp_new = $orsh* le_new //	 $orsh
 
 // gen international lines
-gen lp19 = 1.9 *30.4 * 2.92 * (76555.93+1) * (1914.12+1) /100000
-gen lp32 = 3.2 *30.4 * 2.92 * (76555.93+1) * (1914.12+1) /100000
-gen lp55 = 5.5 *30.4 * 2.92 * (76555.93+1) * (1914.12+1) /100000
+gen lp19 = 1.9 *30.42 * 2.92 * (76555.93+1) * (1914.12+1) /100000
+gen lp32 = 3.2 *30.42 * 2.92 * (76555.93+1) * (1914.12+1) /100000
+gen lp55 = 5.5 *30.42 * 2.92 * (76555.93+1) * (1914.12+1) /100000
 
 // gen last national oficial lines corrected by inflation
 gen le_ofi = 1560/5.2* (76555.93+1) * (1914.12+1) /100000
@@ -117,8 +117,7 @@ tab pobre_55, mi
 sort ipcf
 gen obs = _n
 preserve
-drop if obs>31500
-graph twoway line ipcf obs  if obs<30500, lcolor("black") ///
+graph twoway line ipcf obs  if obs<30000, lcolor("black") ///
 || line lp19 obs, lcolor("blue") ///
 || line lp32 obs, lcolor("blue") ///
 || line lp55 obs, lcolor("blue") ///

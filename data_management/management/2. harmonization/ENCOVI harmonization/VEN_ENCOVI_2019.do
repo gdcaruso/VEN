@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -34,7 +34,7 @@ Note:
 		}
 	    if $lauta {
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-				global dataout 	PONGAN ONE DRIVE PORQUE YA ES MUY PESADA (VER ABAJO EN MALE)
+				global dataout 	"C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN" 
@@ -93,11 +93,21 @@ local vr       "01"     // version renta
 				display r(mean)
 				local indice`j' = r(mean)				
 				}
-			local deflactor11 `indice2'/`indice11'
-			local deflactor12 `indice2'/`indice12'
-			local deflactor1 `indice2'/`indice1'
-			local deflactor2 `indice2'/`indice2'
-			local deflactor3 `indice2'/`indice3'
+
+// if we consider that incomes are earned in the previous month than the month of the interview use
+ 			local deflactor11 =.
+			local deflactor12 =`indice2'/`indice11'
+			local deflactor1 `indice2'/`indice12'
+			local deflactor2 `indice2'/`indice1'
+			local deflactor3 `indice2'/`indice2'
+
+				
+// if we consider that incomes are earned in the same month than the survey is collected use this
+// 			local deflactor11 `indice2'/`indice11'
+// 			local deflactor12 `indice2'/`indice12'
+// 			local deflactor1 `indice2'/`indice1'
+// 			local deflactor2 `indice2'/`indice2'
+// 			local deflactor3 `indice2'/`indice3'
 			
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
@@ -107,13 +117,27 @@ local vr       "01"     // version renta
 			
 			use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
 			
+//if we consider that incomes are earned one month previous to data collection use this			
 			destring mes, replace
 			foreach i of local monedas {
 				foreach j of local meses {
 					sum mean_moneda	if moneda==`i' & mes==`j'
-					local tc`i'mes`j' = r(mean)
-				}
-			}
+					local k `j-1'
+					local tc`i'mes`k' = r(mean)
+					}
+					}
+
+
+			
+			
+// if we consider that incomes are earned the same month as data is collected use this
+// 			destring mes, replace
+// 			foreach i of local monedas {
+// 				foreach j of local meses {
+// 					sum mean_moneda	if moneda==`i' & mes==`j'
+// 					local tc`i'mes`j' = r(mean)
+// 				}
+// 			}
 			
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
@@ -158,6 +182,10 @@ rename gps_coordenadas__timestamp	gps_coord_tiempo
 gen string_interview_month = substr(s4_start,6,2)
 gen new_interview_month = real(string_interview_month)
 replace interview_month = new_interview_month if (interview_month==.a | interview_month==.)
+
+// this is only to test wha
+//drop if interview month is november
+// drop if interview_month==11
 
 gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   //Region Central
 replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
@@ -4040,5 +4068,5 @@ interview_month interview__id interview__key quest labor_status miembros s9q28a_
 
 *save "$dataout\ENCOVI_2019.dta", replace
 *save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
-*save "$dataout\ENCOVI_2019_PRECIOS IMPLICITOS.dta", replace
-save "$dataout\ENCOVI_2019_Asamblea Nacional.dta", replace
+*save "$dataout\ENCOVI_2019_PRECIOS IMPLICITOS.dta_lag_ingresos.dta", replace
+save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

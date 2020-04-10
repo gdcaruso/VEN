@@ -1,6 +1,5 @@
 /*===========================================================================
-Puropose: This script takes spending in food and compares it with spending
-in non food goods to calculate orshansky indexes over population of reference
+Puropose: Graph of ipcf distrubution & month of survey
 ===========================================================================
 Country name:	Venezuela
 Year:			2019
@@ -19,38 +18,38 @@ Note:
 ********************************************************************************
 
 
-// // Define rootpath according to user
-//
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta2   1
-//		
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath ""
-// 		}
-// 	    if $lauta {
-// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-// 		}
-// 	    if $lauta2 {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-// 		}
-//
-// // set path
-// global merged "$rootpath\data_management\output\merged"
-// global cleaned "$rootpath\data_management\output\cleaned"
-// global output "$rootpath\poverty_measurement\output"
+// Define rootpath according to user
+
+	    * User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   0
+		
+		* User 3: Lautaro
+		global lauta   0
+		
+		* User 3: Lautaro
+		global lauta2   1
+		
+		
+		* User 4: Malena
+		global male   0
+			
+		if $juli {
+				global rootpath ""
+		}
+	    if $lauta {
+				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+		}
+	    if $lauta2 {
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
+		}
+
+// set path
+global merged "$rootpath\data_management\output\merged"
+global cleaned "$rootpath\data_management\output\cleaned"
+global output "$rootpath\poverty_measurement\output"
 *
 ********************************************************************************
 
@@ -63,60 +62,7 @@ set more off
 
 
 
-/*==============================================================================
-1:moves currencies to bolivares
-==============================================================================*/
-// generate exchange rates
 
-*** 0.0 To take everything to bolívares ***
-
-* Deflactor DEPRECIATED
-*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
-			
-use "$cleaned\InflacionVerdadera_26-3-20.dta", clear
-//		
-// forvalues j = 11(1)12 {
-// 	sum indice if mes==`j' & ano==2019
-// 	local indice`j' = r(mean) 			
-// 	di `indice`j''
-// 	}
-//
-//	
-// forvalues j = 1(1)3 {
-// 	qui sum indice if mes==`j' & ano==2020
-// 	display r(mean)
-// 	local indice`j' = r(mean)				
-// 	}
-// local deflactor11 `indice2'/`indice11'
-// local deflactor12 `indice2'/`indice12'
-// local deflactor1 `indice2'/`indice1'
-// local deflactor2 `indice2'/`indice2'
-// local deflactor3 `indice2'/`indice3'
-
-
-// or use this to mute all inflation effects
-local deflactor11 1
-local deflactor12 1
-local deflactor1 1
-local deflactor2 1
-local deflactor3 1
-	
-* Exchange Rates / Tipo de cambio
-*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
-
-local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
-local meses 1 2 3 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
-
-use "$cleaned\exchenge_rate_price.dta", clear
-
-destring mes, replace
-foreach i of local monedas {
-	foreach j of local meses {
-		qui sum mean_moneda	if moneda==`i' & mes==`j'
-		local tc`i'mes`j' = r(mean)
-		di `tc`i'mes`j''
-	}
-}
 
 
 /*==============================================================================
@@ -130,9 +76,59 @@ foreach i of local monedas {
 ****************************************************************************************************************
 
 // load food data
-use  "$merged/product-hh.dta", clear
+use  "$cleaned/ENCOVI_2019.dta
 
+collapse (max) ipcf, by(interview__id interview__key quest interview_month)
+local t 5
 
+xtile q = ipcf, nq(`t')
+
+tab interview_month,mi
+
+gen share_nov =.
+gen share_dic =.
+gen share_jan =.
+gen share_feb =.
+gen share_mar =.
+
+forvalues i = 1(1)`t' {
+count if interview_month==12 & q==`i'
+replace share_dic = r(N) if q==`i'
+count if interview_month==11 & q==`i'
+replace share_nov = r(N) if q==`i'
+count if interview_month==1 & q==`i'
+replace share_jan = r(N) if q==`i'
+count if interview_month==2 & q==`i'
+replace share_feb = r(N) if q==`i'
+count if interview_month==3 & q==`i'
+replace share_mar = r(N) if q==`i'
+}
+
+bys q: gen q_obs = _N
+
+local vars share_nov share_dic share_jan share_feb share_mar
+bro
+
+foreach v in `vars' {
+ replace `v' = `v'/q_obs
+ }
+
+ 
+sort ipcf
+gen obs = _n
+bro
+
+sum ipcf, detail
+gen noout = ipcf<r(p99)
+
+twoway line ipcf obs if noout   ///
+|| line share_feb obs if noout, yaxis(2) ///
+|| line share_mar obs if noout, yaxis(2) ///
+|| line share_jan obs if noout, yaxis(2) ///
+|| line share_dic obs if noout, yaxis(2) ///
+|| line share_nov obs if noout, yaxis(2) 
+
+stop
 //drop no consumption
 keep if consumio==1 & cantidad>0 & (cantidad!=.|cantidad!=.a)
 
@@ -164,8 +160,8 @@ merge m:1 interview__id interview__key quest using `hhsize', keep(match)
 drop _merge
 // dates
 // gen week of data
-gen week = week(date_consumption_survey)
-replace week = week+52 if week<40
+gen week = week(date_consumption_survey)-52
+
 // gen month of data
 gen month = month(date_consumption_survey)
 
@@ -208,6 +204,7 @@ replace gasto_bol = gasto*`tc4mes12'*`deflactor12' if moneda == 4 & month == 12
 ==============================================================================*/
 // keep only goods of the basket
 keep if inlist(bien, 1, 4, 5, 6, 7, 10, 14, 17, 22, 26, 28, 31, 33, 34, 37, 39, 43, 45, 46, 51, 53, 54, 55, 62, 63, 68, 74, 78)
+
 
 
 // keep obs of feb2020
@@ -256,5 +253,3 @@ collapse (p50) pimp, by(bien)
 
 export excel $output/precios_implicitos.xlsx, firstrow(variables) replace
 save $output/precios_implicitos.dta, replace
-
-

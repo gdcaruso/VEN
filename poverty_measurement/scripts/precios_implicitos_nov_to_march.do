@@ -1,6 +1,5 @@
 /*===========================================================================
-Puropose: This script takes spending in food and compares it with spending
-in non food goods to calculate orshansky indexes over population of reference
+Puropose: generate implicit prices in time
 ===========================================================================
 Country name:	Venezuela
 Year:			2019
@@ -19,38 +18,38 @@ Note:
 ********************************************************************************
 
 
-// // Define rootpath according to user
-//
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta2   1
-//		
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath ""
-// 		}
-// 	    if $lauta {
-// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-// 		}
-// 	    if $lauta2 {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-// 		}
-//
-// // set path
-// global merged "$rootpath\data_management\output\merged"
-// global cleaned "$rootpath\data_management\output\cleaned"
-// global output "$rootpath\poverty_measurement\output"
+// Define rootpath according to user
+
+	    * User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   0
+		
+		* User 3: Lautaro
+		global lauta   0
+		
+		* User 3: Lautaro
+		global lauta2   1
+		
+		
+		* User 4: Malena
+		global male   0
+			
+		if $juli {
+				global rootpath ""
+		}
+	    if $lauta {
+				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+		}
+	    if $lauta2 {
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
+		}
+
+// set path
+global merged "$rootpath\data_management\output\merged"
+global cleaned "$rootpath\data_management\output\cleaned"
+global output "$rootpath\poverty_measurement\output"
 *
 ********************************************************************************
 
@@ -166,6 +165,7 @@ drop _merge
 // gen week of data
 gen week = week(date_consumption_survey)
 replace week = week+52 if week<40
+
 // gen month of data
 gen month = month(date_consumption_survey)
 
@@ -210,9 +210,6 @@ replace gasto_bol = gasto*`tc4mes12'*`deflactor12' if moneda == 4 & month == 12
 keep if inlist(bien, 1, 4, 5, 6, 7, 10, 14, 17, 22, 26, 28, 31, 33, 34, 37, 39, 43, 45, 46, 51, 53, 54, 55, 62, 63, 68, 74, 78)
 
 
-// keep obs of feb2020
-keep if month==2
-
 //drop 0s or . in quantities and expenditure
 drop if comprado ==0 | comprado ==.
 drop if gasto_bol ==0 | comprado ==.
@@ -252,9 +249,11 @@ replace comprado = comprado*250 if bien==6 & unidad_medida==40
 // generate implicit prices per gram
 gen pimp = gasto_bol/comprado
 
-collapse (p50) pimp, by(bien)
-
-export excel $output/precios_implicitos.xlsx, firstrow(variables) replace
-save $output/precios_implicitos.dta, replace
+collapse (p50) pimp, by(bien month)
+drop if month ==.
 
 
+save $output/precios_implicitos_nov_to_march.dta, replace
+
+replace month = month + 12 if month <10
+export excel $output/precios_implicitos_nov_to_march.xlsx, firstrow(variables) replace

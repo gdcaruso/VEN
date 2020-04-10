@@ -20,6 +20,7 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
+	    * User 1: Trini
 		global trini 0
 		
 		* User 2: Julieta
@@ -50,13 +51,12 @@ Note:
 				global dataout "$rootpath\"
 		}
 
-	global dataofficial "$rootpath\data_management\input\latest"
+	global dataofficial "$rootpath\data_management\input\04_07_20"
 	global dataout "$rootpath\data_management\output"
 	global dataint "$dataout\intermediate"
     // Set the  path for prices
 	global pathprc "$dataofficial\ENCOVI_prices_2_STATA_All"
 	global exch_rate "$rootpath\data_management\management\1. merging\exchange rates"
-********************************************************************************
 	
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Merge prices data   --------------------------------------------------
@@ -64,6 +64,19 @@ Note:
 *************************************************************************************************************************************************)*/ 
 **** Preliminary information: completed surveys
 
+	//Keep completed by Approbed by HQ (only leaves 25 obs) So we are using completed
+//	use "$pathprc\interview__actions.dta", clear
+	
+	// Create a tempfile for completed surveys
+//  tempfile completed_surveys
+	
+	// Create identification for completed surveys
+//	bys interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step)
+	
+	// To identify unique interviews according the last date and time entered
+//  bys interview__key interview__id (date time) : keep if _n==_N
+
+	
 	//Keep completed by HQ 
 	use "$pathprc\interview__actions.dta", clear
 	
@@ -71,8 +84,8 @@ Note:
     tempfile completed_surveys
 	
 	// Create identification for completed surveys
-	bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step)
-	
+	bys interview__key interview__id (date): keep if action==3 // 3=Completed 
+
 	// To identify unique interviews according the last date and time entered
     bys interview__key interview__id (date time) : keep if _n==_N
 
@@ -480,6 +493,7 @@ Pieza (bistec,chuleta, similares) |          6        0.08       87.00
 	replace unidad_medida_ot="Teticas" if (unidad_medida_ot=="bolsitas de 100 grs. (teticas)")
 	replace unidad_medida_ot="Teticas" if (unidad_medida_ot=="teticas") 
 	replace unidad_medida_ot="Teticas" if (unidad_medida_ot=="bolsita (teticas)") 
+	replace unidad_medida_ot="Teta" if (unidad_medida_ot=="se vende prwsentacion.de.teta 100 gramos")
 
 //Bolsita
 	*-----------
@@ -1297,11 +1311,19 @@ log close
 //	Aceite
 *-----------
 	drop if food=="Aceite" & unidad_medida==3 & cantidad==1 & precio_b>999999
+	replace cantidad=100 if food=="Aceite" & unidad_medida==1 & precio_b==13000 
+	replace unidad_medida=4 if food=="Aceite" & unidad_medida==1 & precio_b==13000 
+	replace unidad_medida=4 if food=="Aceite" & unidad_medida==2 & cantidad>=100 & cantidad<=900  
+	replace cantidad=100 if food=="Aceite" & unidad_medida==3 & cantidad==1 & precio_b>=13000 & precio_b<=20000
+	replace unidad_medida=4 if food=="Aceite" & unidad_medida==3  & cantidad==1 & precio_b>=13000 & precio_b<=20000
+	replace cantidad=1 if food=="Aceite" & unidad_medida==3 & (cantidad==50 | cantidad==60 | cantidad==150 | cantidad==250 | cantidad==800) & precio_b>=100000 & precio_b<=150000
+	replace cantidad=1000 if food=="Aceite" & unidad_medida==4 & cantidad==30 & precio_b==140000
 
 //	Aji dulce, pimentón, pimiento
 *-----------
 	replace precio_b=precio_b*100 if food=="Aji dulce, pimentón, pimiento" & unidad_medida==1 & precio==1000 
 	replace cantidad=1 if food=="Aji dulce, pimentón, pimiento" & unidad_medida==110 & cantidad>=3 & cantidad<=5 & precio_b>=2000 & precio_b<=3000 
+	replace precio_b=precio_b*1000 if food=="Aji dulce, pimentón, pimiento" & precio_b==95 & unidad_medida==1
 
 //	Arroz
 *-----------
@@ -1309,11 +1331,13 @@ log close
 	replace precio_b=precio_b*10 if food=="Arroz" & unidad_medida==1 & cantidad==10 & precio_b<200000
 	replace precio_b=precio_b*10 if food=="Arroz" & unidad_medida==1 & cantidad==20 & precio_b<200000
 	drop if food=="Arroz" & cantidad==84  & precio_b==41	
+	replace cantidad=1 if food=="Arroz" & unidad_medida==1 & precio_b>=80000 & precio_b<=85000 & (cantidad==600 | cantidad==1000 | cantidad==2000)
 
 //	Auyama
 *-----------
 	replace precio_b=precio_b*8 if food=="Auyama" & unidad_medida==1 & cantidad==8 & precio_b<100000
-	
+	replace precio_b=precio_b*1000 if food=="Auyama" & unidad_medida==1 & precio_b==15
+
 //	Azúcar
 *-----------
 	drop if food=="Azúcar" & unidad_medida==1 & cantidad==1 & precio==3100	
@@ -1324,6 +1348,8 @@ log close
 	replace cantidad=1 if food=="Azúcar" & unidad_medida_ot=="Teta" & cantidad==6 & precio_b==20000		
 	replace cantidad=cantidad*100 if food=="Azúcar" & unidad_medida==1 & cantidad==1 & precio_b>=6000 & precio_b<=12000		
 	replace unidad_medida=2 if food=="Azúcar" & unidad_medida==1 & cantidad==100 & precio_b>=6000 & precio_b<=12000		
+	replace cantidad=1 if food=="Azúcar" & unidad_medida_ot=="Teta" & precio_b==18000
+	replace cantidad=1 if food=="Azúcar" & unidad_medida==1 & precio_b>=65000 & precio_b<=85000 & (cantidad==100 | cantidad==150 | cantidad==200 | cantidad==500 | cantidad==2500)
 
 //	Café
 *-----------
@@ -1345,17 +1371,29 @@ log close
 	replace precio_b=precio_b*1000 if food=="Café" & unidad_medida==2 & cantidad==400 & precio_b>=150 & precio_b<=170
 	// Mes - Entidad
 	replace cantidad=100 if bien==71 & unidad_medida==2 & cantidad==1000 & precio_b>=30000 & precio_b<=50000
-	
+	// February
+	replace cantidad=50 if food=="Café" & unidad_medida==2 & cantidad==25 & precio_b>=2000 & precio_b<=5000
+	replace cantidad=100 if food=="Café" & unidad_medida==2  & precio_b>=10000 & precio_b<=20000 & (cantidad==35| cantidad==40 | cantidad==45 | cantidad==50 | cantidad==60)
+	replace cantidad=1 if food=="Café" & unidad_medida==2 & cantidad==100 & precio_b>=70000 & precio_b<=80000
+	replace unidad_medida=1 if food=="Café" & unidad_medida==2 & cantidad==1 & precio_b>=70000 & precio_b<=80000
+
 
 // Cambur
 *-----------
 
 // Caraotas
 *-----------
-
+	replace cantidad=600 if food=="Caraotas" & unidad_medida==2 & cantidad==60 & precio==70000
+	replace cantidad=600 if food=="Caraotas" & unidad_medida==2 & cantidad==60 & precio==70000
+	replace cantidad=100 if food=="Caraotas" & unidad_medida==1 & cantidad==1 & precio==35000
+	replace unidad_medida=2 if food=="Caraotas" & unidad_medida==1 & cantidad==100 & precio_b==35000
+	replace cantidad=250 if food=="Caraotas" & unidad_medida==2 & cantidad==500 & precio_b>=36000 & precio_b<=40000
+	replace cantidad=100 if food=="Caraotas" & unidad_medida==2 & cantidad==1000 & precio_b==35000
+	replace cantidad=500 if food=="Caraotas" & unidad_medida==2 & cantidad==1000 & precio==60000
 
 //	Carne de pollo/gallina
 *-----------
+	replace cantidad=1 if food=="Carne de pollo/gallina" & unidad_medida==1 & (cantidad==250 | cantidad==1000) & precio_b>=125000 & precio_b<=130000
 
 //	Carne de res (bistec)
 *-----------
@@ -1374,7 +1412,11 @@ log close
 	
 //	Cebollin, ajoporro.
 *-----------
-	
+	replace precio_b=80000 if food=="Cebollin, ajoporro." & unidad_medida==1 & cantidad==1 & precio_b==80
+	replace cantidad=100 if food=="Cebollin, ajoporro." & unidad_medida==1 & cantidad==1 & precio_b==20000
+	replace unidad_medida=2 if food=="Cebollin, ajoporro." & unidad_medida==1 & cantidad==100 & precio_b==20000
+	replace cantidad=100 if food=="Cebollin, ajoporro." & unidad_medida==2 & cantidad==500 & precio_b==7000
+
 //	Chorizo, jamón, mortaleda y otros embutidos
 *-----------
 	replace cantidad=1000 if unidad_medida==2 & food=="Chorizo, jamón, mortaleda y otros embutidos" & cantidad==10000
@@ -1392,11 +1434,17 @@ log close
 
 //	Frijoles
 *-----------
-	
+	replace cantidad=1 if food=="Frijoles" & unidad_medida==1 & cantidad==150 & precio_b==85000
+	replace cantidad=500 if food=="Frijoles" & unidad_medida==1 & cantidad==1 & precio_b>=35000 & precio_b<=40000
+	replace unidad_medida=2 if food=="Frijoles" & unidad_medida==1 & cantidad==500 & precio_b>=35000 & precio_b<=40000
+
 //	Harina de arroz
 *-----------
 	replace precio_b=precio_b*5 if food=="Harina de arroz" & unidad_medida==1 & cantidad==5 & precio_b<100000	
-	
+	replace cantidad=100 if food=="Harina de arroz" & unidad_medida==1 & cantidad==1 & precio_b==26000
+	replace unidad_medida=2 if food=="Harina de arroz" & unidad_medida==1 & cantidad==100 & precio_b==26000
+	replace cantidad=1 if food=="Harina de arroz" & unidad_medida==1 & cantidad==1000 & precio_b==100000
+
 //	Harina de maiz
 *-----------
 	replace cantidad=1 if bien==7 & unidad_medida==1 & precio==90000 & cantidad==20
@@ -1431,18 +1479,27 @@ log close
 	drop if food=="Leche en polvo, completa o descremada" & unidad_medida==110 & cantidad==1
 	replace precio_b=precio_b*10 if food=="Leche en polvo, completa o descremada" & unidad_medida==1 & cantidad==10 & precio==54000
 	replace precio_b=(precio_b/10) if food=="Leche en polvo, completa o descremada" & unidad_medida==1 & cantidad==1 & precio>=900000 & precio_b<=1021000 
+	// 
+	replace precio_b=precio_b*1000 if food=="Leche en polvo, completa o descremada"  & unidad_medida==1 & precio_b==340 & cantidad==1
+	replace cantidad=100 if food=="Leche en polvo, completa o descremada"  & unidad_medida==1 & precio_b==60000 & cantidad==1
+	replace unidad_medida=2 if food=="Leche en polvo, completa o descremada"  & unidad_medida==1 & precio_b==60000 & cantidad==100
+	replace cantidad=1 if food=="Leche en polvo, completa o descremada"  & unidad_medida==1 & precio_b==200000 & cantidad==200
+	replace cantidad=100 if food=="Leche en polvo, completa o descremada" & unidad_medida==2 & cantidad==1000 & precio_b==25000
 
 //	Lechosa
 *-----------
 	
 //	Lentejas
 *-----------
-
+	replace unidad_medida=2 if food=="Lentejas" & unidad_medida==1 & cantidad==200 & precio_b==50000
 	
 //	Margarina/Mantequilla
 *-----------	
 	replace cantidad=1 if unidad_medida==220 & food=="Margarina/Mantequilla" & cantidad==120
 	replace precio_b=224000 if food=="Margarina/Mantequilla" & unidad_medida==1 & cantidad==1 & precio==2240000
+	replace cantidad=100 if food=="Margarina/Mantequilla" & unidad_medida==1 & cantidad==1 & precio_b>=47000 & precio_b<=60000
+	replace unidad_medida=2 if food=="Margarina/Mantequilla" & unidad_medida==1 & cantidad==100 & precio_b>=47000 & precio_b<=60000
+	replace cantidad=1000 if food=="Margarina/Mantequilla" & unidad_medida==2 & (cantidad==30 | cantidad==50 | cantidad==60 | cantidad==72 | cantidad==100 | cantidad==300) & precio_b>=140000 & precio_b<=175000
 
 //	Pan de trigo
 *-----------
@@ -1680,22 +1737,17 @@ log close
 
 		
 	// Carne de res (bistec) (COD:12)
-		// Unidad de medida is always either kilograms or grams
-		// Some extreme values fixed
-		// Date: 3/10/2020
-
+		replace cantidad_3=cantidad*1000 if (unidad_medida == 30  & bien == 12)
+		replace unidad_3=1 if (unidad_medida == 30 & bien == 12 )
 		
 	// Carne de res (molida) (COD:13)
-		// Unidad de medida is always either kilograms or grams
-		// Some extreme values fixed
-		// Date: 3/10/2020
-	
+		replace cantidad_3=cantidad*1000 if (unidad_medida == 30  & bien == 13)
+		replace unidad_3=1 if (unidad_medida == 30 & bien == 13)	
 	
 	// Carne de res (para esmechar) (COD:14)
-		// Unidad de medida is always either kilograms or grams
-		// Some extreme values fixed
-		// Date: 3/10/2020
-	
+		replace cantidad_3=cantidad*1000 if (unidad_medida == 30 & bien == 14)
+		replace unidad_3=1 if (unidad_medida == 30 & bien == 14)
+
 	
 	// Cebolla (COD:46)
 		// Unidad (1) cebolla mediana:75g
@@ -2113,7 +2165,19 @@ log close
 
 	preserve
 	keep if mes=="02" 
-	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
+	collapse (mean) mean_p=precio_u (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
 	export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
 	save "$dataout/resumen_precio_gramo_L.dta", replace
+	restore	
+
+	//preserve
+	//keep if mes=="02" 
+	//collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
+	//export excel using "$dataout/resumen_09_04", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
+	//restore	
+
+	preserve
+	keep if mes=="02" 
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u, by (bien)
+	export excel using "$dataout/explicitos(feb)_10_04", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
 	restore	

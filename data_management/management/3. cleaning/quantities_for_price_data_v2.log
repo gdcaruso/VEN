@@ -1,9 +1,9 @@
--------------------------------------------------------------------------------------------
+-------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:\Users\wb563583\GitHub\VEN\data_management\management\3. cleaning\quantities
-> _for_price_data_v2.log
+       log:  C:\Users\wb563583\GitHub\VEN\data_management\managemen
+> t\3. cleaning\quantities_for_price_data_v2.log
   log type:  text
- opened on:   9 Apr 2020, 11:21:35
+ opened on:  10 Apr 2020, 11:52:04
 
 . 
 . 
@@ -23,90 +23,109 @@
   6.                         local vu: label `uname' `u'
   7.                         
 .                         //Levels of sizes
-.                                 qui levelsof tamano if bien ==`f' & unidad_medida==`u' , 
-> local(tamanos)
-  8.                                 local tname: value label tamano
-  9.                                 local tcounts : list sizeof tamanos
+.                                 qui levelsof tamano if bien ==`f'
+>  & unidad_medida==`u' , local(tamanos)
+  8.                                 local tname: value label taman
+> o
+  9.                                 local tcounts : list sizeof ta
+> manos
  10.                         
-.                                 // Unidades de medida de la encuesta
+.                                 // Unidades de medida de la encue
+> sta
 .                                 if "`vu'" != "Otro" {
  11.                                 
-.                                                                         if `tcounts' == 0
->  {
- 12.                                                                         display "food 
-> = `vf' (`f')"
- 13.                                                                         display "unit 
-> = `vu' (`u')"
- 14.                                                                         display "size 
-> = no size"
- 15.                                                                         tab cantidad i
-> f (bien ==`f' & unidad_medida==`u'), mi
- 16.                                                                            }
- 17.                                                                         else {
- 18.                                                                         foreach t of l
-> ocal tamanos{
- 19.                                                                         local vt: labe
-> l `tname' `t'
- 20.                                                                         display "food 
-> = `vf' (`f')"
- 21.                                                                         display "unit 
-> = `vu' (`u')"     
- 22.                                                                         display "size 
-> = `vt' (`t')"      
- 23.                                                                         tab cantidad i
-> f (bien ==`f' & unidad_medida==`u'), mi
- 24.                                                                                       
->   }
- 25.                                                                                 }
- 26.                                                                         }
- 27.                                 //Otras unidades de medida                            
->           
+.                                                                  
+>        if `tcounts' == 0 {
+ 12.                                                               
+>           display "food = `vf' (`f')"
+ 13.                                                               
+>           display "unit = `vu' (`u')"
+ 14.                                                               
+>           display "size = no size"
+ 15.                                                               
+>           tab cantidad if (bien ==`f' & unidad_medida==`u'), mi
+ 16.                                                               
+>              }
+ 17.                                                               
+>           else {
+ 18.                                                               
+>           foreach t of local tamanos{
+ 19.                                                               
+>           local vt: label `tname' `t'
+ 20.                                                               
+>           display "food = `vf' (`f')"
+ 21.                                                               
+>           display "unit = `vu' (`u')"     
+ 22.                                                               
+>           display "size = `vt' (`t')"      
+ 23.                                                               
+>           tab cantidad if (bien ==`f' & unidad_medida==`u'), mi
+ 24.                                                               
+>                           }
+ 25.                                                               
+>                   }
+ 26.                                                               
+>           }
+ 27.                                 //Otras unidades de medida    
+>                                   
 .                                 else                            {
- 28.                                 //Local de las otras unidades de medida
-.                                 qui levelsof unidad_medida_ot if bien ==`f' & unidad_medi
-> da ==`u', local(units_ot)
+ 28.                                 //Local de las otras unidades 
+> de medida
+.                                 qui levelsof unidad_medida_ot if 
+> bien ==`f' & unidad_medida ==`u', local(units_ot)
  29.                                 
 .                                 //Para cada 
 .                                 foreach o of local units_ot {
  30.                                 
-.                                 qui levelsof tamano if bien ==`f' & unidad_medida==`u' & 
-> unidad_medida_ot=="`o'", local(tamanos_ot)
- 31.                                 local tnamet: value label tamano
- 32.                                 local tcountst : list sizeof tamanos
+.                                 qui levelsof tamano if bien ==`f'
+>  & unidad_medida==`u' & unidad_medida_ot=="`o'", local(tamanos_ot
+> )
+ 31.                                 local tnamet: value label tama
+> no
+ 32.                                 local tcountst : list sizeof t
+> amanos
  33.                                 
-.                                                                                 if `tcoun
-> tst' == 0 {
- 34.                                                                                 displa
-> y "food = `vf' (`f')"
- 35.                                                                                 displa
-> y "unit = `vu' (`u')"
- 36.                                                                                 displa
-> y "unit_ot = `o'"
- 37.                                                                                 tab ca
-> ntidad if (bien ==`f' & unidad_medida ==`u' & unidad_medida_ot=="`o'"), mi
- 38.                                                                                       
->                            }
- 39.                                                                                 else {
- 40.                                                                                 foreac
-> h k of local tamanos_ot {
- 41.                                                                                 local 
-> vk: label `tnamet' `k'
- 42.                                                                                 displa
-> y "food = `vf' (`f')"
- 43.                                                                                 displa
-> y "unit = `vu' (`u')"
- 44.                                                                                 displa
-> y "unit_ot = `o'"
- 45.                                                                                 tab ca
-> ntidad if (bien ==`f' & unidad_medida ==`u' & unidad_medida_ot=="`o'" & tamano==`k'), mi
- 46.                                                                                 
-.                                                                                          
->                                                        }
- 47.                                                                                 }
+.                                                                  
+>                if `tcountst' == 0 {
+ 34.                                                               
+>                   display "food = `vf' (`f')"
+ 35.                                                               
+>                   display "unit = `vu' (`u')"
+ 36.                                                               
+>                   display "unit_ot = `o'"
+ 37.                                                               
+>                   tab cantidad if (bien ==`f' & unidad_medida ==`
+> u' & unidad_medida_ot=="`o'"), mi
+ 38.                                                               
+>                                                    }
+ 39.                                                               
+>                   else {
+ 40.                                                               
+>                   foreach k of local tamanos_ot {
+ 41.                                                               
+>                   local vk: label `tnamet' `k'
+ 42.                                                               
+>                   display "food = `vf' (`f')"
+ 43.                                                               
+>                   display "unit = `vu' (`u')"
+ 44.                                                               
+>                   display "unit_ot = `o'"
+ 45.                                                               
+>                   tab cantidad if (bien ==`f' & unidad_medida ==`
+> u' & unidad_medida_ot=="`o'" & tamano==`k'), mi
+ 46.                                                               
+>                   
+.                                                                  
+>                                                                  
+>               }
+ 47.                                                               
+>                   }
  48.                                 
 .                                         
-.                                                                                         }
- 49.                                                                         }
+.                                                                  
+>                        }
+ 49.                                                               
+>           }
  50.                                 }
  51.                         }
 food = Arroz (1)
@@ -2643,22 +2662,10 @@ cantidad de |
  [ARTÍCULO] |
           ? |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          6 |          1      100.00      100.00
+          6 |          1       50.00       50.00
+        100 |          1       50.00      100.00
 ------------+-----------------------------------
-      Total |          1      100.00
-food = Azúcar (66)
-unit = Otro (60)
-unit_ot = se vende prwsentacion.de.teta 100 gramos
-
-   9. ¿Cuál |
-      es la |
-cantidad de |
- [ARTÍCULO] |
-          ? |      Freq.     Percent        Cum.
-------------+-----------------------------------
-        100 |          1      100.00      100.00
-------------+-----------------------------------
-      Total |          1      100.00
+      Total |          2      100.00
 food = Azúcar (66)
 unit = Otro (60)
 unit_ot = teticas de 100 gramos
@@ -3154,95 +3161,184 @@ cantidad de |
 .         // To list the places where prices were observed
 .                 tab s2q1_os
 
-      1_oth. other source of collection |      Freq.     Percent        Cum.
-----------------------------------------+-----------------------------------
-                                 ABASTO |         13        0.55        0.55
-                     ABASTO Y LICORERIA |         12        0.51        1.06
-                                 Abasto |        210        8.88        9.93
-                   Abasto y Charcuteria |          8        0.34       10.27
-                                BODEGON |         27        1.14       11.41
-                       Bodega/Papelería |         19        0.80       12.21
-                                Bodegon |        102        4.31       16.53
-                                Bodegón |         82        3.47       19.99
-                        CASA DE FAMILIA |          9        0.38       20.37
-                             Carnicería |          5        0.21       20.58
-               Carnicería / Mini Market |         31        1.31       21.89
-                      Carnicería/Abasto |         22        0.93       22.82
-                 Carnicería/Mini Market |         25        1.06       23.88
-                        Casa de Familia |          6        0.25       24.13
-                              Comercial |         70        2.96       27.09
-Distribuidora, venta al mayor y detal.. |         11        0.46       27.56
-                         Distribuidora. |          9        0.38       27.94
-                               FRUTERIA |         17        0.72       28.66
-                    Feria de Hortalizas |         17        0.72       29.37
-                            Frigorífico |         29        1.23       30.60
-                                 Galpon |         18        0.76       31.36
-                              Heladería |         11        0.46       31.83
-                            Inversiones |         74        3.13       34.95
-                                 KIOSKO |         14        0.59       35.55
-                              Licoreria |          3        0.13       35.67
-        Licorería, abasto y Charcuteria |         13        0.55       36.22
-                              MARKETING |         13        0.55       36.77
-                            Mini Abasto |         29        1.23       38.00
-                            Mini Market |        103        4.35       42.35
-                            Mini abasto |         26        1.10       43.45
-               Mini abasto y carniceria |         17        0.72       44.17
-                             MiniMarket |         14        0.59       44.76
-                             Minimarket |         69        2.92       47.68
-                  Multicomercializadora |         12        0.51       48.18
-                                Negocio |         13        0.55       48.73
-                              PANADERIA |         14        0.59       49.32
-                              PANADERÍA |         28        1.18       50.51
-                               PANDERIA |         12        0.51       51.01
-PUESTO DE VENTA DE VIVERES MERCADITO .. |         15        0.63       51.65
-                              Panaderia |         55        2.32       53.97
-               Panaderia y supermercado |         17        0.72       54.69
-                              Panadería |         72        3.04       57.73
-Puesto de vegetales, verduras, frutas.. |         15        0.63       58.37
-                   Tienda al aire libre |         11        0.46       58.83
-                               Un Local |          8        0.34       59.17
-Venta de Verduras,hortalizas y legumb.. |         22        0.93       60.10
-                                 abasto |        122        5.16       65.26
-                         abasto pequeño |         23        0.97       66.23
-                         abasto,viveres |         11        0.46       66.69
-                           auto mercado |         21        0.89       67.58
-                            automercado |         12        0.51       68.09
-                                 bodega |         33        1.39       69.48
-                                bodegon |         25        1.06       70.54
-                        casa de Familia |          8        0.34       70.88
-                        casa de familia |         58        2.45       73.33
-                   charcutería y bodega |         16        0.68       74.01
-                              comercial |         20        0.85       74.85
-                       comercializadora |         31        1.31       76.16
-                      comercio familiar |         11        0.46       76.63
-                          fotocopiadora |         19        0.80       77.43
-                            frigorifico |         15        0.63       78.06
-                               fruteria |         14        0.59       78.66
-                               frutería |         19        0.80       79.46
-            frutería y venta de víveres |         29        1.23       80.68
-                            inversiones |         16        0.68       81.36
-                                 kiosco |         10        0.42       81.78
-                                 kiosko |         23        0.97       82.76
-licoreria y venta.de viveres en general |         15        0.63       83.39
-                              licorería |         17        0.72       84.11
-                                  local |         11        0.46       84.57
-                        mesa de víveres |         10        0.42       85.00
-                             minamarket |         23        0.97       85.97
-                          mini -.abasto |         18        0.76       86.73
-                            mini Market |         22        0.93       87.66
-                            mini abasto |          9        0.38       88.04
-                             mini super |         14        0.59       88.63
-                            mini-abasto |         24        1.01       89.64
-                             minimarket |         13        0.55       90.19
-                   minimarket fruterías |         10        0.42       90.62
-                             mininarket |         14        0.59       91.21
-negocio establecido en el porche de l.. |         17        0.72       91.93
-                              panaderia |        117        4.95       96.87
-                       panaderia Abasto |         13        0.55       97.42
-                              panadería |         44        1.86       99.28
-                           panificadora |          8        0.34       99.62
-tráiler transformado en local para ve.. |          9        0.38      100.00
-----------------------------------------+-----------------------------------
+      1_oth. other source of collection |      Freq.     Percent   
+>      Cum.
+----------------------------------------+--------------------------
+> ---------
+                                 ABASTO |         13        0.55   
+>      0.55
+                     ABASTO Y LICORERIA |         12        0.51   
+>      1.06
+                                 Abasto |        210        8.88   
+>      9.93
+                   Abasto y Charcuteria |          8        0.34   
+>     10.27
+                                BODEGON |         27        1.14   
+>     11.41
+                       Bodega/Papelería |         19        0.80   
+>     12.21
+                                Bodegon |        102        4.31   
+>     16.53
+                                Bodegón |         82        3.47   
+>     19.99
+                        CASA DE FAMILIA |          9        0.38   
+>     20.37
+                             Carnicería |          5        0.21   
+>     20.58
+               Carnicería / Mini Market |         31        1.31   
+>     21.89
+                      Carnicería/Abasto |         22        0.93   
+>     22.82
+                 Carnicería/Mini Market |         25        1.06   
+>     23.88
+                        Casa de Familia |          6        0.25   
+>     24.13
+                              Comercial |         70        2.96   
+>     27.09
+Distribuidora, venta al mayor y detal.. |         11        0.46   
+>     27.56
+                         Distribuidora. |          9        0.38   
+>     27.94
+                               FRUTERIA |         17        0.72   
+>     28.66
+                    Feria de Hortalizas |         17        0.72   
+>     29.37
+                            Frigorífico |         29        1.23   
+>     30.60
+                                 Galpon |         18        0.76   
+>     31.36
+                              Heladería |         11        0.46   
+>     31.83
+                            Inversiones |         74        3.13   
+>     34.95
+                                 KIOSKO |         14        0.59   
+>     35.55
+                              Licoreria |          3        0.13   
+>     35.67
+        Licorería, abasto y Charcuteria |         13        0.55   
+>     36.22
+                              MARKETING |         13        0.55   
+>     36.77
+                            Mini Abasto |         29        1.23   
+>     38.00
+                            Mini Market |        103        4.35   
+>     42.35
+                            Mini abasto |         26        1.10   
+>     43.45
+               Mini abasto y carniceria |         17        0.72   
+>     44.17
+                             MiniMarket |         14        0.59   
+>     44.76
+                             Minimarket |         69        2.92   
+>     47.68
+                  Multicomercializadora |         12        0.51   
+>     48.18
+                                Negocio |         13        0.55   
+>     48.73
+                              PANADERIA |         14        0.59   
+>     49.32
+                              PANADERÍA |         28        1.18   
+>     50.51
+                               PANDERIA |         12        0.51   
+>     51.01
+PUESTO DE VENTA DE VIVERES MERCADITO .. |         15        0.63   
+>     51.65
+                              Panaderia |         55        2.32   
+>     53.97
+               Panaderia y supermercado |         17        0.72   
+>     54.69
+                              Panadería |         72        3.04   
+>     57.73
+Puesto de vegetales, verduras, frutas.. |         15        0.63   
+>     58.37
+                   Tienda al aire libre |         11        0.46   
+>     58.83
+                               Un Local |          8        0.34   
+>     59.17
+Venta de Verduras,hortalizas y legumb.. |         22        0.93   
+>     60.10
+                                 abasto |        122        5.16   
+>     65.26
+                         abasto pequeño |         23        0.97   
+>     66.23
+                         abasto,viveres |         11        0.46   
+>     66.69
+                           auto mercado |         21        0.89   
+>     67.58
+                            automercado |         12        0.51   
+>     68.09
+                                 bodega |         33        1.39   
+>     69.48
+                                bodegon |         25        1.06   
+>     70.54
+                        casa de Familia |          8        0.34   
+>     70.88
+                        casa de familia |         58        2.45   
+>     73.33
+                   charcutería y bodega |         16        0.68   
+>     74.01
+                              comercial |         20        0.85   
+>     74.85
+                       comercializadora |         31        1.31   
+>     76.16
+                      comercio familiar |         11        0.46   
+>     76.63
+                          fotocopiadora |         19        0.80   
+>     77.43
+                            frigorifico |         15        0.63   
+>     78.06
+                               fruteria |         14        0.59   
+>     78.66
+                               frutería |         19        0.80   
+>     79.46
+            frutería y venta de víveres |         29        1.23   
+>     80.68
+                            inversiones |         16        0.68   
+>     81.36
+                                 kiosco |         10        0.42   
+>     81.78
+                                 kiosko |         23        0.97   
+>     82.76
+licoreria y venta.de viveres en general |         15        0.63   
+>     83.39
+                              licorería |         17        0.72   
+>     84.11
+                                  local |         11        0.46   
+>     84.57
+                        mesa de víveres |         10        0.42   
+>     85.00
+                             minamarket |         23        0.97   
+>     85.97
+                          mini -.abasto |         18        0.76   
+>     86.73
+                            mini Market |         22        0.93   
+>     87.66
+                            mini abasto |          9        0.38   
+>     88.04
+                             mini super |         14        0.59   
+>     88.63
+                            mini-abasto |         24        1.01   
+>     89.64
+                             minimarket |         13        0.55   
+>     90.19
+                   minimarket fruterías |         10        0.42   
+>     90.62
+                             mininarket |         14        0.59   
+>     91.21
+negocio establecido en el porche de l.. |         17        0.72   
+>     91.93
+                              panaderia |        117        4.95   
+>     96.87
+                       panaderia Abasto |         13        0.55   
+>     97.42
+                              panadería |         44        1.86   
+>     99.28
+                           panificadora |          8        0.34   
+>     99.62
+tráiler transformado en local para ve.. |          9        0.38   
+>    100.00
+----------------------------------------+--------------------------
+> ---------
                                   Total |      2,366      100.00
 
 .                 
@@ -3251,8 +3347,8 @@ tráiler transformado en local para ve.. |          9        0.38      100.00
 . 
 . log close
       name:  <unnamed>
-       log:  C:\Users\wb563583\GitHub\VEN\data_management\management\3. cleaning\quantities
-> _for_price_data_v2.log
+       log:  C:\Users\wb563583\GitHub\VEN\data_management\managemen
+> t\3. cleaning\quantities_for_price_data_v2.log
   log type:  text
- closed on:   9 Apr 2020, 11:21:36
--------------------------------------------------------------------------------------------
+ closed on:  10 Apr 2020, 11:52:06
+-------------------------------------------------------------------

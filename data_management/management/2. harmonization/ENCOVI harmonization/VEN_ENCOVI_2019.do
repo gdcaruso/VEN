@@ -79,8 +79,9 @@ local vr       "01"     // version renta
 		* Deflactor
 			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-			use "$rootpath\data_management\management\1. merging\inflacion verdadera\InflacionVerdadera_04-09-20.dta", clear
-			*use "$rootpath\data_management\management\1. merging\inflacion verdadera\InflacionVerdadera_04-09-20_PARA NOMINAL.dta", clear
+			*use "$rootpath\data_management\management\output\cleaned\inflacion\InflacionVerdadera_04-09-20.dta", clear
+			use "$rootpath\data_management\management\output\cleaned\inflacion\Inflacion_PARA NOMINAL.dta", clear
+			*use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
 			
 			forvalues j = 11(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -4036,5 +4037,6 @@ keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI
 interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb  // additional
 
 
-*save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
-save "$dataout\ENCOVI_2019.dta", replace
+*save "$dataout\ENCOVI_2019.dta", replace
+save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
+*save "$dataout\ENCOVI_2019_PRECIOS IMPLICITOS.dta", replace

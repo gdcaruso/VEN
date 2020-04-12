@@ -117,6 +117,9 @@ tempname pname
 tempfile pfile
 postfile `pname' year str30(incs) str30(type) value using `pfile', replace
 
+
+
+
 //	 SELECT years FOR ANALYSIS			<------------------
 global years "2014/2018"
 

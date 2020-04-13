@@ -29,7 +29,7 @@ Note:
 			
 			
 		if $juli {
-				global rootpath "C:\Users\wb563583\VEN\data_management\management\1. merging\exchange rates" 
+				global rootpath "C:\Users\wb563583\GitHub\VEN\data_management\management\1. merging\exchange rates" 
 				global dataout "$rootpath\"
 				
 		}
@@ -91,7 +91,7 @@ Note:
 // Replace errors with a code and destring
 	foreach var of varlist Venta VentaASK {
 	replace `var'="." if `var'=="----------------"
-	destring `var', replace
+	destring `var', replace force
 	}
 
 // To generate date in a format which allow to merge with price data: YYYY-MM-DD
@@ -151,7 +151,7 @@ encode COD_moneda, gen(COD_moneda_e)
 	// Replace errors with a code and destring
 	foreach var of varlist Venta VentaASK {
 	replace `var'="." if `var'=="----------------"
-	destring `var', replace
+	destring `var', replace force
 	}
 
 // To generate date in a format which allow to merge with price data: YYYY-MM-DD
@@ -166,14 +166,68 @@ encode COD_moneda, gen(COD_moneda_e)
 	//Drop the variable used as imput for date
 	drop date
 
-	// Save as temporal file
+// Save as temporal file
 	save `exch2', replace
 	clear
+
+*********************************************************************************
+*--- Import official data of exchange rates
+*--- Source: 
+*********************************************************************************
+
+*--------------- 2T 2020	
+*--------------- Set the dates of the exchange rate as a local 
+* These are the names of the excel spreadsheet which contain daily data for each trimester
+	local fechas_T9 08042020 07042020 06042020 03042020 02042020 01042020	
+foreach x of local fechas_T9 {
+          cap import excel using "$rootpath\2_1_2b20.xls", sheet(`x') cellrange(B9:G47) firstrow clear	  
+	gen date="`x'"
+	if `x'==08042020 {
+	tempfile exch3
+	save `exch3'
+	}
+	else {
+	    replace date="`x'"
+		append using `exch3'
+		save `exch3', replace
+		}
+}
+
+// Format
+	rename (B) (COD_moneda)
+	label var COD_moneda Moneda
+	rename (MonedaPaís) (Pais)
+	rename VentaASKb Venta
+	rename (F) (Compra)
+
+// Keep useful observations
+keep if Compra!=. 
+//Generate a code for each currency
+encode COD_moneda, gen(COD_moneda_e)
+
+	// Replace errors with a code and destring
+	foreach var of varlist Venta VentaASK {
+	replace `var'="." if `var'=="----------------"
+	destring `var', replace force
+	}
+
+// To generate date in a format which allow to merge with price data: YYYY-MM-DD
+     //Generate Year
+	 gen year=substr(date,5,4)
+	 //Generate Month 
+	 gen month=substr(date,3,2)
+	 //Generate Day
+	 gen day=substr(date,1,2)
+// Link the three variables to generate the variable of date  
+	egen date_price=concat(year month day),  punct(-)
+	//Drop the variable used as imput for date
+	drop date
 	
 ********************************************************************************
 *---  Append both databases
 ********************************************************************************
-append using `exch1' 
+append using `exch1', force
+append using `exch2', force
 
 *********************************************************************************
 *--- To select the currency units included in the survey
@@ -212,7 +266,13 @@ append using `exch1'
 	replace moneda=2 if COD_moneda=="USD"
 	replace moneda=3 if COD_moneda=="EUR"
 	replace moneda=4 if COD_moneda=="COP"
-	keep if moneda!=.
+	// Given that Petro is not relevant for our analysis we use this to generate the
+	// exchange rate Bolivar-Bolivar
+	replace moneda=1 if COD_moneda!="COP" & COD_moneda!="EUR" & COD_moneda!="USD"
+	replace COD_moneda="BOL" if moneda==1
+	replace mean_moneda=1 if moneda==1
+	replace median_moneda=1 if moneda==1
+	keep if moneda!=.	
 	rename month mes
 	
 *********************************************************************************

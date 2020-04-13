@@ -34,7 +34,8 @@ Note:
 		}
 	    if $lauta {
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-				global dataout 	"C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
+				global dataout 	"C:\Users\wb563365\GitHub\VEN"
+				//"C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN" 
@@ -83,8 +84,9 @@ local vr       "01"     // version renta
 			*use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_PARA NOMINAL.dta", clear
 			*use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
 			use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
+
 			
-			forvalues j = 11(1)12 {
+			forvalues j = 10(1)12 {
 				sum indice if mes==`j' & ano==2019
 				local indice`j' = r(mean) 			
 				}
@@ -94,51 +96,54 @@ local vr       "01"     // version renta
 				local indice`j' = r(mean)				
 				}
 
-// if we consider that incomes are earned in the previous month than the month of the interview use
-//  			local deflactor11 =.
-// 			local deflactor12 =`indice2'/`indice11'
-// 			local deflactor1 `indice2'/`indice12'
-// 			local deflactor2 `indice2'/`indice1'
-// 			local deflactor3 `indice2'/`indice2'
+				
+// if we consider that incomes are earned in the previous month than the month of the interview use this
+
+ 			local deflactor11 =`indice2'/`indice10'
+			local deflactor12 =`indice2'/`indice11'
+			local deflactor1 `indice2'/`indice12'
+			local deflactor2 `indice2'/`indice1'
+			local deflactor3 `indice2'/`indice2'
 
 				
-// if we consider that incomes are earned in the same month than the survey is collected use this
-			local deflactor11 `indice2'/`indice11'
-			local deflactor12 `indice2'/`indice12'
-			local deflactor1 `indice2'/`indice1'
-			local deflactor2 `indice2'/`indice2'
-			local deflactor3 `indice2'/`indice3'
-			
+// // if we consider that incomes are earned in the same month than the survey is collected use this
+// 			local deflactor11 `indice2'/`indice11'
+// 			local deflactor12 `indice2'/`indice12'
+// 			local deflactor1 `indice2'/`indice1'
+// 			local deflactor2 `indice2'/`indice2'
+// 			local deflactor3 `indice2'/`indice3'
+
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 			
 			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
-			local meses "1 2 3 4 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march, 4=april
+			local meses "1 2 3 4 10 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march, 4=april
 			
-			use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
+			use "$rootpath\data_management\management\1. merging\exchange rates\TC_cierre_provisorio.dta", clear
 			
-//if we consider that incomes are earned one month previous to data collection use this			
-// 			destring mes, replace
-// 			foreach i of local monedas {
-// 				foreach j of local meses {
-// 					sum mean_moneda	if moneda==`i' & mes==`j'
-// 					local k `j-1'
-// 					local tc`i'mes`k' = r(mean)
-// 					}
-// 					}
-
-
-			
-			
-// if we consider that incomes are earned the same month as data is collected use this
+// if we consider that incomes are earned one month previous to data collection use this			
 			destring mes, replace
 			foreach i of local monedas {
 				foreach j of local meses {
 					sum mean_moneda	if moneda==`i' & mes==`j'
-					local tc`i'mes`j' = r(mean)
+					local k `j-1'
+					local tc`i'mes`k' = r(mean)
+					display `tc`i'mes`k''
+					}
 				}
-			}
+				
+
 			
+// if we consider that incomes are earned the same month as data is collected use this
+// 			destring mes, replace
+// 			foreach i of local monedas {
+// 				foreach j of local meses {
+// 					sum mean_moneda	if moneda==`i' & mes==`j'
+// 					local tc`i'mes`j' = r(mean)
+// 				}
+// 			}
+
+	
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 

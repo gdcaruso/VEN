@@ -2130,17 +2130,17 @@ log close
 // Price per gram by Good-Month-Region
 *----------- 
 	preserve
-	keep if mes=="02" 
-	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien ENTIDAD mes)
-	export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
+	//keep if mes=="02" 
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u, by (bien mes)
+	export excel using "$dataout/RESUMEN", sheet("Precios estandarizados") firstrow(varlabels) replace
 	save "$dataout/resumen_precio_gramo_L.dta", replace
 	restore	
 
-	preserve
-	keep if bien==7
-	keep bien precio_u
-	save "$dataout/maiz_precio_gramo.dta", replace
-	restore
+	//preserve
+	//keep if bien==7
+	//keep bien precio_u
+	//save "$dataout/maiz_precio_gramo.dta", replace
+	//restore
 	
 /*(************************************************************************************************************************************************* 
 *  Comparison with prices from expenditure survey
@@ -2148,36 +2148,60 @@ log close
 
 *----------- Popularity filter
 // This means that we are going to look for the most popular "presentations" for each good(bien unidad_medida tamano cantidad) and filter less popular
-	preserve
-	collapse (count) count=unidad_medida, by(bien)
-	by bien: egen total = total(count)
-	gen pop = count/total
-	keep if pop>.15 //parametro clave, permite encontrar observaciones en todos los productos. revisar tab bien _merge luego del proximo merge antes de cambiar
-	tempfile popular
-	save `popular'
-	restore
+	//preserve
+	//collapse (count) count=unidad_medida, by(bien)
+	//by bien: egen total = total(count)
+	//gen pop = count/total
+	//keep if pop>.15 //parametro clave, permite encontrar observaciones en todos los productos. revisar tab bien _merge luego del proximo merge antes de cambiar
+	//tempfile popular
+	//save `popular'
+	//restore
 	
 *----------- Popularity filter applied to February
-	keep if mes=="02"
-	merge m:1 bien using `popular'
-	tab bien _merge
-	keep if _merge == 3
+	//keep if mes=="02"
+	//merge m:1 bien using `popular'
+	//tab bien _merge
+	//keep if _merge == 3
 
-	preserve
-	keep if mes=="02" 
-	collapse (mean) mean_p=precio_u (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
-	export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
-	save "$dataout/resumen_precio_gramo_L.dta", replace
-	restore	
+	//preserve
+	//keep if mes=="02" 
+	//collapse (mean) mean_p=precio_u (median) median_p=precio_u (max) max_p=precio_u (min) min_p=precio_u (p1) p1_p =precio_u (p5) p5_p =precio_u  (p10) p10_p=precio_u (p90) p90=precio_u (p95) p95_p =precio_u (p99) p99_p=precio_u, by (bien)
+	//export excel using "$dataout/resumen_precio_gramo_L", sheet("Precios estandarizados") firstrow(varlabels) replace
+	//save "$dataout/resumen_precio_gramo_L.dta", replace
+	//restore	
 
 	//preserve
 	//keep if mes=="02" 
 	//collapse (mean) mean_p=precio_b  (median) median_p=precio_b (max) max_p=precio_b (min) min_p=precio_b (p1) p1_p =precio_b (p5) p5_p =precio_b (p95) p95_p =precio_b (p99) p99_p=precio_b, by (bien unidad_medida unidad_medida_ot tamano cantidad)
 	//export excel using "$dataout/resumen_09_04", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
-	//restore	
+	//restore
+	
+	preserve
+	keep if mes=="11" 
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (count) count_p=precio_u, by (bien)
+	export excel using "$dataout/explicitos(nov)_10_04", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
+	restore	
+
+	preserve
+	keep if mes=="12" 
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u, by (bien)
+	export excel using "$dataout/explicitos(dic)_10_04", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
+	restore	
+
+	preserve
+	keep if mes=="01" 
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (count) count_p=precio_u, by (bien)
+	export excel using "$dataout/explicitos(ene)_10_04", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
+	restore	
 
 	preserve
 	keep if mes=="02" 
-	collapse (mean) mean_p=precio_u  (median) median_p=precio_u, by (bien)
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (count) count_p=precio_u, by (bien)
 	export excel using "$dataout/explicitos(feb)_10_04", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
+	restore	
+
+	preserve
+	keep if mes=="03" 
+	collapse (mean) mean_p=precio_u  (median) median_p=precio_u (count) count_p=precio_u, by (bien)
+	export excel using "$dataout/explicitos(mar)_10_04", sheet("Unidad de medida (otro)") firstrow(varlabels) replace
 	restore	

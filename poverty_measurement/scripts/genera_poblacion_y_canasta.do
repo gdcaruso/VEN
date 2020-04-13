@@ -19,23 +19,23 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// // Define rootpath according to user
-//
-// // 	    * User 1: Trini
-// // 		global trini 0
-// //		
-// // 		* User 2: Julieta
-// // 		global juli   0
-// //		
-// // 		* User 3: Lautaro
-// 		global lauta   1
-// //		
-// // 		* User 4: Malena
-// // 		global male   0
-// //			
-// // 		if $juli {
-// // 				global rootpath ""
-// // 		}
+// Define rootpath according to user
+
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+//		global lauta   1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath ""
+// 		}
 //  	    if $lauta {
 //  				global rootpath "C:\Users\wb563365\GitHub\VEN"
 //  		}
@@ -66,7 +66,7 @@ global calreq = 2000
 // merges with income data
 use "$cleaned/ENCOVI_2019", replace
 keep if interview_month==2
-bys interview__id interview__key quest: egen miembros = max(com)
+//bys interview__id interview__key quest: egen miembros = max(com)
 
 collapse (max)ipcf_max=ipcf (max) miembros (max) entidad, by (interview__key interview__id quest)
 
@@ -127,7 +127,7 @@ drop _merge
 keep interview__key interview__id quest ipcf miembros entidad quant bien cantidad_h Energia_kcal_m Proteina_m
 
 
-// identify large outliars (testing)
+// identify very large outliars (testing, now we replace outliars with the mean)
 gen cantidad_pc = cantidad_h/miembros
 bysort bien: egen outliars = pctile(cantidad_pc), p(99) 
 bysort bien: egen cantidad_media_pc = mean(cantidad_pc) if cantidad_pc<outliars 

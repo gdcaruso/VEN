@@ -19,39 +19,39 @@ Output:			    Claned Price Database
 Note: 
 =============================================================================*/
 ********************************************************************************
-	    * User 1: Trini
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   1
-		
-		* User 3: Lautaro
-		global lauta   0
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath "C:\Users\wb563583\GitHub\VEN"
-				global dataout "$rootpath\"
-				
-		}
-	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-				global dataout "$rootpath\"
-		}
-		if $trini   {
-				global rootpath ""
-				global dataout "$rootpath\"
-		}
-		
-		if $male   {
-				global rootpath ""
-				global dataout "$rootpath\"
-		}
+// 	    * User 1: Trini
+// 	    * User 1: Trini
+// 		global trini 1
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   0
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
+// 				global dataout "$rootpath\"
+//				
+// 		}
+// 	    if $lauta {
+// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+// 				global dataout "$rootpath\"
+// 		}
+// 		if $trini   {
+// 				global rootpath ""
+// 				global dataout "$rootpath\"
+// 		}
+//		
+// 		if $male   {
+// 				global rootpath ""
+// 				global dataout "$rootpath\"
+// 		}
 
-	global dataofficial "$rootpath\data_management\input\04_07_20"
+	global dataofficial "$rootpath\data_management\input\latest"
 	global dataout "$rootpath\data_management\output"
 	global dataint "$dataout\intermediate"
     // Set the  path for prices

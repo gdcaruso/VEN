@@ -72,5 +72,5 @@ run "$merging/Merge_Hogares_JL.do"
 //merge products datasets
 run "$merging/products_append_n_merge.do"
 //merge prices datasets
-run "$merging/Merge_Prices_JL.do"
+// run "$merging/Merge_Prices_JL.do"
 

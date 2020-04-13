@@ -28,7 +28,7 @@ Note:
 // 		global juli   0
 //		
 // 		* User 3: Lautaro
-//		global lauta   1
+// 		global lauta   1
 //		
 // 		* User 4: Malena
 // 		global male   0
@@ -39,13 +39,13 @@ Note:
 //  	    if $lauta {
 //  				global rootpath "C:\Users\wb563365\GitHub\VEN"
 //  		}
-//
+// //
 // // set raw data path
 // global cleaned "$rootpath\data_management\output\cleaned"
 // global merged "$rootpath\data_management\output\merged"
 // global input "$rootpath/poverty_measurement/input"
 // global output "$rootpath\poverty_measurement\output"
-*
+// *
 ********************************************************************************
 
 
@@ -89,8 +89,8 @@ tempfile comeafuera
 preserve
 use "$merged/product-hh.dta", replace
 keep if bien>199 & bien<299
-keep interview__id interview__key quest
-duplicates drop
+collapse (count) bien, by (interview__id interview__key quest)
+drop bien
 save `comeafuera'
 restore
 
@@ -129,6 +129,7 @@ keep interview__key interview__id quest ipcf miembros entidad quant bien cantida
 
 // identify very large outliars (testing, now we replace outliars with the mean)
 gen cantidad_pc = cantidad_h/miembros
+
 bysort bien: egen outliars = pctile(cantidad_pc), p(99) 
 bysort bien: egen cantidad_media_pc = mean(cantidad_pc) if cantidad_pc<outliars 
 replace cantidad_h = cantidad_media_pc*miembros if cantidad_pc>=outliars

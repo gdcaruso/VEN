@@ -48,7 +48,7 @@ Note:
 // global merged "$rootpath\data_management\output\merged"
 // global input  "$rootpath\poverty_measurement\input"
 // global output "$rootpath\poverty_measurement\output"
-// global orsh = 2.32
+ global orsh = 2
 
 
 ********************************************************************************

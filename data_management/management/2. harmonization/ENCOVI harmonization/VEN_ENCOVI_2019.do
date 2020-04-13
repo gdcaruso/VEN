@@ -95,19 +95,19 @@ local vr       "01"     // version renta
 				}
 
 // if we consider that incomes are earned in the previous month than the month of the interview use
- 			local deflactor11 =.
-			local deflactor12 =`indice2'/`indice11'
-			local deflactor1 `indice2'/`indice12'
-			local deflactor2 `indice2'/`indice1'
-			local deflactor3 `indice2'/`indice2'
+//  			local deflactor11 =.
+// 			local deflactor12 =`indice2'/`indice11'
+// 			local deflactor1 `indice2'/`indice12'
+// 			local deflactor2 `indice2'/`indice1'
+// 			local deflactor3 `indice2'/`indice2'
 
 				
 // if we consider that incomes are earned in the same month than the survey is collected use this
-// 			local deflactor11 `indice2'/`indice11'
-// 			local deflactor12 `indice2'/`indice12'
-// 			local deflactor1 `indice2'/`indice1'
-// 			local deflactor2 `indice2'/`indice2'
-// 			local deflactor3 `indice2'/`indice3'
+			local deflactor11 `indice2'/`indice11'
+			local deflactor12 `indice2'/`indice12'
+			local deflactor1 `indice2'/`indice1'
+			local deflactor2 `indice2'/`indice2'
+			local deflactor3 `indice2'/`indice3'
 			
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
@@ -118,26 +118,26 @@ local vr       "01"     // version renta
 			use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
 			
 //if we consider that incomes are earned one month previous to data collection use this			
-			destring mes, replace
-			foreach i of local monedas {
-				foreach j of local meses {
-					sum mean_moneda	if moneda==`i' & mes==`j'
-					local k `j-1'
-					local tc`i'mes`k' = r(mean)
-					}
-					}
+// 			destring mes, replace
+// 			foreach i of local monedas {
+// 				foreach j of local meses {
+// 					sum mean_moneda	if moneda==`i' & mes==`j'
+// 					local k `j-1'
+// 					local tc`i'mes`k' = r(mean)
+// 					}
+// 					}
 
 
 			
 			
 // if we consider that incomes are earned the same month as data is collected use this
-// 			destring mes, replace
-// 			foreach i of local monedas {
-// 				foreach j of local meses {
-// 					sum mean_moneda	if moneda==`i' & mes==`j'
-// 					local tc`i'mes`j' = r(mean)
-// 				}
-// 			}
+			destring mes, replace
+			foreach i of local monedas {
+				foreach j of local meses {
+					sum mean_moneda	if moneda==`i' & mes==`j'
+					local tc`i'mes`j' = r(mean)
+				}
+			}
 			
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
@@ -1606,7 +1606,7 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 
 	*** How many hours do you normally work weekly in all your jobs or businesses?
 	/* s9q18 ¿Cuántas horas trabaja normalmente a la semana en todos sus trabajos o negocios?: hstr_todos */
-		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
+
 	clonevar hstr_todos = s9q18 if s9q17==1 & (s9q18!=. & s9q18!=.a) 
 
 		*Problem: it should not be possible but there is at least one case in which the total hours worked appears to be greater than the hours worked for the main job
@@ -2994,7 +2994,7 @@ global foodcons_ENCOVI clap clap_cuando
 				1 = si
 				2 = no	*/
 		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	gen 	clap = s12aq10==1 & (s12aq10!=. & s12aq10!=.a)
+	gen 	clap = s12aq10==1 if (s12aq10!=. & s12aq10!=.a)
 	
 *** When was the last time that the "Bolsa-Caja" CLAP arrived to the household?
 	/* s12aq10_a Cuándo fue la última vez que llegó la Bolsa-Caja del CLAP al hogar?
@@ -3943,7 +3943,10 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	rename  inla_extraord inla_otro // Because it appeared like this in CEDLAS' do_file_1_variables
 	
 
+
+
 	
+
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: PRECIOS  ------------------------------------------------------------------
 ************************************************************************************************************************************************)*/
@@ -4044,6 +4047,16 @@ include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_
 include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
 * Terminar de chequear nuestros labels!!
 
+
+*(************************************************************************************************************************************************ 
+*---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------------
+************************************************************************************************************************************************)*/	
+gen linea_pobreza = 4389986 // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
+gen linea_pobreza_extrema = 2194993  // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
+
+gen pobre = ipcf<linea_pobreza
+gen pobre_extremo = ipcf<linea_pobreza_extrema
+
 compress
 
 
@@ -4057,16 +4070,16 @@ compress
 
 sort id com
 
-order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $food_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
+order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb  // additional
+interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
 
-keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $food_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
+keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb  // additional
+interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
 *save "$dataout\ENCOVI_2019.dta", replace
 *save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
 *save "$dataout\ENCOVI_2019_PRECIOS IMPLICITOS.dta_lag_ingresos.dta", replace
-save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace
+save "$dataout\ENCOVI_2019", replace

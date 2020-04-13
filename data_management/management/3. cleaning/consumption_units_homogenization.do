@@ -25,15 +25,12 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
+		global lauta   1
 		
-		* User 3: Lautaro
-		global lauta   0
-		
-		
+
 		* User 4: Malena
 		global male   0
 			
@@ -596,19 +593,19 @@ compress
 /*(************************************************************************************************************************************************* 
 * Frequency of expenditure
 *************************************************************************************************************************************************)*/
-
-*---Generate a variable to identify the mode in the frequency of expenditure
-	*Using the date of the last shopping
-	bysort bien: egen frecuencia=mode(fecha_ultima_compra)
-	*Label values
-	label def frecuencia 1 "Ayer" 2 "Últimos 7 días" 3 "Últimos 15 días" 4 "Más de 15 días" 5 "Nunca"
-	label val frecuencia frecuencia
-*---Generate a variable to share comsuption over expenditure in the last 7 days
-	//gen over_consumption=
-*---Generate a dummy variable to identify the products frecuency of expenditure
-	bysort bien: gen seven=1 if frecuencia==2 
-	
-	
+//
+// *---Generate a variable to identify the mode in the frequency of expenditure
+// 	*Using the date of the last shopping
+// 	bysort bien: egen frecuencia=mode(fecha_ultima_compra)
+// 	*Label values
+// 	label def frecuencia 1 "Ayer" 2 "Últimos 7 días" 3 "Últimos 15 días" 4 "Más de 15 días" 5 "Nunca"
+// 	label val frecuencia frecuencia
+// *---Generate a variable to share comsuption over expenditure in the last 7 days
+// 	//gen over_consumption=
+// *---Generate a dummy variable to identify the products frecuency of expenditure
+// 	bysort bien: gen seven=1 if frecuencia==2 
+//	
+//	
 *---Generate a variable to identify the mode quantity 
 	//bysort bien fecha_ultima_compra: egen frec_cantidad=mode(cantidad_h), maxmode
 	

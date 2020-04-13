@@ -48,8 +48,8 @@ Note:
 // 		if $male   {
 // 				global rootpath ""
 // 		}
-
-// set raw data path
+//
+// // set raw data path
 // global input "$rootpath\data_management\input\latest"
 // global output "$rootpath\data_management\output"
 
@@ -89,7 +89,8 @@ replace quest=3 if quest==. & quest!=1 & quest!=2
 
 //	Create a temporary db with surveys approved by HQ 
 
-bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step)
+bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed 
+bys quest interview__key interview__id (date time): keep if _n==_N //& approved by HQ (as last step)
 
 // check, log and delete duplicates
 duplicates tag interview__key interview__id quest, generate(dupli)
@@ -97,6 +98,7 @@ preserve
 keep if dupli >= 1
 save "$rootpath\data_management\output\merged\duplicates-prod.dta", replace
 restore	
+
 drop if dupli >= 1
 
 // formatting
@@ -113,8 +115,6 @@ isid interview__key interview__id quest
 // save temporary db with surveys approved
 tempfile approved_surveys
 save `approved_surveys'
-
-
 
 
 /*(************************************************************************************************************************************************* 

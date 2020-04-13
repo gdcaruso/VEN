@@ -19,39 +19,36 @@ Note:
 ********************************************************************************
 
 
-// // Define rootpath according to user
-//
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta2   1
-//		
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath ""
-// 		}
-// 	    if $lauta {
-// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-// 		}
-// 	    if $lauta2 {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-// 		}
-//
-// // set raw data path
-// global merged "$rootpath\data_management\output\merged"
-// global cleaned "$rootpath\data_management\output\cleaned"
-// global input "$rootpath\poverty_measurement\input"
-// global output "$rootpath\poverty_measurement\output"
+// Define rootpath according to user
+
+	    * User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   0
+		
+		* User 3: Lautaro
+		global lauta   0
+		
+		* User 3: Lautaro
+		global lauta2   1
+		
+		
+		* User 4: Malena
+		global male   0
+			
+		if $juli {
+				global rootpath ""
+		}
+	    if $lauta2 {
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
+		}
+
+// set raw data path
+global merged "$rootpath\data_management\output\merged"
+global cleaned "$rootpath\data_management\output\cleaned"
+global input "$rootpath\poverty_measurement\input"
+global output "$rootpath\poverty_measurement\output"
 
 
 *
@@ -70,11 +67,20 @@ set more off
 /*(************************************************************************************************************************************************* 
 * 1: sets population of reference
 *************************************************************************************************************************************************)*/
-
+// import data of pop of reference
 use "$output/pob_referencia.dta", replace
 tempfile reference
 replace ipcf = round(ipcf)
 save `reference'
+
+
+// // to test on all pop
+// use "$cleaned/ENCOVI_2019.dta", replace
+// collapse (max) ipcf (max)miembros, by(interview__id interview__key quest)
+// tempfile reference
+// replace ipcf = round(ipcf)
+// save `reference'
+
 
 /*(************************************************************************************************************************************************* 
 * 1: generate deflators and ex rate conversion
@@ -86,34 +92,34 @@ save `reference'
 		* Deflactor
 			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-// 			use "$cleaned\inflacion\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
-//			
-// 			forvalues j = 11(1)12 {
-// 				sum indice if mes==`j' & ano==2019
-// 				local indice`j' = r(mean) 			
-// 				}
-// 			forvalues j = 1(1)3 {
-// 				sum indice if mes==`j' & ano==2020
-// 				display r(mean)
-// 				local indice`j' = r(mean)				
-// 				}
-// 			local deflactor11 `indice2'/`indice11'
-// 			local deflactor12 `indice2'/`indice12'
-// 			local deflactor1 `indice2'/`indice1'
-// 			local deflactor2 `indice2'/`indice2'
-// 			local deflactor3 `indice2'/`indice3'
+use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
+			
+			forvalues j = 11(1)12 {
+				sum indice if mes==`j' & ano==2019
+				local indice`j' = r(mean) 			
+				}
+			forvalues j = 1(1)3 {
+				sum indice if mes==`j' & ano==2020
+				display r(mean)
+				local indice`j' = r(mean)				
+				}
+			local deflactor11 `indice2'/`indice11'
+			local deflactor12 `indice2'/`indice12'
+			local deflactor1 `indice2'/`indice1'
+			local deflactor2 `indice2'/`indice2'
+			local deflactor3 `indice2'/`indice3'
 
-			local deflactor11 1
-			local deflactor12 1
-			local deflactor1 1
-			local deflactor2 1
-			local deflactor3 1
+// 			local deflactor11 1
+// 			local deflactor12 1
+// 			local deflactor1 1
+// 			local deflactor2 1
+// 			local deflactor3 1
 			
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 			
-			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
-			local meses "1 2 3 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
+			local monedas 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
+			local meses 1 2 3 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
 			use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
 			
@@ -122,10 +128,18 @@ save `reference'
 				foreach j of local meses {
 					sum mean_moneda	if moneda==`i' & mes==`j'
 					local tc`i'mes`j' = r(mean)
+					di `tc`i'mes`j''
 				}
 			}
-			
+local tc1mes1 = 1
+local tc1mes2 = 1
+local tc1mes3 = 1
+local tc1mes11 = 1
+local tc1mes12 = 1
 
+di `tc2mes2'
+di `tc1mes1'
+stop
 /*(************************************************************************************************************************************************* 
 * 1: collect data of spending in feb2020
 *************************************************************************************************************************************************)*/
@@ -140,9 +154,15 @@ save `reference'
 use "$merged/product-hh.dta", replace //use merged because we need expenditure, not homogenized units of cleaned dataset
 
 // keep only with data of pop of reference
-merge m:1 interview__id interview__key quest using `reference'
+merge m:1 interview__id interview__key quest using `reference' //up to APRIL 13th is ipcf quantiles 55 74 
+
 keep if _merge ==3
 drop _merge
+
+// generate month of the survey
+gen month = month(date_consumption_survey)
+drop if month ==4
+
 
 // problems and solutions: a) define good types b) define current goods c) homogenize currencies d) correct date of purchase  e) define frequency of purchase for each type 
 
@@ -225,85 +245,41 @@ mption_sur |        hogar?
 ... and keeps going
 */
 
-// selects purchases done 7 to 15 days before and previous to 7Feb20
-gen inflate = 1 if date_consumption_survey<=date("2/7/20","MDY", 2050) & fecha==3 & (type_good ==1 | type_good ==2)
-
-replace inflate = 1 if date_consumption_survey<=date("2/14/20","MDY", 2050)  & fecha==4 & (type_good ==1 | type_good ==2)
 
 //homogenize currencies
-// feb
-gen gasto_feb20 = gasto if moneda == 1 & (type_good ==1 | type_good ==2)
-replace gasto_feb20 = gasto * `tc2mes2' if moneda == 2  & (type_good ==1 | type_good ==2)
-replace gasto_feb20 = gasto * `tc3mes2' if moneda == 3  & (type_good ==1 | type_good ==2)
-replace gasto_feb20 = gasto * `tc4mes2' if moneda == 4  & (type_good ==1 | type_good ==2)
+// we simplify the analysis assuming that any purchase of the consumption interview of Feb is done within Feb, and each purchase of a survey of march is done within march
+// for non food this might be questionable, but we have no other reference of when the purchase was done. Ex. prendas de vestir en los ultimos 3 meses...
+gen gasto_feb20 = .
 
-// jan (alredy food only)
-replace gasto_feb20 = gasto*`deflactor1' if inflate==1 & moneda ==1
-replace gasto_feb20 = gasto*`deflactor1' * `tc2mes1' if inflate==1 & moneda ==2
-replace gasto_feb20 = gasto*`deflactor1' * `tc3mes1' if inflate==1 & moneda ==3
-replace gasto_feb20 = gasto*`deflactor1' * `tc4mes1' if inflate==1 & moneda ==4
+levelsof month, local(month_levels)
+levelsof moneda, local(moneda_levels)
 
-
-
-
-/*
-b) A few march purchases of food and alcohol need to be deflacted to feb2020
-
-           |   8. ¿Cuando fue la
-           |    última vez que
-date_consu | compró  .... para su
-mption_sur |        hogar?
-       vey |      Ayer  Últimos 7 |     Total
------------+----------------------+----------
-..........
-    1Mar20 |        11         47 |        58 
-    3Mar20 |         6         13 |        19 
-    4Mar20 |         6         13 |        19 
------------+----------------------+----------
-     Total |     2,236     14,793 |    17,029 
-*/
+foreach mes in `month_levels'{
+	foreach currency in `moneda_levels'{
+	di "////"
+	di `mes'
+	di `currency'
+	di  `tc`currency'mes`mes''
+	di `deflactor`mes''
+	replace gasto_feb20 = gasto * `tc`currency'mes`mes''*`deflactor`mes'' if month==`mes' & moneda == `currency'
+	
+	}
+	}
 
 
-// selects purchases done in first days of march that need to take to feb
+gen gasto_feb20_b=.
+replace gasto_feb20_b = gasto if moneda == 1 & month ==2
+replace gasto_feb20_b = gasto * `tc2mes2' if moneda == 2  & month ==2
+replace gasto_feb20_b = gasto * `tc3mes2' if moneda == 3  & month ==2
+replace gasto_feb20_b = gasto * `tc4mes2' if moneda == 4 & month ==2
+
 // march (alredy food only)
-gen deflate = 1 if date_consumption_survey<=date("3/1/20","MDY", 2050) & fecha==1 & (type_good ==1 | type_good ==2)
-replace deflate = 1 if date_consumption_survey<=date("3/7/20","MDY", 2050) & fecha==2 & (type_good ==1 | type_good ==2)
+replace gasto_feb20_b = gasto*`deflactor3' if moneda == 1 & month ==3
+replace gasto_feb20_b = gasto*`deflactor3' * `tc2mes3' if moneda == 2 & month ==3
+replace gasto_feb20_b = gasto*`deflactor3' * `tc3mes3'  if moneda == 3 & month ==3
+replace gasto_feb20_b = gasto*`deflactor3' * `tc4mes3' if moneda == 4 & month ==3
 
-replace gasto_feb20 = gasto*`deflactor3' if deflate==1 & moneda ==1
-replace gasto_feb20 = gasto*`deflactor3' * `tc2mes3' if deflate==1 & moneda ==2
-replace gasto_feb20 = gasto*`deflactor3' * `tc3mes3' if deflate==1 & moneda ==3
-replace gasto_feb20 = gasto*`deflactor3' * `tc4mes3' if deflate==1 & moneda ==4
-
-	 
-/*
-c)
-For the rest, we cannot discriminate between a purchase done within the timespan of the question, so we keep the spending date in FEB2020
-
-// c) homogenize currencies
-	* We move everything to bolivares February 2020, given that there we have more sample size // 2=dolares, 3=euros, 4=colombianos // 
-		*Nota: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
-
- tab moneda (number of spending obs. by currency)
-
-      10b. Moneda |      Freq.     Percent        Cum.
-------------------+-----------------------------------
-        Bolívares |    131,356       91.18       91.18
-          Dólares |      2,488        1.73       92.90
-            Euros |         20        0.01       92.92
-Pesos Colombianos |     10,205        7.08      100.00
-------------------+-----------------------------------
-            Total |    144,069      100.00
-*/
-			
-			
-// all purchases except some food are assumed as feb based, with no better options
-// examples: entretenimiento "ultimo mes", ropa "ultimos tres meses"
-replace gasto_feb20 = gasto if moneda == 1 & !(type_good ==1 | type_good ==2)
-replace gasto_feb20 = gasto * `tc2mes2' if moneda == 2  & !(type_good ==1 | type_good ==2)
-replace gasto_feb20 = gasto * `tc3mes2' if moneda == 3  & !(type_good ==1 | type_good ==2)
-replace gasto_feb20 = gasto * `tc4mes2' if moneda == 4  & !(type_good ==1 | type_good ==2)
-
-
+stop
 
 
 
@@ -355,6 +331,16 @@ replace gasto_mensual = round(gasto_mensual)
 tempfile conSpending
 save `conSpending'
 
+//checking
+collapse (sum) gasto_mensual, by (interview__id interview__key quest)
+tempfile `checkingSpending'
+
+merge 1:m (interview__id interview__key quest) using `reference'
+gen ingfam = ipcf*miembros
+
+gen superavit = ingfam > gasto_mensual
+gen keynes_multiplier = ingfam/gasto_mensual
+stop
 
 /*(************************************************************************************************************************************************* 
 * // HH section  (wide shape) 
@@ -1405,7 +1391,7 @@ xtile ors_quant = orshansky, nq(100)
 
 sort orshansky
 gen obs = _n
-twoway line orshansky obs if ors_quant<98 
+twoway line orshansky obs if ors_quant<100 
 
 xtile exp_quant = exp, nq(100)
 

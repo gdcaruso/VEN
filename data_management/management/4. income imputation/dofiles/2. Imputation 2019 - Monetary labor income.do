@@ -6,12 +6,13 @@
 
 global pathout "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
 
-use "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\data\ENCOVI_forimputation_2019.dta", clear
+use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation\ENCOVI_forimputation_2019.dta", clear
 
-* Variables for Mincer Eq.
+///*** VARIABLES FOR MINCER EQUATION ***///
+
 	local xvar	edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
-				tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
-				seguro_salud afiliado_segsalud_comp ///
+				tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh /*anio_auto_hh*/ heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh tv_cable_hh microondas_hh  ///
+				/*seguro_salud*/ afiliado_segsalud_comp ///
 				nivel_educ ///
 				tarea sector_encuesta categ_ocu total_hrtr ///
 				c_sso c_rpv c_spf c_aca c_sps c_otro ///
@@ -22,43 +23,62 @@ use "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputatio
 	*Note: "mdesc" displays the number and proportion of missing values for each variable in varlist.
 	mdesc `xvar' if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1 ) // Universo: los que reportaron recibir (caso 1.a) o ocupados (caso 2)
 		// few % of missinf values except nivel_educ
-		// c_* will only be useful if we see divided by categ_ocup because they are only defined for workers who are not independent workers or employers
+		// c_* will only be useful if we see divided by categ_ocup as they are only defined for workers who are not independent workers or employers
 		
 	/* To perform imputation by linear regression all the independent variables need have completed values, so we re-codified missing 
 	values in the independent variables as an additional category. The missing values in the dependent variable are estimated from
 	the posterior distribution of model parameters or from the large-sample normal approximation of the posterior distribution*/
 
-	local xvar1 edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil_sinmis region_est1 municipio 	///
-				tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh_sinmis /*anio_auto_hh_sinmis*/ heladera_hh_sinmis lavarropas_hh_sinmis computadora_hh_sinmis	internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
-				seguro_salud afiliado_segsalud_comp ///
+	local xvar1 edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil_sinmis region_est1 entidad municipio 	///
+				tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh_sinmis /*anio_auto_hh_sinmis*/ heladera_hh_sinmis lavarropas_hh_sinmis computadora_hh_sinmis internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
+				/*seguro_salud*/ afiliado_segsalud_comp ///
 				nivel_educ_sinmis asiste_o_dejoypq_sinmis ///
 				tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
 				/* c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis */ ///
 				cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
 				aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis
 	
-	*Indep. variable
+	* Dependent variable
 	gen log_ila_m = log(ila_m) if ila_m!=.
 	
-* Checking which variables maximize R2
 
+///*** CHECKING WHICH VARIABLES MAXIMIZE R2 ***///
+	
 	* LASSO
 	/* 	LASSO is one of the first and still most widely used techniques employed in machine learning. 
 	For this specification, you may want to use the command lassoregress. 
 	You will first need to install the package elasticregress, using the command line ssc install elasticregress. 
 	For the purposes of this exercise, please use as argument for the Lasso command set seed 1 and the default number of folds to be 10. */
 	
-	set seed 1
-	lassoregress log_ila_m `xvar1' if log_ila_m>0 & ocup_o_rtarecibenilamon==1, numfolds(5)
+		*set seed 1
+		*lassoregress log_ila_m `xvar1' if log_ila_m>0 & ocup_o_rtarecibenilamon==1, numfolds(5)
+		
+	* Stepwise (pr usa chris; trini usa backward)
+		
+		* ??
 	
-	stop
-	* Stepwise (pr)
-								
-								
-* Equation	
+	* Vselect
+		
+		*Problema: no se puede poner variable como factor variables 
+		* R2 como criterio
+		* me guarda las variables como una lista
+		* return - rpret list
+		vselect log_ila_m `xvar1' if log_ila_m>0 & ocup_o_rtarecibenilamon==1, backward r2adj
+		display r(predlist)
+		local vselectvars = r(predlist)
+	
+	* Nuestra idea
+		*local nuestrasvars edad edad2 hombre relacion_comp npers_viv estado_civil entidad tipo_vivienda_hh propieta_hh microondas_hh nivel_educ afiliado_segsalud_comp no_banco_sinmis
+	
+///*** EQUATION ***///
+	
+	*Obs: should not be done with "pondera"
+	
 	reg log_ila_m `xvar1' if log_ila_m>0
-		*Obs: varias variables son significativas
-
+	reg log_ila_m `vselectvars' if log_ila_m>0
+	*reg log_ila_m `nuestrasvars' if log_ila_m>0 // Da peor
+	
+stop
 	set more off
 	mi set flong
 	set seed 66778899

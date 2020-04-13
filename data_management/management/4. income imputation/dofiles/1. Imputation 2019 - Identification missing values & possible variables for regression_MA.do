@@ -1,13 +1,19 @@
-****************************************************************
-*** ENCOVI 2019 - IMPUTATION - IDENTIFICATION OF MISSING VALUES 
-****************************************************************
+* ENCOVI 2019 - IMPUTATION
+* Objective: Identification missing values and possible variables for regression
 
+****************************************************************
+*** IDENTIFICATION OF MISSING VALUES 
+****************************************************************
+ 
 ///*** OPEN DATABASE & PATHS ***///
 
-global pathout "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
+global pathout "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+global pathoutexcel "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
 
-use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019", clear
-*use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", clear
+*ESTE NO use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_INFLA VERDADERA", clear
+*ESTE NO use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", clear
+use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_Asamblea Nacional.dta", clear
+*use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_PRECIOS IMPLICITOS.dta", clear
 
 
 ///*** DESCRIPTION INCOME ***///
@@ -301,6 +307,8 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 		display `report_inglabmon_nocuanto'
 		display `ocup_norta_sirecibeila' 
 		display `aimputar_ila_mon'
+		*Universo:
+		gen ocup_o_rtarecibenilamon = 1 if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1 )
 	
 	* Non-monetary ila (no jubi)
 	display `report_inglabnomon_nocuanto'
@@ -312,11 +320,13 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	display `report_pensjub_nocuanto'
 	display `jubi_norta_sirecibejubi' 
 	display `aimputar_jubipen'
+		*Universo:
+		gen jubi_o_rtarecibejubi = 1 if (recibe_ingresopenjub==1 | jubi_pens==1)
 
-	
-// *** Descriptive Stats ***//
-/*
-	foreach i of varlist 	report_inglabmon_nocuanto report_inglabnomon_nocuanto report_ingnolab_nocuanto ocup_norta_sirecibeila jubi_noreportajubi aimputar_ila_mon {
+/*	
+//*** Descriptive Stats ***//
+
+	foreach i of varlist 	report_inglabmon_nocuanto report_inglabnomon_nocuanto report_ingnolab_nocuanto report_pensjub_nocuanto ocup_norta_sirecibeila jubi_norta_sirecibejubi aimputar_ila_mon {
 		tablecol region `i', rowpct // nofreq
 		tablecol tarea `i', rowpct // nofreq
 		tablecol sector_encuesta `i', rowpct // nofreq
@@ -324,7 +334,11 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	}
 */
 
-// *** Trini's Notation ***//
+
+
+** NO PUDE HACER EL EXCEL BIEN!
+
+//*** Trini's Notation ***//
 
 	clonevar linc_m = ingresoslab_mon // value labor income (monetary)
 	clonevar linc_nm = ingresoslab_bene // value of labor income (non monetary)
@@ -391,12 +405,14 @@ local a3=r(sum)
 ** Non-zero values
 sum `x' if `x'>0 & `x'!=. & dlinc==1
 local a4=r(N)
-** Total employed
-sum ocupado  if ocupado==1
+** Total employed, or receive ila mon
+sum ocup_o_rtarecibenilamon  if ocup_o_rtarecibenilamon==1
 local a5=r(N)
-matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
-matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
-matrix a=nullmat(a), aux1, aux2
+*Creating matrix
+	matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
+	*Percentage
+	matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
+	matrix a=nullmat(a), aux1, aux2
 }
 
 *** Pensions
@@ -417,8 +433,8 @@ local a3=r(sum)
 ** Non-zero values
 sum `x' if `x'>0 & `x'!=. & djubpen==1
 local a4=r(N)
-** All pensioners and retired
-sum jubi_pens if jubi_pens==1
+** All pensioners and retired, or receive pension/retirement ben.
+sum jubi_o_rtarecibejubi if jubi_o_rtarecibejubi==1
 local a5=r(N)
 matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
 matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
@@ -426,10 +442,87 @@ matrix a`i'=nullmat(a`i'), aux1, aux2
 }
 
 local row=4
-putexcel set "$pathout\VEN_income_imputation_2019_MA.xlsx", sheet("missing_values") modify
+putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA.xlsx", sheet("missing_values") modify
 putexcel B`row'=matrix(a)
 local row= `row' + rowsof(a)+4
 putexcel B`row'=matrix(a1)
 local row= `row' + rowsof(a1)+4
 
 matrix drop aux1 aux2 a a1
+
+
+*****************************************************************
+*** POSSIBLE VARIABLES FOR REGRESSION 
+*****************************************************************
+
+	gen propieta = (tenencia_vivienda==1 | tenencia_vivienda==2) if tenencia_vivienda!=.
+ 
+	gen agegroup=1 if edad<=14 & edad!=.
+	replace agegroup=2 if edad>=15 & edad<=24 & edad!=.
+	replace agegroup=3 if edad>=25 & edad<=34 & edad!=.
+	replace agegroup=4 if edad>=35 & edad<=44 & edad!=.
+	replace agegroup=5 if edad>=45 & edad<=54 & edad!=.
+	replace agegroup=6 if edad>=55 & edad<=64 & edad!=.
+	replace agegroup=7 if edad>=65 & edad!=.
+	label def agegroup 1 "[0-14]" 2 "[15-24]" 3 "[25-34]" 4 "[35-44]" 5 "[45-54]" 6 "[55-64]" 7 "[65+]"
+	label value agegroup agegroup
+	
+	gen edad2=edad^2
+	
+	*Juntamos la razón por la cual dejo estudios y si asiste (para cubrir a casi todos)
+	clonevar asiste_o_dejoypq = razon_dejo_est_comp
+	replace asiste_o_dejoypq = 0 if asiste==1
+		*Al final no porque asiste solo está para edad escolar
+	
+	*Comparable con años anteriores (opción 6 no afiliado)
+	clonevar afiliado_segsalud_comp = afiliado_segsalud
+	replace afiliado_segsalud_comp = 6 if seguro_salud==0
+	
+	/*Checking the bancarization variables
+	egen bancarization = rowtotal(cuenta_corr cuenta_aho tcredito tdebito)
+	tab bancarization no_banco
+	*/
+	
+	foreach i of varlist tipo_vivienda material_piso tipo_sanitario_comp propieta auto anio_auto heladera lavarropas computadora internet televisor calentador aire tv_cable microondas {
+		bys id: egen `i'_hh=max(`i') // para asegurar que todos en el hogar tengan lo mismo, no solo el jefe
+	}
+	
+	gen total_hrtr = hstr_ppal 
+	replace total_hrtr = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
+
+	global vars_mineq 	edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
+					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
+					seguro_salud afiliado_segsalud_comp /*quien_pagosegsalud*/ ///
+					nivel_educ asiste_o_dejoypq ///
+					tarea sector_encuesta categ_ocu total_hrtr ///
+					c_sso c_rpv c_spf c_aca c_sps c_otro ///
+					cuenta_corr cuenta_aho tcredito tdebito no_banco ///
+					aporte_pension clap ingsuf_comida comida_trueque
+		
+		* Copio variables para que no tengan missing (missing una variables más)
+
+		foreach i of global vars_mineq {
+			sum `i'
+			clonevar `i'_sinmis = `i'
+			replace `i'_sinmis = r(max) + 1 if `i'==.
+	}
+	
+	*br if (edad_sinmis==. |	hombre_sinmis==. |	relacion_comp_sinmis==. |	miembros_sinmis==. |	estado_civil_sinmis==. |	region_est1_sinmis==. |	municipio_sinmis==. |	tipo_vivienda_sinmis==. |	propieta_sinmis==. |	auto_sinmis==. |	anio_auto_sinmis==. |	heladera_sinmis==. |	lavarropas_sinmis==. |	computadora_sinmis==. |	internet_sinmis==. |	televisor_sinmis==. |	calentador_sinmis==. |	aire_sinmis==. |	tv_cable_sinmis==. |	microondas_sinmis==. |	seguro_salud_sinmis==. |	nivel_educ_sinmis==. |	tarea_sinmis==. |	sector_encuesta_sinmis==. |	categ_ocu_sinmis==. |	hstr_todos_sinmis==. |	aporte_pension_sinmis==. |	clap_sinmis==. )
+		* Check: Da ok, ninguna con missing
+	
+	global vars_mineq_sinmis 	edad_sinmis	edad2_sinmis  agegroup_sinmis hombre_sinmis relacion_comp_sinmis miembros_sinmis estado_civil_sinmis region_est1_sinmis municipio_sinmis 	///
+								tipo_vivienda_hh_sinmis propieta_hh_sinmis auto_hh_sinmis anio_auto_hh_sinmis heladera_hh_sinmis lavarropas_hh_sinmis computadora_hh_sinmis	internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
+								seguro_salud_sinmis afiliado_segsalud_comp_sinmis /*quien_pagosegsalud_sinmis*/ ///
+								nivel_educ_sinmis asiste_o_dejoypq_sinmis ///
+								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
+								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///
+								cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
+								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis
+
+* Equations:
+	* Ingreso laboral montario - hacerlo por categ. ocup?
+	* Ingreso laboral no monetario (no jubilación)
+	* Ingreso no laboral
+	* Jubilación/Pensión
+	
+save "$pathout\ENCOVI_forimputation_2019.dta", replace

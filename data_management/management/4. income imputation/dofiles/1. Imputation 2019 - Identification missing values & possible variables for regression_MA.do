@@ -7,12 +7,12 @@
  
 ///*** OPEN DATABASE & PATHS ***///
 
-global pathout "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-global pathoutexcel "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
+global pathout "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+global pathoutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"
 
 *ESTE NO use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_INFLA VERDADERA", clear
 *ESTE NO use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", clear
-use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_Asamblea Nacional.dta", clear
+use "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_Asamblea Nacional.dta", clear
 *use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_PRECIOS IMPLICITOS.dta", clear
 
 
@@ -508,7 +508,7 @@ clonevar linc_m = ingresoslab_mon // value labor income (monetary)
 	}
 
 local row=4
-putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA.xlsx", sheet("missing_values") modify
+putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA_JL.xlsx", sheet("missing_values") modify
 putexcel B`row'=matrix(a)
 local row= `row' + rowsof(a)+4
 putexcel B`row'=matrix(a1)
@@ -567,7 +567,7 @@ matrix drop aux1 aux2 a a1 a2 a3
 					tarea sector_encuesta categ_ocu total_hrtr ///
 					c_sso c_rpv c_spf c_aca c_sps c_otro ///
 					cuenta_corr cuenta_aho tcredito tdebito no_banco ///
-					aporte_pension clap ingsuf_comida comida_trueque
+					aporte_pension clap ingsuf_comida comida_trueque pgas_monto ptelefono_monto
 		
 		* Copio variables para que no tengan missing (missing una variables más)
 
@@ -587,7 +587,7 @@ matrix drop aux1 aux2 a a1 a2 a3
 								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
 								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///
 								cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
-								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis
+								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis pgas_monto_sinmis ptelefono_monto_sinmis
 
 * Equations:
 	* Ingreso laboral montario - hacerlo por categ. ocup?

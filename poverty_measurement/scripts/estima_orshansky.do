@@ -118,10 +118,10 @@ use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacio
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 			
-			local monedas 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
+			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses 1 2 3 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
+			use "$rootpath\data_management\management\1. merging\exchange rates/TC_cierre_provisorio.dta", clear
 			
 			destring mes, replace
 			foreach i of local monedas {
@@ -131,15 +131,9 @@ use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacio
 					di `tc`i'mes`j''
 				}
 			}
-local tc1mes1 = 1
-local tc1mes2 = 1
-local tc1mes3 = 1
-local tc1mes11 = 1
-local tc1mes12 = 1
 
-di `tc2mes2'
-di `tc1mes1'
-stop
+
+
 /*(************************************************************************************************************************************************* 
 * 1: collect data of spending in feb2020
 *************************************************************************************************************************************************)*/
@@ -186,6 +180,7 @@ replace current_good = 0 if type_good==5 //bienes durables (TV, plancha)
 drop if current_good !=1
 
 
+keep if type_good == 1
 
 
 // d) define date of purchases
@@ -261,25 +256,24 @@ foreach mes in `month_levels'{
 	di `currency'
 	di  `tc`currency'mes`mes''
 	di `deflactor`mes''
-	replace gasto_feb20 = gasto * `tc`currency'mes`mes''*`deflactor`mes'' if month==`mes' & moneda == `currency'
+	replace gasto_feb20 = gasto * `tc`currency'mes`mes'' * `deflactor`mes'' if month==`mes' & moneda == `currency'
 	
 	}
 	}
 
+// just to test the previous loop, 13th april its working well
+// gen gasto_feb20_b=.
+// replace gasto_feb20_b = gasto if moneda == 1 & month ==2
+// replace gasto_feb20_b = gasto * `tc2mes2' if moneda == 2  & month ==2
+// replace gasto_feb20_b = gasto * `tc3mes2' if moneda == 3  & month ==2
+// replace gasto_feb20_b = gasto * `tc4mes2' if moneda == 4 & month ==2
+//
+// // march (alredy food only)
+// replace gasto_feb20_b = gasto*`deflactor3' if moneda == 1 & month ==3
+// replace gasto_feb20_b = gasto*`deflactor3' * `tc2mes3' if moneda == 2 & month ==3
+// replace gasto_feb20_b = gasto*`deflactor3' * `tc3mes3'  if moneda == 3 & month ==3
+// replace gasto_feb20_b = gasto*`deflactor3' * `tc4mes3' if moneda == 4 & month ==3
 
-gen gasto_feb20_b=.
-replace gasto_feb20_b = gasto if moneda == 1 & month ==2
-replace gasto_feb20_b = gasto * `tc2mes2' if moneda == 2  & month ==2
-replace gasto_feb20_b = gasto * `tc3mes2' if moneda == 3  & month ==2
-replace gasto_feb20_b = gasto * `tc4mes2' if moneda == 4 & month ==2
-
-// march (alredy food only)
-replace gasto_feb20_b = gasto*`deflactor3' if moneda == 1 & month ==3
-replace gasto_feb20_b = gasto*`deflactor3' * `tc2mes3' if moneda == 2 & month ==3
-replace gasto_feb20_b = gasto*`deflactor3' * `tc3mes3'  if moneda == 3 & month ==3
-replace gasto_feb20_b = gasto*`deflactor3' * `tc4mes3' if moneda == 4 & month ==3
-
-stop
 
 
 
@@ -331,7 +325,9 @@ replace gasto_mensual = round(gasto_mensual)
 tempfile conSpending
 save `conSpending'
 
-//checking
+/*(************************************************************************************************************************************************* 
+* // Check spending
+*********************************************************************************************************************)*/
 collapse (sum) gasto_mensual, by (interview__id interview__key quest)
 tempfile `checkingSpending'
 
@@ -340,6 +336,11 @@ gen ingfam = ipcf*miembros
 
 gen superavit = ingfam > gasto_mensual
 gen keynes_multiplier = ingfam/gasto_mensual
+
+graph box keynes, noout
+tab superavit
+codebook ingfam
+
 stop
 
 /*(************************************************************************************************************************************************* 

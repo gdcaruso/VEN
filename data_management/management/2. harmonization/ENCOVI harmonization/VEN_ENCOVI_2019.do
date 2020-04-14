@@ -90,7 +90,7 @@ local vr       "01"     // version renta
 				sum indice if mes==`j' & ano==2019
 				local indice`j' = r(mean) 			
 				}
-			forvalues j = 1(1)3 {
+			forvalues j = 1(1)4 {
 				sum indice if mes==`j' & ano==2020
 				display r(mean)
 				local indice`j' = r(mean)				
@@ -104,7 +104,7 @@ local vr       "01"     // version renta
 			local deflactor1 `indice2'/`indice12'
 			local deflactor2 `indice2'/`indice1'
 			local deflactor3 `indice2'/`indice2'
-
+			local deflactor4 `indice2'/`indice3'
 				
 // // if we consider that incomes are earned in the same month than the survey is collected use this
 // 			local deflactor11 `indice2'/`indice11'
@@ -112,6 +112,7 @@ local vr       "01"     // version renta
 // 			local deflactor1 `indice2'/`indice1'
 // 			local deflactor2 `indice2'/`indice2'
 // 			local deflactor3 `indice2'/`indice3'
+//			local deflactor4 `indice2'/`indice3'
 
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
@@ -125,8 +126,8 @@ local vr       "01"     // version renta
 			destring mes, replace
 			foreach i of local monedas {
 				foreach j of local meses {
-					sum mean_moneda	if moneda==`i' & mes==`j'
-					local k `j-1'
+					sum mean_moneda	if moneda==`i' & mes==`j' // if we pick ex rate of month=2
+ 					local k `j+1' // we impute it to month 3
 					local tc`i'mes`k' = r(mean)
 					display `tc`i'mes`k''
 					}
@@ -4042,8 +4043,62 @@ gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | te
 replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=7 & tenencia_vivienda<=10) | tenencia_vivienda==.
 bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
 
+
+// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 gen     renta_imp = .
-replace renta_imp = 0.10*itf_sin_ri  if  propieta_no_paga == 1
+
+
+levelsof interview_month, local(rent_month)
+foreach m in `rent_month'{
+    levelsof renta_imp_mon, local(rent_currency)
+
+	foreach c in `rent_currency'{
+
+	di "////"
+	di `m'
+	di `c'
+	di  `tc`c'mes`m''
+	di `deflactor`m''
+	replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
+	}
+}
+
+// tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated   
+//
+//       7. Para su hogar, la vivienda es? |      Freq.     Percent        Cum.
+// ----------------------------------------+-----------------------------------
+//                           Propia pagada |        252       11.91       11.91
+//                        Propia pagándose |         62        2.93       14.84
+//                               Alquilada |        420       19.85       34.69
+//          Alquilada parte de la vivienda |         14        0.66       35.35
+// Adjudicada pagándose Gran Misión Vivien |         23        1.09       36.44
+//         Adjudicada Gran Misión Vivienda |         10        0.47       36.91
+//           Cedida por razones de trabajo |         33        1.56       38.47
+//           Prestada por familiar o amigo |        895       42.30       80.77
+//                                  Tomada |        181        8.55       89.32
+//                                    Otra |        226       10.68      100.00
+// ----------------------------------------+-----------------------------------
+//                                   Total |      2,116      100.00
+gen renta_imp_b = itf_sin_ri*0.1
+
+// twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny) ///
+// || line renta_imp renta_imp if renta_imp<10000000 & renta_imp_b<10000000
+
+// gen test_renta = renta_imp>renta_imp_b
+// tab test_renta
+//  test_renta |      Freq.     Percent        Cum.
+// ------------+-----------------------------------
+//           0 |      1,021        3.20        3.20
+//           1 |     30,927       96.80      100.00
+// ------------+-----------------------------------
+//       Total |     31,948      100.00
+
+
+
+
+
+ 
+replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //complete with 10% in cases where no guess is provided by hh.
 
 *replace renta_imp = renta_imp / p_reg
 *replace renta_imp = renta_imp / ipc_rel 
@@ -4058,8 +4113,8 @@ include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonizat
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------------
 ************************************************************************************************************************************************)*/	
-gen linea_pobreza = 4389986 // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
-gen linea_pobreza_extrema = 2194993  // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
+gen linea_pobreza = . // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
+gen linea_pobreza_extrema = .  // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
 
 gen pobre = ipcf<linea_pobreza
 gen pobre_extremo = ipcf<linea_pobreza_extrema

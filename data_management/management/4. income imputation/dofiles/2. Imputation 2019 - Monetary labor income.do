@@ -43,7 +43,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 		*local nuestrasvars edad edad2 hombre relacion_comp npers_viv estado_civil entidad tipo_vivienda_hh propieta_hh microondas_hh nivel_educ afiliado_segsalud_comp no_banco_sinmis
 	
 	* Dependent variable
-	gen log_ila_m = log(ila_m) if ila_m!=.
+	gen log_ila_m = ln(ila_m) if ila_m!=.
 	
 
 ///*** CHECKING WHICH VARIABLES MAXIMIZE R2 ***///
@@ -76,11 +76,9 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 					propieta_hh nivel_educ_sinmis cuenta_aho_sinmis municipio heladera_hh_sinmis televisor_hh_sinmis ///
 					aporte_pension_sinmis tipo_sanitario_comp_hh computadora_hh_sinmis cuenta_corr_sinmis edad
 	
-	/*
-		vselect log_ila_m `nuestrasvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1, backward r2adj
+	/*	vselect log_ila_m `nuestrasvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1, backward r2adj
 		display r(predlist)
-		local vselectvars2 = r(predlist)
-	*/
+		local vselectvars2 = r(predlist)	*/
 		
 	
 ///*** EQUATION ***///
@@ -97,32 +95,30 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	mi set flong
 	set seed 66778899
 	mi register imputed log_ila_m
-	mi impute regress log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1, add(1) rseed(66778899) force noi 
+	mi impute regress log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1, add(5) rseed(66778899) force noi 
 	mi unregister log_ila_m
+	* Obs.: _mi_m es la variable que crea Stata luego de la imputacion e identifica cada base
+		*Ej. si haces 20 imputaciones _mi_m tendra valores de 0 a 20, donde 0 corresponde a la variable sin imputar e 1 a 20 a las bases con un posible valor para los missing values
 	
-
-* Retrieving original variables
+///*** REPLACING MISSINGS BY IMPUTED VALUES ***///
 
 	foreach x of varlist ila_m {
 	gen `x'2=.
-	local j=1
 	* Genero var. con valores preliminares de los missing a imputar
 	replace `x'2= exp(log_`x') if d`x'_miss3==1 // miss3 junta los 2 tipos de missing
 	* Si algun valor imputado es menor que el menor ila_m, reemplazar con el menor ila_m
-	sum `x' if `x'>0 & ocup_o_rtarecibenilamon==1 & _mi_m==0
+	sum `x' if `x'>0 & ocup_o_rtarecibenilamon==1 & _mi_m==0 // _mi_m==0 es la variable sin imputar
 	scalar min_`x'`j'=r(min)
-	replace `x'2=min_`x'`j' if (`x'2<min_`x'`j' & d`x'_miss3==1)
-	* Imputo reemplazando en variable ila_m
+	replace `x'2=min_`x' if (`x'2<min_`x' & d`x'_miss3==1)
+	* Imputo reemplazando en variable ila_m en las variables imputadas (varias porque hay cuantas replicas como repeticiones tenga el vselect)
 	replace `x'=`x'2 if (d`x'_miss3==1 & _mi_m!=0)
-	local j=`j'+1
 	drop `x'2
 	}	
 	mdesc ila_m if _mi_m==0
-	mdesc ila_m if _mi_m==1 //cheking we do not have "incompleted" values in monetary labor income after imputation
+	mdesc ila_m if _mi_m==1 // Cheking we do not have "incompleted" values in monetary labor income after imputation
 
-	* MA: qué es esto (hasta analyzing imputed data)
 	gen imp_id=_mi_m
-	*mi unset
+	*mi unset /// MA: Qué es esto? (hasta analyzing imputed data)
 	char _dta[_mi_style] 
 	char _dta[_mi_marker] 
 	char _dta[_mi_M] 
@@ -130,9 +126,9 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	char _dta[_mi_update] 
 	char _dta[_mi_rvars] 
 	char _dta[_mi_ivars] 
-	drop _mi_id _mi_miss _mi_m	
+	drop _mi_id _mi_miss _mi_m
 
-	drop if imp_id==0
+	drop if imp_id==0 // Droppea la variable sin imputar
 	collapse (mean) ila_m, by(id com)
 	rename ila_m ila_m_imp1
 	save "$pathout\VEN_ila_m_imp1.dta", replace
@@ -151,12 +147,13 @@ gen log_`x'=ln(`x')
 gen log_`x'_imp1=ln(`x'_imp1)
 }
 
-*** Comparing not imputed vs. imputed labor income distribution
+cd "$pathoutexcel"
+*** Comparing not imputed vs. imputed monetary labor income distribution
 foreach x in ila_m {
 twoway (kdensity log_`x' if `x'>0 & ocup_o_rtarecibenilamon==1, lcolor(blue) bw(0.45)) ///
        (kdensity log_`x'_imp1 if `x'_imp1>0 & ocup_o_rtarecibenilamon==1, lcolor(red) lp(dash) bw(0.45)), ///
 	    legend(order(1 "Not imputed" 2 "Imputed")) title("") xtitle("") ytitle("") graphregion(color(white) fcolor(white)) name(kd_`x'1, replace) saving(kd_`x'1, replace)
-graph export kd_`x'1.png, replace
+graph export "kd_`x'1.png", replace
 }
 
 foreach x in ila_m {
@@ -173,3 +170,12 @@ matrix list imp
 putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA.xlsx", sheet("labor_incmon_imp_stochastic_reg") modify
 putexcel A3=matrix(imp), names
 matrix drop imp
+
+
+********************************************************************************
+********************************************************************************
+*** Imputation model for labor income: using chained equations
+********************************************************************************
+********************************************************************************
+
+* Hacer?

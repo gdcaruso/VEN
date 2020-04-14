@@ -2078,7 +2078,7 @@ gen tcredito=s16q1__3 if (s16q1__3!=. & s16q1__3!=.a)
 * Debit card
 gen tdebito=s16q1__4 if (s16q1__4!=. & s16q1__4!=.a)
 * None
-gen no_banco=s16q1__4 if (s16q1__4!=. & s16q1__4!=.a)
+gen no_banco=s16q1__5 if (s16q1__5!=. & s16q1__5!=.a)
 
 *** How often do you pay with cash ?
 gen efectivo_f=s16q2 if (s16q2!=. & s16q2!=.a)

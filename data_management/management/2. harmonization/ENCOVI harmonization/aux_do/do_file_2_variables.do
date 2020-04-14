@@ -22,18 +22,18 @@ replace itf = .		if  itf_sin_ri==.
 ************************************************************************************************************************************************************************)*/
 
 /* Respuestas Inconsistentes de Individuos 
-	Ocupados, con ingreso en la ocupación principal missing		(cohi = 800)
+	Ocupados, con ingreso en la ocupaciÃ³n principal missing		(cohi = 800)
 	Ocupados, con todas las fuentes de ingreso laboral missing	(cohi = 810)
 	Asalariados, con ingreso de trabajo asalariado missing		(cohi = 811)
 	Cuentapropistas, con ingreso por cuenta propia missing		(cohi = 812)
-	Patrones, con ingreso por patrón missing			(cohi = 813)
+	Patrones, con ingreso por patrÃ³n missing			(cohi = 813)
 	Sin salario, con ingreso laboral positivo			(cohi = 814)
 	Individuos con ingreso laboral invalidado por la ONE		(cohi = 890)				*/
 				
 * Coherente a nivel individual
 gen     cohi = 1
 
-* Trabajadores ocupados, con el ingresos laboral de la ocupación principal missing
+* Trabajadores ocupados, con el ingresos laboral de la ocupaciÃ³n principal missing
 replace cohi = 800		if            ocupado==1 & ip==.  & relab!=4
 
 * Trabajadores ocupados, con todas las fuentes de ingresos laborales missing
@@ -45,7 +45,7 @@ replace cohi = 811		if  cohi==1 & relab==2   & iasalp==.
 * Trabajadores cuentapropistas, con ingresos por cuenta propia missing
 replace cohi = 812		if  cohi==1 & relab==3   & ictap==. 
 
-* Patrones con ingresos por patrón missing
+* Patrones con ingresos por patrÃ³n missing
 replace cohi = 813		if  cohi==1 & relab==1   & ipatrp==. 
 
 * Otras inconsistencias
@@ -53,9 +53,9 @@ replace cohi = 815		if  iasalp!=.  & relab!=2
 replace cohi = 816		if  ipatrp!=.  & relab!=1	
 replace cohi = 817		if  ictapp!=.  & relab!=3	
 
-replace cohi = 818		if  iasalnp!=. & relab_s!=2 
-replace cohi = 819		if  ipatrnp!=. & relab_s!=1	
-replace cohi = 820		if  ictapnp!=. & relab_s!=3
+*replace cohi = 818		if  iasalnp!=. & relab_s!=2 
+*replace cohi = 819		if  ipatrnp!=. & relab_s!=1	
+*replace cohi = 820		if  ictapnp!=. & relab_s!=3
 
 
 /*(************************************************************************************************************************************************************************ 
@@ -72,7 +72,7 @@ egen    aux2 = sum(aux),	by(id)
 replace cohh = aux2		if  cohh==1 & aux2>0
 drop aux aux2
 
-* Familias con Único Ocupado (no Jefe) con Ingreso Individual Inconsistente
+* Familias con Ãšnico Ocupado (no Jefe) con Ingreso Individual Inconsistente
 egen  aux = sum(ocupado),	by(id)
 gen unico = 1			if  ocupado==aux & ocupado==1
 drop aux
@@ -87,7 +87,7 @@ drop aux aux2
 gen   aux_ocu = 1		if  relacion==1 & ocupado==1
 egen jefe_ocu = max(aux_ocu),	by(id)
 
-* Identifica Miembro (no Jefe) de Mayor Educación Incoherente
+* Identifica Miembro (no Jefe) de Mayor EducaciÃ³n Incoherente
 egen    max_edu = max(nivel),	by(id)
 gen     edu_max = 1		if  max_edu==nivel & ocupado==1
 replace edu_max = .		if  cohi==1
@@ -106,7 +106,7 @@ replace cohh = 902		if  cohh==1 & ilf<0
 * Familias con ingresos totales negativos o invalidados
 replace cohh = 903		if  cohh==1 & itf<0
 
-* Identifica respuestas inconsistentes de ingreso del hogar para el cálculo oficial de la pobreza 
+* Identifica respuestas inconsistentes de ingreso del hogar para el cÃ¡lculo oficial de la pobreza 
 gen coh_oficial = 1
 	 
 
@@ -132,7 +132,7 @@ gen ipcf    = itf        / miembros
 
 ***  Ingreso familiar equivalente ***
 /* Ye=(A+a1.K1+a2.K2)^theta 
-donde A=numero de adultos, K1=niños menores de 5 y K2=niños entre 6 y 14*/
+donde A=numero de adultos, K1=niÃ±os menores de 5 y K2=niÃ±os entre 6 y 14*/
 
 * Ingreso equivalente A (theta=0.9, a1=0.5, a2=0.75) 
 gen	ae = 1
@@ -175,6 +175,8 @@ drop ae aef
 *-----------------------------------------------------------------------  3.7 PERCENTILES  --------------------------------------------------------------------------------
 ************************************************************************************************************************************************************************)*/
 
+/* MA: faltan los ponderadores
+
 *** Ingreso per capita familiar 
 * Percentiles
 cuantiles ipcf [w=pondera] if ipcf>=0 & cohh==1, n(100) orden_aux(id com relacion edad) g(pipcf)
@@ -206,7 +208,7 @@ cuantiles iea [w=pondera] if iea>=0 & cohh==1, n(5)   orden_aux(id com relacion 
 * Ponderador de Ingresos
 gen pondera_i = pondera
 
-* IPC promedio del año 2005 
+* IPC promedio del aÃ±o 2005 
 gen	ipc05 = 161.728		if  pais=="ARG"
 replace ipc05 = 116.628		if  pais=="BOL"
 replace ipc05 = 151.421		if  pais=="BRA"
@@ -226,7 +228,7 @@ replace ipc05 = 110.114		if  pais=="PER"
 replace ipc05 = 162.281		if  pais=="URY"
 replace ipc05 = 254.992		if  pais=="VEN"
 
-* IPC promedio del año 2011
+* IPC promedio del aÃ±o 2011
 gen	ipc11 = 464.420		if  pais=="ARG"
 replace ipc11 = 175.438		if  pais=="BOL"
 replace ipc11 = 202.995		if  pais=="BRA"
@@ -286,11 +288,11 @@ replace ppp11 =    1.568639	if  pais=="PER"
 replace ppp11 =   16.42385	if  pais=="URY"
 replace ppp11 =    2.915	if  pais=="VEN"
 
-* Ingreso per cápita familiar ajustado por IPC
+* Ingreso per cÃ¡pita familiar ajustado por IPC
 gen ipcf_cpi05 = ipcf * (ipc05/ipc)
 gen ipcf_cpi11 = ipcf * (ipc11/ipc)
 
-* Ingreso per cápita familiar ajustado por PPP
+* Ingreso per cÃ¡pita familiar ajustado por PPP
 gen ipcf_ppp05 = ipcf * (ipc05/ipc) * (1/ppp05)
 gen ipcf_ppp11 = ipcf * (ipc11/ipc) * (1/ppp11)
    

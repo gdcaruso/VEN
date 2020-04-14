@@ -9,6 +9,11 @@ global pathoutexcel "C:\Users\wb550905\Github\VEN\data_management\management\4. 
 
 use "$path\ENCOVI_forimputation_2019.dta", clear
 
+* Cuántos queremos imputar
+mdesc ila_m if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) 
+	// if me decís que recibiste pero ila monteario missing Ó estás ocupado, no decís que no recibís ila_m (eso sería un verdadero missing) y no contestás un monto de ila no mon.
+	* Check: da ok! Igual que la cantidad de miss3
+
 ///*** VARIABLES FOR MINCER EQUATION ***///
 
 	global xvar	edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
@@ -22,7 +27,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 
 * Identifying missing values in potential independent variables for Mincer equation
 	*Note: "mdesc" displays the number and proportion of missing values for each variable in varlist.
-	mdesc $xvar if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1 ) // Universo: los que reportaron recibir (caso 1.a) o ocupados (caso 2)
+	mdesc $xvar if ocup_o_rtarecibenilamon==1 // Universo: los que reportaron recibir (caso 1.a) o ocupados (caso 2)
 		// few % of missinf values except nivel_educ
 		// c_* will only be useful if we see divided by categ_ocup as they are only defined for workers who are not independent workers or employers
 		
@@ -56,7 +61,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 		
 		*set seed 1
 		
-		lassoregress log_ila_m $xvar1 if log_ila_m>0 & ocup_o_rtarecibenilamon==1, numfolds(5)
+		lassoregress log_ila_m $xvar1 if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, numfolds(5)
 		display e(varlist_nonzero)
 		local lassovars = e(varlist_nonzero)
 		
@@ -67,7 +72,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 		* Se puede usar R2adjustado como criterio. Ojo, no se puede poner variable como factor variables 
 		* return - rpret list
 	
-	vselect log_ila_m $xvar1 if log_ila_m>0 & ocup_o_rtarecibenilamon==1, best
+	vselect log_ila_m $xvar1 if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, best
 	
 	* Best one appears to be with 28 vars.
 	local vselectvars categ_ocu_sinmis clap_sinmis comida_trueque_sinmis sector_encuesta_sinmis auto_hh_sinmis ///
@@ -85,17 +90,17 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	
 	*Obs.: should not be done with "pondera"
 	
-	*reg log_ila_m `xvar1' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 // Da peor
-	*reg log_ila_m `nuestrasvars' if log_ila_m>0 // Da peor
+	*reg log_ila_m `xvar1' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0  // Da peor
+	*reg log_ila_m `nuestrasvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0  // Da peor
 	
-	reg log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 // R2ajustado .1433
-	reg log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 // R2ajustado .1436, mejor que lasso
+	reg log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0 // R2ajustado .1433
+	reg log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0 // R2ajustado .1436, mejor que Lasso
 
 	set more off
 	mi set flong
 	set seed 66778899
 	mi register imputed log_ila_m
-	mi impute regress log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1, add(5) rseed(66778899) force noi 
+	mi impute regress log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, add(1) rseed(66778899) force noi 
 	mi unregister log_ila_m
 	* Obs.: _mi_m es la variable que crea Stata luego de la imputacion e identifica cada base
 		*Ej. si haces 20 imputaciones _mi_m tendra valores de 0 a 20, donde 0 corresponde a la variable sin imputar e 1 a 20 a las bases con un posible valor para los missing values
@@ -107,18 +112,20 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	* Genero var. con valores preliminares de los missing a imputar
 	replace `x'2= exp(log_`x') if d`x'_miss3==1 // miss3 junta los 2 tipos de missing
 	* Si algun valor imputado es menor que el menor ila_m, reemplazar con el menor ila_m
-	sum `x' if `x'>0 & ocup_o_rtarecibenilamon==1 & _mi_m==0 // _mi_m==0 es la variable sin imputar
+	sum `x' if `x'>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0 & _mi_m==0 // _mi_m==0 es la variable sin imputar
 	scalar min_`x'`j'=r(min)
 	replace `x'2=min_`x' if (`x'2<min_`x' & d`x'_miss3==1)
 	* Imputo reemplazando en variable ila_m en las variables imputadas (varias porque hay cuantas replicas como repeticiones tenga el vselect)
 	replace `x'=`x'2 if (d`x'_miss3==1 & _mi_m!=0)
 	drop `x'2
-	}	
-	mdesc ila_m if _mi_m==0
-	mdesc ila_m if _mi_m==1 // Cheking we do not have "incompleted" values in monetary labor income after imputation
-
-	gen imp_id=_mi_m
-	*mi unset /// MA: Qué es esto? (hasta analyzing imputed data)
+	}
+	
+	mdesc ila_m if _mi_m==0 & (inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.)) 
+	mdesc ila_m if _mi_m==1 & (inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.))  // Cheking we do not have "incompleted" values in monetary labor income after imputation
+	* Check: Da ok! Se imputaron todos los missing a imputar
+	
+	gen imp_id=_mi_m // Para que se conserve esta variable luego
+	*mi unset // Borramos cosas que se generan de la imputación:
 	char _dta[_mi_style] 
 	char _dta[_mi_marker] 
 	char _dta[_mi_M] 
@@ -129,7 +136,10 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	drop _mi_id _mi_miss _mi_m
 
 	drop if imp_id==0 // Droppea la variable sin imputar
-	collapse (mean) ila_m, by(id com)
+	collapse (mean) ila_m, by(interview__key interview__id quest com) // da lo mismo usando by(id com)
+	
+	* Chequear que el número de obs. sea el mismo que en la base original
+	
 	rename ila_m ila_m_imp1
 	save "$pathout\VEN_ila_m_imp1.dta", replace
 
@@ -140,14 +150,14 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 
 use "$path\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 id com using "$path\VEN_ila_m_imp1.dta"
+merge 1:1 interview__key interview__id quest com using "$path\VEN_ila_m_imp1.dta" // da lo mismo usando id com
 
 foreach x of varlist ila_m {
 gen log_`x'=ln(`x')
 gen log_`x'_imp1=ln(`x'_imp1)
 }
 
-cd "$pathoutexcel"
+cd "$pathoutexcel\income_imp"
 *** Comparing not imputed vs. imputed monetary labor income distribution
 foreach x in ila_m {
 twoway (kdensity log_`x' if `x'>0 & ocup_o_rtarecibenilamon==1, lcolor(blue) bw(0.45)) ///

@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -3691,8 +3691,6 @@ iasalp_m: ingreso monetario laboral de la actividad principal si es asalariado
 ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propia */
 
 
-**Note: We are still missing the exchange rates, but when we have them we should change everything into bolívares following the daily rates.
-
 *****  i)  PATRÓN
 	* Monetario	
 	* Ingreso monetario laboral de la actividad principal si es patrón
@@ -3724,6 +3722,15 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	gen iolp_nm = ingresoslab_bene if relab==4
 
 	
+***** iv) AGREGADO POR NOSOTROS: relab=. pero ganan dinero
+		// (como se les pregunta el dinero que ganan con base anual, 
+		//por lo que puede haber gente no ocupada -medido en la última semana- que gana ingreso laboral)
+
+	gen irelabmisspr_m = ingresoslab_mon if inlist(relab,.,5) & ingresoslab_mon!=.
+	
+	gen irelabmisspr_nm = ingresoslab_bene if inlist(relab,.,5) & ingresoslab_mon!=.
+
+	
 ****** 9.2. SECONDARY LABOR INCOME ******
 *The survey does not differenciate between both
 
@@ -3732,13 +3739,14 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	gen     iasalnp_m = .
 	gen     ictapnp_m = .
 	gen     iolnp_m=.
-
+	*gen 	irelabmissnp_m=.
+	
 	* Non-monetary
 	gen     ipatrnp_nm = .
 	gen     iasalnp_nm = .
 	gen     ictapnp_nm = .
 	gen     iolnp_nm = .
-
+	*gen 	irelabmissnp_nm=.
 
 		
 ********** B. NON-LABOR INCOME **********
@@ -4054,7 +4062,7 @@ capture label drop nivel
 	gen `uno' = 1
 	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
 
-include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_1_variables.do"
+include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 
 /* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
 		1 = Propia pagada		
@@ -4070,7 +4078,7 @@ include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_1_
 		
 		*Obs: Before there were options saying "De algun programa de gobierno (con titulo de propiedad)" and "De algun programa de gobierno (sin titulo de propiedad)"
 */
-stop
+
 gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
 replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
 bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
@@ -4135,7 +4143,7 @@ replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //com
 *replace renta_imp = renta_imp / p_reg
 *replace renta_imp = renta_imp / ipc_rel 
 
-include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
+include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
 * El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
 include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
@@ -4168,12 +4176,12 @@ sort id com
 /* 
 order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
+interview_month interview__id interview__key quest labor_status miembros relab s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
 */
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
+interview_month interview__id interview__key quest labor_status miembros relab s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
 *save "$dataout\ENCOVI_2019.dta", replace

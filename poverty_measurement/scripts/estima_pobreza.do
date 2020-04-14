@@ -80,12 +80,12 @@ gen le_new = $costodiario * 30.42
 gen lp_new = $orsh* le_new //	 $orsh
 
 // gen international lines
-gen lp19 = 1.9 *30.42 * 2.92 * (76555.93+1) * (1914.12+1) /100000
-gen lp32 = 3.2 *30.42 * 2.92 * (76555.93+1) * (1914.12+1) /100000
-gen lp55 = 5.5 *30.42 * 2.92 * (76555.93+1) * (1914.12+1) /100000
+gen lp19 = 1.9 *30.42 * 2.92/100000 * 747304733.8
+gen lp32 = 3.2 *30.42 * 2.92/100000  * 747304733.8
+gen lp55 = 5.5 *30.42 * 2.92/100000  * 747304733.8
 
 // gen last national oficial lines corrected by inflation
-gen le_ofi = 1560/5.2* (76555.93+1) * (1914.12+1) /100000
+gen le_ofi = 1600/5.2/100000* 747304733.8
 gen lp_ofi = le_ofi*2 //2 is the official orshansky of venezuela pov. estimates
 
 // clasificates population using diff lines

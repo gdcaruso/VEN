@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -34,7 +34,7 @@ Note:
 		}
 	    if $lauta {
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-				global dataout 	"C:\Users\wb563365\GitHub\VEN"
+				global dataout 	"C:\Users\wb563365\GitHub\VEN\data_management\output\cleaned"
 				//"C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
 		}
 		if $trini   {
@@ -119,7 +119,7 @@ local vr       "01"     // version renta
 			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses "1 2 3 4 10 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march, 4=april
 			
-			use "$rootpath\data_management\management\1. merging\exchange rates\TC_cierre_provisorio.dta", clear
+			use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
 			
 // if we consider that incomes are earned one month previous to data collection use this			
 			destring mes, replace
@@ -4089,7 +4089,7 @@ keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI
 interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
-*save "$dataout\ENCOVI_2019.dta", replace
+save "$dataout\ENCOVI_2019.dta", replace
 *save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
 *save "$dataout\ENCOVI_2019_PRECIOS IMPLICITOS.dta_lag_ingresos.dta", replace
-save "$dataout\ENCOVI_2019_Asamblea Nacional.dta", replace
+*save "$dataout\ENCOVI_2019_Asamblea Nacional.dta", replace

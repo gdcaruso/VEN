@@ -263,7 +263,7 @@ use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 	 
 *** 3. Dicen que son jubilados o pensionados pero después missing si cobran jubilación/pensión, y el monto // Person retired/pensioned (inactive) but doesn't report if receives retirement/pension (nor amount)
 	
-	* Jubilado
+	* Jubilado o pensionado
 	gen jubi_pens = .
 	replace jubi_pens = 1 if actividades_inactivos==6
 	replace jubi_pens = 0 if (ocupado==1 | busco_trabajo==1 | empezo_negocio==1 | inlist(actividades_inactivos,1,2,3,4,7,8,9,10,11) | edad<10)
@@ -321,7 +321,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	display `jubi_norta_sirecibejubi' 
 	display `aimputar_jubipen'
 		*Universo:
-		gen jubi_o_rtarecibejubi = 1 if (recibe_ingresopenjub==1 | jubi_pens==1)
+		gen jubi_o_rtarecibejubi = 1 if (inlist(recibe_ingresopenjub,1,2,3) | jubi_pens==1)
 
 /*	
 //*** Descriptive Stats ***//
@@ -336,119 +336,189 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 
 
 
-** NO PUDE HACER EL EXCEL BIEN!
+********************************************************************************
+*** Counting missing values and real zeros in 2019
+********************************************************************************
 
-//*** Trini's Notation ***//
-
-	clonevar linc_m = ingresoslab_mon // value labor income (monetary)
+* Notación Trini
+clonevar linc_m = ingresoslab_mon // value labor income (monetary)
 	clonevar linc_nm = ingresoslab_bene // value of labor income (non monetary)
 	clonevar linc = ila // value labor income
 	clonevar dlinc = ila_dummy
 	clonevar jubpen = ijubi_aux
 	clonevar djubpen = ijubpen_dummy
+
 	
-* Missing values - modificado para 2019
-	* Ila monetario:
-	gen dlinc_zero=(ila==0 | recibe_ingresolab_mon==0)
-		label def dlinc_zero 1 "Real zeros (answered 0 or said didn't receive ila)"
-		label values dlinc_zero dlinc_zero
-	gen dlinc_miss1=(ocup_norta_sirecibeila==1)
-		label def dlinc_miss1 1 "Occupied, but didn't answer if received ila"
-		label values dlinc_miss1 dlinc_miss1
-	gen dlinc_miss2=(report_inglabmon_nocuanto==1) 
-		label def dlinc_miss2 1 "Said received monetary ila, but amount missing"
-		label values dlinc_miss2 dlinc_miss2
-	gen dlinc_miss3=(aimputar_ila_mon==1)
-		label def dlinc_miss3 1 "Total missing (sum both cases)"
-		label values dlinc_miss3 dlinc_miss3
-	* Pensions:
-	gen djubpen_zero=(ila==0 | recibe_ingresopenjub==0)
-		label def djubpen_zero 1 "Real zeros (answered 0 or said didn't receive pension)"
-		label values djubpen_zero djubpen_zero
-	gen djubpen_miss1=(jubi_norta_sirecibejubi==1)
-		label def djubpen_miss1 1 "Jubilado/Pensionado, but didn't answer if received pension"
-		label values djubpen_miss1 djubpen_miss1
-	gen djubpen_miss2=(report_pensjub_nocuanto==1) 
-		label def djubpen_miss2 1 "Said received pension, but amount missing"
-		label values djubpen_miss2 djubpen_miss2
-	gen djubpen_miss3=(aimputar_jubipen==1)
-		label def djubpen_miss3 1 "Total missing (sum both cases)"
-		label values djubpen_miss3 djubpen_miss3
-	
-	/*
-	sum dlinc_zero if dlinc_zero==1
-	sum dlinc_miss1 if dlinc_miss1==1
-	sum dlinc_miss2 if dlinc_miss2==1
-	sum dlinc_miss3 if dlinc_miss3==1
-	*/
-
-
-********************************************************************************
-*** Counting missing values and real zeros in 2019
-********************************************************************************
-
 *** Labor income
+		
+	foreach x in ila_m {
 
-foreach x in linc{
-** Real zeros (answered 0 or said didn't receive income)
-sum d`x'_zero
-local a0=r(sum)
-** Missing values: Occupied, but didn't answer if received ila
-sum d`x'_miss1
-local a1=r(sum)
-** Missing values: said received monetary ila, but amount missing
-sum d`x'_miss2
-local a2=r(sum)
-** Missing values: Total missing (sum both cases)
-sum d`x'_miss3
-local a3=r(sum)
-** Non-zero values
-sum `x' if `x'>0 & `x'!=. & dlinc==1
-local a4=r(N)
-** Total employed, or receive ila mon
-sum ocup_o_rtarecibenilamon  if ocup_o_rtarecibenilamon==1
-local a5=r(N)
-*Creating matrix
-	matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
-	*Percentage
-	matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
-	matrix a=nullmat(a), aux1, aux2
-}
+	** Real zeros:
+	gen d`x'_zero=(ila==0 | recibe_ingresolab_mon==0)
+			label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive ila)"
+			label values d`x'_zero d`x'_zero
+	sum d`x'_zero
+	local a0=r(sum)
 
-*** Pensions
-local i=1
-foreach x in jubpen {
-** Zeros (answered 0 or said didn't receive pension)
-sum d`x'_zero
-local a0=r(sum)
-** Missing values: Those who replied they do not know if they received pensions
-sum d`x'_miss1
-local a1=r(sum)
-** Missing values: Those who replied they received pensions but they did not declare the amount
-sum d`x'_miss2
-local a2=r(sum)
-** Total missing values
-sum d`x'_miss3
-local a3=r(sum)
-** Non-zero values
-sum `x' if `x'>0 & `x'!=. & djubpen==1
-local a4=r(N)
-** All pensioners and retired, or receive pension/retirement ben.
-sum jubi_o_rtarecibejubi if jubi_o_rtarecibejubi==1
-local a5=r(N)
-matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
-matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
-matrix a`i'=nullmat(a`i'), aux1, aux2
-}
+	** Missing values: 
+	gen d`x'_miss1=(report_inglabmon_nocuanto==1) 
+			label def d`x'_miss1 1 "Said received monetary ila, but amount missing"
+			label values d`x'_miss1 d`x'_miss1
+	sum d`x'_miss1
+	local a1=r(sum)
+
+	** Missing values:
+	gen d`x'_miss2=(ocup_norta_sirecibeila==1)
+			label def d`x'_miss2 1 "Occupied, but didn't answer if received ila"
+			label values d`x'_miss2 d`x'_miss2
+	sum d`x'_miss2
+	local a2=r(sum)
+
+	** Missing values:
+	gen d`x'_miss3=(aimputar_ila_mon==1)
+			label def d`x'_miss3 1 "Total missing (sum both cases)"
+			label values d`x'_miss3 d`x'_miss3
+	sum d`x'_miss3
+	local a3=r(sum)
+
+	** Non-zero values
+	sum `x' if `x'>0 & `x'!=. & dlinc==1
+	local a4=r(N)
+
+	** Total employed, or receive ila mon
+	sum ocup_o_rtarecibenilamon  if ocup_o_rtarecibenilamon==1
+	local a5=r(N)
+
+	*Creating matrix
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
+		*Percentage
+		matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
+		matrix a=nullmat(a), aux1, aux2
+	}
+
+*** Monetary non-labor income: Pensions
+
+	local i=1
+	foreach x in jubpen {
+			
+	** Real zeros:
+	gen d`x'_zero=( (recibe_ingresopenjub==0 & jubi_pens==1) | (inlist(recibe_ingresopenjub,1,2,3) & ijubi_aux==0))
+			label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive pension)"
+			label values d`x'_zero d`x'_zero
+	sum d`x'_zero
+	local a0=r(sum)
+
+	** Missing values:
+	gen d`x'_miss1=(report_pensjub_nocuanto==1) 
+			label def d`x'_miss1 1 "Said received pension, but amount missing"
+			label values d`x'_miss1 d`x'_miss1
+	sum d`x'_miss1
+	local a1=r(sum)
+
+	** Missing values:
+	gen d`x'_miss2=(jubi_norta_sirecibejubi==1)
+			label def d`x'_miss2 1 "Jubilado/Pensionado, but didn't answer if received pension"
+			label values d`x'_miss2 d`x'_miss2
+	sum d`x'_miss2
+	local a2=r(sum)
+
+	** Total missing values
+	gen d`x'_miss3=(aimputar_jubipen==1)
+			label def d`x'_miss3 1 "Total missing (sum both cases)"
+			label values d`x'_miss3 d`x'_miss3
+	sum d`x'_miss3
+	local a3=r(sum)
+
+	** Non-zero values
+	sum `x' if `x'>0 & `x'!=. & djubpen==1
+	local a4=r(N)
+
+	** All pensioners and retired, or receive pension/retirement benefits
+	sum jubi_o_rtarecibejubi if jubi_o_rtarecibejubi==1
+	local a5=r(N)
+
+	*Creating matrix
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
+		matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
+		matrix a`i'=nullmat(a`i'), aux1, aux2
+	}
+
+*** Non-monetary labor income
+	local i=2
+	foreach x in bene {
+
+	** Zeros: answered 0 or said didn't receive non-monetary labor income
+	gen d`x'_zero=1 if (recibe_ingresolab_nomon==0 | ingresoslab_bene==0)
+		label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive non-monetary labor income)"
+		label values d`x'_zero d`x'_zero
+	sum d`x'_zero
+	local a0=r(sum)
+
+	** Missing values: 
+	gen d`x'_miss1=(report_inglabnomon_nocuanto==1) 
+			label def d`x'_miss1 1 "Said received non-monetary ila, but amount missing"
+			label values d`x'_miss1 d`x'_miss1
+	sum d`x'_miss1
+	local a1=r(sum)
+
+	** Non-zero values
+	sum ingresoslab_`x' if ingresoslab_`x'>0 & ingresoslab_`x'!=. & recibe_ingresolab_nomon==1
+	local a2=r(N)
+
+	** All receiving non-monetary labor income
+	sum recibe_ingresolab_nomon if recibe_ingresolab_nomon==1
+	local a3=r(N)
+
+	*Creating matrix
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' )
+		matrix aux2=((`a0'/`a3')\(`a1'/`a3')\(`a2'/`a3')\(`a3'/`a3'))*100
+		matrix a`i'=nullmat(a`i'), aux1, aux2
+	}
+
+*** Monetary non-labor income (all except pensions)
+	local i=3
+	foreach x in inla {
+
+	** Zeros: answered 0 or said didn't receive monetary non-labor income
+	gen d`x'_zero=1 if recibe_ingresonolab_mes==0 | (recibe_ingresonolab_mes==1 & inla_aux==0)
+		label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive monetary non-labor income other than pensions)"
+		label values d`x'_zero d`x'_zero
+	sum d`x'_zero
+	local a0=r(sum)
+
+	** Missing values: 
+	gen d`x'_miss1=(report_ingnolab_nocuanto==1) 
+			label def d`x'_miss1 1 "Said received monetary non-labor income, but amount missing"
+			label values d`x'_miss1 d`x'_miss1
+	sum d`x'_miss1
+	local a1=r(sum)
+
+	** Non-zero values
+	sum `x'_aux if `x'_aux>0 & `x'_aux!=. & inlist(recibe_ingresonolab,1,2,3)
+	local a2=r(N)
+
+	** All receiving non-monetary labor income
+	sum recibe_ingresonolab if inlist(recibe_ingresonolab,1,2,3)
+	local a3=r(N)
+
+	*Creating matrix
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' )
+		matrix aux2=((`a0'/`a3')\(`a1'/`a3')\(`a2'/`a3')\(`a3'/`a3'))*100
+		matrix a`i'=nullmat(a`i'), aux1, aux2
+	}
 
 local row=4
 putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA.xlsx", sheet("missing_values") modify
 putexcel B`row'=matrix(a)
 local row= `row' + rowsof(a)+4
 putexcel B`row'=matrix(a1)
-local row= `row' + rowsof(a1)+4
+local row= `row' + rowsof(a1)+4	
+putexcel B`row'=matrix(a2)
+local row= `row' + rowsof(a2)+4
+putexcel B`row'=matrix(a3)
+local row= `row' + rowsof(a3)+4
 
-matrix drop aux1 aux2 a a1
+matrix drop aux1 aux2 a a1 a2 a3
 
 
 *****************************************************************
@@ -492,7 +562,7 @@ matrix drop aux1 aux2 a a1
 
 	global vars_mineq 	edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
 					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
-					seguro_salud afiliado_segsalud_comp /*quien_pagosegsalud*/ ///
+					/*seguro_salud*/ afiliado_segsalud_comp /*quien_pagosegsalud*/ ///
 					nivel_educ asiste_o_dejoypq ///
 					tarea sector_encuesta categ_ocu total_hrtr ///
 					c_sso c_rpv c_spf c_aca c_sps c_otro ///
@@ -512,7 +582,7 @@ matrix drop aux1 aux2 a a1
 	
 	global vars_mineq_sinmis 	edad_sinmis	edad2_sinmis  agegroup_sinmis hombre_sinmis relacion_comp_sinmis miembros_sinmis estado_civil_sinmis region_est1_sinmis municipio_sinmis 	///
 								tipo_vivienda_hh_sinmis propieta_hh_sinmis auto_hh_sinmis anio_auto_hh_sinmis heladera_hh_sinmis lavarropas_hh_sinmis computadora_hh_sinmis	internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
-								seguro_salud_sinmis afiliado_segsalud_comp_sinmis /*quien_pagosegsalud_sinmis*/ ///
+								/*seguro_salud_sinmis*/ afiliado_segsalud_comp_sinmis /*quien_pagosegsalud_sinmis*/ ///
 								nivel_educ_sinmis asiste_o_dejoypq_sinmis ///
 								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
 								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///

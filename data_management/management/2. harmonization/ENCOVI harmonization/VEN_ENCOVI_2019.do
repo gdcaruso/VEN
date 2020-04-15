@@ -90,7 +90,7 @@ local vr       "01"     // version renta
 				sum indice if mes==`j' & ano==2019
 				local indice`j' = r(mean) 			
 				}
-			forvalues j = 1(1)3 {
+			forvalues j = 1(1)4 {
 				sum indice if mes==`j' & ano==2020
 				display r(mean)
 				local indice`j' = r(mean)				
@@ -104,7 +104,7 @@ local vr       "01"     // version renta
 			local deflactor1 `indice2'/`indice12'
 			local deflactor2 `indice2'/`indice1'
 			local deflactor3 `indice2'/`indice2'
-
+			local deflactor4 `indice2'/`indice3'
 				
 // // if we consider that incomes are earned in the same month than the survey is collected use this
 // 			local deflactor11 `indice2'/`indice11'
@@ -112,6 +112,7 @@ local vr       "01"     // version renta
 // 			local deflactor1 `indice2'/`indice1'
 // 			local deflactor2 `indice2'/`indice2'
 // 			local deflactor3 `indice2'/`indice3'
+//			local deflactor4 `indice2'/`indice3'
 
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
@@ -125,8 +126,8 @@ local vr       "01"     // version renta
 			destring mes, replace
 			foreach i of local monedas {
 				foreach j of local meses {
-					sum mean_moneda	if moneda==`i' & mes==`j'
-					local k `j-1'
+					sum mean_moneda	if moneda==`i' & mes==`j' // if we pick ex rate of month=2
+ 					local k `j+1' // we impute it to month 3
 					local tc`i'mes`k' = r(mean)
 					display `tc`i'mes`k''
 					}
@@ -3690,8 +3691,6 @@ iasalp_m: ingreso monetario laboral de la actividad principal si es asalariado
 ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propia */
 
 
-**Note: We are still missing the exchange rates, but when we have them we should change everything into bolívares following the daily rates.
-
 *****  i)  PATRÓN
 	* Monetario	
 	* Ingreso monetario laboral de la actividad principal si es patrón
@@ -3723,6 +3722,15 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	gen iolp_nm = ingresoslab_bene if relab==4
 
 	
+***** iv) AGREGADO POR NOSOTROS: relab=. pero ganan dinero
+		// (como se les pregunta el dinero que ganan con base anual, 
+		//por lo que puede haber gente no ocupada -medido en la última semana- que gana ingreso laboral)
+
+	gen irelabmisspr_m = ingresoslab_mon if inlist(relab,.,5) & ingresoslab_mon!=.
+	
+	gen irelabmisspr_nm = ingresoslab_bene if inlist(relab,.,5) & ingresoslab_mon!=.
+
+	
 ****** 9.2. SECONDARY LABOR INCOME ******
 *The survey does not differenciate between both
 
@@ -3731,13 +3739,14 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	gen     iasalnp_m = .
 	gen     ictapnp_m = .
 	gen     iolnp_m=.
-
+	*gen 	irelabmissnp_m=.
+	
 	* Non-monetary
 	gen     ipatrnp_nm = .
 	gen     iasalnp_nm = .
 	gen     ictapnp_nm = .
 	gen     iolnp_nm = .
-
+	*gen 	irelabmissnp_nm=.
 
 		
 ********** B. NON-LABOR INCOME **********
@@ -4053,7 +4062,7 @@ capture label drop nivel
 	gen `uno' = 1
 	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
 
-include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_1_variables.do"
+include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 
 /* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
 		1 = Propia pagada		
@@ -4070,17 +4079,71 @@ include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_1_
 		*Obs: Before there were options saying "De algun programa de gobierno (con titulo de propiedad)" and "De algun programa de gobierno (sin titulo de propiedad)"
 */
 
-gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6
-replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=7 & tenencia_vivienda<=10) | tenencia_vivienda==.
+gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
+replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
 bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
 
+
+// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 gen     renta_imp = .
-replace renta_imp = 0.10*itf_sin_ri  if  propieta_no_paga == 1
+
+
+levelsof interview_month, local(rent_month)
+foreach m in `rent_month'{
+    levelsof renta_imp_mon, local(rent_currency)
+
+	foreach c in `rent_currency'{
+
+	di "////"
+	di `m'
+	di `c'
+	di  `tc`c'mes`m''
+	di `deflactor`m''
+	replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
+	}
+}
+
+// tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated   
+//
+//       7. Para su hogar, la vivienda es? |      Freq.     Percent        Cum.
+// ----------------------------------------+-----------------------------------
+//                           Propia pagada |        252       11.91       11.91
+//                        Propia pagándose |         62        2.93       14.84
+//                               Alquilada |        420       19.85       34.69
+//          Alquilada parte de la vivienda |         14        0.66       35.35
+// Adjudicada pagándose Gran Misión Vivien |         23        1.09       36.44
+//         Adjudicada Gran Misión Vivienda |         10        0.47       36.91
+//           Cedida por razones de trabajo |         33        1.56       38.47
+//           Prestada por familiar o amigo |        895       42.30       80.77
+//                                  Tomada |        181        8.55       89.32
+//                                    Otra |        226       10.68      100.00
+// ----------------------------------------+-----------------------------------
+//                                   Total |      2,116      100.00
+gen renta_imp_b = itf_sin_ri*0.1
+
+// twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny) ///
+// || line renta_imp renta_imp if renta_imp<10000000 & renta_imp_b<10000000
+
+// gen test_renta = renta_imp>renta_imp_b
+// tab test_renta
+//  test_renta |      Freq.     Percent        Cum.
+// ------------+-----------------------------------
+//           0 |      1,021        3.20        3.20
+//           1 |     30,927       96.80      100.00
+// ------------+-----------------------------------
+//       Total |     31,948      100.00
+
+
+
+
+
+ 
+replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //complete with 10% in cases where no guess is provided by hh.
 
 *replace renta_imp = renta_imp / p_reg
 *replace renta_imp = renta_imp / ipc_rel 
 
-include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
+include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
 * El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
 include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
@@ -4090,8 +4153,8 @@ include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonizat
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------------
 ************************************************************************************************************************************************)*/	
-gen linea_pobreza = 4389986 // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
-gen linea_pobreza_extrema = 2194993  // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
+gen linea_pobreza = . // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
+gen linea_pobreza_extrema = .  // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
 
 gen pobre = ipcf<linea_pobreza
 gen pobre_extremo = ipcf<linea_pobreza_extrema
@@ -4113,12 +4176,12 @@ sort id com
 /* 
 order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
+interview_month interview__id interview__key quest labor_status miembros relab s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
 */
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-interview_month interview__id interview__key quest labor_status miembros s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
+interview_month interview__id interview__key quest labor_status miembros relab s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
 *save "$dataout\ENCOVI_2019.dta", replace

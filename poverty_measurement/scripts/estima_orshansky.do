@@ -19,36 +19,36 @@ Note:
 ********************************************************************************
 
 
-// Define rootpath according to user
-
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta   0
-		
-		* User 3: Lautaro
-		global lauta2   1
-		
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath ""
-		}
-	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\GitHub\VEN"
-		}
-
-// set raw data path
-global merged "$rootpath\data_management\output\merged"
-global cleaned "$rootpath\data_management\output\cleaned"
-global input "$rootpath\poverty_measurement\input"
-global output "$rootpath\poverty_measurement\output"
+// // Define rootpath according to user
+//
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta2   1
+//		
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath ""
+// 		}
+// 	    if $lauta2 {
+// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 		}
+//
+// // set raw data path
+// global merged "$rootpath\data_management\output\merged"
+// global cleaned "$rootpath\data_management\output\cleaned"
+// global input "$rootpath\poverty_measurement\input"
+// global output "$rootpath\poverty_measurement\output"
 
 
 *
@@ -67,19 +67,37 @@ set more off
 /*(************************************************************************************************************************************************* 
 * 1: sets population of reference
 *************************************************************************************************************************************************)*/
+
+// we dont want to be misleaded by imputed income, so we remove this households
+import excel "$input\imputacion_ingreso_lista_hh.xlsx", firstrow clear
+keep interview__key interview__id quest
+bys interview__key interview__id quest: keep if _n==1
+replace quest = "1" if quest == "Tradicional - Viejo"
+replace quest = "2" if quest == "Tradicional - Nuevo"
+replace quest = "3" if quest == "Remoto"
+destring quest, replace
+
+
+tempfile imputedhh
+save `imputedhh'
+
+
 // import data of pop of reference
 use "$output/pob_referencia.dta", replace
-tempfile reference
-replace ipcf = round(ipcf)
-save `reference'
 
 
 // // to test on all pop
 // use "$cleaned/ENCOVI_2019.dta", replace
 // collapse (max) ipcf (max)miembros, by(interview__id interview__key quest)
-// tempfile reference
-// replace ipcf = round(ipcf)
-// save `reference'
+
+// remove hh with imputed income
+merge 1:1 interview__id interview__key quest using `imputedhh'
+drop if _merge!=1
+drop _merge
+tempfile reference
+replace ipcf = round(ipcf)
+save `reference'
+
 
 
 /*(************************************************************************************************************************************************* 
@@ -179,8 +197,8 @@ replace current_good = 1 if inlist(type_good,1,2,3,4,6,7)
 replace current_good = 0 if type_good==5 //bienes durables (TV, plancha)
 drop if current_good !=1
 
-
-keep if type_good == 1
+// //only food
+// keep if type_good == 1
 
 
 // d) define date of purchases
@@ -310,6 +328,8 @@ we convert all expenditures to montly equivalent multiplying or dividing each ty
 
 //genera gasto mensualizado
 gen gasto_mensual = gasto_feb20* 30.42/7 if type_good==1
+// gen gasto_mensual = gasto_feb20* 30.42/15 if type_good==1
+
 replace gasto_mensual = gasto_feb20* 30.42/7 if type_good==2
 replace gasto_mensual = gasto_feb20* 30.42/15 if type_good==3
 replace gasto_mensual = gasto_feb20/3 if type_good==4
@@ -317,9 +337,8 @@ replace gasto_mensual = gasto_feb20* 30.42/7 if type_good==5
 replace gasto_mensual = gasto_feb20* 30.42/15 if type_good==6
 replace gasto_mensual = round(gasto_mensual)
 
-
-
-
+// // genera gasto mensual raw, sin multiplicadores de frecuencia de consumos
+// gen gasto_mensual = gasto_feb20
 
 
 tempfile conSpending
@@ -341,7 +360,7 @@ graph box keynes, noout
 tab superavit
 codebook ingfam
 
-stop
+
 
 /*(************************************************************************************************************************************************* 
 * // HH section  (wide shape) 

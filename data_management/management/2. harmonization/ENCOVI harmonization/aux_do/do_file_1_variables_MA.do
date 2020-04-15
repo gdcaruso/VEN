@@ -1,4 +1,5 @@
 
+
 /*=========================================================================================================================================================================
 								2: Preparacion de los datos: Variables de segundo orden
 ==========================================================================================================================================================================*/
@@ -132,13 +133,17 @@ replace ictapp = .		if  ictapp==0 & relab!=3
 egen    iolp = rsum(iolp_m iolp_nm), missing
 replace iolp = .		if  iolp==0
 
+* Male Acuña: vamos a agregar a aquellos que relab=. o relab=5 pero ganan dinero 
+	// (como se les pregunta el dinero que ganan con base anual, por lo que puede haber gente no ocupada -medido en la última semana- que gana ingreso laboral)
+egen irelabmiss = rsum(irelabmisspr_m irelabmisspr_nm), missing
+
 
 * Ingreso en la Actividad Principal 
-egen    ip = rsum(ipatrp iasalp ictapp iolp), missing
+egen    ip = rsum(ipatrp iasalp ictapp iolp irelabmiss), missing
 replace ip = 0			if  ip<0
 replace ip = 0			if  relab==4 & ip==.
 
-egen    ip_m = rsum(ipatrp_m iasalp_m ictapp_m iolp_m), missing
+egen    ip_m = rsum(ipatrp_m iasalp_m ictapp_m iolp_m irelabmisspr_m), missing
 replace ip_m = 0		if  ip_m<0
 replace ip_m = 0		if  relab==4 & ip_m==.
 
@@ -167,17 +172,18 @@ replace ictapnp = .		if  ictapnp==0
 egen    iolnp = rsum(iolnp_m iolnp_nm), missing
 replace iolnp = .		if  iolnp==0
 
+* Male Acuña: acá no tenemos nada que agregar de irelabmiss
 
 * Ingreso en la Actividad no Principal 
 egen    inp = rsum(ipatrnp iasalnp ictapnp iolnp), missing
 replace inp = .			if  inp==0
 replace inp = 0			if  inp<0
-replace inp = 0			if (relab_s==4 | relab_o==4) & inp==.
+*replace inp = 0			if (relab_s==4 | relab_o==4) & inp==.
 
 egen    inp_m = rsum(ipatrnp_m iasalnp_m ictapnp_m iolnp_m), missing
 replace inp_m = .		if  inp_m==0
 replace inp_m = 0		if  inp_m<0
-replace inp_m = 0		if (relab_s==4 | relab_o==4) & inp_m==.
+*replace inp_m = 0		if (relab_s==4 | relab_o==4) & inp_m==.
 
 
 ******************** INGRESOS LABORALES TOTALES
@@ -193,12 +199,16 @@ egen iasal_m = rsum(iasalp_m iasalnp_m), missing
 egen ictap   = rsum(ictapp   ictapnp), missing
 egen ictap_m = rsum(ictapp_m ictapnp_m), missing
 
+* Male Acuña: vamos a agregar a aquellos que relab=. o relab=5 pero ganan dinero 
+	// (como se les pregunta el dinero que ganan con base anual, por lo que puede haber gente no ocupada -medido en la última semana- que gana ingreso laboral)
+* irelabmiss de nuevo, ya que no está definido para act. no principal
+
 * Ingreso Laboral Total
-egen    ila = rsum(ipatr   iasal   ictap   iolp   iolnp), missing
+egen    ila = rsum(ipatr   iasal   ictap   iolp   iolnp irelabmiss), missing
 replace ila = 0			if  ila<0
 *replace ila = 0		if  ila==. & relab==4
 
-egen    ila_m = rsum(ipatr_m iasal_m ictap_m iolp_m iolnp_m), missing
+egen    ila_m = rsum(ipatr_m iasal_m ictap_m iolp_m iolnp_m irelabmisspr_m), missing
 replace ila_m = 0		if  ila_m<0	
 
 * Salario Horario en todas las Ocupaciones

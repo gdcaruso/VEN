@@ -229,8 +229,8 @@ use "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 			
 *** 2. Dicen que trabajan pero después missing si cobran ila, y el monto // Person occupied but doesn't report if receives labor income (nor amount)
 			
-	* Ingreso
-	gen ila_dummy=.
+	* Ingreso laboral
+	gen 	ila_dummy=.
 	replace ila_dummy=1 if ila>0 & ila!=. & ila!=.a // reports income amount
 	replace ila_dummy=0 if ila==0 // real zero
 	tab ila_dummy ocupado, mi // In 4,745 cases people say they are employed but do not report any labor income, however they might be answering they don't earn any
@@ -238,17 +238,19 @@ use "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 		gen recibe_ingresolab = 1 if (inlist(recibe_ingresolab_mon,1,2,3) | recibe_ingresolab_nomon==1)
 		tab ila_dummy recibe_ingresolab, mi // OK: no hay casos donde reporten un monto de ingresos pero no reportaron recibir ingreso
 	
-	* No responde si gana ingreso laboral
+	* No responde si gana ingreso laboral MONETARIO
 	gen 	norta_sirecibeila = .
-	replace norta_sirecibeila = 1 if (recibe_ingresolab_mon==. & recibe_ingresolab_nomon==.) 
-	replace norta_sirecibeila = 1 if (recibe_ingresolab_mon == 0 & recibe_ingresolab_nomon==.) 
-	replace norta_sirecibeila = 1 if (recibe_ingresolab_mon == . & recibe_ingresolab_nomon==0)
-		// Dejamos afuera (.) casos donde contestan que no ganan ila monetario ni no monetario (ambos ==0), y casos donde dicen que ganan pero no reportan cuánto (alguno ==1, ya contemplado en 1.a y 1.b)
+	replace norta_sirecibeila = 1 if recibe_ingresolab_mon==. // & inlist(recibe_ingresolab_nomon,0,.) 
+		// Silencio el final porque había 2 casos de gente que reportó haber recibido ingreso laboral no monetario pero no contestó sobre el monetario, en esos casos solo les vamos a imputar no monetario.
+		
+		* NO AGREGAR: replace norta_sirecibeila = 1 if (recibe_ingresolab_mon==0 & recibe_ingresolab_nomon==.) 
+		// Dejamos afuera (norta_sirecibeila==.) casos donde contestan que no ganan ila monetario ni no monetario (ambos ==0), o donde contestan que no ganan ila monetario pero no contestan sobre el ila no monetario
+		// y casos donde dicen que ganan pero no reportan cuánto (alguno ==1, ya contemplado en 1.a y 1.b)
 	
 	*Identifico valores a imputar
 	gen 	ocup_norta_sirecibeila = .
 	*replace ocup_noreportaila = 0 if inlist(ila_dummy,1,0) & ocupado==1
-	replace ocup_norta_sirecibeila = 1 if ila_dummy==. & ocupado==1 & norta_sirecibeila == 1
+	replace ocup_norta_sirecibeila = 1 if ila_dummy==. & ocupado==1 & norta_sirecibeila==1
 		label def ocup_norta_sirecibeila 	1 "No contestan si ganan ila, pero ocupados" 
 		label values ocup_norta_sirecibeila ocup_norta_sirecibeila
 		
@@ -308,7 +310,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 		display `ocup_norta_sirecibeila' 
 		display `aimputar_ila_mon'
 		*Universo:
-		gen ocup_o_rtarecibenilamon = 1 if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1 )
+		gen ocup_o_rtarecibenilamon = 1 if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1 ) 
 	
 	* Non-monetary ila (no jubi)
 	display `report_inglabnomon_nocuanto'
@@ -341,10 +343,10 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 ********************************************************************************
 
 * Notación Trini
-clonevar linc_m = ingresoslab_mon // value labor income (monetary)
-	clonevar linc_nm = ingresoslab_bene // value of labor income (non monetary)
-	clonevar linc = ila // value labor income
-	clonevar dlinc = ila_dummy
+	*clonevar linc_m = ingresoslab_mon // value labor income (monetary)
+	*clonevar linc_nm = ingresoslab_bene // value of labor income (non monetary)
+	*clonevar linc = ila // value labor income
+	*clonevar dlinc = ila_dummy
 	clonevar jubpen = ijubi_aux
 	clonevar djubpen = ijubpen_dummy
 
@@ -382,7 +384,7 @@ clonevar linc_m = ingresoslab_mon // value labor income (monetary)
 	local a3=r(sum)
 
 	** Non-zero values
-	sum `x' if `x'>0 & `x'!=. & dlinc==1
+	sum `x' if `x'>0 & `x'!=. & ila_dummy==1
 	local a4=r(N)
 
 	** Total employed, or receive ila mon
@@ -596,3 +598,34 @@ matrix drop aux1 aux2 a a1 a2 a3
 	* Jubilación/Pensión
 	
 save "$pathout\ENCOVI_forimputation_2019.dta", replace
+
+
+*****************************************************************
+*** POSSIBLE VARIABLES FOR REGRESSION 
+*****************************************************************
+
+keep if categ_ocu==6
+
+gen indep_inglabmon_mens = .
+	replace indep_inglabmon_mens = 1 	if s9q26a_bolfeb>=1 & s9q26a_bolfeb!=.
+	replace indep_inglabmon_mens = 0 	if s9q26a_bolfeb==.
+
+gen indep_pagoslabmon_mens = .
+	replace indep_pagoslabmon_mens = 1 	if s9q27_bolfeb>=1 & s9q27_bolfeb!=.
+	replace indep_pagoslabmon_mens = 0 	if s9q27_bolfeb==.
+
+gen indep_ingpagoslabmon_mens = 0 if indep_pagoslabmon_mens==. & indep_inglabmon_mens==.
+replace indep_ingpagoslabmon_mens = 1 if indep_pagoslabmon_mens==. & indep_inglabmon_mens==1
+replace indep_ingpagoslabmon_mens = 2 if indep_pagoslabmon_mens==1 & indep_inglabmon_mens==.
+replace indep_ingpagoslabmon_mens = 3 if indep_pagoslabmon_mens==1 & indep_inglabmon_mens==1
+label def indep_ingpagoslabmon_mens 	0 "Nada mensual" 1 "Solo ing mensual" 2 "Solo pago mensual" 3 "Pago e ing mensual"
+				label values indep_ingpagoslabmon_mens indep_ingpagoslabmon_mens
+			
+tab report_inglabmon_nocuanto indep_ingpagoslabmon_mens, mi
+			
+reg ila_m s9q26a_bolfeb if report_inglabmon_nocuanto==0 // analizo para los que tengo datos
+
+* Independientes: ingresos - pagos
+gen ingresoneto_mens_indep 	= cond(missing(s9q26a_bolfeb), ., s9q26a_bolfeb) - cond(missing(s9q27_bolfeb), 0, s9q27_bolfeb)
+	
+reg ila_m s9q26a_bolfeb if report_inglabmon_nocuanto==0 // analizo para los que tengo datos

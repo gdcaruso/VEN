@@ -22,10 +22,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -117,8 +117,8 @@ local vr       "01"     // version renta
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 			
-			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
-			local meses "1 2 3 4 10 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march, 4=april
+			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
+			local meses 1 2 3 4 10 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march, 4=april
 			
 			use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
 			
@@ -126,15 +126,19 @@ local vr       "01"     // version renta
 			destring mes, replace
 			foreach i of local monedas {
 				foreach j of local meses {
+					if `j' !=12 {
+					  local k=`j'+1
+					 }
+ 					else {
+					  local k=1 // if the month is 12 we send it to month 1
+					}
 					sum mean_moneda	if moneda==`i' & mes==`j' // if we pick ex rate of month=2
- 					local k `j+1' // we impute it to month 3
 					local tc`i'mes`k' = r(mean)
 					display `tc`i'mes`k''
 					}
 				}
 				
 
-			
 // if we consider that incomes are earned the same month as data is collected use this
 // 			destring mes, replace
 // 			foreach i of local monedas {
@@ -144,7 +148,6 @@ local vr       "01"     // version renta
 // 				}
 // 			}
 
-	
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 
@@ -3332,37 +3335,38 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 		
 	* gen XX_bolfeb = XX		*tipo de cambio	* deflactor a febrero if interview_month=M & moneda=J
 
-	local incomevar19 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 
+	local incomevar19 _1  _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 
 	foreach i of local incomevar19 {
-		* Bolívares
-			gen s9q19a`i'_bolfeb = s9q19a`i'					* `deflactor11'	if interview_month==11 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
+
+		* Bolívares s9q19a`i'_bolfeb = s9q19a`i' * `deflactor11'
+			gen s9q19a`i'_bolfeb = s9q19a`i' * `deflactor11'  if interview_month==11 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor12'	if interview_month==12 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor1'	if interview_month==1 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'				 				if interview_month==2 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
+			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor2' 	if interview_month==2 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor3'	if interview_month==3 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
-			cap replace s9q19a`i'_bolfeb = s9q19a`i'								if interview_month==4 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a // Falta completar!
+			replace s9q19a`i'_bolfeb = s9q19a`i'			* `deflactor4' 	if interview_month==4 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a // Falta completar!
 		* Dólares
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
+			replace s9q19a`i'_bolfeb = s9q19a`i' * `tc2mes11' * `deflactor11' 	if interview_month==11 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes2' 					if interview_month==2 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
-			cap replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes4'					if interview_month==4 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a // Falta completar!
+			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes2' 	* `deflactor2' 	if interview_month==2 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
+			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a 
+			cap replace s9q19a`i'_bolfeb = s9q19a`i'*`tc2mes4'	* `deflactor4' 	if interview_month==4 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a // Falta completar!
 		* Euros
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes2'					if interview_month==2 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
+			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes2'	* `deflactor2' 	if interview_month==2 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
-			cap replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes4'					if interview_month==4 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a // Falta completar!
+			cap replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes4'* `deflactor4' if interview_month==4 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a // Falta completar!
 		* Colombianos
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes2'					if interview_month==2 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
+			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes2'	* `deflactor2' 	if interview_month==2 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
-			cap replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes4'					if interview_month==4 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a // Falta completar!
-		}
+			cap replace s9q19a`i'_bolfeb = s9q19a`i'*`tc4mes4' 	* `deflactor4' 	if interview_month==4 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a // Falta completar!
+	}
 		
 	local incomevar21 _1 _2 _3 _4 _5 _6 _7 _8 _9
 	foreach i of local incomevar21 {
@@ -3370,30 +3374,30 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			gen s9q21a`i'_bolfeb = s9q21a`i'					* `deflactor11'	if interview_month==11 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
 			replace s9q21a`i'_bolfeb = s9q21a`i'				* `deflactor12'	if interview_month==12 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
 			replace s9q21a`i'_bolfeb = s9q21a`i'				* `deflactor1'	if interview_month==1 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'				 				if interview_month==2 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'				* `deflactor3'	if interview_month==3 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
-			cap replace s9q21a`i'_bolfeb = s9q21a`i'								if interview_month==4 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a // Falta completar!!
+			replace s9q21a`i'_bolfeb = s9q21a`i'				* `deflactor2' 	if interview_month==2 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'				* `deflactor3' if interview_month==3 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
+			cap replace s9q21a`i'_bolfeb = s9q21a`i'			* `deflactor4' if interview_month==4 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a // Falta completar!!
 		* Dólares
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes2' 					if interview_month==2 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes2' 	* `deflactor2' 	if interview_month==2 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
-			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes4'					if interview_month==4 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a // Falta completar!!
+			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes4'* `deflactor4' if interview_month==4 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a // Falta completar!!
 		* Euros
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes2'					if interview_month==2 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes4'					if interview_month==4 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a // Falta completar!!
+			replace s9q21a`i'_bolfeb = s9q21a`i'*`tc3mes11' * `deflactor11'	if  interview_month==11 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes12' * `deflactor12'	if  interview_month==12 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes1' 	* `deflactor1' 	if  interview_month==1 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes2'	* `deflactor2' 	if  interview_month==2 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes3'	* `deflactor3'	if  interview_month==3 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
+			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes4'* `deflactor4' if  interview_month==4 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a // Falta completar!!
 		* Colombianos
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes2'					if interview_month==2 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes4'					if interview_month==4 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a // Falta completar!!
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes11'	* `deflactor11'	if  interview_month==11 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes12' * `deflactor12'	if  interview_month==12 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes1'	* `deflactor1'	if  interview_month==1 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes2'* `deflactor2' 	if  interview_month==2 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes3'	* `deflactor3'	if  interview_month==3 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
+			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes4'* `deflactor4' if  interview_month==4 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a // Falta completar!!
 		}
 
 	local incomevar23456 23 24 25 26
@@ -3402,30 +3406,30 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			gen s9q`i'a_bolfeb = s9q`i'a					* `deflactor11'	if interview_month==11 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a				* `deflactor12'	if interview_month==12 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a				* `deflactor1'	if interview_month==1 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a				 				if interview_month==2 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
+			replace s9q`i'a_bolfeb = s9q`i'a				* `deflactor2' 	if interview_month==2 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a				* `deflactor3'	if interview_month==3 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
-			cap replace s9q`i'a_bolfeb = s9q`i'a							if interview_month==4 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a // Falta completar!!
+			cap replace s9q`i'a_bolfeb = s9q`i'a			* `deflactor4' 	if interview_month==4 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a // Falta completar!!
 		* Dólares
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes2' 					if interview_month==2 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
+			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes2' * `deflactor2' 	if interview_month==2 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
-			cap replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes4'				if interview_month==4 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a // Falta completar!!
+			cap replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes4'* `deflactor4' if interview_month==4 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a // Falta completar!!
 		* Euros
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes2'					if interview_month==2 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
+			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes2'* `deflactor2' 	if interview_month==2 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
-			cap replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes4'					if interview_month==4 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a // Falta completar!!
+			cap replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes4'* `deflactor4' 		if interview_month==4 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a // Falta completar!!
 		* Colombianos
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes2'					if interview_month==2 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
+			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes2'	* `deflactor2'	if interview_month==2 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
 			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
-			cap replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes4'				if interview_month==4 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a // Falta completar!!
+			cap replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes4'* `deflactor4'if interview_month==4 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a // Falta completar!!
 		}
 	
 	local incomevar27 27
@@ -3433,63 +3437,63 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 		* Bolívares
 			gen s9q`i'_bolfeb = s9q`i'					* `deflactor11'	if interview_month==11 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'				* `deflactor12'	if interview_month==12 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a
-			replace s9q`i'_bolfeb = s9q`i'				* `deflactor1'	if interview_month==1 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a
-			replace s9q`i'_bolfeb = s9q`i'				 				if interview_month==2 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a
+			replace s9q`i'_bolfeb = s9q`i'				* `deflactor1'	if interview_month==1 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a 
+			replace s9q`i'_bolfeb = s9q`i'				*`deflactor2'	if interview_month==2 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'				* `deflactor3'	if interview_month==3 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a
-			cap replace s9q`i'_bolfeb = s9q`i'							if interview_month==4 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a // Falta completar!!
+			cap replace s9q`i'_bolfeb = s9q`i'			*`deflactor4'	if interview_month==4 & s9q`i'a==1 & s9q`i'!=. & s9q`i'!=.a // Falta completar!!
 		* Dólares
 			replace s9q`i'_bolfeb = s9q`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q`i'a==2 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q`i'a==2 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q`i'a==2 & s9q`i'!=. & s9q`i'!=.a
-			replace s9q`i'_bolfeb = s9q`i'	*`tc2mes2' 					if interview_month==2 & s9q`i'a==2 & s9q`i'!=. & s9q`i'!=.a
+			replace s9q`i'_bolfeb = s9q`i'	*`tc2mes2' *`deflactor2'	if interview_month==2 & s9q`i'a==2 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q`i'a==2 & s9q`i'!=. & s9q`i'!=.a
-			cap replace s9q`i'_bolfeb = s9q`i'	*`tc2mes4'				if interview_month==4 & s9q`i'a==2 & s9q`i'!=. & s9q`i'!=.a // Falta completar!!
+			cap replace s9q`i'_bolfeb = s9q`i'	*`tc2mes4' *`deflactor4' if interview_month==4 & s9q`i'a==2 & s9q`i'!=. & s9q`i'!=.a // Falta completar!!
 		* Euros
 			replace s9q`i'_bolfeb = s9q`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q`i'a==3 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q`i'a==3 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q`i'a==3 & s9q`i'!=. & s9q`i'!=.a
-			replace s9q`i'_bolfeb = s9q`i'	*`tc3mes2'					if interview_month==2 & s9q`i'a==3 & s9q`i'!=. & s9q`i'!=.a
+			replace s9q`i'_bolfeb = s9q`i'	*`tc3mes2' * `deflactor2' 	if interview_month==2 & s9q`i'a==3 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q`i'a==3 & s9q`i'!=. & s9q`i'!=.a
-			cap replace s9q`i'_bolfeb = s9q`i'	*`tc3mes4'				if interview_month==4 & s9q`i'a==3 & s9q`i'!=. & s9q`i'!=.a // Falta completar!!
+			cap replace s9q`i'_bolfeb = s9q`i'	*`tc3mes4'* `deflactor4' if interview_month==4 & s9q`i'a==3 & s9q`i'!=. & s9q`i'!=.a // Falta completar!!
 		* Colombianos
 			replace s9q`i'_bolfeb = s9q`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q`i'a==4 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q`i'a==4 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q`i'a==4 & s9q`i'!=. & s9q`i'!=.a
-			replace s9q`i'_bolfeb = s9q`i'	*`tc4mes2'					if interview_month==2 & s9q`i'a==4 & s9q`i'!=. & s9q`i'!=.a
+			replace s9q`i'_bolfeb = s9q`i'	*`tc4mes2'	* `deflactor2' if interview_month==2 & s9q`i'a==4 & s9q`i'!=. & s9q`i'!=.a
 			replace s9q`i'_bolfeb = s9q`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q`i'a==4 & s9q`i'!=. & s9q`i'!=.a
-			cap replace s9q`i'_bolfeb = s9q`i'	*`tc4mes4'				if interview_month==4 & s9q`i'a==4 & s9q`i'!=. & s9q`i'!=.a // Falta completar!!
+			cap replace s9q`i'_bolfeb = s9q`i'	*`tc4mes4'* `deflactor4'	if interview_month==4 & s9q`i'a==4 & s9q`i'!=. & s9q`i'!=.a // Falta completar!!
 		}
 
 	local incomevar28 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11
 	foreach i of local incomevar28 {
 		* Bolívares
-			gen s9q28a`i'_bolfeb = s9q28a`i'					* `deflactor11'	if interview_month==11 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor12'	if interview_month==12 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor1'	if interview_month==1 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'				 				if interview_month==2 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor3'	if interview_month==3 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			cap replace s9q28a`i'_bolfeb = s9q28a`i'							if interview_month==4 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
+			gen s9q28a`i'_bolfeb = s9q28a`i'					* `deflactor11'	if  interview_month==11 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor12'	if  interview_month==12 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor1'	if  interview_month==1 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor2'	if  interview_month==2 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor3'	if  interview_month==3 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
+			cap replace s9q28a`i'_bolfeb = s9q28a`i'			* `deflactor4'	if  interview_month==4 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
 		* Dólares
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes2' 					if interview_month==2 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			cap replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes4'				if interview_month==4 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes11'	* `deflactor11'	if  interview_month==11 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes12' * `deflactor12'	if  interview_month==12 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes1' 	* `deflactor1'	if  interview_month==1 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes2' * `deflactor2' if  interview_month==2 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes3'	* `deflactor3'	if  interview_month==3 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
+			cap replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes4'* `deflactor4'	if  interview_month==4 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
 		* Euros
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes2'					if interview_month==2 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a 
-			cap replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes4'				if interview_month==4 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes11' * `deflactor11'	if  interview_month==11 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes12' * `deflactor12'	if  interview_month==12 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes1' 	* `deflactor1' 	if  interview_month==1 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes2'	* `deflactor2' if  interview_month==2 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes3'	* `deflactor3'	if  interview_month==3 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a 
+			cap replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes4'	* `deflactor4' if  interview_month==4 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
 		* Colombianos
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes11'	* `deflactor11'	if  interview_month==11 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
 			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
 			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes2'					if interview_month==2 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
+			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes2'	* `deflactor2'	if interview_month==2 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
 			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a 
-			cap replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes4'				if interview_month==4 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
+			cap replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes4' * `deflactor4' if interview_month==4 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a // Falta completar!!
 		}
 
 	local incomevar29 _1 _2 _3 _4 _5 _6 _7 _8 _9
@@ -3498,34 +3502,32 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			gen s9q29b`i'_bolfeb = s9q29b`i'					* `deflactor11'	if interview_month==11 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'				* `deflactor12'	if interview_month==12 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'				* `deflactor1'	if interview_month==1 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'				 				if interview_month==2 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
+			replace s9q29b`i'_bolfeb = s9q29b`i'				* `deflactor2' if interview_month==2 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'				* `deflactor3'	if interview_month==3 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
-			cap replace s9q29b`i'_bolfeb = s9q29b`i'							if interview_month==4 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a // Falta completar!!
+			cap replace s9q29b`i'_bolfeb = s9q29b`i'	     	* `deflactor4'	if interview_month==4 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a // Falta completar!!
 		* Dólares
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes2' 					if interview_month==2 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
+			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes2' * `deflactor2' if interview_month==2 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a 
-			cap replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes4'				if interview_month==4 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a // Falta completar!!
+			cap replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes4'* `deflactor4'	if interview_month==4 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a // Falta completar!!
 		* Euros
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes2'					if interview_month==2 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
+			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes2'	* `deflactor2' if interview_month==2 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
-			cap replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes4'				if interview_month==4 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a // Falta completar!!
+			cap replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes4'* `deflactor4' if interview_month==4 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a // Falta completar!!
 		* Colombianos
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes2'					if interview_month==2 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
+			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes2'* `deflactor2' if interview_month==2 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
-			cap replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes4'				if interview_month==4 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a // Falta completar!!
+			cap replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes4'* `deflactor4' if interview_month==4 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a // Falta completar!!
 		}
 
-
-		
 *** MONETARY
 
 /* * For those not self-employed or employers (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9)
@@ -3598,8 +3600,9 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 	
 	*For employers (s9q15==5)
 		replace ingresoslab_mon_local = s9q23a_bolfeb 							if ingresoslab_mon_local==. & s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
+		
 		replace ingresoslab_mon_local = ingresoslab_mon_local + s9q23a_bolfeb 	if ingresoslab_mon_local!=. & s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
-	
+	stop
 	*For self-employed (s9q15==6)
 		* Special case: We will use what they report they earned (q26a) and spent (q27) last month, as long as their substraction is not negative and as long as both are not missing.
 		* If not, we will use the yearly data (q25a) divided by 12 when available.

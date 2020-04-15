@@ -18,10 +18,10 @@ Note: Income imputation - Identification missing values
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta   0
@@ -48,80 +48,52 @@ Note: Income imputation - Identification missing values
 
 		}
 
-///*** OPEN DATABASE & PATHS ***///
+///*** OPEN DATABASE ***///
 
 use "$path\ENCOVI_forimputation_2019.dta", clear
 
-mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+///*** Check missing values to fix
+	mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+
 ///*** VARIABLES FOR MINCER EQUATION ***///
 
-	global xvar	edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
-				tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh /*anio_auto_hh*/ heladera_hh ///
-				lavarropas_hh computadora_hh internet_hh televisor_hh calentador_hh aire_hh tv_cable_hh microondas_hh  ///
-				/*seguro_salud*/ afiliado_segsalud_comp ///
-				nivel_educ cuenta_corr cuenta_aho tcredito tdebito no_banco ///
-				aporte_pension clap ingsuf_comida comida_trueque 
-
-* Identifying missing values in potential independent variables for Mincer equation
-	*Note: "mdesc" displays the number and proportion of missing values for each variable in varlist.
-	mdesc $xvar if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
-	//(inlist(recibe_ingresopenjub,1,2,3) | jubi_pens==1) // Universo: los que reportaron recibir (caso 1.a) o ocupados (caso 2)
-		// few % of missinf values except nivel_educ
-		// c_* will only be useful if we see divided by categ_ocup as they are only defined for workers who are not independent workers or employers
-		
+	 global xvar edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
+					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
+					afiliado_segsalud_comp ///
+					nivel_educ asiste_o_dejoypq ///
+					tarea sector_encuesta categ_ocu total_hrtr ///
+					c_sso c_rpv c_spf c_aca c_sps c_otro ///
+					cuenta_corr cuenta_aho tcredito tdebito no_banco ///
+					aporte_pension clap ingsuf_comida comida_trueque 
+					
+///*** Check missing values predictors for these individuals		
+	mdesc jubpen $xvar if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+			
 	/* To perform imputation by linear regression all the independent variables need have completed values, so we re-codified missing 
 	values in the independent variables as an additional category. The missing values in the dependent variable are estimated from
 	the posterior distribution of model parameters or from the large-sample normal approximation of the posterior distribution*/
 
-	global xvar1  edad edad2 agegroup hombre relacion_comp npers_viv miembros total_hrtr_sinmis ///
-	    dum_agegrou_1 dum_agegrou_2 dum_agegrou_3 dum_agegrou_4 dum_agegrou_5 dum_agegrou_6 ///
-		dum_agegrou_7 dum_agegrou_8 dum_relacio_1 dum_relacio_2 dum_relacio_3 dum_relacio_4 dum_relacio_5 ///
-		dum_relacio_6 dum_relacio_7 dum_relacio_8 dum_relacio_9 dum_relacio_10 dum_relacio_11 ///
-		dum_relacio_12 dum_relacio_13 dum_estado__1 dum_estado__2 dum_estado__3 dum_estado__4 ///
-		dum_estado__5 dum_estado__6 dum_region__1 dum_region__2 dum_region__3 dum_region__4 ///
-		dum_region__5 dum_region__6 dum_region__7 dum_region__8 dum_region__9 dum_municip_1 dum_municip_2 ///
-		dum_municip_3 dum_municip_4 dum_municip_5 dum_municip_6 dum_municip_7 dum_municip_8 ///
-		dum_municip_9 dum_municip_10 dum_municip_11 dum_municip_12 dum_municip_13 dum_municip_14 ///
-		dum_municip_15 dum_municip_16 dum_municip_17 dum_municip_18 dum_municip_19 dum_municip_20 ///
-		dum_municip_21 dum_municip_23 dum_municip_24 dum_municip_25 dum_municip_27 dum_tipo_vi_1 ///
-		dum_tipo_vi_2 dum_tipo_vi_3 dum_tipo_vi_4 dum_tipo_vi_5 dum_tipo_vi_6 dum_tipo_vi_7 dum_tipo_vi_8 ///
-		dum_propiet_0 dum_propiet_1 dum_propiet_2 dum_auto_hh_0 dum_auto_hh_1 dum_auto_hh_2 ///
-		dum_helader_0 dum_helader_1 dum_helader_2 dum_lavarro_0 dum_lavarro_1 dum_lavarro_2 ///
-		dum_computa_0 dum_computa_1 dum_computa_2 dum_interne_0 dum_interne_1 dum_interne_2 dum_televis_0 ///
-		dum_televis_1 dum_televis_2 dum_calenta_0 dum_calenta_1 dum_calenta_2 dum_aire_hh_0 ///
-		dum_aire_hh_1 dum_aire_hh_2 dum_tv_cabl_0 dum_tv_cabl_1 dum_tv_cabl_2 dum_microon_0 ///
-		dum_microon_1 dum_microon_2 dum_afiliad_1 dum_afiliad_2 dum_afiliad_3 dum_afiliad_4 ///
-		dum_afiliad_5 dum_afiliad_6 dum_afiliad_7 dum_nivel_e_1 dum_nivel_e_2 dum_nivel_e_3 dum_nivel_e_4 ///
-		dum_nivel_e_5 dum_nivel_e_6 dum_nivel_e_7 dum_nivel_e_8 dum_asiste__0 dum_asiste__1 ///
-		dum_asiste__2 dum_asiste__3 dum_asiste__4 dum_asiste__5 dum_asiste__6 dum_asiste__7 dum_asiste__8 ///
-		dum_asiste__9 dum_asiste__10 dum_asiste__11 dum_asiste__12 dum_asiste__13 dum_asiste__14 ///
-		dum_asiste__15 dum_asiste__16 dum_tarea_s_1 dum_tarea_s_2 dum_tarea_s_3 dum_tarea_s_4 ///
-		dum_tarea_s_5 dum_tarea_s_6 dum_tarea_s_7 dum_tarea_s_8 dum_tarea_s_9 dum_tarea_s_10 ///
-		dum_tarea_s_11 dum_sector__1 dum_sector__2 dum_sector__3 dum_sector__4 dum_sector__5 dum_sector__6 ///
-		dum_sector__7 dum_sector__8 dum_sector__9 dum_sector__10 dum_sector__11 ///
-		dum_categ_o_1 dum_categ_o_3 dum_categ_o_5 dum_categ_o_6 dum_categ_o_7 dum_categ_o_8 dum_categ_o_9 ///
-		dum_categ_o_10 dum_c_sso_s_0 dum_c_sso_s_1 dum_c_sso_s_2 dum_c_rpv_s_0 dum_c_rpv_s_1 ///
-		dum_c_rpv_s_2 dum_c_spf_s_0 dum_c_spf_s_1 dum_c_spf_s_2 dum_c_aca_s_0 dum_c_aca_s_1 ///
-		dum_c_aca_s_2 dum_c_sps_s_0 dum_c_sps_s_1 dum_c_sps_s_2 dum_c_otro__0 dum_c_otro__1 dum_c_otro__2 ///
-		dum_cuenta__0 dum_cuenta__1 dum_cuenta__2 dum_cuenta__0 dum_cuenta__1 dum_cuenta__2 ///
-		dum_tcredit_0 dum_tcredit_1 dum_tcredit_2 dum_tdebito_0 dum_tdebito_1 dum_tdebito_2 dum_no_banc_0 ///
-		dum_no_banc_1 dum_no_banc_2 dum_aporte__1 dum_aporte__2 dum_aporte__3 dum_aporte__4 ///
-		dum_aporte__5 dum_aporte__6 dum_clap_si_0 dum_clap_si_1 dum_clap_si_2 dum_ingsuf__0 dum_ingsuf__1 ///
-		dum_ingsuf__2 dum_comida__0 dum_comida__1 dum_comida__2
+	global xvar1 edad edad2 agegroup hombre npers_viv miembros total_hrtr_sinmis ///
+		p_agegroup_sinmis1 p_agegroup_sinmis2 p_agegroup_sinmis3 p_agegroup_sinmis4 p_agegroup_sinmis5 p_agegroup_sinmis6 p_agegroup_sinmis7 p_agegroup_sinmis8 ///
+		p_relacion_comp_sinmis1 p_relacion_comp_sinmis2 p_relacion_comp_sinmis3 p_relacion_comp_sinmis4 p_relacion_comp_sinmis5 p_relacion_comp_sinmis6 p_relacion_comp_sinmis7 p_relacion_comp_sinmis8 p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_relacion_comp_sinmis11 p_relacion_comp_sinmis12 p_relacion_comp_sinmis13 ///
+		p_estado_civil_sinmis1 p_estado_civil_sinmis2 p_estado_civil_sinmis3 p_estado_civil_sinmis4 p_estado_civil_sinmis5 p_estado_civil_sinmis6 p_region_est1_sinmis1 p_region_est1_sinmis2 p_region_est1_sinmis3 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis6 p_region_est1_sinmis7 p_region_est1_sinmis8 p_region_est1_sinmis9 ///
+		p_municipio_sinmis1 p_municipio_sinmis2 p_municipio_sinmis3 p_municipio_sinmis4 p_municipio_sinmis5 p_municipio_sinmis6 p_municipio_sinmis7 p_municipio_sinmis8 p_municipio_sinmis9 p_municipio_sinmis10 p_municipio_sinmis11 p_municipio_sinmis12 p_municipio_sinmis13 p_municipio_sinmis14 p_municipio_sinmis15 p_municipio_sinmis16 p_municipio_sinmis17 p_municipio_sinmis18 p_municipio_sinmis19 p_municipio_sinmis20 p_municipio_sinmis21 p_municipio_sinmis22 p_municipio_sinmis23 p_municipio_sinmis24 p_municipio_sinmis25 ///
+		p_tipo_vivienda_hh_sinmis1 p_tipo_vivienda_hh_sinmis2 p_tipo_vivienda_hh_sinmis3 p_tipo_vivienda_hh_sinmis4 p_tipo_vivienda_hh_sinmis5 p_tipo_vivienda_hh_sinmis6 p_tipo_vivienda_hh_sinmis7 p_tipo_vivienda_hh_sinmis8 ///
+		p_propieta_hh_sinmis1 p_propieta_hh_sinmis2 p_propieta_hh_sinmis3 ///
+		p_auto_hh_sinmis1 p_auto_hh_sinmis2 p_auto_hh_sinmis3 p_heladera_hh_sinmis1 p_heladera_hh_sinmis2 p_heladera_hh_sinmis3 p_lavarropas_hh_sinmis1 p_lavarropas_hh_sinmis2 p_lavarropas_hh_sinmis3 p_computadora_hh_sinmis1 p_computadora_hh_sinmis2 p_computadora_hh_sinmis3 p_internet_hh_sinmis1 p_internet_hh_sinmis2 p_internet_hh_sinmis3 p_televisor_hh_sinmis1 p_televisor_hh_sinmis2 p_televisor_hh_sinmis3 p_calentador_hh_sinmis1 p_calentador_hh_sinmis2 p_calentador_hh_sinmis3 p_aire_hh_sinmis1 p_aire_hh_sinmis2 p_aire_hh_sinmis3 p_tv_cable_hh_sinmis1 p_tv_cable_hh_sinmis2 p_tv_cable_hh_sinmis3 p_microondas_hh_sinmis1 p_microondas_hh_sinmis2 p_microondas_hh_sinmis3 ///
+		p_afiliado_segsalud_comp_sinmis1 p_afiliado_segsalud_comp_sinmis2 p_afiliado_segsalud_comp_sinmis3 p_afiliado_segsalud_comp_sinmis4 p_afiliado_segsalud_comp_sinmis5 p_afiliado_segsalud_comp_sinmis6 p_afiliado_segsalud_comp_sinmis7 ///
+		p_nivel_educ_sinmis1 p_nivel_educ_sinmis2 p_nivel_educ_sinmis3 p_nivel_educ_sinmis4 p_nivel_educ_sinmis5 p_nivel_educ_sinmis6 p_nivel_educ_sinmis7 p_nivel_educ_sinmis8 /*p_asiste_o_dejoypq_sinmis1 p_asiste_o_dejoypq_sinmis2 p_asiste_o_dejoypq_sinmis3 p_asiste_o_dejoypq_sinmis4 p_asiste_o_dejoypq_sinmis5 p_asiste_o_dejoypq_sinmis6 p_asiste_o_dejoypq_sinmis7 p_asiste_o_dejoypq_sinmis8 p_asiste_o_dejoypq_sinmis9 p_asiste_o_dejoypq_sinmis10 p_asiste_o_dejoypq_sinmis11 p_asiste_o_dejoypq_sinmis12 p_asiste_o_dejoypq_sinmis13 p_asiste_o_dejoypq_sinmis14 p_asiste_o_dejoypq_sinmis15 p_asiste_o_dejoypq_sinmis16 p_asiste_o_dejoypq_sinmis17*/ ///
+		/*p_tarea_sinmis1 p_tarea_sinmis2 p_tarea_sinmis3 p_tarea_sinmis4 p_tarea_sinmis5 p_tarea_sinmis6 p_tarea_sinmis7 p_tarea_sinmis8 p_tarea_sinmis9 p_tarea_sinmis10 p_tarea_sinmis11 p_sector_encuesta_sinmis1 p_sector_encuesta_sinmis2 p_sector_encuesta_sinmis3 p_sector_encuesta_sinmis4 p_sector_encuesta_sinmis5 p_sector_encuesta_sinmis6 p_sector_encuesta_sinmis7 p_sector_encuesta_sinmis8 p_sector_encuesta_sinmis9 p_sector_encuesta_sinmis10 p_sector_encuesta_sinmis11 p_categ_ocu_sinmis1 p_categ_ocu_sinmis2 p_categ_ocu_sinmis3 p_categ_ocu_sinmis4 p_categ_ocu_sinmis5 p_categ_ocu_sinmis6 p_categ_ocu_sinmis7 p_categ_ocu_sinmis8*/ /*p_c_sso_sinmis1 p_c_sso_sinmis2 p_c_sso_sinmis3*/ ///
+		/*p_c_rpv_sinmis1 p_c_rpv_sinmis2 p_c_rpv_sinmis3 p_c_spf_sinmis1 p_c_spf_sinmis2 p_c_spf_sinmis3 p_c_aca_sinmis1 p_c_aca_sinmis2 p_c_aca_sinmis3 p_c_sps_sinmis1 p_c_sps_sinmis2 p_c_sps_sinmis3 p_c_otro_sinmis1 p_c_otro_sinmis2 p_c_otro_sinmis3*/ ///
+		p_cuenta_corr_sinmis1 p_cuenta_corr_sinmis2 p_cuenta_corr_sinmis3 p_cuenta_aho_sinmis1 p_cuenta_aho_sinmis2 p_cuenta_aho_sinmis3 p_tcredito_sinmis1 p_tcredito_sinmis2 p_tcredito_sinmis3 p_tdebito_sinmis1 p_tdebito_sinmis2 p_tdebito_sinmis3 p_no_banco_sinmis1 p_no_banco_sinmis2 p_no_banco_sinmis3 ///
+		/*p_aporte_pension_sinmis1 p_aporte_pension_sinmis2 p_aporte_pension_sinmis3 p_aporte_pension_sinmis4 p_aporte_pension_sinmis5 p_aporte_pension_sinmis6*/ ///
+		p_clap_sinmis1 p_clap_sinmis2 p_clap_sinmis3 p_ingsuf_comida_sinmis1 p_ingsuf_comida_sinmis2 p_ingsuf_comida_sinmis3 p_comida_trueque_sinmis1 p_comida_trueque_sinmis2 p_comida_trueque_sinmis3
+		 
+	* Identifying missing values in potential independent variables for Mincer equation
+	*Note: "mdesc" displays the number and proportion of missing values for each variable in varlist.	
+	mdesc $xvar1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 
 
-	
-	/* edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil_sinmis region_est1 entidad municipio 	///
-				tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh_sinmis propieta_hh auto_hh_sinmis /*anio_auto_hh_sinmis*/ heladera_hh_sinmis lavarropas_hh_sinmis computadora_hh_sinmis internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
-				afiliado_segsalud_comp_sinmis ///
-				nivel_educ_sinmis asiste_o_dejoypq_sinmis ///
-				/* tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
-				 c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis */ ///
-				cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
-				/* aporte_pension_sinmis*/ clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis 
-	mdesc $xvar1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 */
-	
-	
-	* Dependent variable
+	* Generate dependent variable
 	gen log_jubpen = ln(jubpen) if jubpen!=.
 	
 
@@ -132,9 +104,7 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 		For this specification, you may want to use the command lassoregress. 
 		You will first need to install the package elasticregress, using the command line ssc install elasticregress. 
 		For the purposes of this exercise, please use as argument for the Lasso command set seed 1 and the default number of folds to be 10. */
-		
-		*set seed 1
-		
+				
 		lassoregress log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, numfolds(5)
 		display e(varlist_nonzero)
 		global lassovars = e(varlist_nonzero)
@@ -147,9 +117,9 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 		* Use option: best 
 		* Select model with highest R2 como criterio
 		* return - rpret list
-		vselect log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, best
-		display r(predlist)
-		local vselectvars = r(predlist)
+		//vselect log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, best
+		//display r(predlist)
+		//local vselectvars = r(predlist)
 	
 	* Best: model with 21 vars. Copy and paste them here:
 		global vselectvars  region_est1 no_banco_sinmis entidad calentador_hh_sinmis tdebito_sinmis ///
@@ -164,16 +134,16 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	*Obs: Regress without using weights because we try to predict indivudual income
 	*(should not be done with "pondera")
 	
-	reg log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+	*reg log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	reg log_jubpen $lassovars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 
-	reg log_jubpen $vselectvars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+	//reg log_jubpen $vselectvars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	
 	* The variables which leads to the maximun R2 are selected for the imputation
 	set more off
 	mi set flong
 	set seed 66778899
 	mi register imputed log_jubpen
-	mi impute regress log_jubpen $vselectvars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, add(1) rseed(66778899) force noi 
+	mi impute regress log_jubpen $lassovars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, add(1) rseed(66778899) force noi 
 	mi unregister log_jubpen
 
 	//clonevar dila_m_zero = dlinc_zero 

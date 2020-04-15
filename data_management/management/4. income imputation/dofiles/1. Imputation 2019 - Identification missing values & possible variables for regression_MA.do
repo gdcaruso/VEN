@@ -24,13 +24,13 @@ clear all
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -632,6 +632,9 @@ putexcel B`row'=matrix(a3)
 local row= `row' + rowsof(a3)+4
 
 matrix drop aux1 aux2 a a1 a2 a3
+
+*br interview__key interview__id quest dila_m_out djubpen_out dbene_out dinlanojub_out if (dila_m_out==1 | djubpen_out==1 | dbene_out==1 | dinlanojub_out==1) 
+
 
 *****************************************************************
 *** POSSIBLE VARIABLES FOR REGRESSION 

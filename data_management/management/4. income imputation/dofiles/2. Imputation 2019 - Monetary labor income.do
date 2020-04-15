@@ -51,14 +51,13 @@ Note: Income imputation - Identification missing values
 		}
 
 
-///*** OPEN DATABASE & PATHS ***///
+///*** OPEN DATABASE ***///
+	use "$path\ENCOVI_forimputation_2019.dta", clear
 
-use "$path\ENCOVI_forimputation_2019.dta", clear
-
-* Cuántos queremos imputar
-mdesc ila_m if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) 
-	// if me decís que recibiste pero ila monteario missing Ó estás ocupado, no decís que no recibís ila_m (eso sería un verdadero missing) y no contestás un monto de ila no mon.
-	* Check: da ok! Igual que la cantidad de miss3
+	* Cuántos queremos imputar
+	mdesc ila_m if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) 
+		// if me decís que recibiste pero ila monteario missing Ó estás ocupado, no decís que no recibís ila_m (eso sería un verdadero missing) y no contestás un monto de ila no mon.
+		* Check: da ok! Igual que la cantidad de miss3
 
 ///*** VARIABLES FOR MINCER EQUATION ***///
 

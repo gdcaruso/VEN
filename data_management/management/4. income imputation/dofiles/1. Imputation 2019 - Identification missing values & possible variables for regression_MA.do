@@ -24,13 +24,13 @@ clear all
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -715,54 +715,58 @@ matrix drop aux1 aux2 a a1 a2 a3
 								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///
 								cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
 								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis 
+
+								
+								
+								
 	* Creo variables dummy
 	local j=1
 	local varlist ""
 		 foreach y of global vars_dummy_selec {
 			display "`y'"
-			xi i.`y', noomit prefix(dum_)
-			unab varlist`j': dum_*
+			tab `y', gen(d_`y')
+			unab varlist`j': d_*
 			display "`varlist`j''"
 			local varlist `varlist' `varlist`j'' 
 			local j=`j'+1
 					}
-
 display "`varlist'"
 
-	global var_dummy_imp 	dum_agegrou_1 dum_agegrou_2 dum_agegrou_3 dum_agegrou_4 dum_agegrou_5 dum_agegrou_6 ///
-		dum_agegrou_7 dum_agegrou_8 dum_relacio_1 dum_relacio_2 dum_relacio_3 dum_relacio_4 dum_relacio_5 ///
-		dum_relacio_6 dum_relacio_7 dum_relacio_8 dum_relacio_9 dum_relacio_10 dum_relacio_11 ///
-		dum_relacio_12 dum_relacio_13 dum_estado__1 dum_estado__2 dum_estado__3 dum_estado__4 ///
-		dum_estado__5 dum_estado__6 dum_region__1 dum_region__2 dum_region__3 dum_region__4 ///
-		dum_region__5 dum_region__6 dum_region__7 dum_region__8 dum_region__9 dum_municip_1 dum_municip_2 ///
-		dum_municip_3 dum_municip_4 dum_municip_5 dum_municip_6 dum_municip_7 dum_municip_8 ///
-		dum_municip_9 dum_municip_10 dum_municip_11 dum_municip_12 dum_municip_13 dum_municip_14 ///
-		dum_municip_15 dum_municip_16 dum_municip_17 dum_municip_18 dum_municip_19 dum_municip_20 ///
-		dum_municip_21 dum_municip_23 dum_municip_24 dum_municip_25 dum_municip_27 dum_tipo_vi_1 ///
-		dum_tipo_vi_2 dum_tipo_vi_3 dum_tipo_vi_4 dum_tipo_vi_5 dum_tipo_vi_6 dum_tipo_vi_7 dum_tipo_vi_8 ///
-		dum_propiet_0 dum_propiet_1 dum_propiet_2 dum_auto_hh_0 dum_auto_hh_1 dum_auto_hh_2 ///
-		dum_helader_0 dum_helader_1 dum_helader_2 dum_lavarro_0 dum_lavarro_1 dum_lavarro_2 ///
-		dum_computa_0 dum_computa_1 dum_computa_2 dum_interne_0 dum_interne_1 dum_interne_2 dum_televis_0 ///
-		dum_televis_1 dum_televis_2 dum_calenta_0 dum_calenta_1 dum_calenta_2 dum_aire_hh_0 ///
-		dum_aire_hh_1 dum_aire_hh_2 dum_tv_cabl_0 dum_tv_cabl_1 dum_tv_cabl_2 dum_microon_0 ///
-		dum_microon_1 dum_microon_2 dum_afiliad_1 dum_afiliad_2 dum_afiliad_3 dum_afiliad_4 ///
-		dum_afiliad_5 dum_afiliad_6 dum_afiliad_7 dum_nivel_e_1 dum_nivel_e_2 dum_nivel_e_3 dum_nivel_e_4 ///
-		dum_nivel_e_5 dum_nivel_e_6 dum_nivel_e_7 dum_nivel_e_8 dum_asiste__0 dum_asiste__1 ///
-		dum_asiste__2 dum_asiste__3 dum_asiste__4 dum_asiste__5 dum_asiste__6 dum_asiste__7 dum_asiste__8 ///
-		dum_asiste__9 dum_asiste__10 dum_asiste__11 dum_asiste__12 dum_asiste__13 dum_asiste__14 ///
-		dum_asiste__15 dum_asiste__16 dum_tarea_s_1 dum_tarea_s_2 dum_tarea_s_3 dum_tarea_s_4 ///
-		dum_tarea_s_5 dum_tarea_s_6 dum_tarea_s_7 dum_tarea_s_8 dum_tarea_s_9 dum_tarea_s_10 ///
-		dum_tarea_s_11 dum_sector__1 dum_sector__2 dum_sector__3 dum_sector__4 dum_sector__5 dum_sector__6 ///
-		dum_sector__7 dum_sector__8 dum_sector__9 dum_sector__10 dum_sector__11 ///
-		dum_categ_o_1 dum_categ_o_3 dum_categ_o_5 dum_categ_o_6 dum_categ_o_7 dum_categ_o_8 dum_categ_o_9 ///
-		dum_categ_o_10 dum_c_sso_s_0 dum_c_sso_s_1 dum_c_sso_s_2 dum_c_rpv_s_0 dum_c_rpv_s_1 ///
-		dum_c_rpv_s_2 dum_c_spf_s_0 dum_c_spf_s_1 dum_c_spf_s_2 dum_c_aca_s_0 dum_c_aca_s_1 ///
-		dum_c_aca_s_2 dum_c_sps_s_0 dum_c_sps_s_1 dum_c_sps_s_2 dum_c_otro__0 dum_c_otro__1 dum_c_otro__2 ///
-		dum_cuenta__0 dum_cuenta__1 dum_cuenta__2 dum_cuenta__0 dum_cuenta__1 dum_cuenta__2 ///
-		dum_tcredit_0 dum_tcredit_1 dum_tcredit_2 dum_tdebito_0 dum_tdebito_1 dum_tdebito_2 dum_no_banc_0 ///
-		dum_no_banc_1 dum_no_banc_2 dum_aporte__1 dum_aporte__2 dum_aporte__3 dum_aporte__4 ///
-		dum_aporte__5 dum_aporte__6 dum_clap_si_0 dum_clap_si_1 dum_clap_si_2 dum_ingsuf__0 dum_ingsuf__1 ///
-		dum_ingsuf__2 dum_comida__0 dum_comida__1 dum_comida__2
+		global dummy_vars d_agegrou_1 d_agegrou_2 d_agegrou_3 d_agegrou_4 d_agegrou_5 d_agegrou_6 ///
+		d_agegrou_7 d_agegrou_8 d_relacio_1 d_relacio_2 d_relacio_3 d_relacio_4 d_relacio_5 ///
+		d_relacio_6 d_relacio_7 d_relacio_8 d_relacio_9 d_relacio_10 d_relacio_11 ///
+		d_relacio_12 d_relacio_13 d_estado__1 d_estado__2 d_estado__3 d_estado__4 ///
+		d_estado__5 d_estado__6 d_region__1 d_region__2 d_region__3 d_region__4 ///
+		d_region__5 d_region__6 d_region__7 d_region__8 d_region__9 d_municip_1 d_municip_2 ///
+		d_municip_3 d_municip_4 d_municip_5 d_municip_6 d_municip_7 d_municip_8 ///
+		d_municip_9 d_municip_10 d_municip_11 d_municip_12 d_municip_13 d_municip_14 ///
+		d_municip_15 d_municip_16 d_municip_17 d_municip_18 d_municip_19 d_municip_20 ///
+		d_municip_21 d_municip_23 d_municip_24 d_municip_25 d_municip_27 d_tipo_vi_1 ///
+		d_tipo_vi_2 d_tipo_vi_3 d_tipo_vi_4 d_tipo_vi_5 d_tipo_vi_6 d_tipo_vi_7 d_tipo_vi_8 ///
+		d_propiet_0 d_propiet_1 d_propiet_2 d_auto_hh_0 d_auto_hh_1 d_auto_hh_2 ///
+		d_helader_0 d_helader_1 d_helader_2 d_lavarro_0 d_lavarro_1 d_lavarro_2 ///
+		d_computa_0 d_computa_1 d_computa_2 d_interne_0 d_interne_1 d_interne_2 d_televis_0 ///
+		d_televis_1 d_televis_2 d_calenta_0 d_calenta_1 d_calenta_2 d_aire_hh_0 ///
+		d_aire_hh_1 d_aire_hh_2 d_tv_cabl_0 d_tv_cabl_1 d_tv_cabl_2 d_microon_0 ///
+		d_microon_1 d_microon_2 d_afiliad_1 d_afiliad_2 d_afiliad_3 d_afiliad_4 ///
+		d_afiliad_5 d_afiliad_6 d_afiliad_7 d_nivel_e_1 d_nivel_e_2 d_nivel_e_3 d_nivel_e_4 ///
+		d_nivel_e_5 d_nivel_e_6 d_nivel_e_7 d_nivel_e_8 d_asiste__0 d_asiste__1 ///
+		d_asiste__2 d_asiste__3 d_asiste__4 d_asiste__5 d_asiste__6 d_asiste__7 d_asiste__8 ///
+		d_asiste__9 d_asiste__10 d_asiste__11 d_asiste__12 d_asiste__13 d_asiste__14 ///
+		d_asiste__15 d_asiste__16 d_tarea_s_1 d_tarea_s_2 d_tarea_s_3 d_tarea_s_4 ///
+		d_tarea_s_5 d_tarea_s_6 d_tarea_s_7 d_tarea_s_8 d_tarea_s_9 d_tarea_s_10 ///
+		d_tarea_s_11 d_sector__1 d_sector__2 d_sector__3 d_sector__4 d_sector__5 d_sector__6 ///
+		d_sector__7 d_sector__8 d_sector__9 d_sector__10 d_sector__11 ///
+		d_categ_o_1 d_categ_o_3 d_categ_o_5 d_categ_o_6 d_categ_o_7 d_categ_o_8 d_categ_o_9 ///
+		d_categ_o_10 d_c_sso_s_0 d_c_sso_s_1 d_c_sso_s_2 d_c_rpv_s_0 d_c_rpv_s_1 ///
+		d_c_rpv_s_2 d_c_spf_s_0 d_c_spf_s_1 d_c_spf_s_2 d_c_aca_s_0 d_c_aca_s_1 ///
+		d_c_aca_s_2 d_c_sps_s_0 d_c_sps_s_1 d_c_sps_s_2 d_c_otro__0 d_c_otro__1 d_c_otro__2 ///
+		d_cuenta__0 d_cuenta__1 d_cuenta__2 d_cuenta__0 d_cuenta__1 d_cuenta__2 ///
+		d_tcredit_0 d_tcredit_1 d_tcredit_2 d_tdebito_0 d_tdebito_1 d_tdebito_2 d_no_banc_0 ///
+		d_no_banc_1 d_no_banc_2 d_aporte__1 d_aporte__2 d_aporte__3 d_aporte__4 ///
+		d_aporte__5 d_aporte__6 d_clap_si_0 d_clap_si_1 d_clap_si_2 d_ingsuf__0 d_ingsuf__1 ///
+		d_ingsuf__2 d_comida__0 d_comida__1 d_comida__2
+						
 
 * Equations:
 	* Ingreso laboral montario - hacerlo por categ. ocup?

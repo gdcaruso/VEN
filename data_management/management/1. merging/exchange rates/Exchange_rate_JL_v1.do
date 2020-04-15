@@ -51,17 +51,17 @@ Note:
 *--- Import official data of exchange rates
 *--- Source: 
 *********************************************************************************
-*--------------- 3T 2019		
+*--------------- 1T 2019		
 *--------------- Set the dates of the exchange rate as a local 
 * These are the names of the excel spreadsheet which contain daily data for each trimester	
-	local fechas_T3_2019 30092019 27092019 26092019 25092019 24092019 23092019 ///
+	local fechas_T1_2019 30092019 27092019 26092019 25092019 24092019 23092019 ///
 	20092019 19092019 18092019 17092019 13092019 12092019 11092019 10092019 09092019 ///
 	06092019 05092019 04092019 03092019 02092019 30082019 29082019 28082019 27082019 26082019 ///
 	23082019 22082019 21082019 20082019 16082019 15082019 14082019 13082019 12082019 09082019 ///
 	08082019 07082019 06082019 05082019 
 	
-	foreach k of local fechas_T3_2019 {
-			  cap import excel using "$rootpath\2_1_2c19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
+	foreach k of local fechas_T1_2019 {
+			  cap import excel using "$rootpath\2_1_2b19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
 		gen date="`k'"
 		if `k'==30092019 {
 		tempfile exch1
@@ -109,29 +109,26 @@ Note:
 	save `exch1', replace
 	clear
 
-*--------------- 4T 2019		
+*--------------- 2T 2019		
 *--------------- Set the dates of the exchange rate as a local 
 * These are the names of the excel spreadsheet which contain daily data for each trimester	
-	local fechas_T1 31102019 30102019 29102019 28102019 25102019 24102019 23102019 ///
-	22102019 21102019 18102019 17102019 16102019 15102019 14102019 11102019 10102019 09102019 ///
-	08102019 07102019 04102019 03102019 02102019 01102019 ///
-	30122019 27122019 26122019 23122019 20122019 19122019 ///
-	18122019 17122019 16122019 13122019 12122019 11122019 10122019 09122019 ///
-	06122019 05122019 04122019 03122019 02122019 29112019 28112019 27112019 26112019 ///
-	25112019 22112019 21112019 20112019 19112019 18112019 15112019 14112019 ///
-	13112019 12112019 11112019 08112019 07112019 06112019 05112019 01112019
+	local fechas_T2_2019 30092019 27092019 26092019 25092019 24092019 23092019 ///
+	20092019 19092019 18092019 17092019 13092019 12092019 11092019 10092019 09092019 ///
+	06092019 05092019 04092019 03092019 02092019 30082019 29082019 28082019 27082019 26082019 ///
+	23082019 22082019 21082019 20082019 16082019 15082019 14082019 13082019 12082019 09082019 ///
+	08082019 07082019 06082019 05082019 
 	
-	foreach k of local fechas_T1 {
-			  cap import excel using "$rootpath\2_1_2d19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
+	foreach k of local fechas_T2_2019 {
+			  cap import excel using "$rootpath\2_1_2b19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
 		gen date="`k'"
-		if `k'==31102019 {
-		tempfile exch1
-		save `exch1'
+		if `k'==30092019 {
+		tempfile exch2
+		save `exch2'
 		}
 		else {
 			replace date="`k'"
-			append using `exch1'
-			save `exch1', replace
+			append using `exch2'
+			save `exch2', replace
 		}
 	}
 
@@ -167,7 +164,125 @@ Note:
 	drop date
 
 	// Save as temporal file
-	save `exch1', replace
+	save `exch2', replace
+	clear
+*--------------- 3T 2019		
+*--------------- Set the dates of the exchange rate as a local 
+* These are the names of the excel spreadsheet which contain daily data for each trimester	
+	local fechas_T3_2019 30092019 27092019 26092019 25092019 24092019 23092019 ///
+	20092019 19092019 18092019 17092019 13092019 12092019 11092019 10092019 09092019 ///
+	06092019 05092019 04092019 03092019 02092019 30082019 29082019 28082019 27082019 26082019 ///
+	23082019 22082019 21082019 20082019 16082019 15082019 14082019 13082019 12082019 09082019 ///
+	08082019 07082019 06082019 05082019 
+	
+	foreach k of local fechas_T3_2019 {
+			  cap import excel using "$rootpath\2_1_2c19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
+		gen date="`k'"
+		if `k'==30092019 {
+		tempfile exch3
+		save `exch3'
+		}
+		else {
+			replace date="`k'"
+			append using `exch3'
+			save `exch3', replace
+		}
+	}
+
+
+// Format
+	rename (B) (COD_moneda)
+	label var COD_moneda Moneda
+	rename (MonedaPaís) (Pais)
+	rename VentaASKb Venta
+	rename (F) (Compra)
+
+// Keep useful observations
+	keep if Compra!=. 
+	//Generate a code for each currency
+	encode COD_moneda, gen(COD_moneda_e)
+
+// Replace errors with a code and destring
+	foreach var of varlist Venta VentaASK {
+	replace `var'="." if `var'=="----------------"
+	destring `var', replace force
+	}
+
+// To generate date in a format which allow to merge with price data: YYYY-MM-DD
+     //Generate Year
+	 gen year=substr(date,5,4)
+	 //Generate Month 
+	 gen month=substr(date,3,2)
+	 //Generate Day
+	 gen day=substr(date,1,2)
+// Link the three variables to generate the variable of date  
+	egen date_price=concat(year month day),  punct(-)
+	//Drop the variable used as imput for date
+	drop date
+
+	// Save as temporal file
+	save `exch3', replace
+	clear
+
+*--------------- 4T 2019		
+*--------------- Set the dates of the exchange rate as a local 
+* These are the names of the excel spreadsheet which contain daily data for each trimester	
+	local fechas_T1 31102019 30102019 29102019 28102019 25102019 24102019 23102019 ///
+	22102019 21102019 18102019 17102019 16102019 15102019 14102019 11102019 10102019 09102019 ///
+	08102019 07102019 04102019 03102019 02102019 01102019 ///
+	30122019 27122019 26122019 23122019 20122019 19122019 ///
+	18122019 17122019 16122019 13122019 12122019 11122019 10122019 09122019 ///
+	06122019 05122019 04122019 03122019 02122019 29112019 28112019 27112019 26112019 ///
+	25112019 22112019 21112019 20112019 19112019 18112019 15112019 14112019 ///
+	13112019 12112019 11112019 08112019 07112019 06112019 05112019 01112019
+	
+	foreach k of local fechas_T1 {
+			  cap import excel using "$rootpath\2_1_2d19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
+		gen date="`k'"
+		if `k'==31102019 {
+		tempfile exch4
+		save `exch4'
+		}
+		else {
+			replace date="`k'"
+			append using `exch4'
+			save `exch4', replace
+		}
+	}
+
+
+// Format
+	rename (B) (COD_moneda)
+	label var COD_moneda Moneda
+	rename (MonedaPaís) (Pais)
+	rename VentaASKb Venta
+	rename (F) (Compra)
+
+// Keep useful observations
+	keep if Compra!=. 
+	//Generate a code for each currency
+	encode COD_moneda, gen(COD_moneda_e)
+
+// Replace errors with a code and destring
+	foreach var of varlist Venta VentaASK {
+	replace `var'="." if `var'=="----------------"
+	destring `var', replace force
+	}
+
+// To generate date in a format which allow to merge with price data: YYYY-MM-DD
+     //Generate Year
+	 gen year=substr(date,5,4)
+	 //Generate Month 
+	 gen month=substr(date,3,2)
+	 //Generate Day
+	 gen day=substr(date,1,2)
+// Link the three variables to generate the variable of date  
+	egen date_price=concat(year month day),  punct(-)
+	//Drop the variable used as imput for date
+	drop date
+
+	// Save as temporal file
+	save `exch4', replace
 	clear
 	
 *********************************************************************************
@@ -186,13 +301,13 @@ foreach i of local fechas_T4 {
           cap import excel using "$rootpath\2_1_2a20.xls", sheet(`i') cellrange(B9:G47) firstrow clear	  
 	gen date="`i'"
 	if `i'==31032020 {
-	tempfile exch2
-	save `exch2'
+	tempfile exch5
+	save `exch5'
 	}
 	else {
 	    replace date="`i'"
-		append using `exch2'
-		save `exch2', replace
+		append using `exch5'
+		save `exch5', replace
 		}
 }
 
@@ -227,7 +342,7 @@ encode COD_moneda, gen(COD_moneda_e)
 	drop date
 
 // Save as temporal file
-	save `exch2', replace
+	save `exch5', replace
 	clear
 
 *********************************************************************************
@@ -243,13 +358,13 @@ foreach x of local fechas_T9 {
           cap import excel using "$rootpath\2_1_2b20.xls", sheet(`x') cellrange(B9:G47) firstrow clear	  
 	gen date="`x'"
 	if `x'==08042020 {
-	tempfile exch3
-	save `exch3'
+	tempfile exch6
+	save `exch6'
 	}
 	else {
 	    replace date="`x'"
-		append using `exch3'
-		save `exch3', replace
+		append using `exch6'
+		save `exch6', replace
 		}
 }
 
@@ -288,7 +403,9 @@ encode COD_moneda, gen(COD_moneda_e)
 ********************************************************************************
 append using `exch1', force
 append using `exch2', force
-
+append using `exch3', force
+append using `exch4', force
+append using `exch5', force
 *********************************************************************************
 *--- To select the currency units included in the survey
 *********************************************************************************

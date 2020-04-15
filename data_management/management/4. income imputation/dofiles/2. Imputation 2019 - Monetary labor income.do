@@ -1,11 +1,57 @@
-****************************************************************
-*** ENCOVI 2019 - IMPUTATION MONETARY LABOR INCOME 
-****************************************************************
- 
-///*** OPEN DATABASE & PATHS ***///
+********************************************************************************
+*** ENCOVI 2019 - Income imputation: MONETARY LABOR INCOME 
+********************************************************************************
+ /*===========================================================================
+Country name:	Venezuela
+Year:			2014-2019
+Survey:			ENCOVI
+Vintage:		
+Project:	
+---------------------------------------------------------------------------
+Authors:			
+Dependencies:		The World Bank
+Creation Date:		March, 2020
+Modification Date:  
+Output:			
 
-global path "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-global pathoutexcel "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
+Note: Income imputation - Identification missing values
+=============================================================================*/
+********************************************************************************
+
+	    * User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   1
+		
+		* User 3: Lautaro
+		global lauta   0
+		
+		* User 4: Malena
+		global male   0
+			
+		if $juli {
+				global path "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+				global pathoutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"
+		}
+	    if $lauta {
+
+		}
+		if $trini   {
+				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
+                global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela"
+				global path "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+				global pathdo "$rootpath2\Income Imputation\dofiles"
+		}
+		
+		if $male   {
+		        global path "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+				global pathoutexcel "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
+
+		}
+
+
+///*** OPEN DATABASE & PATHS ***///
 
 use "$path\ENCOVI_forimputation_2019.dta", clear
 
@@ -35,14 +81,41 @@ mdesc ila_m if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingres
 	values in the independent variables as an additional category. The missing values in the dependent variable are estimated from
 	the posterior distribution of model parameters or from the large-sample normal approximation of the posterior distribution*/
 
-	global xvar1 edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil_sinmis region_est1 entidad municipio 	///
-				tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh_sinmis /*anio_auto_hh_sinmis*/ heladera_hh_sinmis lavarropas_hh_sinmis computadora_hh_sinmis internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
-				/*seguro_salud*/ afiliado_segsalud_comp ///
-				nivel_educ_sinmis ///
-				tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
-				/* c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis */ ///
-				cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
-				aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis
+	global xvar1 edad edad2 agegroup hombre relacion_comp npers_viv miembros total_hrtr_sinmis ///
+	    dum_agegrou_1 dum_agegrou_2 dum_agegrou_3 dum_agegrou_4 dum_agegrou_5 dum_agegrou_6 ///
+		dum_agegrou_7 dum_agegrou_8 dum_relacio_1 dum_relacio_2 dum_relacio_3 dum_relacio_4 dum_relacio_5 ///
+		dum_relacio_6 dum_relacio_7 dum_relacio_8 dum_relacio_9 dum_relacio_10 dum_relacio_11 ///
+		dum_relacio_12 dum_relacio_13 dum_estado__1 dum_estado__2 dum_estado__3 dum_estado__4 ///
+		dum_estado__5 dum_estado__6 dum_region__1 dum_region__2 dum_region__3 dum_region__4 ///
+		dum_region__5 dum_region__6 dum_region__7 dum_region__8 dum_region__9 dum_municip_1 dum_municip_2 ///
+		dum_municip_3 dum_municip_4 dum_municip_5 dum_municip_6 dum_municip_7 dum_municip_8 ///
+		dum_municip_9 dum_municip_10 dum_municip_11 dum_municip_12 dum_municip_13 dum_municip_14 ///
+		dum_municip_15 dum_municip_16 dum_municip_17 dum_municip_18 dum_municip_19 dum_municip_20 ///
+		dum_municip_21 dum_municip_23 dum_municip_24 dum_municip_25 dum_municip_27 dum_tipo_vi_1 ///
+		dum_tipo_vi_2 dum_tipo_vi_3 dum_tipo_vi_4 dum_tipo_vi_5 dum_tipo_vi_6 dum_tipo_vi_7 dum_tipo_vi_8 ///
+		dum_propiet_0 dum_propiet_1 dum_propiet_2 dum_auto_hh_0 dum_auto_hh_1 dum_auto_hh_2 ///
+		dum_helader_0 dum_helader_1 dum_helader_2 dum_lavarro_0 dum_lavarro_1 dum_lavarro_2 ///
+		dum_computa_0 dum_computa_1 dum_computa_2 dum_interne_0 dum_interne_1 dum_interne_2 dum_televis_0 ///
+		dum_televis_1 dum_televis_2 dum_calenta_0 dum_calenta_1 dum_calenta_2 dum_aire_hh_0 ///
+		dum_aire_hh_1 dum_aire_hh_2 dum_tv_cabl_0 dum_tv_cabl_1 dum_tv_cabl_2 dum_microon_0 ///
+		dum_microon_1 dum_microon_2 dum_afiliad_1 dum_afiliad_2 dum_afiliad_3 dum_afiliad_4 ///
+		dum_afiliad_5 dum_afiliad_6 dum_afiliad_7 dum_nivel_e_1 dum_nivel_e_2 dum_nivel_e_3 dum_nivel_e_4 ///
+		dum_nivel_e_5 dum_nivel_e_6 dum_nivel_e_7 dum_nivel_e_8 dum_asiste__0 dum_asiste__1 ///
+		dum_asiste__2 dum_asiste__3 dum_asiste__4 dum_asiste__5 dum_asiste__6 dum_asiste__7 dum_asiste__8 ///
+		dum_asiste__9 dum_asiste__10 dum_asiste__11 dum_asiste__12 dum_asiste__13 dum_asiste__14 ///
+		dum_asiste__15 dum_asiste__16 dum_tarea_s_1 dum_tarea_s_2 dum_tarea_s_3 dum_tarea_s_4 ///
+		dum_tarea_s_5 dum_tarea_s_6 dum_tarea_s_7 dum_tarea_s_8 dum_tarea_s_9 dum_tarea_s_10 ///
+		dum_tarea_s_11 dum_sector__1 dum_sector__2 dum_sector__3 dum_sector__4 dum_sector__5 dum_sector__6 ///
+		dum_sector__7 dum_sector__8 dum_sector__9 dum_sector__10 dum_sector__11 ///
+		dum_categ_o_1 dum_categ_o_3 dum_categ_o_5 dum_categ_o_6 dum_categ_o_7 dum_categ_o_8 dum_categ_o_9 ///
+		dum_categ_o_10 dum_c_sso_s_0 dum_c_sso_s_1 dum_c_sso_s_2 dum_c_rpv_s_0 dum_c_rpv_s_1 ///
+		dum_c_rpv_s_2 dum_c_spf_s_0 dum_c_spf_s_1 dum_c_spf_s_2 dum_c_aca_s_0 dum_c_aca_s_1 ///
+		dum_c_aca_s_2 dum_c_sps_s_0 dum_c_sps_s_1 dum_c_sps_s_2 dum_c_otro__0 dum_c_otro__1 dum_c_otro__2 ///
+		dum_cuenta__0 dum_cuenta__1 dum_cuenta__2 dum_cuenta__0 dum_cuenta__1 dum_cuenta__2 ///
+		dum_tcredit_0 dum_tcredit_1 dum_tcredit_2 dum_tdebito_0 dum_tdebito_1 dum_tdebito_2 dum_no_banc_0 ///
+		dum_no_banc_1 dum_no_banc_2 dum_aporte__1 dum_aporte__2 dum_aporte__3 dum_aporte__4 ///
+		dum_aporte__5 dum_aporte__6 dum_clap_si_0 dum_clap_si_1 dum_clap_si_2 dum_ingsuf__0 dum_ingsuf__1 ///
+		dum_ingsuf__2 dum_comida__0 dum_comida__1 dum_comida__2
 	
 	* Nuestra idea para laboral monetario
 		*local nuestrasvars edad edad2 hombre relacion_comp npers_viv estado_civil entidad tipo_vivienda_hh propieta_hh microondas_hh nivel_educ afiliado_segsalud_comp no_banco_sinmis
@@ -74,8 +147,9 @@ mdesc ila_m if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingres
 	
 	vselect log_ila_m $xvar1 if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, best
 	
-	* Best one appears to be with 28 vars.
-	local vselectvars categ_ocu_sinmis clap_sinmis comida_trueque_sinmis sector_encuesta_sinmis auto_hh_sinmis ///
+	* Best: model with XX vars. Copy and paste them here:
+	* CAMBIAR CUANDO CORRA CON LA NUEVA BASE
+	*local vselectvars categ_ocu_sinmis clap_sinmis comida_trueque_sinmis sector_encuesta_sinmis auto_hh_sinmis ///
 					hombre total_hrtr_sinmis ingsuf_comida_sinmis tdebito_sinmis relacion_comp region_est1 ///
 					tv_cable_hh_sinmis entidad tarea_sinmis lavarropas_hh_sinmis tcredito_sinmis material_piso_hh ///
 					propieta_hh nivel_educ_sinmis cuenta_aho_sinmis municipio heladera_hh_sinmis televisor_hh_sinmis ///

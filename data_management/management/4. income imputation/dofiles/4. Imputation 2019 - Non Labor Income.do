@@ -1,5 +1,5 @@
 *******************************************************************************
-*** ENCOVI 2019 - Income imputation : PENSIONS
+*** ENCOVI 2019 - Income imputation : LABOR NON MONETARY INCOME
 ********************************************************************************
 /*===========================================================================
 Country name:	Venezuela
@@ -52,7 +52,7 @@ Note: Income imputation - Identification missing values
 
 use "$path\ENCOVI_forimputation_2019.dta", clear
 
-mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+mdesc bene if inlist(recibe_ingresonolab,1,2,3)
 ///*** VARIABLES FOR MINCER EQUATION ***///
 
 	global xvar	edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
@@ -122,7 +122,7 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	
 	
 	* Dependent variable
-	gen log_jubpen = ln(jubpen) if jubpen!=.
+	gen log_bene = ln(bene) if bene!=.
 	
 
 ///*** CHECKING WHICH VARIABLES MAXIMIZE R2 ***///
@@ -135,23 +135,21 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 		
 		*set seed 1
 		
-		lassoregress log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, numfolds(5)
+		lassoregress log_bene $xvar1 if log_bene>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, numfolds(5)
 		display e(varlist_nonzero)
 		global lassovars = e(varlist_nonzero)
 		
-	** Stepwise (pr usa Chris; Trini usa backward)
-		* ??
-	
+
 	** Vselect
 		*Problema: no se puede poner variable como factor variables (incluir dummys una a una) 
 		* Use option: best 
 		* Select model with highest R2 como criterio
 		* return - rpret list
-		vselect log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, best
+		vselect log_bene $xvar1 if log_bene>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, best
 		display r(predlist)
 		local vselectvars = r(predlist)
 	
-	* Best: model with 21 vars. Copy and paste them here:
+	* Best: model with xx vars. Copy and paste them here:
 		global vselectvars  region_est1 no_banco_sinmis entidad calentador_hh_sinmis tdebito_sinmis ///
 		afiliado_segsalud_comp_sinmis computadora_hh_sinmis comida_trueque_sinmis npers_viv ///
 		asiste_o_dejoypq_sinmis cuenta_corr_sinmis municipio estado_civil_sinmis tipo_vivienda_hh relacion_comp ///
@@ -164,17 +162,17 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	*Obs: Regress without using weights because we try to predict indivudual income
 	*(should not be done with "pondera")
 	
-	reg log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
-	reg log_jubpen $lassovars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 
-	reg log_jubpen $vselectvars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+	reg log_bene $xvar1 if log_bene>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+	reg log_bene $lassovars if log_bene>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 
+	reg log_bene $vselectvars if log_bene>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	
 	* The variables which leads to the maximun R2 are selected for the imputation
 	set more off
 	mi set flong
 	set seed 66778899
-	mi register imputed log_jubpen
-	mi impute regress log_jubpen $vselectvars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, add(1) rseed(66778899) force noi 
-	mi unregister log_jubpen
+	mi register imputed log_bene
+	mi impute regress log_bene $vselectvars if log_bene>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, add(1) rseed(66778899) force noi 
+	mi unregister log_bene
 
 	//clonevar dila_m_zero = dlinc_zero 
 	//clonevar dila_m_miss1 = dlinc_miss1
@@ -182,7 +180,7 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	//clonevar dila_m_miss3 = dlinc_miss3
 	
 * Retrieving original variables
-	foreach x of varlist jubpen {
+	foreach x of varlist bene {
 	gen `x'2=.
 	* Genero var. con valores preliminares de los missing a imputar
 	local j=1
@@ -196,8 +194,8 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	local j=`j'+1
 	drop `x'2
 	}	
-	mdesc jubpen if _mi_m==0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
-	mdesc jubpen if _mi_m==1 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 //cheking we do not have incompleted values in labor income after the imputation
+	mdesc bene if _mi_m==0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+	mdesc bene if _mi_m==1 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 //cheking we do not have incompleted values in labor income after the imputation
 
 	gen imp_id=_mi_m
 	*mi unset (Para borrar cosas que quedaron de la imputacion en el memoria)
@@ -211,32 +209,32 @@ mdesc jubpen if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	drop _mi_id _mi_miss _mi_m	
 
 	drop if imp_id==0 // Saco la base sin imputaciones
-	collapse (mean) jubpen, by(id com) // La imputacion va a ser el promedio de las bases imputadas
-	rename jubpen jubpen_imp1
-	save "$pathpathoutexcel\VEN_jubpen_imp1.dta", replace
+	collapse (mean) bene, by(id com) // La imputacion va a ser el promedio de las bases imputadas
+	rename bene bene_imp1
+	save "$pathpathoutexcel\VEN_bene_imp1.dta", replace
 
 ********************************************************************************
 *** Analyzing imputed data
 ********************************************************************************
 use "$path\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 id com using "$pathpathoutexcel\VEN_jubpen_imp1.dta"
+merge 1:1 id com using "$pathpathoutexcel\VEN_bene_imp1.dta"
 
 
-foreach x of varlist jubpen {
+foreach x of varlist bene {
 gen log_`x'=ln(`x')
 gen log_`x'_imp1=ln(`x'_imp1)
 }
 
 *** Comparing not imputed versus imputed labor income distribution
-foreach x in jubpen {
+foreach x in bene {
 twoway (kdensity log_`x' if `x'>0 & jubi_o_rtarecibejubi==1 , lcolor(blue) bw(0.45)) ///
        (kdensity log_`x'_imp1 if `x'_imp1>0 & jubi_o_rtarecibejubi==1, lcolor(red) lp(dash) bw(0.45)), ///
 	    legend(order(1 "Not imputed" 2 "Imputed")) title("") xtitle("") ytitle("") graphregion(color(white) fcolor(white)) name(kd_`x'1_`y', replace) saving(kd_`x'1_`y', replace)
 graph export kd_`x'1.png, replace
 }
 
-foreach x in jubpen {
+foreach x in bene {
 	tabstat `x' if `x'>0, stat(mean p10 p25 p50 p75 p90 p99) save
 	matrix aux1=r(StatTotal)'
 	tabstat `x'_imp1 if `x'_imp1>0, stat(mean p10 p25 p50 p75 p90 p99) save
@@ -247,7 +245,7 @@ foreach x in jubpen {
 matrix rownames imp="2019"
 matrix list imp
 
-putexcel set "$pathpathoutexcel\VEN_income_imputation_2019_JL.xlsx", sheet("labor_jubpenimp_stochastic_reg") modify
+putexcel set "$pathpathoutexcel\VEN_income_imputation_2019_JL.xlsx", sheet("labor_beneimp_stochastic_reg") modify
 putexcel A3=matrix(imp), names
 matrix drop imp
 

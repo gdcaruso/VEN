@@ -38,8 +38,8 @@ set more off
 		global male   0
 			
 		if $juli {
-				global main "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-		}
+				global path "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+				global pathoutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"}
 	    if $lauta {
 
 		}

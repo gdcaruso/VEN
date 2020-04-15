@@ -632,7 +632,6 @@ putexcel B`row'=matrix(a3)
 local row= `row' + rowsof(a3)+4
 
 matrix drop aux1 aux2 a a1 a2 a3
-stop
 
 *****************************************************************
 *** POSSIBLE VARIABLES FOR REGRESSION 
@@ -808,9 +807,103 @@ save "$pathout\ENCOVI_forimputation_2019.dta", replace
 	}
 	matrix colnames a="Labor income" "Pensions"
 	matrix list a
-	;
+	
 	putexcel set "$pathoutexcel\VEN_income_imputation_JL.xlsx", sheet("profile_missing_values") modify
 	putexcel B2=matrix(a), colnames
+	
+	
+/* Lo dejo muteado - solo aquí para referencia
+
+*****************************************************************
+*** ANALISIS ILA_M LOCAL INDEPENDIENTES
+*****************************************************************
+
+*Hecho antes de cambiar sus ingresos para analizar qué hacer
+
+	*Contestan ingresos netos anuales?
+	gen indep_inglabmon_anual = .
+	replace indep_inglabmon_anual = 1 		if s9q25a_bolfeb>=0 & s9q25a_bolfeb!=. & s9q25a_bolfeb!=.a
+	replace indep_inglabmon_anual = 0 		if s9q25a_bolfeb==. | s9q25a_bolfeb==.a
+	
+	*Contestan ingresos mensuales?
+	gen indep_inglabmon_mens = .
+		replace indep_inglabmon_mens = 1 	if s9q26a_bolfeb>=0 & s9q26a_bolfeb!=. & s9q26a_bolfeb!=.a
+		replace indep_inglabmon_mens = 0 	if s9q26a_bolfeb==. | s9q26a_bolfeb==.a
+		
+	*Contestan pagos mensuales?
+	gen indep_pagoslabmon_mens = .
+		replace indep_pagoslabmon_mens = 1 	if s9q27_bolfeb>=0 & s9q27_bolfeb!=. & s9q27_bolfeb!=.a
+		replace indep_pagoslabmon_mens = 0 	if s9q27_bolfeb==. | s9q27_bolfeb==.a
+		
+	*Contestan ingresos y pagos mensuales?
+	gen indep_ingpagoslabmon_mens = 0 if indep_pagoslabmon_mens==0 & indep_inglabmon_mens==0
+	replace indep_ingpagoslabmon_mens = 1 if indep_pagoslabmon_mens==0 & indep_inglabmon_mens==1
+	replace indep_ingpagoslabmon_mens = 2 if indep_pagoslabmon_mens==1 & indep_inglabmon_mens==0
+	replace indep_ingpagoslabmon_mens = 3 if indep_pagoslabmon_mens==1 & indep_inglabmon_mens==1
+	label def indep_ingpagoslabmon_mens 	0 "Nada mensual" 1 "Solo ing mensual" 2 "Solo pago mensual" 3 "Pago e ing mensual"
+					label values indep_ingpagoslabmon_mens indep_ingpagoslabmon_mens
+
+	* Nueva var: ingresos anuales / 12
+	gen ingneto_anual_indep = s9q25a_bolfeb/12 if s9q25a_bolfeb!=. & s9q25a_bolfeb!=.a
+	
+	* Nueva var: ingresos mensuales - pagos mensuales
+	gen ingneto_mens_indep 	= cond(missing(s9q26a_bolfeb), ., s9q26a_bolfeb) - cond(missing(s9q27_bolfeb), 0, s9q27_bolfeb)
+		*sin valores negativos
+	gen indep_ingneto_mens 	= cond(missing(s9q26a_bolfeb), ., s9q26a_bolfeb) - cond(missing(s9q27_bolfeb), 0, s9q27_bolfeb)
+			replace indep_ingneto_mens =. if indep_ingneto_mens<0
+	
+	* Relación entre los que contestan lo mensual y los missing?		
+	tab dila_m_miss3 indep_ingpagoslabmon_mens if categ_ocu==6, mi
+		// 2165 de los 3410 missing para anual sí tienen información de ingresos y pagos mensuales
+		
+	reg indep_inglabmon_anual s9q26a_bolfeb if report_inglabmon_nocuanto==0 & categ_ocu==6 // analizo para los que tengo datos	
+	reg indep_inglabmon_anual ingneto_mens_indep if report_inglabmon_nocuanto==0 & categ_ocu==6 & s9q26a_bolfeb!=. & s9q27_bolfeb!=. // analizo para los que tengo datos
+	reg indep_inglabmon_anual indep_ingneto_mens if report_inglabmon_nocuanto==0 & categ_ocu==6 & s9q26a_bolfeb!=. & s9q27_bolfeb!=. // analizo para los que tengo datos
+	reg ila_m ingneto_mens_indep if report_inglabmon_nocuanto==0 & categ_ocu==6 & s9q26a_bolfeb!=. & s9q27_bolfeb!=. // analizo para los que tengo datos
+		// Regres no parecen dar nada
+	
+	* Estadísticas descriptivas
+	sum ila_m if categ_ocu==6, detail
+	sum ingneto_anual_indep if categ_ocu==6, detail
+	sum s9q26a_bolfeb if categ_ocu==6, detail
+	sum ingneto_mens_indep if categ_ocu==6, detail
+		// Como 10% dan negativo, pero eso es esperable...
+	sum indep_ingneto_mens if categ_ocu==6, detail // sin negativos
+		
+	quantiles ila_m if categ_ocu==6, nquant(10) gen(q_ila_m)
+	quantiles ingneto_mens_indep if categ_ocu==6, nquant(10) gen(q_ingmens_m)
+	quantiles ingneto_anual_indep if categ_ocu==6, nquant(10) gen (q_inganu_m)
+	quantiles indep_ingneto_mens if categ_ocu==6, nquant(10) gen (q_ingposmens_m) 
+	
+	preserve
+	keep if categ_ocu==6
+		table q_ila_m, c(mean ila_m median ila_m)
+		table q_ingmens_m, c(mean ingneto_mens_indep median ingneto_mens_indep)
+		table q_inganu_m, c(mean ingneto_anual_indep median ingneto_anual_indep)
+		table q_ingposmens_m, c(mean indep_ingneto_mens median indep_ingneto_mens)
+	restore
+	
+	gen log_ila_m = ln(ila_m) if ila_m!=.
+	gen log_ingneto_mens_indep = ln(ingneto_mens_indep) if ingneto_mens_indep>0 & ingneto_mens_indep!=.
+	gen log_ingneto_anu_indep = ln(ingneto_anual_indep) if ingneto_anual_indep>0 & ingneto_anual_indep!=.
+	
+	twoway (kdensity log_ingneto_anu_indep if log_ingneto_anu_indep>0 & categ_ocu==6, lcolor(blue) bw(0.45)) ///
+		   (kdensity log_ingneto_mens_indep if ingneto_mens_indep>0 & categ_ocu==6, lcolor(red) lp(dash) bw(0.45)), ///
+			legend(order(1 "Log anual/12" 2 "Log ing-gasto mens. (cuando ambos disp.)")) title("") xtitle("") ytitle("") graphregion(color(white) fcolor(white)) // name(kd_`x'1, replace) saving(kd_`x'1, replace)
+	*graph export "kd_analisisindep.png", replace
+
+	/*
+	twoway (kdensity log_ila_m if ila_m>0, lcolor(blue) bw(0.45)) ///
+		   (kdensity log_ingneto_mens_indep if ingneto_mens_indep>0, lcolor(red) lp(dash) bw(0.45)), ///
+			legend(order(1 "Log anual/12" 2 "Log ing-gasto mensual (cuando ambos disp.)")) title("") xtitle("") ytitle("") graphregion(color(white) fcolor(white)) // name(kd_`x'1, replace) saving(kd_`x'1, replace)
+	*graph export "kd_analisisindep.png", replace
+
+	/*
+	twoway (kdensity ila_m if ila_m>0 & ila_m<500000, lcolor(blue) bw(0.45)) ///
+		   (kdensity ingneto_mens_indep if ingneto_mens_indep>0 & ingneto_mens_indep<500000, lcolor(red) lp(dash) bw(0.45)), ///
+			legend(order(1 "Datos anual/12" 2 "Mensual (cuando data de ing. y gasto)")) title("") xtitle("") ytitle("") graphregion(color(white) fcolor(white)) // name(kd_`x'1, replace) saving(kd_`x'1, replace)
+	*graph export "kd_analisisindep.png", replace
+	*/
 
 
 

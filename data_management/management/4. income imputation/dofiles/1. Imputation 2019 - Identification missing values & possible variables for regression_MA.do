@@ -694,79 +694,61 @@ matrix drop aux1 aux2 a a1 a2 a3
 		* Check: Da ok, ninguna con missing
 		
 	* Creo una global para definir el universo de variables sin missing
-	global vars_mineq_sinmis 	edad_sinmis	edad2_sinmis  agegroup_sinmis hombre_sinmis relacion_comp_sinmis miembros_sinmis estado_civil_sinmis region_est1_sinmis municipio_sinmis 	///
+	global vars_mineq_sinmis 	edad_sinmis	edad2_sinmis agegroup_sinmis hombre_sinmis relacion_comp_sinmis miembros_sinmis estado_civil_sinmis region_est1_sinmis municipio_sinmis 	///
 								tipo_vivienda_hh_sinmis propieta_hh_sinmis auto_hh_sinmis anio_auto_hh_sinmis heladera_hh_sinmis lavarropas_hh_sinmis computadora_hh_sinmis	internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
-								/*seguro_salud_sinmis*/ afiliado_segsalud_comp_sinmis /*quien_pagosegsalud_sinmis*/ ///
+								afiliado_segsalud_comp_sinmis ///
 								nivel_educ_sinmis asiste_o_dejoypq_sinmis ///
 								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
 								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///
 								cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
-								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis pgas_monto_sinmis ptelefono_monto_sinmis
+								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis 
 	
 	* Dado que en la siguiente etapa vamos a seleccionar variables para la regresion con LASSO y selectvars
 	* Tengo que transformar las variables categoricas en dummys para que ambos metodos funcionen
 	* Defino una global para transformar mi variables de interes en dummy
-	global vars_dummy_selec 	agegroup_sinmis /*hombre_sinmis*/ relacion_comp_sinmis /*miembros_sinmis*/ estado_civil_sinmis region_est1_sinmis municipio_sinmis 	///
-								tipo_vivienda_hh_sinmis propieta_hh_sinmis auto_hh_sinmis /*anio_auto_hh_sinmis*/ heladera_hh_sinmis lavarropas_hh_sinmis ///
+	
+	global vars_dummy_selec 	agegroup_sinmis relacion_comp_sinmis estado_civil_sinmis region_est1_sinmis municipio_sinmis 	///
+								tipo_vivienda_hh_sinmis propieta_hh_sinmis auto_hh_sinmis heladera_hh_sinmis lavarropas_hh_sinmis ///
 								computadora_hh_sinmis internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
-								/*seguro_salud_sinmis*/ afiliado_segsalud_comp_sinmis /*quien_pagosegsalud_sinmis*/ ///
+								afiliado_segsalud_comp_sinmis ///
 								nivel_educ_sinmis asiste_o_dejoypq_sinmis ///
-								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis /*total_hrtr_sinmis*/ ///
+								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis ///
 								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///
 								cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
 								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis 
-
-								
-								
+							
 								
 	* Creo variables dummy
 	local j=1
 	local varlist ""
 		 foreach y of global vars_dummy_selec {
 			display "`y'"
-			tab `y', gen(d_`y')
-			unab varlist`j': d_*
-			display "`varlist`j''"
-			local varlist `varlist' `varlist`j'' 
+			tab `y', gen(p_`y')
+			unab varlist`j': p_*
+			//display "`varlist`j''"
+			//local varlist `varlist' `varlist`j'' 
 			local j=`j'+1
 					}
-display "`varlist'"
+forval s = 1/38 {
+display "`varlist`s''"
+}
+display "`varlist38'"
 
-		global dummy_vars d_agegrou_1 d_agegrou_2 d_agegrou_3 d_agegrou_4 d_agegrou_5 d_agegrou_6 ///
-		d_agegrou_7 d_agegrou_8 d_relacio_1 d_relacio_2 d_relacio_3 d_relacio_4 d_relacio_5 ///
-		d_relacio_6 d_relacio_7 d_relacio_8 d_relacio_9 d_relacio_10 d_relacio_11 ///
-		d_relacio_12 d_relacio_13 d_estado__1 d_estado__2 d_estado__3 d_estado__4 ///
-		d_estado__5 d_estado__6 d_region__1 d_region__2 d_region__3 d_region__4 ///
-		d_region__5 d_region__6 d_region__7 d_region__8 d_region__9 d_municip_1 d_municip_2 ///
-		d_municip_3 d_municip_4 d_municip_5 d_municip_6 d_municip_7 d_municip_8 ///
-		d_municip_9 d_municip_10 d_municip_11 d_municip_12 d_municip_13 d_municip_14 ///
-		d_municip_15 d_municip_16 d_municip_17 d_municip_18 d_municip_19 d_municip_20 ///
-		d_municip_21 d_municip_23 d_municip_24 d_municip_25 d_municip_27 d_tipo_vi_1 ///
-		d_tipo_vi_2 d_tipo_vi_3 d_tipo_vi_4 d_tipo_vi_5 d_tipo_vi_6 d_tipo_vi_7 d_tipo_vi_8 ///
-		d_propiet_0 d_propiet_1 d_propiet_2 d_auto_hh_0 d_auto_hh_1 d_auto_hh_2 ///
-		d_helader_0 d_helader_1 d_helader_2 d_lavarro_0 d_lavarro_1 d_lavarro_2 ///
-		d_computa_0 d_computa_1 d_computa_2 d_interne_0 d_interne_1 d_interne_2 d_televis_0 ///
-		d_televis_1 d_televis_2 d_calenta_0 d_calenta_1 d_calenta_2 d_aire_hh_0 ///
-		d_aire_hh_1 d_aire_hh_2 d_tv_cabl_0 d_tv_cabl_1 d_tv_cabl_2 d_microon_0 ///
-		d_microon_1 d_microon_2 d_afiliad_1 d_afiliad_2 d_afiliad_3 d_afiliad_4 ///
-		d_afiliad_5 d_afiliad_6 d_afiliad_7 d_nivel_e_1 d_nivel_e_2 d_nivel_e_3 d_nivel_e_4 ///
-		d_nivel_e_5 d_nivel_e_6 d_nivel_e_7 d_nivel_e_8 d_asiste__0 d_asiste__1 ///
-		d_asiste__2 d_asiste__3 d_asiste__4 d_asiste__5 d_asiste__6 d_asiste__7 d_asiste__8 ///
-		d_asiste__9 d_asiste__10 d_asiste__11 d_asiste__12 d_asiste__13 d_asiste__14 ///
-		d_asiste__15 d_asiste__16 d_tarea_s_1 d_tarea_s_2 d_tarea_s_3 d_tarea_s_4 ///
-		d_tarea_s_5 d_tarea_s_6 d_tarea_s_7 d_tarea_s_8 d_tarea_s_9 d_tarea_s_10 ///
-		d_tarea_s_11 d_sector__1 d_sector__2 d_sector__3 d_sector__4 d_sector__5 d_sector__6 ///
-		d_sector__7 d_sector__8 d_sector__9 d_sector__10 d_sector__11 ///
-		d_categ_o_1 d_categ_o_3 d_categ_o_5 d_categ_o_6 d_categ_o_7 d_categ_o_8 d_categ_o_9 ///
-		d_categ_o_10 d_c_sso_s_0 d_c_sso_s_1 d_c_sso_s_2 d_c_rpv_s_0 d_c_rpv_s_1 ///
-		d_c_rpv_s_2 d_c_spf_s_0 d_c_spf_s_1 d_c_spf_s_2 d_c_aca_s_0 d_c_aca_s_1 ///
-		d_c_aca_s_2 d_c_sps_s_0 d_c_sps_s_1 d_c_sps_s_2 d_c_otro__0 d_c_otro__1 d_c_otro__2 ///
-		d_cuenta__0 d_cuenta__1 d_cuenta__2 d_cuenta__0 d_cuenta__1 d_cuenta__2 ///
-		d_tcredit_0 d_tcredit_1 d_tcredit_2 d_tdebito_0 d_tdebito_1 d_tdebito_2 d_no_banc_0 ///
-		d_no_banc_1 d_no_banc_2 d_aporte__1 d_aporte__2 d_aporte__3 d_aporte__4 ///
-		d_aporte__5 d_aporte__6 d_clap_si_0 d_clap_si_1 d_clap_si_2 d_ingsuf__0 d_ingsuf__1 ///
-		d_ingsuf__2 d_comida__0 d_comida__1 d_comida__2
-						
+		global dummy_vars p_agegroup_sinmis1 p_agegroup_sinmis2 p_agegroup_sinmis3 p_agegroup_sinmis4 p_agegroup_sinmis5 p_agegroup_sinmis6 p_agegroup_sinmis7 p_agegroup_sinmis8 ///
+		p_relacion_comp_sinmis1 p_relacion_comp_sinmis2 p_relacion_comp_sinmis3 p_relacion_comp_sinmis4 p_relacion_comp_sinmis5 p_relacion_comp_sinmis6 p_relacion_comp_sinmis7 p_relacion_comp_sinmis8 p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_relacion_comp_sinmis11 p_relacion_comp_sinmis12 p_relacion_comp_sinmis13 ///
+		p_estado_civil_sinmis1 p_estado_civil_sinmis2 p_estado_civil_sinmis3 p_estado_civil_sinmis4 p_estado_civil_sinmis5 p_estado_civil_sinmis6 p_region_est1_sinmis1 p_region_est1_sinmis2 p_region_est1_sinmis3 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis6 p_region_est1_sinmis7 p_region_est1_sinmis8 p_region_est1_sinmis9 ///
+		p_municipio_sinmis1 p_municipio_sinmis2 p_municipio_sinmis3 p_municipio_sinmis4 p_municipio_sinmis5 p_municipio_sinmis6 p_municipio_sinmis7 p_municipio_sinmis8 p_municipio_sinmis9 p_municipio_sinmis10 p_municipio_sinmis11 p_municipio_sinmis12 p_municipio_sinmis13 p_municipio_sinmis14 p_municipio_sinmis15 p_municipio_sinmis16 p_municipio_sinmis17 p_municipio_sinmis18 p_municipio_sinmis19 p_municipio_sinmis20 p_municipio_sinmis21 p_municipio_sinmis22 p_municipio_sinmis23 p_municipio_sinmis24 p_municipio_sinmis25 ///
+		p_tipo_vivienda_hh_sinmis1 p_tipo_vivienda_hh_sinmis2 p_tipo_vivienda_hh_sinmis3 p_tipo_vivienda_hh_sinmis4 p_tipo_vivienda_hh_sinmis5 p_tipo_vivienda_hh_sinmis6 p_tipo_vivienda_hh_sinmis7 p_tipo_vivienda_hh_sinmis8 ///
+		p_propieta_hh_sinmis1 p_propieta_hh_sinmis2 p_propieta_hh_sinmis3 ///
+		p_auto_hh_sinmis1 p_auto_hh_sinmis2 p_auto_hh_sinmis3 p_heladera_hh_sinmis1 p_heladera_hh_sinmis2 p_heladera_hh_sinmis3 p_lavarropas_hh_sinmis1 p_lavarropas_hh_sinmis2 p_lavarropas_hh_sinmis3 p_computadora_hh_sinmis1 p_computadora_hh_sinmis2 p_computadora_hh_sinmis3 p_internet_hh_sinmis1 p_internet_hh_sinmis2 p_internet_hh_sinmis3 p_televisor_hh_sinmis1 p_televisor_hh_sinmis2 p_televisor_hh_sinmis3 p_calentador_hh_sinmis1 p_calentador_hh_sinmis2 p_calentador_hh_sinmis3 p_aire_hh_sinmis1 p_aire_hh_sinmis2 p_aire_hh_sinmis3 p_tv_cable_hh_sinmis1 p_tv_cable_hh_sinmis2 p_tv_cable_hh_sinmis3 p_microondas_hh_sinmis1 p_microondas_hh_sinmis2 p_microondas_hh_sinmis3 ///
+		p_afiliado_segsalud_comp_sinmis1 p_afiliado_segsalud_comp_sinmis2 p_afiliado_segsalud_comp_sinmis3 p_afiliado_segsalud_comp_sinmis4 p_afiliado_segsalud_comp_sinmis5 p_afiliado_segsalud_comp_sinmis6 p_afiliado_segsalud_comp_sinmis7 ///
+		p_nivel_educ_sinmis1 p_nivel_educ_sinmis2 p_nivel_educ_sinmis3 p_nivel_educ_sinmis4 p_nivel_educ_sinmis5 p_nivel_educ_sinmis6 p_nivel_educ_sinmis7 p_nivel_educ_sinmis8 p_asiste_o_dejoypq_sinmis1 p_asiste_o_dejoypq_sinmis2 p_asiste_o_dejoypq_sinmis3 p_asiste_o_dejoypq_sinmis4 p_asiste_o_dejoypq_sinmis5 p_asiste_o_dejoypq_sinmis6 p_asiste_o_dejoypq_sinmis7 p_asiste_o_dejoypq_sinmis8 p_asiste_o_dejoypq_sinmis9 p_asiste_o_dejoypq_sinmis10 p_asiste_o_dejoypq_sinmis11 p_asiste_o_dejoypq_sinmis12 p_asiste_o_dejoypq_sinmis13 p_asiste_o_dejoypq_sinmis14 p_asiste_o_dejoypq_sinmis15 p_asiste_o_dejoypq_sinmis16 p_asiste_o_dejoypq_sinmis17 ///
+		p_tarea_sinmis1 p_tarea_sinmis2 p_tarea_sinmis3 p_tarea_sinmis4 p_tarea_sinmis5 p_tarea_sinmis6 p_tarea_sinmis7 p_tarea_sinmis8 p_tarea_sinmis9 p_tarea_sinmis10 p_tarea_sinmis11 p_sector_encuesta_sinmis1 p_sector_encuesta_sinmis2 p_sector_encuesta_sinmis3 p_sector_encuesta_sinmis4 p_sector_encuesta_sinmis5 p_sector_encuesta_sinmis6 p_sector_encuesta_sinmis7 p_sector_encuesta_sinmis8 p_sector_encuesta_sinmis9 p_sector_encuesta_sinmis10 p_sector_encuesta_sinmis11 p_categ_ocu_sinmis1 p_categ_ocu_sinmis2 p_categ_ocu_sinmis3 p_categ_ocu_sinmis4 p_categ_ocu_sinmis5 p_categ_ocu_sinmis6 p_categ_ocu_sinmis7 p_categ_ocu_sinmis8 p_c_sso_sinmis1 p_c_sso_sinmis2 p_c_sso_sinmis3 ///
+		p_c_rpv_sinmis1 p_c_rpv_sinmis2 p_c_rpv_sinmis3 p_c_spf_sinmis1 p_c_spf_sinmis2 p_c_spf_sinmis3 p_c_aca_sinmis1 p_c_aca_sinmis2 p_c_aca_sinmis3 p_c_sps_sinmis1 p_c_sps_sinmis2 p_c_sps_sinmis3 p_c_otro_sinmis1 p_c_otro_sinmis2 p_c_otro_sinmis3 ///
+		p_cuenta_corr_sinmis1 p_cuenta_corr_sinmis2 p_cuenta_corr_sinmis3 p_cuenta_aho_sinmis1 p_cuenta_aho_sinmis2 p_cuenta_aho_sinmis3 p_tcredito_sinmis1 p_tcredito_sinmis2 p_tcredito_sinmis3 p_tdebito_sinmis1 p_tdebito_sinmis2 p_tdebito_sinmis3 p_no_banco_sinmis1 p_no_banco_sinmis2 p_no_banco_sinmis3 ///
+		p_aporte_pension_sinmis1 p_aporte_pension_sinmis2 p_aporte_pension_sinmis3 p_aporte_pension_sinmis4 p_aporte_pension_sinmis5 p_aporte_pension_sinmis6 ///
+		p_clap_sinmis1 p_clap_sinmis2 p_clap_sinmis3 p_ingsuf_comida_sinmis1 p_ingsuf_comida_sinmis2 p_ingsuf_comida_sinmis3 p_comida_trueque_sinmis1 p_comida_trueque_sinmis2 p_comida_trueque_sinmis3
+
 
 * Equations:
 	* Ingreso laboral montario - hacerlo por categ. ocup?

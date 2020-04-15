@@ -1,21 +1,66 @@
 * ENCOVI 2019 - IMPUTATION
 * Objective: Identification missing values and possible variables for regression
 
+/*===========================================================================
+Country name:	Venezuela
+Year:			2019
+Survey:			ECNFT
+Vintage:		01M-01A
+Project:	
+---------------------------------------------------------------------------
+Authors:			Malena Acuña, Trinidad Saavedra, Lautaro Chittaro, Julieta Ladronis
+
+Dependencies:		CEDLAS/UNLP -- The World Bank
+Creation Date:		March, 2020
+Modification Date:  
+Output:			sedlac do-file template
+
+Note: 
+=============================================================================*/
+********************************************************************************
+clear all 
+
+		* User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   0
+		
+		* User 3: Lautaro
+		global lauta  0
+		
+		* User 4: Malena
+		global male   1
+		
+			
+		if $juli {
+				global pathdata "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
+				global pathout "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+				global pathoutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"
+				global pathdo "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\dofiles"
+		}
+	    if $lauta {
+		}
+		if $trini   {
+		}
+		if $male   {
+				global pathdata "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
+				global pathout "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+				global pathoutexcel "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
+				global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\dofiles"
+		}
+
+		
+
 ****************************************************************
 *** IDENTIFICATION OF MISSING VALUES 
 ****************************************************************
  
-///*** OPEN DATABASE & PATHS ***///
 program drop _all
 
-global pathout "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-global pathoutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"
-global pathdo "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\dofiles"
 qui: do "$pathdo\outliers.do" 
-*ESTE NO use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_INFLA VERDADERA", clear
-*ESTE NO use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", clear
-use "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_Asamblea Nacional.dta", clear
-*use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned\ENCOVI_2019_PRECIOS IMPLICITOS.dta", clear
+*use "$pathdata\ENCOVI_2019_Asamblea Nacional.dta", clear
+use "$pathdata\ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos.dta", clear 
 
 
 ///*** DESCRIPTION INCOME ***///
@@ -74,23 +119,24 @@ use "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 		* Ingreso laboral monetario (empleados y empleadores), segun si recibieron o no en el ultimo mes
 			gen recibe_ingresolab_mon_mes = .
 			replace recibe_ingresolab_mon_mes = 1 if (im_sueldo==1 | im_hsextra==1 | im_propina==1 | im_comision==1 | im_ticket==1 | im_guarderia==1 | im_beca==1 | im_hijos==1 | im_antiguedad==1 | im_transporte==1 | im_rendimiento==1 | im_otro==1) ///
-				| im_petro==1 | im_patron==1 // Recibió ingreso monetario en algún concepto en el último mes (no usamos s9q26 porque se decidió que s9q25 engloba ambas 26 y 27)
+				| im_petro==1 | im_patron==1 | i_indep_mes==1 // Recibió ingreso monetario en algún concepto en el último mes
 			replace recibe_ingresolab_mon_mes = 0 if (im_sueldo==0 & im_hsextra==0 & im_propina==0 & im_comision==0 & im_ticket==0 & im_guarderia==0 & im_beca==0 & im_hijos==0 & im_antiguedad==0 & im_transporte==0 & im_rendimiento==0 & im_otro==0) ///
-				& im_petro==0 & im_patron==0 // No recibió ingreso laboral monetario en ningún concepto mensual
+				& im_petro==0 & im_patron==0 & i_indep_mes==0 // No recibió ingreso laboral monetario en ningún concepto mensual
 			* Problem: income from abroad for salaries/wages and net benefits for independent workers (s9q29a_1 and _2), and local benefits/utilities of independent workers (s9q25) are measured on a yearly basis, not monthly as the others
 			* If we include them in this dummy, there ends up being some unemployed or inactives who report labor income.
 		
 		*Ingreso laboral monetario (independientes y otros), segun si recibieron o no en el ultimo año
 			* Thus, analysis on the side for imputation for those 3 variables, create a new variables
 			gen recibe_ingresolab_mon_ano = .
-			replace recibe_ingresolab_mon_ano = 1 if im_indep==1 | (iext_sueldo==1 | iext_ingnet==1)
+			replace recibe_ingresolab_mon_ano = 1 if (im_indep==1 & inlist(i_indep_mes,.,1)) | (iext_sueldo==1 | iext_ingnet==1) 
+				// Obs.: si contestaron que sí a ingreso anual im_indep pero ya habían contestado que no recibieron el mes pasado, no queremos que cuenten como que sí recibieron porque no queremos a imputarles nada, es un "0 verdadero"
 			replace recibe_ingresolab_mon_ano = 0 if im_indep==0 & iext_sueldo==0 & iext_ingnet==0
 		
-		* Checks (data April 10)
+		* Checks (data April 15)
 		tab recibe_ingresolab_mon_ano recibe_ingresolab_mon_mes, mi
 		tab labor_status recibe_ingresolab_mon_mes, mi // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving monetary labor income
 		tab labor_status recibe_ingresolab_mon_ano, mi // 30 obs. unemployed or inactive with labor income
-		*br if recibe_ingresolab_mon_ano==1 & inlist(labor_status,3,5,6,7,8,9,.)
+		* br if recibe_ingresolab_mon_ano==1 & inlist(labor_status,3,5,6,7,8,9,.)
 		* They are all cases with (iext_sueldo==1 | iext_ingnet==1), which captures 1 year (not 1 week as ocupado variable)
 		
 		gen recibe_ingresolab_mon = .
@@ -351,6 +397,9 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	*clonevar dlinc = ila_dummy
 	clonevar jubpen = ijubi_aux
 	clonevar djubpen = ijubpen_dummy
+	clonevar bene = ingresoslab_bene
+	clonevar inlanojub = inla_aux
+	
 	
 *** Labor income
 		
@@ -363,52 +412,52 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	sum d`x'_zero
 	local a0=r(sum)
 
-	** Missing values: 
+	** Missing values 1: 
 	gen d`x'_miss1=(report_inglabmon_nocuanto==1) 
 			label def d`x'_miss1 1 "Said received monetary ila, but amount missing"
 			label values d`x'_miss1 d`x'_miss1
 	sum d`x'_miss1
 	local a1=r(sum)
 
-	** Missing values:
+	** Missing values 2:
 	gen d`x'_miss2=(ocup_norta_sirecibeila==1)
 			label def d`x'_miss2 1 "Occupied, but didn't answer if received ila"
 			label values d`x'_miss2 d`x'_miss2
 	sum d`x'_miss2
 	local a2=r(sum)
 
-	** Outliers 
-	*** agregar esta parte en el do donde se identifican los missing values
+	** Missing values outliers 
 	clonevar `x'_out=`x'
-	outliers `x' 10 90 5 5 //44 outliers obs
+	outliers `x' 10 90 5 5 // 44 outliers obs
 	sum	`x'_out if	out_`x'==1 //
 	gen d`x'_out=out_`x'==1 if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) 
+	sum d`x'_out
+	local a3=r(sum)
 	replace aimputar_ila_mon=1 if d`x'_out==1 & inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) //adding outliers to variable identifying all the missing values 
 	
-	
-	** Missing values:
+	** Missing values 3:
 	gen d`x'_miss3=(aimputar_ila_mon==1)
 			label def d`x'_miss3 1 "Total missing (sum both cases)"
 			label values d`x'_miss3 d`x'_miss3
 	sum d`x'_miss3
-	local a3=r(sum)
+	local a4=r(sum)
 	
-	mdesc `x' if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.)  //now there are 3963 missing values instead of 3919
+	mdesc `x' if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.)  // now there are 3963 missing values instead of 3919
 	tab d`x'_miss3 if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) 
 	note: fine!
 
 	** Non-zero values
-	sum `x' if `x'>0 & `x'!=. & ila_dummy==1
-	local a4=r(N)
+	sum `x' if `x'>0 & `x'!=. & ila_dummy==1 & d`x'_out!=1
+	local a5=r(N)
 
 	** Total employed, or receive ila mon
 	sum ocup_o_rtarecibenilamon if ocup_o_rtarecibenilamon==1
-	local a5=r(N)
+	local a6=r(N)
 
 	*Creating matrix
-		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' \ `a6')
 		*Percentage
-		matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
+		matrix aux2=((`a0'/`a6')\(`a1'/`a6')\(`a2'/`a6')\(`a3'/`a6')\(`a4'/`a6')\(`a5'/`a6')\(`a6'/`a6'))*100
 		matrix a=nullmat(a), aux1, aux2
 	}
 
@@ -439,11 +488,12 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a2=r(sum)
 	
 	** Outliers 
-	*** agregar esta parte en el do donde se identifican los missing values
 	clonevar `x'_out=`x'
 	outliers `x' 10 90 5 5 
 	sum	`x'_out if	out_`x'==1 //
 	gen d`x'_out=out_`x'==1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+	sum d`x'_out
+	local a3=r(sum)
 	replace aimputar_jubipen=1 if d`x'_out==1 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 
 	
 	** Total missing values
@@ -451,23 +501,24 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 			label def d`x'_miss3 1 "Total missing (sum both cases)"
 			label values d`x'_miss3 d`x'_miss3
 	sum d`x'_miss3
-	local a3=r(sum)
+	local a4=r(sum)
 	
 	mdesc `x' if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0   
 	tab d`x'_miss3 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 
 	note: fine!
 	
 	** Non-zero values
-	sum `x' if `x'>0 & `x'!=. & djubpen==1
-	local a4=r(N)
+	sum `x' if `x'>0 & `x'!=. & djubpen==1 & d`x'_out!=1
+	local a5=r(N)
 
 	** All pensioners and retired, or receive pension/retirement benefits
 	sum jubi_o_rtarecibejubi if jubi_o_rtarecibejubi==1
-	local a5=r(N)
+	local a6=r(N)
 
 	*Creating matrix
-		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' )
-		matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' \ `a6')
+		*Percentage
+		matrix aux2=((`a0'/`a6')\(`a1'/`a6')\(`a2'/`a6')\(`a3'/`a6')\(`a4'/`a6')\(`a5'/`a6')\(`a6'/`a6'))*100
 		matrix a`i'=nullmat(a`i'), aux1, aux2
 	}
 
@@ -481,31 +532,48 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 		label values d`x'_zero d`x'_zero
 	sum d`x'_zero
 	local a0=r(sum)
-
-	** Missing values: 
+	
+	** Missing values 1: 
 	gen d`x'_miss1=(report_inglabnomon_nocuanto==1) 
 			label def d`x'_miss1 1 "Said received non-monetary ila, but amount missing"
 			label values d`x'_miss1 d`x'_miss1
 	sum d`x'_miss1
 	local a1=r(sum)
+	
+	** Missing values: Outliers
+	clonevar `x'_out=`x'
+	outliers `x' 10 90 5 5 
+	sum	`x'_out if out_`x'==1 //
+	gen d`x'_out=out_`x'==1 if recibe_ingresolab_nomon==1
+	sum d`x'_out
+	local a2=r(sum)
+	replace report_inglabnomon_nocuanto=1 if d`x'_out==1 & recibe_ingresolab_nomon==1 
+
+	** Missing values: sum of both 
+	gen d`x'_miss2=(report_inglabnomon_nocuanto==1) 
+			label def d`x'_miss2 1 "Said received non-monetary ila, but amount missing or outlier"
+			label values d`x'_miss2 d`x'_miss2
+	sum d`x'_miss2
+	local a3=r(sum)
 
 	** Non-zero values
-	sum ingresoslab_`x' if ingresoslab_`x'>0 & ingresoslab_`x'!=. & recibe_ingresolab_nomon==1
-	local a2=r(N)
+	sum `x' if `x'>0 & `x'!=. & recibe_ingresolab_nomon==1 & d`x'_out!=1
+	local a4=r(N)
 
 	** All receiving non-monetary labor income
 	sum recibe_ingresolab_nomon if recibe_ingresolab_nomon==1
-	local a3=r(N)
+	local a5=r(N)
 
 	*Creating matrix
-		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' )
-		matrix aux2=((`a0'/`a3')\(`a1'/`a3')\(`a2'/`a3')\(`a3'/`a3'))*100
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4'\ `a5' )
+		*Percentages
+		matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
 		matrix a`i'=nullmat(a`i'), aux1, aux2
 	}
 
 *** Monetary non-labor income (all except pensions)
 	local i=3
-	foreach x in inla {
+	foreach x in inlanojub {
 
 	** Zeros: answered 0 or said didn't receive monetary non-labor income
 	gen d`x'_zero=1 if recibe_ingresonolab_mes==0 | (recibe_ingresonolab_mes==1 & inla_aux==0)
@@ -514,40 +582,57 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	sum d`x'_zero
 	local a0=r(sum)
 
-	** Missing values: 
+	** Missing values 1 
 	gen d`x'_miss1=(report_ingnolab_nocuanto==1) 
 			label def d`x'_miss1 1 "Said received monetary non-labor income, but amount missing"
 			label values d`x'_miss1 d`x'_miss1
 	sum d`x'_miss1
 	local a1=r(sum)
+	
+	** Missing values: Outliers
+	clonevar `x'_out=`x'
+	outliers `x' 10 90 5 5 
+	sum	`x'_out if out_`x'==1 //
+	gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3)
+	sum d`x'_out
+	local a2=r(sum)
+	replace report_ingnolab_nocuanto=1 if d`x'_out==1 & inlist(recibe_ingresonolab,1,2,3) 
+
+	** Missing values: sum of both
+	gen d`x'_miss2=(report_ingnolab_nocuanto==1) 
+			label def d`x'_miss2 1 "Said received monetary non-labor income, but amount missing or outlier"
+			label values d`x'_miss2 d`x'_miss2
+	sum d`x'_miss2
+	local a3=r(sum)
 
 	** Non-zero values
-	sum `x'_aux if `x'_aux>0 & `x'_aux!=. & inlist(recibe_ingresonolab,1,2,3)
-	local a2=r(N)
+	sum `x' if `x'>0 & `x'!=. & inlist(recibe_ingresonolab,1,2,3) & d`x'_out!=1
+	local a4=r(N)
 
 	** All receiving non-monetary labor income
 	sum recibe_ingresonolab if inlist(recibe_ingresonolab,1,2,3)
-	local a3=r(N)
+	local a5=r(N)
 
 	*Creating matrix
-		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' )
-		matrix aux2=((`a0'/`a3')\(`a1'/`a3')\(`a2'/`a3')\(`a3'/`a3'))*100
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4'\ `a5' )
+		*Percentages
+		matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
 		matrix a`i'=nullmat(a`i'), aux1, aux2
 	}
 
 local row=4
-putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA_JL.xlsx", sheet("missing_values") modify
+putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA.xlsx", sheet("missing_values") modify
 putexcel B`row'=matrix(a)
 local row= `row' + rowsof(a)+4
 putexcel B`row'=matrix(a1)
-local row= `row' + rowsof(a1)+4	
+local row= `row' + rowsof(a1)+4
 putexcel B`row'=matrix(a2)
 local row= `row' + rowsof(a2)+4
 putexcel B`row'=matrix(a3)
 local row= `row' + rowsof(a3)+4
 
 matrix drop aux1 aux2 a a1 a2 a3
-
+stop
 
 *****************************************************************
 *** POSSIBLE VARIABLES FOR REGRESSION 

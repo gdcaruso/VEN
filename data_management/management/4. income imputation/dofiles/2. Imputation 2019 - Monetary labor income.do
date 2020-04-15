@@ -53,22 +53,27 @@ Note: Income imputation - Identification missing values
 
 ///*** OPEN DATABASE ***///
 	use "$path\ENCOVI_forimputation_2019.dta", clear
-
-	* Cuántos queremos imputar
+	
+///*** Check missing values to fix
+	 * How many we are going to impute
 	mdesc ila_m if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) 
+
 		// if me decís que recibiste pero ila monteario missing Ó estás ocupado, no decís que no recibís ila_m (eso sería un verdadero missing) y no contestás un monto de ila no mon.
 		* Check: da ok! Igual que la cantidad de miss3
 
-///*** VARIABLES FOR MINCER EQUATION ***///
+		///*** VARIABLES FOR MINCER EQUATION ***///
 
-	global xvar	edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
-				tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh /*anio_auto_hh*/ heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh tv_cable_hh microondas_hh  ///
-				/*seguro_salud*/ afiliado_segsalud_comp ///
-				nivel_educ ///
-				tarea sector_encuesta categ_ocu total_hrtr ///
-				c_sso c_rpv c_spf c_aca c_sps c_otro ///
-				cuenta_corr cuenta_aho tcredito tdebito no_banco ///
-				aporte_pension clap ingsuf_comida comida_trueque
+	 global xvar edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
+					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
+					afiliado_segsalud_comp ///
+					nivel_educ asiste_o_dejoypq ///
+					tarea sector_encuesta categ_ocu total_hrtr ///
+					c_sso c_rpv c_spf c_aca c_sps c_otro ///
+					cuenta_corr cuenta_aho tcredito tdebito no_banco ///
+					aporte_pension clap ingsuf_comida comida_trueque 
+
+///*** Check missing values predictors for these individuals		
+	mdesc $xvar if ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0
 
 * Identifying missing values in potential independent variables for Mincer equation
 	*Note: "mdesc" displays the number and proportion of missing values for each variable in varlist.
@@ -118,14 +123,12 @@ Note: Income imputation - Identification missing values
 		display e(varlist_nonzero)
 		local lassovars = e(varlist_nonzero)
 		
-	** Stepwise (pr usa Chris; Trini usa backward)
-		* ??
 	
 	** Vselect
 		* Se puede usar R2adjustado como criterio. Ojo, no se puede poner variable como factor variables 
 		* return - rpret list
 	
-	vselect log_ila_m $xvar1 if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, best
+	//vselect log_ila_m $xvar1 if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, best
 	
 	* Best: model with XX vars. Copy and paste them here:
 	* CAMBIAR CUANDO CORRA CON LA NUEVA BASE
@@ -147,14 +150,14 @@ Note: Income imputation - Identification missing values
 	*reg log_ila_m `xvar1' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0  // Da peor
 	*reg log_ila_m `nuestrasvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0  // Da peor
 	
-	reg log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0 // R2ajustado .1433
-	reg log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0 // R2ajustado .1436, mejor que Lasso
+	//reg log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0 // R2ajustado .1433
+	//reg log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0 // R2ajustado .1436, mejor que Lasso
 
 	set more off
 	mi set flong
 	set seed 66778899
 	mi register imputed log_ila_m
-	mi impute regress log_ila_m `vselectvars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, add(1) rseed(66778899) force noi 
+	mi impute regress log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, add(1) rseed(66778899) force noi 
 	mi unregister log_ila_m
 	* Obs.: _mi_m es la variable que crea Stata luego de la imputacion e identifica cada base
 		*Ej. si haces 20 imputaciones _mi_m tendra valores de 0 a 20, donde 0 corresponde a la variable sin imputar e 1 a 20 a las bases con un posible valor para los missing values

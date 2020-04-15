@@ -672,14 +672,14 @@ matrix drop aux1 aux2 a a1 a2 a3
 	gen total_hrtr = hstr_ppal 
 	replace total_hrtr = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
 
-	global vars_mineq 	edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
+	global vars_mineq edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
 					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
 					/*seguro_salud*/ afiliado_segsalud_comp /*quien_pagosegsalud*/ ///
 					nivel_educ asiste_o_dejoypq ///
 					tarea sector_encuesta categ_ocu total_hrtr ///
 					c_sso c_rpv c_spf c_aca c_sps c_otro ///
 					cuenta_corr cuenta_aho tcredito tdebito no_banco ///
-					aporte_pension clap ingsuf_comida comida_trueque pgas_monto ptelefono_monto
+					aporte_pension clap ingsuf_comida comida_trueque 
 		
 	* La imputacion de ingreso no puede basarse en variables que contengan missing
 	* Copio variables para que no tengan missing (missing una variables más)

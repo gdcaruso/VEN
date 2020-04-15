@@ -51,6 +51,63 @@ Note:
 *--- Import official data of exchange rates
 *--- Source: 
 *********************************************************************************
+*--------------- 3T 2019		
+*--------------- Set the dates of the exchange rate as a local 
+* These are the names of the excel spreadsheet which contain daily data for each trimester	
+	local fechas_T3_2019 30092019 27092019 26092019 25092019 24092019 23092019 ///
+	20092019 19092019 18092019 17092019 13092019 12092019 11092019 10092019 09092019 ///
+	06092019 05092019 04092019 03092019 02092019 30082019 29082019 28082019 27082019 26082019 ///
+	23082019 22082019 21082019 20082019 16082019 15082019 14082019 13082019 12082019 09082019 ///
+	08082019 07082019 06082019 05082019 
+	
+	foreach k of local fechas_T3_2019 {
+			  cap import excel using "$rootpath\2_1_2c19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
+		gen date="`k'"
+		if `k'==30092019 {
+		tempfile exch1
+		save `exch1'
+		}
+		else {
+			replace date="`k'"
+			append using `exch1'
+			save `exch1', replace
+		}
+	}
+
+
+// Format
+	rename (B) (COD_moneda)
+	label var COD_moneda Moneda
+	rename (MonedaPaís) (Pais)
+	rename VentaASKb Venta
+	rename (F) (Compra)
+
+// Keep useful observations
+	keep if Compra!=. 
+	//Generate a code for each currency
+	encode COD_moneda, gen(COD_moneda_e)
+
+// Replace errors with a code and destring
+	foreach var of varlist Venta VentaASK {
+	replace `var'="." if `var'=="----------------"
+	destring `var', replace force
+	}
+
+// To generate date in a format which allow to merge with price data: YYYY-MM-DD
+     //Generate Year
+	 gen year=substr(date,5,4)
+	 //Generate Month 
+	 gen month=substr(date,3,2)
+	 //Generate Day
+	 gen day=substr(date,1,2)
+// Link the three variables to generate the variable of date  
+	egen date_price=concat(year month day),  punct(-)
+	//Drop the variable used as imput for date
+	drop date
+
+	// Save as temporal file
+	save `exch1', replace
+	clear
 
 *--------------- 4T 2019		
 *--------------- Set the dates of the exchange rate as a local 

@@ -200,9 +200,9 @@ graph export "kd_`x'1.png", replace
 }
 
 foreach x in jubpen {
-	tabstat `x' if `x'>0, stat(mean p10 p25 p50 p75 p90 p99) save
+	tabstat `x' if `x'>0, stat(mean p10 p25 p50 p75 p90) save
 	matrix aux1=r(StatTotal)'
-	tabstat `x'_imp1 if `x'_imp1>0, stat(mean p10 p25 p50 p75 p90 p99) save
+	tabstat `x'_imp1 if `x'_imp1>0, stat(mean p10 p25 p50 p75 p90) save
 	matrix aux2=r(StatTotal)'
 	matrix imp=nullmat(imp)\(aux1,aux2)
 }

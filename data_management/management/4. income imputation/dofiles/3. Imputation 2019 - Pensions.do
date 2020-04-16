@@ -21,13 +21,13 @@ Note: Income imputation - Identification missing values
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
 				global path "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
@@ -37,14 +37,12 @@ Note: Income imputation - Identification missing values
 
 		}
 		if $trini   {
-				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-                global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela"
 				global path "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-				global pathdo "$rootpath2\Income Imputation\dofiles"
 		}
 		
 		if $male   {
 		        global path "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
+				global pathoutexcel "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
 
 		}
 
@@ -177,7 +175,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	drop if imp_id==0 // Saco la base sin imputaciones
 	collapse (mean) jubpen, by(id com) // La imputacion va a ser el promedio de las bases imputadas
 	rename jubpen jubpen_imp1
-	save "$pathoutexcel\VEN_jubpen_imp1.dta", replace
+	save "$path\VEN_jubpen_imp1.dta", replace
 
 ********************************************************************************
 *** Analyzing imputed data
@@ -212,8 +210,15 @@ foreach x in jubpen {
 matrix rownames imp="2019"
 matrix list imp
 
-putexcel set "$pathoutexcel\VEN_income_imputation_2019_JL.xlsx", sheet("labor_jubpenimp_stochastic_reg") modify
+putexcel set "$pathoutexcel\VEN_income_imputation_2019.xlsx", sheet("labor_jubpenimp_stochastic_reg") modify
 putexcel A3=matrix(imp), names
 matrix drop imp
 
+********************************************************************************
+********************************************************************************
+*** Imputation model for labor income: using chained equations
+********************************************************************************
+********************************************************************************
+
+* Hacer?
 

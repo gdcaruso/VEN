@@ -617,7 +617,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	}
 
 local row=4
-putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA.xlsx", sheet("missing_values") modify
+putexcel set "$pathoutexcel\VEN_income_imputation_2019.xlsx", sheet("missing_values") modify
 putexcel B`row'=matrix(a)
 local row= `row' + rowsof(a)+4
 putexcel B`row'=matrix(a1)
@@ -793,7 +793,7 @@ save "$pathout\ENCOVI_forimputation_2019.dta", replace
 	matrix colnames a="Labor income" "Pensions"
 	matrix list a
 	
-	putexcel set "$pathoutexcel\VEN_income_imputation_JL.xlsx", sheet("profile_missing_values") modify
+	putexcel set "$pathoutexcel\VEN_income_imputation_2019.xlsx", sheet("profile_missing_values") modify
 	putexcel B2=matrix(a), colnames
 	
 	

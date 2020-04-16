@@ -38,10 +38,7 @@ Note: Income imputation - Identification missing values
 
 		}
 		if $trini   {
-				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-                global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela"
-				global pathinput "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-				global pathdo "$rootpath2\Income Imputation\dofiles"
+				global path "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
 		}
 		
 		if $male   {
@@ -231,7 +228,7 @@ foreach x in ila_m {
 matrix rownames imp="2019"
 matrix list imp
 
-putexcel set "$pathoutexcel\VEN_income_imputation_2019_MA.xlsx", sheet("labor_incmon_imp_stochastic_reg") modify
+putexcel set "$pathoutexcel\VEN_income_imputation_2019.xlsx", sheet("labor_incmon_imp_stochastic_reg") modify
 putexcel A3=matrix(imp), names
 matrix drop imp
 

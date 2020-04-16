@@ -60,6 +60,7 @@ set more off
 global input "$rootpath\data_management\input\latest"
 global merging "$rootpath\data_management\management\1. merging"
 global output "$rootpath\data_management\output\merged"
+global cleaning "$rootpath\data_management\management\3. cleaning"
 
 /*==============================================================================
 Construction of aproved surveys
@@ -73,4 +74,5 @@ run "$merging/Merge_Hogares_JL.do"
 run "$merging/products_append_n_merge.do"
 //merge prices datasets
 // run "$merging/Merge_Prices_JL.do"
+run "$cleaning/consumption_units_homogenization.do"
 

@@ -1800,7 +1800,7 @@ label	var	itranp_o_m	"Income from other private transfers in the country - monet
 label	var	itranp_ns	"Income from non-specified private transfers	"
 label	var	itrane_o_m	"Income from public transfers other than CCTs - monetary	"
 label	var	itrane_ns	"Income from unspecified public transfers	"
-label	var	inla_otro	"Other non-labor income	"
+label	var	inla_extraord	"Extraordinary non-labor income	"
 label	var	iasalp_m	"Labor income from main occupation - monetary	"
 label	var	iasalp_nm	"Labor income from main occupation - non-monetary	"
 label	var	ictapp_m	"Self-employed income from main occupation - monetary	"

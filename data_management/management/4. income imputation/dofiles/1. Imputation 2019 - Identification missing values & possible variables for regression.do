@@ -222,7 +222,7 @@ use "$pathdata\ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos.dta", clear
 			tab recibe_ingresonolab, mi 
 
 				* Crossed with the amount of income
-				egen inla_aux = rsum(inla_otro itrane_ns itrane_o_m itranp_ns itranp_o_m rem icap_m s9q28a_4_bolfeb), mi
+				egen inla_aux = rsum(inla_otros itrane_ns itrane_o_m itranp_ns itranp_o_m rem icap_m s9q28a_4_bolfeb), mi
 				gen report_ingnolab_nocuanto = .
 				replace report_ingnolab_nocuanto = 1 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux==. // Dicen que reciben inla monetario (no jubi/pens), pero no reportan cuánto
 				replace report_ingnolab_nocuanto = 0 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux>=0 & inla_aux!=.

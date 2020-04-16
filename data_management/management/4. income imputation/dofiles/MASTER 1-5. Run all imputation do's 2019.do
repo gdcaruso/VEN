@@ -203,7 +203,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 			cap drop `i'  	
 		}
 	
-	cap gen hogarsec=.
+	cap gen hogarsec=0
 	cap gen hstrp=hstr_ppal
 	cap gen hstrt= hstr_ppal 
 		replace hstrt = hstr_todos if hstr_todos!=. // los que tienen dos trabajos

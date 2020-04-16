@@ -216,7 +216,7 @@ twoway (kdensity log_`x' if `x'>0 & ocup_o_rtarecibenilamon==1, lcolor(blue) bw(
 	    legend(order(1 "Not imputed" 2 "Imputed")) title("") xtitle("") ytitle("") graphregion(color(white) fcolor(white)) name(kd_`x'1, replace) saving(kd_`x'1, replace)
 graph export "kd_`x'1.png", replace
 }
-
+		
 foreach x in ila_m {
 	tabstat `x' if `x'>0, stat(mean p10 p25 p50 p75 p90) save
 	matrix aux1=r(StatTotal)'

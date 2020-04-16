@@ -81,7 +81,7 @@ use "$pathdata\ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos.dta", clear
 	sum perc_rentimpenitf if itf!=.
 	
 	* Percentage each kind of income in inla
-	foreach i of varlist ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_otro {
+	foreach i of varlist ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord {
 	gen perc_`i'eninla = `i' / inla if inla!=.
 	replace perc_`i'eninla = 0 if inla>0 & `i'==.
 	
@@ -194,9 +194,9 @@ use "$pathdata\ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos.dta", clear
 				
 			* Ingreso no laboral monetario (local) excepto jubilación/pension, segun si recibieron en el último MES
 				gen recibe_ingresonolab_mes = .
-				replace recibe_ingresonolab_mes = 1 if (inla_pens_dsa==1 | inla_beca_pub==1 | inla_beca_pri==1 | inla_ayuda_pu==1 | inla_ayuda_pr==1 | inla_ayuda_fa==1 | inla_asig_men==1 | inla_otro==1 )
+				replace recibe_ingresonolab_mes = 1 if (inla_pens_dsa==1 | inla_beca_pub==1 | inla_beca_pri==1 | inla_ayuda_pu==1 | inla_ayuda_pr==1 | inla_ayuda_fa==1 | inla_asig_men==1 | inla_otros==1 )
 					// Recibió ingreso monetario no laboral en algún concepto en el último mes
-				replace recibe_ingresonolab_mes = 0 if (inla_pens_dsa==0 & inla_beca_pub==0 & inla_beca_pri==0 & inla_ayuda_pu==0 & inla_ayuda_pr==0 & inla_ayuda_fa==0 & inla_asig_men==0 & inla_otro==0) 
+				replace recibe_ingresonolab_mes = 0 if (inla_pens_dsa==0 & inla_beca_pub==0 & inla_beca_pri==0 & inla_ayuda_pu==0 & inla_ayuda_pr==0 & inla_ayuda_fa==0 & inla_asig_men==0 & inla_otros==0) 
 					// No recibió ingreso laboral monetario en ningún concepto mensual
 				* Problem: income from abroad (s9q29a_3 to _9) are measured on a yearly basis, not monthly as the others.
 			

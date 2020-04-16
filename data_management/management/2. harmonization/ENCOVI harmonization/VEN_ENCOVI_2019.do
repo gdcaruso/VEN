@@ -30,7 +30,7 @@ Note:
 			
 		if $juli {
 				global rootpath "C:\Users\wb563583\GitHub\VEN"
-				global dataout 	PONGAN ONE DRIVE PORQUE YA ES MUY PESADA (VER ABAJO EN MALE)
+				global dataout 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
 		}
 	    if $lauta {
 				global rootpath "C:\Users\wb563365\GitHub\VEN"
@@ -3291,7 +3291,7 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 *---------------------------------------------------------- 1.9: Income Variables ----------------------------------------------------------
 *****************************************************************************************************************************************)*/
 
-global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_otro
+global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns /*inla_otro*/ inla_extraord
 
 * Check for negative variables
 	forvalues i = 1(1)12 {	
@@ -4000,7 +4000,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		}		
 	sum inla_extraord
 
-	rename  inla_extraord inla_otro // Because it appeared like this in CEDLAS' do_file_1_variables
+	* rename  inla_extraord inla_otro // Because it appeared like this in CEDLAS' do_file_1_variables
 	
 
 
@@ -4058,8 +4058,10 @@ capture label drop hombre
 capture label drop nivel
 
 *Solo para que corran los do aux de CEDLAS
-	gen hstrp=.
-	gen hstrt=.
+	gen hstrp=hstr_ppal
+	gen hstrt= hstr_ppal 
+		replace hstrt = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
+
 	gen hogarsec=0
 	gen     	relacion = 1		if  relacion_en==1
 		replace relacion = 2		if  relacion_en==2
@@ -4076,84 +4078,76 @@ capture label drop nivel
 
 include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 
-/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
-		1 = Propia pagada		
-		2 = Propia pagandose
-		3 = Alquilada
-		4 = Alquilada parte de la vivienda
-		5 = Adjudicada pagándose Gran Misión Vivienda
-		6 = Adjudicada Gran Misión Vivienda
-		7 = Cedida por razones de trabajo
-		8 = Prestada por familiar o amigo
-		9 = Tomada
-		10 = Otra
+* RENTA IMPUTADA
+	/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
+			1 = Propia pagada		
+			2 = Propia pagandose
+			3 = Alquilada
+			4 = Alquilada parte de la vivienda
+			5 = Adjudicada pagándose Gran Misión Vivienda
+			6 = Adjudicada Gran Misión Vivienda
+			7 = Cedida por razones de trabajo
+			8 = Prestada por familiar o amigo
+			9 = Tomada
+			10 = Otra
+			
+			*Obs: Before there were options saying "De algun programa de gobierno (con titulo de propiedad)" and "De algun programa de gobierno (sin titulo de propiedad)" */
+
+	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
+	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
+	bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
+
+	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
+		gen     renta_imp = .
 		
-		*Obs: Before there were options saying "De algun programa de gobierno (con titulo de propiedad)" and "De algun programa de gobierno (sin titulo de propiedad)"
-*/
+		levelsof interview_month, local(rent_month)
+		foreach m in `rent_month'{
+			levelsof renta_imp_mon, local(rent_currency)
 
-gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
-replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
-bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
+			foreach c in `rent_currency'{
+				di "////"
+				di `m'
+				di `c'
+				di  `tc`c'mes`m''
+				di `deflactor`m''
+				replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
+			}
+		}
 
+		// tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated   
+		//
+		//       7. Para su hogar, la vivienda es? |      Freq.     Percent        Cum.
+		// ----------------------------------------+-----------------------------------
+		//                           Propia pagada |        252       11.91       11.91
+		//                        Propia pagándose |         62        2.93       14.84
+		//                               Alquilada |        420       19.85       34.69
+		//          Alquilada parte de la vivienda |         14        0.66       35.35
+		// Adjudicada pagándose Gran Misión Vivien |         23        1.09       36.44
+		//         Adjudicada Gran Misión Vivienda |         10        0.47       36.91
+		//           Cedida por razones de trabajo |         33        1.56       38.47
+		//           Prestada por familiar o amigo |        895       42.30       80.77
+		//                                  Tomada |        181        8.55       89.32
+		//                                    Otra |        226       10.68      100.00
+		// ----------------------------------------+-----------------------------------
+		//                                   Total |      2,116      100.00
+		gen renta_imp_b = itf_sin_ri*0.1
 
-// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
-gen     renta_imp = .
+		// twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny) ///
+		// || line renta_imp renta_imp if renta_imp<10000000 & renta_imp_b<10000000
 
+		// gen test_renta = renta_imp>renta_imp_b
+		// tab test_renta
+		//  test_renta |      Freq.     Percent        Cum.
+		// ------------+-----------------------------------
+		//           0 |      1,021        3.20        3.20
+		//           1 |     30,927       96.80      100.00
+		// ------------+-----------------------------------
+		//       Total |     31,948      100.00
 
-levelsof interview_month, local(rent_month)
-foreach m in `rent_month'{
-    levelsof renta_imp_mon, local(rent_currency)
+		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //complete with 10% in cases where no guess is provided by hh.
 
-	foreach c in `rent_currency'{
-
-	di "////"
-	di `m'
-	di `c'
-	di  `tc`c'mes`m''
-	di `deflactor`m''
-	replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
-	}
-}
-
-// tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated   
-//
-//       7. Para su hogar, la vivienda es? |      Freq.     Percent        Cum.
-// ----------------------------------------+-----------------------------------
-//                           Propia pagada |        252       11.91       11.91
-//                        Propia pagándose |         62        2.93       14.84
-//                               Alquilada |        420       19.85       34.69
-//          Alquilada parte de la vivienda |         14        0.66       35.35
-// Adjudicada pagándose Gran Misión Vivien |         23        1.09       36.44
-//         Adjudicada Gran Misión Vivienda |         10        0.47       36.91
-//           Cedida por razones de trabajo |         33        1.56       38.47
-//           Prestada por familiar o amigo |        895       42.30       80.77
-//                                  Tomada |        181        8.55       89.32
-//                                    Otra |        226       10.68      100.00
-// ----------------------------------------+-----------------------------------
-//                                   Total |      2,116      100.00
-gen renta_imp_b = itf_sin_ri*0.1
-
-// twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny) ///
-// || line renta_imp renta_imp if renta_imp<10000000 & renta_imp_b<10000000
-
-// gen test_renta = renta_imp>renta_imp_b
-// tab test_renta
-//  test_renta |      Freq.     Percent        Cum.
-// ------------+-----------------------------------
-//           0 |      1,021        3.20        3.20
-//           1 |     30,927       96.80      100.00
-// ------------+-----------------------------------
-//       Total |     31,948      100.00
-
-
-
-
-
- 
-replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //complete with 10% in cases where no guess is provided by hh.
-
-*replace renta_imp = renta_imp / p_reg
-*replace renta_imp = renta_imp / ipc_rel 
+		*replace renta_imp = renta_imp / p_reg
+		*replace renta_imp = renta_imp / ipc_rel 
 
 include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
 * El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear

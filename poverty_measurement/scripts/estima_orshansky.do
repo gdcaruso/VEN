@@ -19,8 +19,8 @@ Note:
 ********************************************************************************
 
 
-// // Define rootpath according to user
-//
+// Define rootpath according to user
+
 	    * User 1: Trini
 		global trini 0
 		
@@ -138,7 +138,7 @@ use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimen
 // 			local deflactor1 1
 // 			local deflactor2 1
 // 			local deflactor3 1
-			
+		
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 			
@@ -156,7 +156,7 @@ use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimen
 				}
 			}
 
-di `tc1mes3'
+di `tc1mes1'
 di `tc2mes1'
 di `tc2mes12'
 di `tc2mes11'
@@ -171,7 +171,6 @@ di `deflactor1'
 di `deflactor2'
 di `deflactor3'
 di `deflactor4' //falta!
-
 
 
 /*(************************************************************************************************************************************************* 
@@ -370,7 +369,7 @@ xtile q = gasto_mensual, nq(100)
 gen flag = q > 99
 gsort -gasto_mensual
 tab q [fw=gasto_mensual] //top 1% of current expenditure gets 98% of total expenditure
-drop if q >99 // drop top 1%
+replace gasto_mensual=. if q >99 // drop top 1%
 
 tab q [fw=gasto_mensual] //now looks more reasonable
 
@@ -393,12 +392,12 @@ gen ingfam = ipcf*miembros
 gen superavit = ingfam > gasto_mensual
 gen keynes_multiplier = ingfam/gasto_mensual
 
-graph box keynes, noout
+//graph box keynes, noout
 tab superavit
 codebook ingfam
 
 
-stop
+
 /*(************************************************************************************************************************************************* 
 * // HH section  (wide shape) 
 *********************************************************************************************************************)*/
@@ -435,265 +434,139 @@ $jubivar
 
 // first we move everything to feb 2020 bolivares, mensual freq. Then we reshape to get a long dataset.
 
-******************************************vivienda
-// global viviendavar renta_imp pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m renta_imp_en renta_imp_mon
 
+
+******************************************vivienda
+// we use the imputed rent or the actually payed rent
+
+// global viviendavar pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m
 *********************declared rent (mensual)
 // data in bolivares feb2020
-gen gasto901 = pago_alq_mutuo if pago_alq_mutuo_mon ==1 & pago_alq_mutuo_m == 2
 
 
-// data of March and many currencies
-replace gasto901 = pago_alq_mutuo* `deflactor3' if pago_alq_mutuo_mon == 1 & pago_alq_mutuo_m == 3
-replace gasto901 = pago_alq_mutuo* `tc2mes3'* `deflactor3' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 3
-replace gasto901 = pago_alq_mutuo* `tc3mes3'* `deflactor3' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 3
-replace gasto901 = pago_alq_mutuo* `tc4mes3'* `deflactor3' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 3
+gen gasto901 =.
+levelsof pago_alq_mutuo_m, local(month)
+foreach m in `month'{
+	levelsof pago_alq_mutuo_mon, local(currency)
+	foreach c in `currency'{
+	if `m'>10 | `m'<3 {
+		replace gasto901 = pago_alq_mutuo*`tc`c'mes`m''*`deflactor`m'' if pago_alq_mutuo_m == `m' & pago_alq_mutuo_mon == `c'
+		di `m'
+		di `c'
+		di `tc`c'mes`m''
+		di `deflactor`m''
+	}
+	}
+	}
 
-// data in many currencies feb2020
-
-replace gasto901 = pago_alq_mutuo* `tc2mes2' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 2
-replace gasto901 = pago_alq_mutuo* `tc3mes2' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 2
-replace gasto901 = pago_alq_mutuo* `tc4mes2' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 2
-
-// data of Jan and many currencies
-replace gasto901 = pago_alq_mutuo* `deflactor1' if pago_alq_mutuo_mon == 1 & pago_alq_mutuo_m == 1
-replace gasto901 = pago_alq_mutuo* `tc2mes1'* `deflactor1' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 1
-replace gasto901 = pago_alq_mutuo* `tc3mes1'* `deflactor1' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 1
-replace gasto901 = pago_alq_mutuo* `tc4mes1'* `deflactor1' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 1
-
-
-// data of Dec and many currencies
-replace gasto901 = pago_alq_mutuo* `deflactor12' if pago_alq_mutuo_mon == 1 & pago_alq_mutuo_m == 12
-replace gasto901 = pago_alq_mutuo* `tc2mes12'* `deflactor12' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 12
-replace gasto901 = pago_alq_mutuo* `tc3mes12'* `deflactor12' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 12
-replace gasto901 = pago_alq_mutuo* `tc4mes12'* `deflactor12' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 12
-
-// data of Nov and many currencies
-replace gasto901 = pago_alq_mutuo* `deflactor11' if pago_alq_mutuo_mon == 1 & pago_alq_mutuo_m == 11
-replace gasto901 = pago_alq_mutuo* `tc2mes11'* `deflactor11' if pago_alq_mutuo_mon == 2 & pago_alq_mutuo_m == 11
-replace gasto901 = pago_alq_mutuo* `tc3mes11'* `deflactor11' if pago_alq_mutuo_mon == 3 & pago_alq_mutuo_m == 11
-replace gasto901 = pago_alq_mutuo* `tc4mes11'* `deflactor11' if pago_alq_mutuo_mon == 4 & pago_alq_mutuo_m == 11
-
-
-
-*****************renta imputada por el entrevisatado
-
-// data in bolivares feb2020
-gen gasto902 = renta_imp_en if renta_imp_mon == 1 // the pop of reference is already based on feb2020
-
-
-// data in many currencies (feb)
-replace gasto902 = renta_imp_en* `tc2mes2' if renta_imp_mon == 2
-replace gasto902 = renta_imp_en* `tc3mes2' if renta_imp_mon == 3
-replace gasto902 = renta_imp_en* `tc4mes2' if renta_imp_mon == 4
 
 ******************inputed rent by analyst
 // data in bolivares feb2020
-gen gasto903 = renta_imp if renta_imp_mon == 1 //assumed everything was moved in the income module to feb 2020
+gen gasto903 = renta_imp //assumed everything was moved in the income module to feb 2020
 
+gen gasto90 = renta_imp // uses imputed rent or
+replace gasto90 = gasto901 if gasto901 !=. // reported rent. If there are both, reported rent prevails
 
+// outliars detection
+replace gasto90 = round(gasto90)
+xtile q = gasto90, nq(100)
+gen flag = q > 99
+gsort -gasto90
+tab q [fw=gasto90] //top 1% of current expenditure gets 98% of total expenditure
+tab q [fw=gasto90] //now looks more reasonable
+drop q flag
 
 **********************************************services
 // global serviciosvar pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m
 *******************agua
 
 
-// data in many currencies (march)
-gen gasto911 = pagua_monto* `deflactor3' if pagua_mon == 1 & pagua_m==3
-replace gasto911 = pagua_monto* `tc2mes3' * `deflactor3' if pagua_mon == 2 & pagua_m==3
-replace gasto911 = pagua_monto* `tc3mes3' * `deflactor3' if pagua_mon == 3 & pagua_m==3
-replace gasto911 = pagua_monto* `tc4mes3' * `deflactor3' if pagua_mon == 4 & pagua_m==3
+gen gasto911 =.
+gen gasto912 =.
+gen gasto913 =.
+gen gasto914 =.
+gen gasto915 =.
+gen gasto916 =.
 
 
-// data in many currencies (feb)
-replace gasto911 = pagua_monto if pagua_mon == 1 & pagua_m==2
-replace gasto911 = pagua_monto* `tc2mes2' * `deflactor2' if pagua_mon == 2 & pagua_m==2
-replace gasto911 = pagua_monto* `tc3mes2' * `deflactor2' if pagua_mon == 3 & pagua_m==2
-replace gasto911 = pagua_monto* `tc4mes2' * `deflactor2' if pagua_mon == 4 & pagua_m==2
+// gasto en agua
+local servicios pagua pelect pgas pcarbon pparafina ptelefono
+local n=910
 
-// data in many currencies (jan)
-replace gasto911 = pagua_monto  * `deflactor1' if pagua_mon == 1 & pagua_m==1
-replace gasto911 = pagua_monto* `tc2mes1' * `deflactor1' if pagua_mon == 2 & pagua_m==1
-replace gasto911 = pagua_monto* `tc3mes1' * `deflactor1' if pagua_mon == 3 & pagua_m==1
-replace gasto911 = pagua_monto* `tc4mes1' * `deflactor1' if pagua_mon == 4 & pagua_m==1
-
-// data in many currencies (dec)
-replace gasto911 = pagua_monto * `deflactor12' if pagua_mon == 1 & pagua_m==12
-replace gasto911 = pagua_monto* `tc2mes12' * `deflactor12' if pagua_mon == 2 & pagua_m==12
-replace gasto911 = pagua_monto* `tc3mes12' * `deflactor12' if pagua_mon == 3 & pagua_m==12
-replace gasto911 = pagua_monto* `tc4mes12' * `deflactor12' if pagua_mon == 4 & pagua_m==12
-
-// data in many currencies (nov)
-replace gasto911 = pagua_monto  * `deflactor11' if pagua_mon == 1 & pagua_m==11
-replace gasto911 = pagua_monto* `tc2mes11' * `deflactor11' if pagua_mon == 2 & pagua_m==11
-replace gasto911 = pagua_monto* `tc3mes11' * `deflactor11' if pagua_mon == 3 & pagua_m==11
-replace gasto911 = pagua_monto* `tc4mes11' * `deflactor11' if pagua_mon == 4 & pagua_m==11
-
-
-*******************electricidad
-
-// data in many currencies (march)
-gen gasto912 = pelect_monto* `deflactor3' if pelect_mon == 1 & pelect_m==3
-replace gasto912 = pelect_monto* `tc2mes3' * `deflactor3' if pelect_mon == 2 & pelect_m==3
-replace gasto912 = pelect_monto* `tc3mes3' * `deflactor3' if pelect_mon == 3 & pelect_m==3
-replace gasto912 = pelect_monto* `tc4mes3' * `deflactor3' if pelect_mon == 4 & pelect_m==3
-
-
-// data in many currencies (feb)
-replace gasto912 = pelect_monto if pelect_mon == 1 & pelect_m==2
-replace gasto912 = pelect_monto* `tc2mes2' * `deflactor2' if pelect_mon == 2 & pelect_m==2
-replace gasto912 = pelect_monto* `tc3mes2' * `deflactor2' if pelect_mon == 3 & pelect_m==2
-replace gasto912 = pelect_monto* `tc4mes2' * `deflactor2' if pelect_mon == 4 & pelect_m==2
-
-// data in many currencies (jan)
-replace gasto912 = pelect_monto  * `deflactor1' if pelect_mon == 1 & pelect_m==1
-replace gasto912 = pelect_monto* `tc2mes1' * `deflactor1' if pelect_mon == 2 & pelect_m==1
-replace gasto912 = pelect_monto* `tc3mes1' * `deflactor1' if pelect_mon == 3 & pelect_m==1
-replace gasto912 = pelect_monto* `tc4mes1' * `deflactor1' if pelect_mon == 4 & pelect_m==1
-
-// data in many currencies (dec)
-replace gasto912 = pelect_monto * `deflactor12' if pelect_mon == 1 & pelect_m==12
-replace gasto912 = pelect_monto* `tc2mes12' * `deflactor12' if pelect_mon == 2 & pelect_m==12
-replace gasto912 = pelect_monto* `tc3mes12' * `deflactor12' if pelect_mon == 3 & pelect_m==12
-replace gasto912 = pelect_monto* `tc4mes12' * `deflactor12' if pelect_mon == 4 & pelect_m==12
-
-// data in many currencies (nov)
-replace gasto912 = pelect_monto  * `deflactor11' if pelect_mon == 1 & pelect_m==11
-replace gasto912 = pelect_monto* `tc2mes11' * `deflactor11' if pelect_mon == 2 & pelect_m==11
-replace gasto912 = pelect_monto* `tc3mes11' * `deflactor11' if pelect_mon == 3 & pelect_m==11
-replace gasto912 = pelect_monto* `tc4mes11' * `deflactor11' if pelect_mon == 4 & pelect_m==11
+foreach v in `servicios'{
+local n=`n'+1
+levelsof `v'_m, local(month)
+	foreach m in `month'{
+	levelsof `v'_mon, local(currency)
+		foreach c in `currency'{
+		if `m'>10 | `m'<4 {
+			di "`v'" "`n'"
+			di `m'
+			di `c'
+			di `tc`c'mes`m''
+			di `deflactor`m''
+			replace gasto`n' = `v'_monto*`tc`c'mes`m''*`deflactor`m'' if `v'_m == `m' & `v'_mon == `c'
+		}
+		}
+		}
+	}
 
 
 
-******************gas
-// data in many currencies (march)
-gen gasto913 = pgas_monto* `deflactor3' if pgas_mon == 1 & pgas_m==3
-replace gasto913 = pgas_monto* `tc2mes3' * `deflactor3' if pgas_mon == 2 & pgas_m==3
-replace gasto913 = pgas_monto* `tc3mes3' * `deflactor3' if pgas_mon == 3 & pgas_m==3
-replace gasto913 = pgas_monto* `tc4mes3' * `deflactor3' if pgas_mon == 4 & pgas_m==3
+// outliars detection
+replace gasto911 = round(gasto911)
+xtile q = gasto911, nq(100)
+gen flag = q > 99
+gsort -gasto911
+tab q [fw=gasto911] //top 1% of current expenditure gets 20% of total expenditure
+//drop if q >99 // do not drop 1% looks reasonable
+drop q flag
 
 
-// data in many currencies (feb)
-replace gasto913 = pgas_monto if pgas_mon == 1 & pgas_m==2
-replace gasto913 = pgas_monto* `tc2mes2' * `deflactor2' if pgas_mon == 2 & pgas_m==2
-replace gasto913 = pgas_monto* `tc3mes2' * `deflactor2' if pgas_mon == 3 & pgas_m==2
-replace gasto913 = pgas_monto* `tc4mes2' * `deflactor2' if pgas_mon == 4 & pgas_m==2
+// outliars detection
+replace gasto912 = round(gasto912)
+xtile q = gasto912, nq(100)
+gen flag = q > 99
+gsort -gasto912
+tab q [fw=gasto912] //top 1% of current expenditure gets 50% of total expenditure
+replace gasto912=. if q >99  // drop 1% 
+drop q flag
 
-// data in many currencies (jan)
-replace gasto913 = pgas_monto  * `deflactor1' if pgas_mon == 1 & pgas_m==1
-replace gasto913 = pgas_monto* `tc2mes1' * `deflactor1' if pgas_mon == 2 & pgas_m==1
-replace gasto913 = pgas_monto* `tc3mes1' * `deflactor1' if pgas_mon == 3 & pgas_m==1
-replace gasto913 = pgas_monto* `tc4mes1' * `deflactor1' if pgas_mon == 4 & pgas_m==1
+// outliars detection
+replace gasto913 = round(gasto913)
+xtile q = gasto913, nq(100)
+gen flag = q > 99
+gsort -gasto913
+tab q [fw=gasto913] 
+replace gasto913=. if q >99 
+drop q flag
 
-// data in many currencies (dec)
-replace gasto913 = pgas_monto * `deflactor12' if pgas_mon == 1 & pgas_m==12
-replace gasto913 = pgas_monto* `tc2mes12' * `deflactor12' if pgas_mon == 2 & pgas_m==12
-replace gasto913 = pgas_monto* `tc3mes12' * `deflactor12' if pgas_mon == 3 & pgas_m==12
-replace gasto913 = pgas_monto* `tc4mes12' * `deflactor12' if pgas_mon == 4 & pgas_m==12
+// outliars detection
+replace gasto914 = round(gasto914)
+xtile q = gasto914, nq(100)
+gen flag = q > 99
+gsort -gasto914
+tab q [fw=gasto914] //top 1% of current expenditure gets 20% of total expenditure
+//drop if q >99 // do not drop 1% looks reasonable
+drop q flag
 
-// data in many currencies (nov)
-replace gasto913 = pgas_monto  * `deflactor11' if pgas_mon == 1 & pgas_m==11
-replace gasto913 = pgas_monto* `tc2mes11' * `deflactor11' if pgas_mon == 2 & pgas_m==11
-replace gasto913 = pgas_monto* `tc3mes11' * `deflactor11' if pgas_mon == 3 & pgas_m==11
-replace gasto913 = pgas_monto* `tc4mes11' * `deflactor11' if pgas_mon == 4 & pgas_m==11
+// outliars detection
+replace gasto915 = round(gasto915)
+xtile q = gasto915, nq(100)
+gen flag = q > 99
+gsort -gasto915
+tab q [fw=gasto915]
+drop q flag
 
-******************carbon
-// data in many currencies (march)
-gen gasto914 = pcarbon_monto* `deflactor3' if pcarbon_mon == 1 & pcarbon_m==3
-replace gasto914 = pcarbon_monto* `tc2mes3' * `deflactor3' if pcarbon_mon == 2 & pcarbon_m==3
-replace gasto914 = pcarbon_monto* `tc3mes3' * `deflactor3' if pcarbon_mon == 3 & pcarbon_m==3
-replace gasto914 = pcarbon_monto* `tc4mes3' * `deflactor3' if pcarbon_mon == 4 & pcarbon_m==3
+// outliars detection
+replace gasto916 = round(gasto916)
+xtile q = gasto916, nq(100)
+gen flag = q > 99
+gsort -gasto916
+tab q [fw=gasto916] //
+drop q flag
 
-
-// data in many currencies (feb)
-replace gasto914 = pcarbon_monto if pcarbon_mon == 1 & pcarbon_m==2
-replace gasto914 = pcarbon_monto* `tc2mes2' * `deflactor2' if pcarbon_mon == 2 & pcarbon_m==2
-replace gasto914 = pcarbon_monto* `tc3mes2' * `deflactor2' if pcarbon_mon == 3 & pcarbon_m==2
-replace gasto914 = pcarbon_monto* `tc4mes2' * `deflactor2' if pcarbon_mon == 4 & pcarbon_m==2
-
-// data in many currencies (jan)
-replace gasto914 = pcarbon_monto  * `deflactor1' if pcarbon_mon == 1 & pcarbon_m==1
-replace gasto914 = pcarbon_monto* `tc2mes1' * `deflactor1' if pcarbon_mon == 2 & pcarbon_m==1
-replace gasto914 = pcarbon_monto* `tc3mes1' * `deflactor1' if pcarbon_mon == 3 & pcarbon_m==1
-replace gasto914 = pcarbon_monto* `tc4mes1' * `deflactor1' if pcarbon_mon == 4 & pcarbon_m==1
-
-// data in many currencies (dec)
-replace gasto914 = pcarbon_monto * `deflactor12' if pcarbon_mon == 1 & pcarbon_m==12
-replace gasto914 = pcarbon_monto* `tc2mes12' * `deflactor12' if pcarbon_mon == 2 & pcarbon_m==12
-replace gasto914 = pcarbon_monto* `tc3mes12' * `deflactor12' if pcarbon_mon == 3 & pcarbon_m==12
-replace gasto914 = pcarbon_monto* `tc4mes12' * `deflactor12' if pcarbon_mon == 4 & pcarbon_m==12
-
-// data in many currencies (nov)
-replace gasto914 = pcarbon_monto  * `deflactor11' if pcarbon_mon == 1 & pcarbon_m==11
-replace gasto914 = pcarbon_monto* `tc2mes11' * `deflactor11' if pcarbon_mon == 2 & pcarbon_m==11
-replace gasto914 = pcarbon_monto* `tc3mes11' * `deflactor11' if pcarbon_mon == 3 & pcarbon_m==11
-replace gasto914 = pcarbon_monto* `tc4mes11' * `deflactor11' if pcarbon_mon == 4 & pcarbon_m==11
-
-
-******************parafina
-// data in many currencies (march)
-gen gasto915 = pparafina_monto* `deflactor3' if pparafina_mon == 1 & pparafina_m==3
-replace gasto915 = pparafina_monto* `tc2mes3' * `deflactor3' if pparafina_mon == 2 & pparafina_m==3
-replace gasto915 = pparafina_monto* `tc3mes3' * `deflactor3' if pparafina_mon == 3 & pparafina_m==3
-replace gasto915 = pparafina_monto* `tc4mes3' * `deflactor3' if pparafina_mon == 4 & pparafina_m==3
-
-
-// data in many currencies (feb)
-replace gasto915 = pparafina_monto if pparafina_mon == 1 & pparafina_m==2
-replace gasto915 = pparafina_monto* `tc2mes2' * `deflactor2' if pparafina_mon == 2 & pparafina_m==2
-replace gasto915 = pparafina_monto* `tc3mes2' * `deflactor2' if pparafina_mon == 3 & pparafina_m==2
-replace gasto915 = pparafina_monto* `tc4mes2' * `deflactor2' if pparafina_mon == 4 & pparafina_m==2
-
-// data in many currencies (jan)
-replace gasto915 = pparafina_monto  * `deflactor1' if pparafina_mon == 1 & pparafina_m==1
-replace gasto915 = pparafina_monto* `tc2mes1' * `deflactor1' if pparafina_mon == 2 & pparafina_m==1
-replace gasto915 = pparafina_monto* `tc3mes1' * `deflactor1' if pparafina_mon == 3 & pparafina_m==1
-replace gasto915 = pparafina_monto* `tc4mes1' * `deflactor1' if pparafina_mon == 4 & pparafina_m==1
-
-// data in many currencies (dec)
-replace gasto915 = pparafina_monto * `deflactor12' if pparafina_mon == 1 & pparafina_m==12
-replace gasto915 = pparafina_monto* `tc2mes12' * `deflactor12' if pparafina_mon == 2 & pparafina_m==12
-replace gasto915 = pparafina_monto* `tc3mes12' * `deflactor12' if pparafina_mon == 3 & pparafina_m==12
-replace gasto915 = pparafina_monto* `tc4mes12' * `deflactor12' if pparafina_mon == 4 & pparafina_m==12
-
-// data in many currencies (nov)
-replace gasto915 = pparafina_monto  * `deflactor11' if pparafina_mon == 1 & pparafina_m==11
-replace gasto915 = pparafina_monto* `tc2mes11' * `deflactor11' if pparafina_mon == 2 & pparafina_m==11
-replace gasto915 = pparafina_monto* `tc3mes11' * `deflactor11' if pparafina_mon == 3 & pparafina_m==11
-replace gasto915 = pparafina_monto* `tc4mes11' * `deflactor11' if pparafina_mon == 4 & pparafina_m==11
-
-******************telefono
-// data in many currencies (march)
-gen gasto916 = ptelefono_monto* `deflactor3' if ptelefono_mon == 1 & ptelefono_m==3
-replace gasto916 = ptelefono_monto* `tc2mes3' * `deflactor3' if ptelefono_mon == 2 & ptelefono_m==3
-replace gasto916 = ptelefono_monto* `tc3mes3' * `deflactor3' if ptelefono_mon == 3 & ptelefono_m==3
-replace gasto916 = ptelefono_monto* `tc4mes3' * `deflactor3' if ptelefono_mon == 4 & ptelefono_m==3
-
-
-// data in many currencies (feb)
-replace gasto916 = ptelefono_monto if ptelefono_mon == 1 & ptelefono_m==2
-replace gasto916 = ptelefono_monto* `tc2mes2' * `deflactor2' if ptelefono_mon == 2 & ptelefono_m==2
-replace gasto916 = ptelefono_monto* `tc3mes2' * `deflactor2' if ptelefono_mon == 3 & ptelefono_m==2
-replace gasto916 = ptelefono_monto* `tc4mes2' * `deflactor2' if ptelefono_mon == 4 & ptelefono_m==2
-
-// data in many currencies (jan)
-replace gasto916 = ptelefono_monto  * `deflactor1' if ptelefono_mon == 1 & ptelefono_m==1
-replace gasto916 = ptelefono_monto* `tc2mes1' * `deflactor1' if ptelefono_mon == 2 & ptelefono_m==1
-replace gasto916 = ptelefono_monto* `tc3mes1' * `deflactor1' if ptelefono_mon == 3 & ptelefono_m==1
-replace gasto916 = ptelefono_monto* `tc4mes1' * `deflactor1' if ptelefono_mon == 4 & ptelefono_m==1
-
-// data in many currencies (dec)
-replace gasto916 = ptelefono_monto * `deflactor12' if ptelefono_mon == 1 & ptelefono_m==12
-replace gasto916 = ptelefono_monto* `tc2mes12' * `deflactor12' if ptelefono_mon == 2 & ptelefono_m==12
-replace gasto916 = ptelefono_monto* `tc3mes12' * `deflactor12' if ptelefono_mon == 3 & ptelefono_m==12
-replace gasto916 = ptelefono_monto* `tc4mes12' * `deflactor12' if ptelefono_mon == 4 & ptelefono_m==12
-
-// data in many currencies (nov)
-replace gasto916 = ptelefono_monto  * `deflactor11' if ptelefono_mon == 1 & ptelefono_m==11
-replace gasto916 = ptelefono_monto* `tc2mes11' * `deflactor11' if ptelefono_mon == 2 & ptelefono_m==11
-replace gasto916 = ptelefono_monto* `tc3mes11' * `deflactor11' if ptelefono_mon == 3 & ptelefono_m==11
-replace gasto916 = ptelefono_monto* `tc4mes11' * `deflactor11' if ptelefono_mon == 4 & ptelefono_m==11
-
+egen gasto91 = rowtotal(gasto91*)
 
 
 
@@ -703,205 +576,96 @@ replace gasto916 = ptelefono_monto* `tc4mes11' * `deflactor11' if ptelefono_mon 
 
 *********************inscripcion (assumed annual freq)
 
-// data in many currencies (march)
-gen gasto921 = cuota_insc_monto* `deflactor3' if cuota_insc_mon == 1 & cuota_insc_m==3
-replace gasto921 = cuota_insc_monto/12* `tc2mes3' * `deflactor3' if cuota_insc_mon == 2 & cuota_insc_m==3
-replace gasto921 = cuota_insc_monto/12* `tc3mes3' * `deflactor3' if cuota_insc_mon == 3 & cuota_insc_m==3
-replace gasto921 = cuota_insc_monto/12* `tc4mes3' * `deflactor3' if cuota_insc_mon == 4 & cuota_insc_m==3
 
 
-// data in many currencies (feb)
-replace gasto921 = cuota_insc_monto/12 if cuota_insc_mon == 1 & cuota_insc_m==2
-replace gasto921 = cuota_insc_monto/12* `tc2mes2' * `deflactor2' if cuota_insc_mon == 2 & cuota_insc_m==2
-replace gasto921 = cuota_insc_monto/12* `tc3mes2' * `deflactor2' if cuota_insc_mon == 3 & cuota_insc_m==2
-replace gasto921 = cuota_insc_monto/12* `tc4mes2' * `deflactor2' if cuota_insc_mon == 4 & cuota_insc_m==2
-
-// data in many currencies (jan)
-replace gasto921 = cuota_insc_monto/12  * `deflactor1' if cuota_insc_mon == 1 & cuota_insc_m==1
-replace gasto921 = cuota_insc_monto/12* `tc2mes1' * `deflactor1' if cuota_insc_mon == 2 & cuota_insc_m==1
-replace gasto921 = cuota_insc_monto/12* `tc3mes1' * `deflactor1' if cuota_insc_mon == 3 & cuota_insc_m==1
-replace gasto921 = cuota_insc_monto/12* `tc4mes1' * `deflactor1' if cuota_insc_mon == 4 & cuota_insc_m==1
-
-// data in many currencies (dec)
-replace gasto921 = cuota_insc_monto/12 * `deflactor12' if cuota_insc_mon == 1 & cuota_insc_m==12
-replace gasto921 = cuota_insc_monto/12* `tc2mes12' * `deflactor12' if cuota_insc_mon == 2 & cuota_insc_m==12
-replace gasto921 = cuota_insc_monto/12* `tc3mes12' * `deflactor12' if cuota_insc_mon == 3 & cuota_insc_m==12
-replace gasto921 = cuota_insc_monto/12* `tc4mes12' * `deflactor12' if cuota_insc_mon == 4 & cuota_insc_m==12
-
-// data in many currencies (nov)
-replace gasto921 = cuota_insc_monto/12  * `deflactor11' if cuota_insc_mon == 1 & cuota_insc_m==11
-replace gasto921 = cuota_insc_monto/12* `tc2mes11' * `deflactor11' if cuota_insc_mon == 2 & cuota_insc_m==11
-replace gasto921 = cuota_insc_monto/12* `tc3mes11' * `deflactor11' if cuota_insc_mon == 3 & cuota_insc_m==11
-replace gasto921 = cuota_insc_monto/12* `tc4mes11' * `deflactor11' if cuota_insc_mon == 4 & cuota_insc_m==11
+gen gasto921 =.
+gen gasto922 =.
+gen gasto923 =.
+gen gasto924 =.
+gen gasto925 =.
+gen gasto926 =.
 
 
-*********************utiles (assumed annual freq)
+// gasto en agua
+local educ cuota_insc compra_utiles compra_uniforme costo_men costo_transp otros_gastos
+local n=920
 
-// data in many currencies (march)
-gen gasto922 = compra_utiles_monto/12* `deflactor3' if compra_utiles_mon == 1 & compra_utiles_m==3
-replace gasto922 = compra_utiles_monto/12* `tc2mes3' * `deflactor3' if compra_utiles_mon == 2 & compra_utiles_m==3
-replace gasto922 = compra_utiles_monto/12* `tc3mes3' * `deflactor3' if compra_utiles_mon == 3 & compra_utiles_m==3
-replace gasto922 = compra_utiles_monto/12* `tc4mes3' * `deflactor3' if compra_utiles_mon == 4 & compra_utiles_m==3
-
-
-// data in many currencies (feb)
-replace gasto922 = compra_utiles_monto/12 if compra_utiles_mon == 1 & compra_utiles_m==2
-replace gasto922 = compra_utiles_monto/12* `tc2mes2' * `deflactor2' if compra_utiles_mon == 2 & compra_utiles_m==2
-replace gasto922 = compra_utiles_monto/12* `tc3mes2' * `deflactor2' if compra_utiles_mon == 3 & compra_utiles_m==2
-replace gasto922 = compra_utiles_monto/12* `tc4mes2' * `deflactor2' if compra_utiles_mon == 4 & compra_utiles_m==2
-
-// data in many currencies (jan)
-replace gasto922 = compra_utiles_monto/12  * `deflactor1' if compra_utiles_mon == 1 & compra_utiles_m==1
-replace gasto922 = compra_utiles_monto/12* `tc2mes1' * `deflactor1' if compra_utiles_mon == 2 & compra_utiles_m==1
-replace gasto922 = compra_utiles_monto/12* `tc3mes1' * `deflactor1' if compra_utiles_mon == 3 & compra_utiles_m==1
-replace gasto922 = compra_utiles_monto/12* `tc4mes1' * `deflactor1' if compra_utiles_mon == 4 & compra_utiles_m==1
-
-// data in many currencies (dec)
-replace gasto922 = compra_utiles_monto/12 * `deflactor12' if compra_utiles_mon == 1 & compra_utiles_m==12
-replace gasto922 = compra_utiles_monto/12* `tc2mes12' * `deflactor12' if compra_utiles_mon == 2 & compra_utiles_m==12
-replace gasto922 = compra_utiles_monto/12* `tc3mes12' * `deflactor12' if compra_utiles_mon == 3 & compra_utiles_m==12
-replace gasto922 = compra_utiles_monto/12* `tc4mes12' * `deflactor12' if compra_utiles_mon == 4 & compra_utiles_m==12
-
-// data in many currencies (nov)
-replace gasto922 = compra_utiles_monto/12  * `deflactor11' if compra_utiles_mon == 1 & compra_utiles_m==11
-replace gasto922 = compra_utiles_monto/12* `tc2mes11' * `deflactor11' if compra_utiles_mon == 2 & compra_utiles_m==11
-replace gasto922 = compra_utiles_monto/12* `tc3mes11' * `deflactor11' if compra_utiles_mon == 3 & compra_utiles_m==11
-replace gasto922 = compra_utiles_monto/12* `tc4mes11' * `deflactor11' if compra_utiles_mon == 4 & compra_utiles_m==11
-
-*********************uniformes (assumed annual freq)
-
-// data in many currencies (march)
-gen gasto923 = compra_uniforme_monto/12* `deflactor3' if compra_uniforme_mon == 1 & compra_uniforme_m==3
-replace gasto923 = compra_uniforme_monto/12* `tc2mes3' * `deflactor3' if compra_uniforme_mon == 2 & compra_uniforme_m==3
-replace gasto923 = compra_uniforme_monto/12* `tc3mes3' * `deflactor3' if compra_uniforme_mon == 3 & compra_uniforme_m==3
-replace gasto923 = compra_uniforme_monto/12* `tc4mes3' * `deflactor3' if compra_uniforme_mon == 4 & compra_uniforme_m==3
-
-
-// data in many currencies (feb)
-replace gasto923 = compra_uniforme_monto/12 if compra_uniforme_mon == 1 & compra_uniforme_m==2
-replace gasto923 = compra_uniforme_monto/12* `tc2mes2' * `deflactor2' if compra_uniforme_mon == 2 & compra_uniforme_m==2
-replace gasto923 = compra_uniforme_monto/12* `tc3mes2' * `deflactor2' if compra_uniforme_mon == 3 & compra_uniforme_m==2
-replace gasto923 = compra_uniforme_monto/12* `tc4mes2' * `deflactor2' if compra_uniforme_mon == 4 & compra_uniforme_m==2
-
-// data in many currencies (jan)
-replace gasto923 = compra_uniforme_monto/12  * `deflactor1' if compra_uniforme_mon == 1 & compra_uniforme_m==1
-replace gasto923 = compra_uniforme_monto/12* `tc2mes1' * `deflactor1' if compra_uniforme_mon == 2 & compra_uniforme_m==1
-replace gasto923 = compra_uniforme_monto/12* `tc3mes1' * `deflactor1' if compra_uniforme_mon == 3 & compra_uniforme_m==1
-replace gasto923 = compra_uniforme_monto/12* `tc4mes1' * `deflactor1' if compra_uniforme_mon == 4 & compra_uniforme_m==1
-
-// data in many currencies (dec)
-replace gasto923 = compra_uniforme_monto/12 * `deflactor12' if compra_uniforme_mon == 1 & compra_uniforme_m==12
-replace gasto923 = compra_uniforme_monto/12* `tc2mes12' * `deflactor12' if compra_uniforme_mon == 2 & compra_uniforme_m==12
-replace gasto923 = compra_uniforme_monto/12* `tc3mes12' * `deflactor12' if compra_uniforme_mon == 3 & compra_uniforme_m==12
-replace gasto923 = compra_uniforme_monto/12* `tc4mes12' * `deflactor12' if compra_uniforme_mon == 4 & compra_uniforme_m==12
-
-// data in many currencies (nov)
-replace gasto923 = compra_uniforme_monto/12  * `deflactor11' if compra_uniforme_mon == 1 & compra_uniforme_m==11
-replace gasto923 = compra_uniforme_monto/12* `tc2mes11' * `deflactor11' if compra_uniforme_mon == 2 & compra_uniforme_m==11
-replace gasto923 = compra_uniforme_monto/12* `tc3mes11' * `deflactor11' if compra_uniforme_mon == 3 & compra_uniforme_m==11
-replace gasto923 = compra_uniforme_monto/12* `tc4mes11' * `deflactor11' if compra_uniforme_mon == 4 & compra_uniforme_m==11
-
-*********************costo mensual (assumed mensual freq)
-
-// data in many currencies (march)
-gen gasto924 = costo_men_monto* `deflactor3' if costo_men_mon == 1 & costo_men_m==3
-replace gasto924 = costo_men_monto* `tc2mes3' * `deflactor3' if costo_men_mon == 2 & costo_men_m==3
-replace gasto924 = costo_men_monto* `tc3mes3' * `deflactor3' if costo_men_mon == 3 & costo_men_m==3
-replace gasto924 = costo_men_monto* `tc4mes3' * `deflactor3' if costo_men_mon == 4 & costo_men_m==3
-
-
-// data in many currencies (feb)
-replace gasto924 = costo_men_monto if costo_men_mon == 1 & costo_men_m==2
-replace gasto924 = costo_men_monto* `tc2mes2' * `deflactor2' if costo_men_mon == 2 & costo_men_m==2
-replace gasto924 = costo_men_monto* `tc3mes2' * `deflactor2' if costo_men_mon == 3 & costo_men_m==2
-replace gasto924 = costo_men_monto* `tc4mes2' * `deflactor2' if costo_men_mon == 4 & costo_men_m==2
-
-// data in many currencies (jan)
-replace gasto924 = costo_men_monto  * `deflactor1' if costo_men_mon == 1 & costo_men_m==1
-replace gasto924 = costo_men_monto* `tc2mes1' * `deflactor1' if costo_men_mon == 2 & costo_men_m==1
-replace gasto924 = costo_men_monto* `tc3mes1' * `deflactor1' if costo_men_mon == 3 & costo_men_m==1
-replace gasto924 = costo_men_monto* `tc4mes1' * `deflactor1' if costo_men_mon == 4 & costo_men_m==1
-
-// data in many currencies (dec)
-replace gasto924 = costo_men_monto * `deflactor12' if costo_men_mon == 1 & costo_men_m==12
-replace gasto924 = costo_men_monto* `tc2mes12' * `deflactor12' if costo_men_mon == 2 & costo_men_m==12
-replace gasto924 = costo_men_monto* `tc3mes12' * `deflactor12' if costo_men_mon == 3 & costo_men_m==12
-replace gasto924 = costo_men_monto* `tc4mes12' * `deflactor12' if costo_men_mon == 4 & costo_men_m==12
-
-// data in many currencies (nov)
-replace gasto924 = costo_men_monto  * `deflactor11' if costo_men_mon == 1 & costo_men_m==11
-replace gasto924 = costo_men_monto* `tc2mes11' * `deflactor11' if costo_men_mon == 2 & costo_men_m==11
-replace gasto924 = costo_men_monto* `tc3mes11' * `deflactor11' if costo_men_mon == 3 & costo_men_m==11
-replace gasto924 = costo_men_monto* `tc4mes11' * `deflactor11' if costo_men_mon == 4 & costo_men_m==11
-
-
-*********************costo transporte (assumed mensual freq)
-
-// data in many currencies (march)
-gen gasto925 = costo_transp_monto* `deflactor3' if costo_transp_mon == 1 & costo_transp_m==3
-replace gasto925 = costo_transp_monto* `tc2mes3' * `deflactor3' if costo_transp_mon == 2 & costo_transp_m==3
-replace gasto925 = costo_transp_monto* `tc3mes3' * `deflactor3' if costo_transp_mon == 3 & costo_transp_m==3
-replace gasto925 = costo_transp_monto* `tc4mes3' * `deflactor3' if costo_transp_mon == 4 & costo_transp_m==3
-
-
-// data in many currencies (feb)
-replace gasto925 = costo_transp_monto if costo_transp_mon == 1 & costo_transp_m==2
-replace gasto925 = costo_transp_monto* `tc2mes2' * `deflactor2' if costo_transp_mon == 2 & costo_transp_m==2
-replace gasto925 = costo_transp_monto* `tc3mes2' * `deflactor2' if costo_transp_mon == 3 & costo_transp_m==2
-replace gasto925 = costo_transp_monto* `tc4mes2' * `deflactor2' if costo_transp_mon == 4 & costo_transp_m==2
-
-// data in many currencies (jan)
-replace gasto925 = costo_transp_monto  * `deflactor1' if costo_transp_mon == 1 & costo_transp_m==1
-replace gasto925 = costo_transp_monto* `tc2mes1' * `deflactor1' if costo_transp_mon == 2 & costo_transp_m==1
-replace gasto925 = costo_transp_monto* `tc3mes1' * `deflactor1' if costo_transp_mon == 3 & costo_transp_m==1
-replace gasto925 = costo_transp_monto* `tc4mes1' * `deflactor1' if costo_transp_mon == 4 & costo_transp_m==1
-
-// data in many currencies (dec)
-replace gasto925 = costo_transp_monto * `deflactor12' if costo_transp_mon == 1 & costo_transp_m==12
-replace gasto925 = costo_transp_monto* `tc2mes12' * `deflactor12' if costo_transp_mon == 2 & costo_transp_m==12
-replace gasto925 = costo_transp_monto* `tc3mes12' * `deflactor12' if costo_transp_mon == 3 & costo_transp_m==12
-replace gasto925 = costo_transp_monto* `tc4mes12' * `deflactor12' if costo_transp_mon == 4 & costo_transp_m==12
-
-// data in many currencies (nov)
-replace gasto925 = costo_transp_monto  * `deflactor11' if costo_transp_mon == 1 & costo_transp_m==11
-replace gasto925 = costo_transp_monto* `tc2mes11' * `deflactor11' if costo_transp_mon == 2 & costo_transp_m==11
-replace gasto925 = costo_transp_monto* `tc3mes11' * `deflactor11' if costo_transp_mon == 3 & costo_transp_m==11
-replace gasto925 = costo_transp_monto* `tc4mes11' * `deflactor11' if costo_transp_mon == 4 & costo_transp_m==11
+foreach v in `servicios'{
+local n=`n'+1
+levelsof `v'_m, local(month)
+	foreach m in `month'{
+	levelsof `v'_mon, local(currency)
+		foreach c in `currency'{
+		if `m'>10 | `m'<4 {
+			di "`v'" "`n'"
+			di `m'
+			di `c'
+			di `tc`c'mes`m''
+			di `deflactor`m''
+			replace gasto`n' = `v'_monto*`tc`c'mes`m''*`deflactor`m'' if `v'_m == `m' & `v'_mon == `c'
+		}
+		}
+		}
+	}
 
 
 
-*********************otros gastos (assumed mensual freq)
+// outliars detection
+replace gasto921 = round(gasto921)
+xtile q = gasto921, nq(100)
+gen flag = q > 99
+gsort -gasto921
+tab q [fw=gasto921] //top 1% of current expenditure gets 40% of total expenditure
 
-// data in many currencies (march)
-gen gasto926 = otros_gastos_monto* `deflactor3' if otros_gastos_mon == 1 & otros_gastos_m==3
-replace gasto926 = otros_gastos_monto* `tc2mes3' * `deflactor3' if otros_gastos_mon == 2 & otros_gastos_m==3
-replace gasto926 = otros_gastos_monto* `tc3mes3' * `deflactor3' if otros_gastos_mon == 3 & otros_gastos_m==3
-replace gasto926 = otros_gastos_monto* `tc4mes3' * `deflactor3' if otros_gastos_mon == 4 & otros_gastos_m==3
+drop q flag
+
+// outliars detection
+replace gasto922 = round(gasto922)
+xtile q = gasto922, nq(100)
+gen flag = q > 99
+gsort -gasto922
+tab q [fw=gasto922] 
+replace gasto922=. if q >99 
+drop q flag
 
 
-// data in many currencies (feb)
-replace gasto926 = otros_gastos_monto if otros_gastos_mon == 1 & otros_gastos_m==2
-replace gasto926 = otros_gastos_monto* `tc2mes2' * `deflactor2' if otros_gastos_mon == 2 & otros_gastos_m==2
-replace gasto926 = otros_gastos_monto* `tc3mes2' * `deflactor2' if otros_gastos_mon == 3 & otros_gastos_m==2
-replace gasto926 = otros_gastos_monto* `tc4mes2' * `deflactor2' if otros_gastos_mon == 4 & otros_gastos_m==2
+// outliars detection
+replace gasto923 = round(gasto923)
+xtile q = gasto923, nq(100)
+gen flag = q > 99
+gsort -gasto923
+tab q [fw=gasto923] //
+replace gasto923=. if q >99 
+drop q flag
 
-// data in many currencies (jan)
-replace gasto926 = otros_gastos_monto  * `deflactor1' if otros_gastos_mon == 1 & otros_gastos_m==1
-replace gasto926 = otros_gastos_monto* `tc2mes1' * `deflactor1' if otros_gastos_mon == 2 & otros_gastos_m==1
-replace gasto926 = otros_gastos_monto* `tc3mes1' * `deflactor1' if otros_gastos_mon == 3 & otros_gastos_m==1
-replace gasto926 = otros_gastos_monto* `tc4mes1' * `deflactor1' if otros_gastos_mon == 4 & otros_gastos_m==1
+// outliars detection
+replace gasto924 = round(gasto924)
+xtile q = gasto924, nq(100)
+gen flag = q > 99
+gsort -gasto924
+tab q [fw=gasto924] //top 1% of current expenditure gets 20% of total expenditure
+//drop if q >99 // do not drop 1% looks reasonable
+drop q flag
 
-// data in many currencies (dec)
-replace gasto926 = otros_gastos_monto * `deflactor12' if otros_gastos_mon == 1 & otros_gastos_m==12
-replace gasto926 = otros_gastos_monto* `tc2mes12' * `deflactor12' if otros_gastos_mon == 2 & otros_gastos_m==12
-replace gasto926 = otros_gastos_monto* `tc3mes12' * `deflactor12' if otros_gastos_mon == 3 & otros_gastos_m==12
-replace gasto926 = otros_gastos_monto* `tc4mes12' * `deflactor12' if otros_gastos_mon == 4 & otros_gastos_m==12
+// outliars detection
+replace gasto925 = round(gasto925)
+xtile q = gasto925, nq(100)
+gen flag = q > 99
+gsort -gasto925
+tab q [fw=gasto925]
+//drop if q >99 // do not drop 1% looks reasonable
+drop q flag
 
-// data in many currencies (nov)
-replace gasto926 = otros_gastos_monto  * `deflactor11' if otros_gastos_mon == 1 & otros_gastos_m==11
-replace gasto926 = otros_gastos_monto* `tc2mes11' * `deflactor11' if otros_gastos_mon == 2 & otros_gastos_m==11
-replace gasto926 = otros_gastos_monto* `tc3mes11' * `deflactor11' if otros_gastos_mon == 3 & otros_gastos_m==11
-replace gasto926 = otros_gastos_monto* `tc4mes11' * `deflactor11' if otros_gastos_mon == 4 & otros_gastos_m==11
+// outliars detection
+replace gasto926 = round(gasto926)
+xtile q = gasto926, nq(100)
+gen flag = q > 99
+gsort -gasto926
+tab q [fw=gasto926] //
+//drop if q >99 // do not drop 1% looks reasonable
+drop q flag
+
+egen gasto92 = rowtotal(gasto92*)
 
 
 *******************************************salud
@@ -910,171 +674,94 @@ replace gasto926 = otros_gastos_monto* `tc4mes11' * `deflactor11' if otros_gasto
 
 ********************pago consulta (assumed mensual)
 
-// data in many currencies (march)
-gen gasto931 = cant_pago_consulta* `deflactor3' if mone_pago_consulta == 1 & mes_pago_consulta==3
-replace gasto931 = cant_pago_consulta* `tc2mes3' * `deflactor3' if mone_pago_consulta == 2 & mes_pago_consulta==3
-replace gasto931 = cant_pago_consulta* `tc3mes3' * `deflactor3' if mone_pago_consulta == 3 & mes_pago_consulta==3
-replace gasto931 = cant_pago_consulta* `tc4mes3' * `deflactor3' if mone_pago_consulta == 4 & mes_pago_consulta==3
+gen gasto931 =.
+gen gasto932 =.
+gen gasto933 =.
+gen gasto934 =.
+gen gasto935 =.
 
 
-// data in many currencies (feb)
-replace gasto931 = cant_pago_consulta if mone_pago_consulta == 1 & mes_pago_consulta==2
-replace gasto931 = cant_pago_consulta* `tc2mes2' * `deflactor2' if mone_pago_consulta == 2 & mes_pago_consulta==2
-replace gasto931 = cant_pago_consulta* `tc3mes2' * `deflactor2' if mone_pago_consulta == 3 & mes_pago_consulta==2
-replace gasto931 = cant_pago_consulta* `tc4mes2' * `deflactor2' if mone_pago_consulta == 4 & mes_pago_consulta==2
+rename pago_remedio cant_pago_remedio
+rename pago_examen cant_pago_examen
 
-// data in many currencies (jan)
-replace gasto931 = cant_pago_consulta  * `deflactor1' if mone_pago_consulta == 1 & mes_pago_consulta==1
-replace gasto931 = cant_pago_consulta* `tc2mes1' * `deflactor1' if mone_pago_consulta == 2 & mes_pago_consulta==1
-replace gasto931 = cant_pago_consulta* `tc3mes1' * `deflactor1' if mone_pago_consulta == 3 & mes_pago_consulta==1
-replace gasto931 = cant_pago_consulta* `tc4mes1' * `deflactor1' if mone_pago_consulta == 4 & mes_pago_consulta==1
+// gasto en agua
+local salud pago_consulta pago_remedio pago_examen remedio_tresmeses pagosegsalud
+local n=930
 
-// data in many currencies (dec)
-replace gasto931 = cant_pago_consulta * `deflactor12' if mone_pago_consulta == 1 & mes_pago_consulta==12
-replace gasto931 = cant_pago_consulta* `tc2mes12' * `deflactor12' if mone_pago_consulta == 2 & mes_pago_consulta==12
-replace gasto931 = cant_pago_consulta* `tc3mes12' * `deflactor12' if mone_pago_consulta == 3 & mes_pago_consulta==12
-replace gasto931 = cant_pago_consulta* `tc4mes12' * `deflactor12' if mone_pago_consulta == 4 & mes_pago_consulta==12
-
-// data in many currencies (nov)
-replace gasto931 = cant_pago_consulta  * `deflactor11' if mone_pago_consulta == 1 & mes_pago_consulta==11
-replace gasto931 = cant_pago_consulta* `tc2mes11' * `deflactor11' if mone_pago_consulta == 2 & mes_pago_consulta==11
-replace gasto931 = cant_pago_consulta* `tc3mes11' * `deflactor11' if mone_pago_consulta == 3 & mes_pago_consulta==11
-replace gasto931 = cant_pago_consulta* `tc4mes11' * `deflactor11' if mone_pago_consulta == 4 & mes_pago_consulta==11
-
-
-********************pago remedio (assumed mensual)
-
-// data in many currencies (march)
-gen gasto932 = pago_remedio* `deflactor3' if mone_pago_remedio == 1 & mes_pago_remedio==3
-replace gasto932 = pago_remedio* `tc2mes3' * `deflactor3' if mone_pago_remedio == 2 & mes_pago_remedio==3
-replace gasto932 = pago_remedio* `tc3mes3' * `deflactor3' if mone_pago_remedio == 3 & mes_pago_remedio==3
-replace gasto932 = pago_remedio* `tc4mes3' * `deflactor3' if mone_pago_remedio == 4 & mes_pago_remedio==3
-
-
-// data in many currencies (feb)
-replace gasto932 = pago_remedio if mone_pago_remedio == 1 & mes_pago_remedio==2
-replace gasto932 = pago_remedio* `tc2mes2' * `deflactor2' if mone_pago_remedio == 2 & mes_pago_remedio==2
-replace gasto932 = pago_remedio* `tc3mes2' * `deflactor2' if mone_pago_remedio == 3 & mes_pago_remedio==2
-replace gasto932 = pago_remedio* `tc4mes2' * `deflactor2' if mone_pago_remedio == 4 & mes_pago_remedio==2
-
-// data in many currencies (jan)
-replace gasto932 = pago_remedio  * `deflactor1' if mone_pago_remedio == 1 & mes_pago_remedio==1
-replace gasto932 = pago_remedio* `tc2mes1' * `deflactor1' if mone_pago_remedio == 2 & mes_pago_remedio==1
-replace gasto932 = pago_remedio* `tc3mes1' * `deflactor1' if mone_pago_remedio == 3 & mes_pago_remedio==1
-replace gasto932 = pago_remedio* `tc4mes1' * `deflactor1' if mone_pago_remedio == 4 & mes_pago_remedio==1
-
-// data in many currencies (dec)
-replace gasto932 = pago_remedio * `deflactor12' if mone_pago_remedio == 1 & mes_pago_remedio==12
-replace gasto932 = pago_remedio* `tc2mes12' * `deflactor12' if mone_pago_remedio == 2 & mes_pago_remedio==12
-replace gasto932 = pago_remedio* `tc3mes12' * `deflactor12' if mone_pago_remedio == 3 & mes_pago_remedio==12
-replace gasto932 = pago_remedio* `tc4mes12' * `deflactor12' if mone_pago_remedio == 4 & mes_pago_remedio==12
-
-// data in many currencies (nov)
-replace gasto932 = pago_remedio  * `deflactor11' if mone_pago_remedio == 1 & mes_pago_remedio==11
-replace gasto932 = pago_remedio* `tc2mes11' * `deflactor11' if mone_pago_remedio == 2 & mes_pago_remedio==11
-replace gasto932 = pago_remedio* `tc3mes11' * `deflactor11' if mone_pago_remedio == 3 & mes_pago_remedio==11
-replace gasto932 = pago_remedio* `tc4mes11' * `deflactor11' if mone_pago_remedio == 4 & mes_pago_remedio==11
-
-********************pago examen (assumed mensual)
-
-// data in many currencies (march)
-gen gasto933 = pago_examen* `deflactor3' if mone_pago_examen == 1 & mes_pago_examen==3
-replace gasto933 = pago_examen* `tc2mes3' * `deflactor3' if mone_pago_examen == 2 & mes_pago_examen==3
-replace gasto933 = pago_examen* `tc3mes3' * `deflactor3' if mone_pago_examen == 3 & mes_pago_examen==3
-replace gasto933 = pago_examen* `tc4mes3' * `deflactor3' if mone_pago_examen == 4 & mes_pago_examen==3
-
-
-// data in many currencies (feb)
-replace gasto933 = pago_examen if mone_pago_examen == 1 & mes_pago_examen==2
-replace gasto933 = pago_examen* `tc2mes2' * `deflactor2' if mone_pago_examen == 2 & mes_pago_examen==2
-replace gasto933 = pago_examen* `tc3mes2' * `deflactor2' if mone_pago_examen == 3 & mes_pago_examen==2
-replace gasto933 = pago_examen* `tc4mes2' * `deflactor2' if mone_pago_examen == 4 & mes_pago_examen==2
-
-// data in many currencies (jan)
-replace gasto933 = pago_examen  * `deflactor1' if mone_pago_examen == 1 & mes_pago_examen==1
-replace gasto933 = pago_examen* `tc2mes1' * `deflactor1' if mone_pago_examen == 2 & mes_pago_examen==1
-replace gasto933 = pago_examen* `tc3mes1' * `deflactor1' if mone_pago_examen == 3 & mes_pago_examen==1
-replace gasto933 = pago_examen* `tc4mes1' * `deflactor1' if mone_pago_examen == 4 & mes_pago_examen==1
-
-// data in many currencies (dec)
-replace gasto933 = pago_examen * `deflactor12' if mone_pago_examen == 1 & mes_pago_examen==12
-replace gasto933 = pago_examen* `tc2mes12' * `deflactor12' if mone_pago_examen == 2 & mes_pago_examen==12
-replace gasto933 = pago_examen* `tc3mes12' * `deflactor12' if mone_pago_examen == 3 & mes_pago_examen==12
-replace gasto933 = pago_examen* `tc4mes12' * `deflactor12' if mone_pago_examen == 4 & mes_pago_examen==12
-
-// data in many currencies (nov)
-replace gasto933 = pago_examen  * `deflactor11' if mone_pago_examen == 1 & mes_pago_examen==11
-replace gasto933 = pago_examen* `tc2mes11' * `deflactor11' if mone_pago_examen == 2 & mes_pago_examen==11
-replace gasto933 = pago_examen* `tc3mes11' * `deflactor11' if mone_pago_examen == 3 & mes_pago_examen==11
-replace gasto933 = pago_examen* `tc4mes11' * `deflactor11' if mone_pago_examen == 4 & mes_pago_examen==11
+foreach v in `salud'{
+local n=`n'+1
+levelsof mes_`v', local(month)
+	foreach m in `month'{
+	levelsof mone_`v', local(currency)
+		foreach c in `currency'{
+		if `m'>10 | `m'<4 {
+			di "`v'" "`n'"
+			di `m'
+			di `c'
+			di `tc`c'mes`m''
+			di `deflactor`m''
+			replace gasto`n' = cant_`v'*`tc`c'mes`m''*`deflactor`m'' if mes_`v' == `m' & mone_`v' == `c'
+		}
+		}
+		}
+		}
 
 
 
-********************remedios 3 meses (assumed trimestral)
-
-// data in many currencies (march)
-gen gasto934 = cant_remedio_tresmeses/3* `deflactor3' if mone_remedio_tresmeses == 1 & mes_remedio_tresmeses==3
-replace gasto934 = cant_remedio_tresmeses/3* `tc2mes3' * `deflactor3' if mone_remedio_tresmeses == 2 & mes_remedio_tresmeses==3
-replace gasto934 = cant_remedio_tresmeses/3* `tc3mes3' * `deflactor3' if mone_remedio_tresmeses == 3 & mes_remedio_tresmeses==3
-replace gasto934 = cant_remedio_tresmeses/3* `tc4mes3' * `deflactor3' if mone_remedio_tresmeses == 4 & mes_remedio_tresmeses==3
-
-
-// data in many currencies (feb)
-replace gasto934 = cant_remedio_tresmeses/3 if mone_remedio_tresmeses == 1 & mes_remedio_tresmeses==2
-replace gasto934 = cant_remedio_tresmeses/3* `tc2mes2' * `deflactor2' if mone_remedio_tresmeses == 2 & mes_remedio_tresmeses==2
-replace gasto934 = cant_remedio_tresmeses/3* `tc3mes2' * `deflactor2' if mone_remedio_tresmeses == 3 & mes_remedio_tresmeses==2
-replace gasto934 = cant_remedio_tresmeses/3* `tc4mes2' * `deflactor2' if mone_remedio_tresmeses == 4 & mes_remedio_tresmeses==2
-
-// data in many currencies (jan)
-replace gasto934 = cant_remedio_tresmeses/3  * `deflactor1' if mone_remedio_tresmeses == 1 & mes_remedio_tresmeses==1
-replace gasto934 = cant_remedio_tresmeses/3* `tc2mes1' * `deflactor1' if mone_remedio_tresmeses == 2 & mes_remedio_tresmeses==1
-replace gasto934 = cant_remedio_tresmeses/3* `tc3mes1' * `deflactor1' if mone_remedio_tresmeses == 3 & mes_remedio_tresmeses==1
-replace gasto934 = cant_remedio_tresmeses/3* `tc4mes1' * `deflactor1' if mone_remedio_tresmeses == 4 & mes_remedio_tresmeses==1
-
-// data in many currencies (dec)
-replace gasto934 = cant_remedio_tresmeses/3 * `deflactor12' if mone_remedio_tresmeses == 1 & mes_remedio_tresmeses==12
-replace gasto934 = cant_remedio_tresmeses/3* `tc2mes12' * `deflactor12' if mone_remedio_tresmeses == 2 & mes_remedio_tresmeses==12
-replace gasto934 = cant_remedio_tresmeses/3* `tc3mes12' * `deflactor12' if mone_remedio_tresmeses == 3 & mes_remedio_tresmeses==12
-replace gasto934 = cant_remedio_tresmeses/3* `tc4mes12' * `deflactor12' if mone_remedio_tresmeses == 4 & mes_remedio_tresmeses==12
-
-// data in many currencies (nov)
-replace gasto934 = cant_remedio_tresmeses/3  * `deflactor11' if mone_remedio_tresmeses == 1 & mes_remedio_tresmeses==11
-replace gasto934 = cant_remedio_tresmeses/3* `tc2mes11' * `deflactor11' if mone_remedio_tresmeses == 2 & mes_remedio_tresmeses==11
-replace gasto934 = cant_remedio_tresmeses/3* `tc3mes11' * `deflactor11' if mone_remedio_tresmeses == 3 & mes_remedio_tresmeses==11
-replace gasto934 = cant_remedio_tresmeses/3* `tc4mes11' * `deflactor11' if mone_remedio_tresmeses == 4 & mes_remedio_tresmeses==11
-
-******************** seg salud (assumed mensual)
-
-// data in many currencies (march)
-gen gasto935 = cant_pagosegsalud* `deflactor3' if mone_pagosegsalud == 1 & mes_pagosegsalud==3
-replace gasto935 = cant_pagosegsalud* `tc2mes3' * `deflactor3' if mone_pagosegsalud == 2 & mes_pagosegsalud==3
-replace gasto935 = cant_pagosegsalud* `tc3mes3' * `deflactor3' if mone_pagosegsalud == 3 & mes_pagosegsalud==3
-replace gasto935 = cant_pagosegsalud* `tc4mes3' * `deflactor3' if mone_pagosegsalud == 4 & mes_pagosegsalud==3
+// outliars detection
+replace gasto931 = round(gasto931)
+xtile q = gasto931, nq(100)
+gen flag = q > 99
+gsort -gasto931
+tab q [fw=gasto931] //top 1% of current expenditure gets 40% of total expenditure
+drop q flag
 
 
-// data in many currencies (feb)
-replace gasto935 = cant_pagosegsalud if mone_pagosegsalud == 1 & mes_pagosegsalud==2
-replace gasto935 = cant_pagosegsalud* `tc2mes2' * `deflactor2' if mone_pagosegsalud == 2 & mes_pagosegsalud==2
-replace gasto935 = cant_pagosegsalud* `tc3mes2' * `deflactor2' if mone_pagosegsalud == 3 & mes_pagosegsalud==2
-replace gasto935 = cant_pagosegsalud* `tc4mes2' * `deflactor2' if mone_pagosegsalud == 4 & mes_pagosegsalud==2
+// outliars detection
+replace gasto932 = round(gasto932)
+xtile q = gasto932, nq(100)
+gen flag = q > 99
+gsort -gasto932
+tab q [fw=gasto932] 
+drop q flag
 
-// data in many currencies (jan)
-replace gasto935 = cant_pagosegsalud  * `deflactor1' if mone_pagosegsalud == 1 & mes_pagosegsalud==1
-replace gasto935 = cant_pagosegsalud* `tc2mes1' * `deflactor1' if mone_pagosegsalud == 2 & mes_pagosegsalud==1
-replace gasto935 = cant_pagosegsalud* `tc3mes1' * `deflactor1' if mone_pagosegsalud == 3 & mes_pagosegsalud==1
-replace gasto935 = cant_pagosegsalud* `tc4mes1' * `deflactor1' if mone_pagosegsalud == 4 & mes_pagosegsalud==1
 
-// data in many currencies (dec)
-replace gasto935 = cant_pagosegsalud * `deflactor12' if mone_pagosegsalud == 1 & mes_pagosegsalud==12
-replace gasto935 = cant_pagosegsalud* `tc2mes12' * `deflactor12' if mone_pagosegsalud == 2 & mes_pagosegsalud==12
-replace gasto935 = cant_pagosegsalud* `tc3mes12' * `deflactor12' if mone_pagosegsalud == 3 & mes_pagosegsalud==12
-replace gasto935 = cant_pagosegsalud* `tc4mes12' * `deflactor12' if mone_pagosegsalud == 4 & mes_pagosegsalud==12
+// outliars detection
+replace gasto933 = round(gasto933)
+xtile q = gasto933, nq(100)
+gen flag = q > 99
+gsort -gasto933
+tab q [fw=gasto933] //
+drop q flag
 
-// data in many currencies (nov)
-replace gasto935 = cant_pagosegsalud  * `deflactor11' if mone_pagosegsalud == 1 & mes_pagosegsalud==11
-replace gasto935 = cant_pagosegsalud* `tc2mes11' * `deflactor11' if mone_pagosegsalud == 2 & mes_pagosegsalud==11
-replace gasto935 = cant_pagosegsalud* `tc3mes11' * `deflactor11' if mone_pagosegsalud == 3 & mes_pagosegsalud==11
-replace gasto935 = cant_pagosegsalud* `tc4mes11' * `deflactor11' if mone_pagosegsalud == 4 & mes_pagosegsalud==11
+// outliars detection
+replace gasto934 = round(gasto934)
+xtile q = gasto934, nq(100)
+gen flag = q > 99
+gsort -gasto934
+tab q [fw=gasto934] //top 1% of current expenditure gets 20% of total expenditure
+drop q flag
+
+// outliars detection
+replace gasto935 = round(gasto935)
+xtile q = gasto935, nq(100)
+gen flag = q > 99
+gsort -gasto935
+tab q [fw=gasto935]
+drop q flag
+
+
+egen gasto93 = rowtotal(gasto93*)
+
+// outliars detection
+replace gasto93 = round(gasto93)
+xtile q = gasto93, nq(100)
+gen flag = q > 99
+gsort -gasto93
+tab q [fw=gasto93]
+drop q flag
+
+
 
 
 ******************************************** jubilacion
@@ -1084,289 +771,73 @@ replace gasto935 = cant_pagosegsalud* `tc4mes11' * `deflactor11' if mone_pagoseg
 *************** descuentos ? incorporamos ? (assumed mensual)
 ********* descuento seg social obligatorio
 
-// data in many currencies (march)
-gen gasto941 = d_sso_cant* `deflactor3' if d_sso_mone == 1 & interview_month==3
-replace gasto941 = d_sso_cant* `tc2mes3' * `deflactor3' if d_sso_mone == 2 & interview_month==3
-replace gasto941 = d_sso_cant* `tc3mes3' * `deflactor3' if d_sso_mone == 3 & interview_month==3
-replace gasto941 = d_sso_cant* `tc4mes3' * `deflactor3' if d_sso_mone == 4 & interview_month==3
-
-
-// data in many currencies (feb)
-replace gasto941 = d_sso_cant if d_sso_mone == 1 & interview_month==2
-replace gasto941 = d_sso_cant* `tc2mes2' * `deflactor2' if d_sso_mone == 2 & interview_month==2
-replace gasto941 = d_sso_cant* `tc3mes2' * `deflactor2' if d_sso_mone == 3 & interview_month==2
-replace gasto941 = d_sso_cant* `tc4mes2' * `deflactor2' if d_sso_mone == 4 & interview_month==2
-
-// data in many currencies (jan)
-replace gasto941 = d_sso_cant  * `deflactor1' if d_sso_mone == 1 & interview_month==1
-replace gasto941 = d_sso_cant* `tc2mes1' * `deflactor1' if d_sso_mone == 2 & interview_month==1
-replace gasto941 = d_sso_cant* `tc3mes1' * `deflactor1' if d_sso_mone == 3 & interview_month==1
-replace gasto941 = d_sso_cant* `tc4mes1' * `deflactor1' if d_sso_mone == 4 & interview_month==1
-
-// data in many currencies (dec)
-replace gasto941 = d_sso_cant * `deflactor12' if d_sso_mone == 1 & interview_month==12
-replace gasto941 = d_sso_cant* `tc2mes12' * `deflactor12' if d_sso_mone == 2 & interview_month==12
-replace gasto941 = d_sso_cant* `tc3mes12' * `deflactor12' if d_sso_mone == 3 & interview_month==12
-replace gasto941 = d_sso_cant* `tc4mes12' * `deflactor12' if d_sso_mone == 4 & interview_month==12
-
-// data in many currencies (nov)
-replace gasto941 = d_sso_cant  * `deflactor11' if d_sso_mone == 1 & interview_month==11
-replace gasto941 = d_sso_cant* `tc2mes11' * `deflactor11' if d_sso_mone == 2 & interview_month==11
-replace gasto941 = d_sso_cant* `tc3mes11' * `deflactor11' if d_sso_mone == 3 & interview_month==11
-replace gasto941 = d_sso_cant* `tc4mes11' * `deflactor11' if d_sso_mone == 4 & interview_month==11
-
-********* descuento spf
-
-// data in many currencies (march)
-gen gasto942 = d_spf_cant* `deflactor3' if d_spf_mone == 1 & interview_month==3
-replace gasto942 = d_spf_cant* `tc2mes3' * `deflactor3' if d_spf_mone == 2 & interview_month==3
-replace gasto942 = d_spf_cant* `tc3mes3' * `deflactor3' if d_spf_mone == 3 & interview_month==3
-replace gasto942 = d_spf_cant* `tc4mes3' * `deflactor3' if d_spf_mone == 4 & interview_month==3
-
-
-// data in many currencies (feb)
-replace gasto942 = d_spf_cant if d_spf_mone == 1 & interview_month==2
-replace gasto942 = d_spf_cant* `tc2mes2' * `deflactor2' if d_spf_mone == 2 & interview_month==2
-replace gasto942 = d_spf_cant* `tc3mes2' * `deflactor2' if d_spf_mone == 3 & interview_month==2
-replace gasto942 = d_spf_cant* `tc4mes2' * `deflactor2' if d_spf_mone == 4 & interview_month==2
-
-// data in many currencies (jan)
-replace gasto942 = d_spf_cant  * `deflactor1' if d_spf_mone == 1 & interview_month==1
-replace gasto942 = d_spf_cant* `tc2mes1' * `deflactor1' if d_spf_mone == 2 & interview_month==1
-replace gasto942 = d_spf_cant* `tc3mes1' * `deflactor1' if d_spf_mone == 3 & interview_month==1
-replace gasto942 = d_spf_cant* `tc4mes1' * `deflactor1' if d_spf_mone == 4 & interview_month==1
-
-// data in many currencies (dec)
-replace gasto942 = d_spf_cant * `deflactor12' if d_spf_mone == 1 & interview_month==12
-replace gasto942 = d_spf_cant* `tc2mes12' * `deflactor12' if d_spf_mone == 2 & interview_month==12
-replace gasto942 = d_spf_cant* `tc3mes12' * `deflactor12' if d_spf_mone == 3 & interview_month==12
-replace gasto942 = d_spf_cant* `tc4mes12' * `deflactor12' if d_spf_mone == 4 & interview_month==12
-
-// data in many currencies (nov)
-replace gasto942 = d_spf_cant  * `deflactor11' if d_spf_mone == 1 & interview_month==11
-replace gasto942 = d_spf_cant* `tc2mes11' * `deflactor11' if d_spf_mone == 2 & interview_month==11
-replace gasto942 = d_spf_cant* `tc3mes11' * `deflactor11' if d_spf_mone == 3 & interview_month==11
-replace gasto942 = d_spf_cant* `tc4mes11' * `deflactor11' if d_spf_mone == 4 & interview_month==11
-
-
-********* descuento isr
-
-// data in many currencies (march)
-gen gasto943 = d_isr_cant* `deflactor3' if d_isr_mone == 1 & interview_month==3
-replace gasto943 = d_isr_cant* `tc2mes3' * `deflactor3' if d_isr_mone == 2 & interview_month==3
-replace gasto943 = d_isr_cant* `tc3mes3' * `deflactor3' if d_isr_mone == 3 & interview_month==3
-replace gasto943 = d_isr_cant* `tc4mes3' * `deflactor3' if d_isr_mone == 4 & interview_month==3
-
-
-// data in many currencies (feb)
-replace gasto943 = d_isr_cant if d_isr_mone == 1 & interview_month==2
-replace gasto943 = d_isr_cant* `tc2mes2' * `deflactor2' if d_isr_mone == 2 & interview_month==2
-replace gasto943 = d_isr_cant* `tc3mes2' * `deflactor2' if d_isr_mone == 3 & interview_month==2
-replace gasto943 = d_isr_cant* `tc4mes2' * `deflactor2' if d_isr_mone == 4 & interview_month==2
-
-// data in many currencies (jan)
-replace gasto943 = d_isr_cant  * `deflactor1' if d_isr_mone == 1 & interview_month==1
-replace gasto943 = d_isr_cant* `tc2mes1' * `deflactor1' if d_isr_mone == 2 & interview_month==1
-replace gasto943 = d_isr_cant* `tc3mes1' * `deflactor1' if d_isr_mone == 3 & interview_month==1
-replace gasto943 = d_isr_cant* `tc4mes1' * `deflactor1' if d_isr_mone == 4 & interview_month==1
-
-// data in many currencies (dec)
-replace gasto943 = d_isr_cant * `deflactor12' if d_isr_mone == 1 & interview_month==12
-replace gasto943 = d_isr_cant* `tc2mes12' * `deflactor12' if d_isr_mone == 2 & interview_month==12
-replace gasto943 = d_isr_cant* `tc3mes12' * `deflactor12' if d_isr_mone == 3 & interview_month==12
-replace gasto943 = d_isr_cant* `tc4mes12' * `deflactor12' if d_isr_mone == 4 & interview_month==12
-
-// data in many currencies (nov)
-replace gasto943 = d_isr_cant  * `deflactor11' if d_isr_mone == 1 & interview_month==11
-replace gasto943 = d_isr_cant* `tc2mes11' * `deflactor11' if d_isr_mone == 2 & interview_month==11
-replace gasto943 = d_isr_cant* `tc3mes11' * `deflactor11' if d_isr_mone == 3 & interview_month==11
-replace gasto943 = d_isr_cant* `tc4mes11' * `deflactor11' if d_isr_mone == 4 & interview_month==11
+gen gasto941 =.
+gen gasto942 =.
+gen gasto943 =.
+gen gasto944 =.
+gen gasto945 =.
+gen gasto946 =.
+gen gasto947 =.
 
 
 
-********* descuento cah
+// gasto en jubi
+local jubi d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro
+local n=940
 
-// data in many currencies (march)
-gen gasto944 = d_cah_cant* `deflactor3' if d_cah_mone == 1 & interview_month==3
-replace gasto944 = d_cah_cant* `tc2mes3' * `deflactor3' if d_cah_mone == 2 & interview_month==3
-replace gasto944 = d_cah_cant* `tc3mes3' * `deflactor3' if d_cah_mone == 3 & interview_month==3
-replace gasto944 = d_cah_cant* `tc4mes3' * `deflactor3' if d_cah_mone == 4 & interview_month==3
-
-
-// data in many currencies (feb)
-replace gasto944 = d_cah_cant if d_cah_mone == 1 & interview_month==2
-replace gasto944 = d_cah_cant* `tc2mes2' * `deflactor2' if d_cah_mone == 2 & interview_month==2
-replace gasto944 = d_cah_cant* `tc3mes2' * `deflactor2' if d_cah_mone == 3 & interview_month==2
-replace gasto944 = d_cah_cant* `tc4mes2' * `deflactor2' if d_cah_mone == 4 & interview_month==2
-
-// data in many currencies (jan)
-replace gasto944 = d_cah_cant  * `deflactor1' if d_cah_mone == 1 & interview_month==1
-replace gasto944 = d_cah_cant* `tc2mes1' * `deflactor1' if d_cah_mone == 2 & interview_month==1
-replace gasto944 = d_cah_cant* `tc3mes1' * `deflactor1' if d_cah_mone == 3 & interview_month==1
-replace gasto944 = d_cah_cant* `tc4mes1' * `deflactor1' if d_cah_mone == 4 & interview_month==1
-
-// data in many currencies (dec)
-replace gasto944 = d_cah_cant * `deflactor12' if d_cah_mone == 1 & interview_month==12
-replace gasto944 = d_cah_cant* `tc2mes12' * `deflactor12' if d_cah_mone == 2 & interview_month==12
-replace gasto944 = d_cah_cant* `tc3mes12' * `deflactor12' if d_cah_mone == 3 & interview_month==12
-replace gasto944 = d_cah_cant* `tc4mes12' * `deflactor12' if d_cah_mone == 4 & interview_month==12
-
-// data in many currencies (nov)
-replace gasto944 = d_cah_cant  * `deflactor11' if d_cah_mone == 1 & interview_month==11
-replace gasto944 = d_cah_cant* `tc2mes11' * `deflactor11' if d_cah_mone == 2 & interview_month==11
-replace gasto944 = d_cah_cant* `tc3mes11' * `deflactor11' if d_cah_mone == 3 & interview_month==11
-replace gasto944 = d_cah_cant* `tc4mes11' * `deflactor11' if d_cah_mone == 4 & interview_month==11
-
-********* descuento cpr
-
-// data in many currencies (march)
-gen gasto945 = d_cpr_cant* `deflactor3' if d_cpr_mone == 1 & interview_month==3
-replace gasto945 = d_cpr_cant* `tc2mes3' * `deflactor3' if d_cpr_mone == 2 & interview_month==3
-replace gasto945 = d_cpr_cant* `tc3mes3' * `deflactor3' if d_cpr_mone == 3 & interview_month==3
-replace gasto945 = d_cpr_cant* `tc4mes3' * `deflactor3' if d_cpr_mone == 4 & interview_month==3
+foreach v in `jubi'{
+local n=`n'+1
+levelsof interview_month, local(month)
+	foreach m in `month'{
+	levelsof `v'_mone, local(currency)
+		foreach c in `currency'{
+		if `m'>10 | `m'<4 {
+			di "`v'" "`n'"
+			di `m'
+			di `c'
+			di `tc`c'mes`m''
+			di `deflactor`m''
+			replace gasto`n' = `v'_cant*`tc`c'mes`m''*`deflactor`m'' if interview_month == `m' & `v'_mone == `c'
+		}
+		}
+		}
+		}
 
 
-// data in many currencies (feb)
-replace gasto945 = d_cpr_cant if d_cpr_mone == 1 & interview_month==2
-replace gasto945 = d_cpr_cant* `tc2mes2' * `deflactor2' if d_cpr_mone == 2 & interview_month==2
-replace gasto945 = d_cpr_cant* `tc3mes2' * `deflactor2' if d_cpr_mone == 3 & interview_month==2
-replace gasto945 = d_cpr_cant* `tc4mes2' * `deflactor2' if d_cpr_mone == 4 & interview_month==2
+// gasto en aportapension
 
-// data in many currencies (jan)
-replace gasto945 = d_cpr_cant  * `deflactor1' if d_cpr_mone == 1 & interview_month==1
-replace gasto945 = d_cpr_cant* `tc2mes1' * `deflactor1' if d_cpr_mone == 2 & interview_month==1
-replace gasto945 = d_cpr_cant* `tc3mes1' * `deflactor1' if d_cpr_mone == 3 & interview_month==1
-replace gasto945 = d_cpr_cant* `tc4mes1' * `deflactor1' if d_cpr_mone == 4 & interview_month==1
+gen gasto948=.
+levelsof interview_month, local(month)
+	foreach m in `month'{
+	levelsof mone_aporta_pension, local(currency)
+		foreach c in `currency'{
+		if `m'>10 | `m'<4 {
+			di `m'
+			di `c'
+			di `tc`c'mes`m''
+			di `deflactor`m''
+			replace gasto948 = cant_aporta_pension*`tc`c'mes`m''*`deflactor`m'' if interview_month == `m' & mone_aporta_pension == `c'
+		}
+		}
+		}
+		
+egen gasto94 = rowtotal(gasto94*)
 
-// data in many currencies (dec)
-replace gasto945 = d_cpr_cant * `deflactor12' if d_cpr_mone == 1 & interview_month==12
-replace gasto945 = d_cpr_cant* `tc2mes12' * `deflactor12' if d_cpr_mone == 2 & interview_month==12
-replace gasto945 = d_cpr_cant* `tc3mes12' * `deflactor12' if d_cpr_mone == 3 & interview_month==12
-replace gasto945 = d_cpr_cant* `tc4mes12' * `deflactor12' if d_cpr_mone == 4 & interview_month==12
+// outliars detection
+replace gasto94 = round(gasto94)
+xtile q = gasto94, nq(100)
+gen flag = q > 99
+gsort -gasto94
+tab q [fw=gasto94]
+drop q flag		
+		
 
-// data in many currencies (nov)
-replace gasto945 = d_cpr_cant  * `deflactor11' if d_cpr_mone == 1 & interview_month==11
-replace gasto945 = d_cpr_cant* `tc2mes11' * `deflactor11' if d_cpr_mone == 2 & interview_month==11
-replace gasto945 = d_cpr_cant* `tc3mes11' * `deflactor11' if d_cpr_mone == 3 & interview_month==11
-replace gasto945 = d_cpr_cant* `tc4mes11' * `deflactor11' if d_cpr_mone == 4 & interview_month==11
-
-********* descuento rpv
-
-// data in many currencies (march)
-gen gasto946 = d_rpv_cant* `deflactor3' if d_rpv_mone == 1 & interview_month==3
-replace gasto946 = d_rpv_cant* `tc2mes3' * `deflactor3' if d_rpv_mone == 2 & interview_month==3
-replace gasto946 = d_rpv_cant* `tc3mes3' * `deflactor3' if d_rpv_mone == 3 & interview_month==3
-replace gasto946 = d_rpv_cant* `tc4mes3' * `deflactor3' if d_rpv_mone == 4 & interview_month==3
-
-
-// data in many currencies (feb)
-replace gasto946 = d_rpv_cant if d_rpv_mone == 1 & interview_month==2
-replace gasto946 = d_rpv_cant* `tc2mes2' * `deflactor2' if d_rpv_mone == 2 & interview_month==2
-replace gasto946 = d_rpv_cant* `tc3mes2' * `deflactor2' if d_rpv_mone == 3 & interview_month==2
-replace gasto946 = d_rpv_cant* `tc4mes2' * `deflactor2' if d_rpv_mone == 4 & interview_month==2
-
-// data in many currencies (jan)
-replace gasto946 = d_rpv_cant  * `deflactor1' if d_rpv_mone == 1 & interview_month==1
-replace gasto946 = d_rpv_cant* `tc2mes1' * `deflactor1' if d_rpv_mone == 2 & interview_month==1
-replace gasto946 = d_rpv_cant* `tc3mes1' * `deflactor1' if d_rpv_mone == 3 & interview_month==1
-replace gasto946 = d_rpv_cant* `tc4mes1' * `deflactor1' if d_rpv_mone == 4 & interview_month==1
-
-// data in many currencies (dec)
-replace gasto946 = d_rpv_cant * `deflactor12' if d_rpv_mone == 1 & interview_month==12
-replace gasto946 = d_rpv_cant* `tc2mes12' * `deflactor12' if d_rpv_mone == 2 & interview_month==12
-replace gasto946 = d_rpv_cant* `tc3mes12' * `deflactor12' if d_rpv_mone == 3 & interview_month==12
-replace gasto946 = d_rpv_cant* `tc4mes12' * `deflactor12' if d_rpv_mone == 4 & interview_month==12
-
-// data in many currencies (nov)
-replace gasto946 = d_rpv_cant  * `deflactor11' if d_rpv_mone == 1 & interview_month==11
-replace gasto946 = d_rpv_cant* `tc2mes11' * `deflactor11' if d_rpv_mone == 2 & interview_month==11
-replace gasto946 = d_rpv_cant* `tc3mes11' * `deflactor11' if d_rpv_mone == 3 & interview_month==11
-replace gasto946 = d_rpv_cant* `tc4mes11' * `deflactor11' if d_rpv_mone == 4 & interview_month==11
-
-
-********* descuento otro
-
-// data in many currencies (march)
-gen gasto947 = d_otro_cant* `deflactor3' if d_otro_mone == 1 & interview_month==3
-replace gasto947 = d_otro_cant* `tc2mes3' * `deflactor3' if d_otro_mone == 2 & interview_month==3
-replace gasto947 = d_otro_cant* `tc3mes3' * `deflactor3' if d_otro_mone == 3 & interview_month==3
-replace gasto947 = d_otro_cant* `tc4mes3' * `deflactor3' if d_otro_mone == 4 & interview_month==3
-
-
-// data in many currencies (feb)
-replace gasto947 = d_otro_cant if d_otro_mone == 1 & interview_month==2
-replace gasto947 = d_otro_cant* `tc2mes2' * `deflactor2' if d_otro_mone == 2 & interview_month==2
-replace gasto947 = d_otro_cant* `tc3mes2' * `deflactor2' if d_otro_mone == 3 & interview_month==2
-replace gasto947 = d_otro_cant* `tc4mes2' * `deflactor2' if d_otro_mone == 4 & interview_month==2
-
-// data in many currencies (jan)
-replace gasto947 = d_otro_cant  * `deflactor1' if d_otro_mone == 1 & interview_month==1
-replace gasto947 = d_otro_cant* `tc2mes1' * `deflactor1' if d_otro_mone == 2 & interview_month==1
-replace gasto947 = d_otro_cant* `tc3mes1' * `deflactor1' if d_otro_mone == 3 & interview_month==1
-replace gasto947 = d_otro_cant* `tc4mes1' * `deflactor1' if d_otro_mone == 4 & interview_month==1
-
-// data in many currencies (dec)
-replace gasto947 = d_otro_cant * `deflactor12' if d_otro_mone == 1 & interview_month==12
-replace gasto947 = d_otro_cant* `tc2mes12' * `deflactor12' if d_otro_mone == 2 & interview_month==12
-replace gasto947 = d_otro_cant* `tc3mes12' * `deflactor12' if d_otro_mone == 3 & interview_month==12
-replace gasto947 = d_otro_cant* `tc4mes12' * `deflactor12' if d_otro_mone == 4 & interview_month==12
-
-// data in many currencies (nov)
-replace gasto947 = d_otro_cant  * `deflactor11' if d_otro_mone == 1 & interview_month==11
-replace gasto947 = d_otro_cant* `tc2mes11' * `deflactor11' if d_otro_mone == 2 & interview_month==11
-replace gasto947 = d_otro_cant* `tc3mes11' * `deflactor11' if d_otro_mone == 3 & interview_month==11
-replace gasto947 = d_otro_cant* `tc4mes11' * `deflactor11' if d_otro_mone == 4 & interview_month==11
-
-********* aporta pension
-
-// data in many currencies (march)
-gen gasto948 = cant_aporta_pension* `deflactor3' if mone_aporta_pension == 1 & interview_month==3
-replace gasto948 = cant_aporta_pension* `tc2mes3' * `deflactor3' if mone_aporta_pension == 2 & interview_month==3
-replace gasto948 = cant_aporta_pension* `tc3mes3' * `deflactor3' if mone_aporta_pension == 3 & interview_month==3
-replace gasto948 = cant_aporta_pension* `tc4mes3' * `deflactor3' if mone_aporta_pension == 4 & interview_month==3
-
-
-// data in many currencies (feb)
-replace gasto948 = cant_aporta_pension if mone_aporta_pension == 1 & interview_month==2
-replace gasto948 = cant_aporta_pension* `tc2mes2' * `deflactor2' if mone_aporta_pension == 2 & interview_month==2
-replace gasto948 = cant_aporta_pension* `tc3mes2' * `deflactor2' if mone_aporta_pension == 3 & interview_month==2
-replace gasto948 = cant_aporta_pension* `tc4mes2' * `deflactor2' if mone_aporta_pension == 4 & interview_month==2
-
-// data in many currencies (jan)
-replace gasto948 = cant_aporta_pension  * `deflactor1' if mone_aporta_pension == 1 & interview_month==1
-replace gasto948 = cant_aporta_pension* `tc2mes1' * `deflactor1' if mone_aporta_pension == 2 & interview_month==1
-replace gasto948 = cant_aporta_pension* `tc3mes1' * `deflactor1' if mone_aporta_pension == 3 & interview_month==1
-replace gasto948 = cant_aporta_pension* `tc4mes1' * `deflactor1' if mone_aporta_pension == 4 & interview_month==1
-
-// data in many currencies (dec)
-replace gasto948 = cant_aporta_pension * `deflactor12' if mone_aporta_pension == 1 & interview_month==12
-replace gasto948 = cant_aporta_pension* `tc2mes12' * `deflactor12' if mone_aporta_pension == 2 & interview_month==12
-replace gasto948 = cant_aporta_pension* `tc3mes12' * `deflactor12' if mone_aporta_pension == 3 & interview_month==12
-replace gasto948 = cant_aporta_pension* `tc4mes12' * `deflactor12' if mone_aporta_pension == 4 & interview_month==12
-
-// data in many currencies (nov)
-replace gasto948 = cant_aporta_pension  * `deflactor11' if mone_aporta_pension == 1 & interview_month==11
-replace gasto948 = cant_aporta_pension* `tc2mes11' * `deflactor11' if mone_aporta_pension == 2 & interview_month==11
-replace gasto948 = cant_aporta_pension* `tc3mes11' * `deflactor11' if mone_aporta_pension == 3 & interview_month==11
-replace gasto948 = cant_aporta_pension* `tc4mes11' * `deflactor11' if mone_aporta_pension == 4 & interview_month==11
 ***********************************end of expenditures********************************
 
 
 // adds expenditure of hh, removing individual dimension 
-collapse (sum) gasto*, by (interview__id interview__key quest ipcf miembros entidad)
+collapse (sum) gasto??, by (interview__id interview__key quest ipcf miembros entidad)
 
-
-**************picks only 1 data in the following hierarchy:
- //if there is a payed ammount, this is housing expenditure,
- // else, if the reporter makes a estimation, we pick this amount as housing expenditure
- // else, we impute a 0.1 from ipcf to housing, if they are owners
- 
-gen gasto909 = gasto903
-replace gasto909 = gasto902 if (gasto901==. | gasto901==0) & !(gasto902==. | gasto902==0)
-replace gasto909 = gasto901 if !(gasto901==. | gasto901==0)
-
-//drop old rents and keep agregator
-drop gasto901 gasto902 gasto903
 
 // now we reshape the wide data to make it long
 reshape long gasto, i(interview__id interview__key quest ipcf miembros entidad) j(bien)
@@ -1377,13 +848,13 @@ replace gasto_mensual = round(gasto_mensual)
 gen current_good = 1
 
 // generate types of goods
-gen type_good = 8 if bien>900 & bien<910
-replace type_good = 9 if bien>910 & bien<920
-replace type_good = 10 if bien>920 & bien<930
-replace type_good = 11 if bien>930 & bien<940
-replace type_good = 12 if bien>940 & bien<950
+gen type_good = 8 if bien==90
+replace type_good = 9 if bien==91
+replace type_good = 10 if bien==92
+replace type_good = 11 if bien==93
+replace type_good = 12 if bien==94
 
-
+replace current_good = 0 if type_good == 12
 
 tempfile hhSpending
 save `hhSpending'
@@ -1405,8 +876,8 @@ save "$output/gastos_pob_referencia.dta", replace
 * 1:orshanky
 *************************************************************************************************************************************************)*/
 
-// chilenean metodolgy does not refer to avoid durables consumtion like TV, so we keep this muted
-// keep if current_good==1
+// colombian meth removes electronics as non current goods.
+keep if current_good==1
 
 
 
@@ -1423,7 +894,7 @@ gen totalhh = r(r)
 gen popularity = popularity_hh/totalhh
 sort popularity
 
-drop if popularity<.1
+drop if popularity<.05
 
 // aggregate expenditures by group and hh
 collapse (sum) gasto_mensual, by(interview__id interview__key quest ipcf miembros entidad type_good)
@@ -1453,9 +924,11 @@ twoway line orshansky obs if ors_quant<100
 xtile exp_quant = exp, nq(100)
 
 sum orshansky, detail
+global orsh = r(p50)
 
-global orsh r(p50)
-di $orsh
+drop if ors_quant>99
+sum orsh, detail
+
 
 
 // TO ANALYSE COMPOSITION OF EXPENDITURE IN THE THE ENVIROMENT OF ORSHANSNKY

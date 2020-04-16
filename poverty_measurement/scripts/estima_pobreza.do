@@ -19,8 +19,8 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user
-
+// // Define rootpath according to user
+//
 // 	    * User 1: Trini
 // 		global trini 0
 //		
@@ -48,8 +48,8 @@ Note:
 // global merged "$rootpath\data_management\output\merged"
 // global input  "$rootpath\poverty_measurement\input"
 // global output "$rootpath\poverty_measurement\output"
- global orsh = 2
-
+//
+// global orsh=1.7
 
 ********************************************************************************
 
@@ -67,6 +67,8 @@ set more off
 *******************************************************************************/
 // import basket costs
 use "$output/costo_canasta_diaria.dta", replace
+di "%%%%%%%%%%%%%%%%%%"
+di $orsh
 
 // calculate total daily cost
 egen costo_canasta = total(valor)
@@ -77,7 +79,7 @@ use "$cleaned\ENCOVI_2019.dta" , replace
 
 // gen new lines
 gen le_new = $costodiario * 30.42
-gen lp_new = $orsh* le_new //	 $orsh
+gen lp_new = $orsh* le_new 
 
 // gen international lines
 gen lp19 = 1.9 *30.42 * 2.92/100000 * 747304733.8
@@ -127,3 +129,17 @@ graph twoway line ipcf obs  if obs<30000, lcolor("black") ///
 || line lp_ofi obs, lcolor("green") 
 
 //generate proper output!! TODO
+
+gen pob_base = ipcf<lp_new
+gen ext_base = ipcf<le_new
+
+gen ext_10off = ipcf<le_new*0.9
+gen ext_20off = ipcf<le_new*0.8
+gen ext_50off = ipcf<le_new*0.5
+gen ext_75off = ipcf<le_new*0.25
+gen pob_10off = ipcf<lp_new*0.9
+gen pob_20off = ipcf<lp_new*0.8
+gen pob_50off = ipcf<lp_new*0.5
+gen pob_75off = ipcf<lp_new*0.25
+
+sum pob_base pob_??off ext_base ext_??off

@@ -37,14 +37,14 @@
 ***********************************
 //*** Running all imputations ***//
 **********************************
-/*
+
 run "$pathrun\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
 run "$pathrun\2. Imputation 2019 - Monetary labor income.do"
 run "$pathrun\3. Imputation 2019 - Pensions.do"
 run "$pathrun\4. Imputation 2019 - Non Labor Income (except pensions).do"
 run "$pathrun\5. Imputation 2019 - Labor benefits (non monetary income).do"
-*/
+
 
 **************************************
 /* NUESTRO DOFILE: TC Y DEFLACTORES */

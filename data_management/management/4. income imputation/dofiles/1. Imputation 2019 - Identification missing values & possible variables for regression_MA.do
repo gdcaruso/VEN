@@ -8,7 +8,7 @@ Survey:			ECNFT
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Malena Acuña, Trinidad Saavedra, Lautaro Chittaro, Julieta Ladronis
+Authors:			Malena Acuña, Julieta Ladronis, Trinidad Saavedra
 
 Dependencies:		CEDLAS/UNLP -- The World Bank
 Creation Date:		March, 2020
@@ -428,16 +428,15 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 
 	** Missing values outliers 
 	clonevar `x'_out=`x'
-	outliers `x' 10 90 5 5 // 44 outliers obs
+	outliers `x' 10 90 5 5
 	sum	`x'_out if	out_`x'==1 //
-	gen d`x'_out=out_`x'==1 if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) 
+	gen d`x'_out=out_`x'==1 if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1) // Lo miramos dentro del universo (antes estaba mal)
 	sum d`x'_out
 	local a3=r(sum)
-	replace aimputar_ila_mon=1 if d`x'_out==1 & inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) //adding outliers to variable identifying all the missing values 
-	
+	 
 	** Missing values 3:
-	gen d`x'_miss3=(aimputar_ila_mon==1)
-			label def d`x'_miss3 1 "Total missing (sum both cases)"
+	gen d`x'_miss3=1 if (aimputar_ila_mon==1 | d`x'_out==1)
+			label def d`x'_miss3 1 "Total missing (sum three cases)"
 			label values d`x'_miss3 d`x'_miss3
 	sum d`x'_miss3
 	local a4=r(sum)
@@ -494,11 +493,10 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	gen d`x'_out=out_`x'==1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
 	sum d`x'_out
 	local a3=r(sum)
-	replace aimputar_jubipen=1 if d`x'_out==1 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0 
 	
 	** Total missing values
-	gen d`x'_miss3=(aimputar_jubipen==1)
-			label def d`x'_miss3 1 "Total missing (sum both cases)"
+	gen d`x'_miss3=1 if (aimputar_jubipen==1 | d`x'_out==1)
+			label def d`x'_miss3 1 "Total missing (sum three cases)"
 			label values d`x'_miss3 d`x'_miss3
 	sum d`x'_miss3
 	local a4=r(sum)
@@ -547,10 +545,9 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	gen d`x'_out=out_`x'==1 if recibe_ingresolab_nomon==1
 	sum d`x'_out
 	local a2=r(sum)
-	replace report_inglabnomon_nocuanto=1 if d`x'_out==1 & recibe_ingresolab_nomon==1 
-
+	
 	** Missing values: sum of both 
-	gen d`x'_miss2=(report_inglabnomon_nocuanto==1) 
+	gen d`x'_miss2=1 if report_inglabnomon_nocuanto==1 | d`x'_out==1
 			label def d`x'_miss2 1 "Said received non-monetary ila, but amount missing or outlier"
 			label values d`x'_miss2 d`x'_miss2
 	sum d`x'_miss2
@@ -596,10 +593,9 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3)
 	sum d`x'_out
 	local a2=r(sum)
-	replace report_ingnolab_nocuanto=1 if d`x'_out==1 & inlist(recibe_ingresonolab,1,2,3) 
-
+	
 	** Missing values: sum of both
-	gen d`x'_miss2=(report_ingnolab_nocuanto==1) 
+	gen d`x'_miss2=1 if (report_ingnolab_nocuanto==1 | d`x'_out==1)
 			label def d`x'_miss2 1 "Said received monetary non-labor income, but amount missing or outlier"
 			label values d`x'_miss2 d`x'_miss2
 	sum d`x'_miss2
@@ -634,7 +630,7 @@ local row= `row' + rowsof(a3)+4
 matrix drop aux1 aux2 a a1 a2 a3
 
 *br interview__key interview__id quest dila_m_out djubpen_out dbene_out dinlanojub_out if (dila_m_out==1 | djubpen_out==1 | dbene_out==1 | dinlanojub_out==1) 
-
+stop
 
 *****************************************************************
 *** POSSIBLE VARIABLES FOR REGRESSION 
@@ -678,7 +674,7 @@ matrix drop aux1 aux2 a a1 a2 a3
 	global vars_mineq edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
 					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
 					/*seguro_salud*/ afiliado_segsalud_comp /*quien_pagosegsalud*/ ///
-					nivel_educ asiste_o_dejoypq ///
+					nivel_educ ///
 					tarea sector_encuesta categ_ocu total_hrtr ///
 					c_sso c_rpv c_spf c_aca c_sps c_otro ///
 					cuenta_corr cuenta_aho tcredito tdebito no_banco ///
@@ -700,7 +696,7 @@ matrix drop aux1 aux2 a a1 a2 a3
 	global vars_mineq_sinmis 	edad_sinmis	edad2_sinmis agegroup_sinmis hombre_sinmis relacion_comp_sinmis miembros_sinmis estado_civil_sinmis region_est1_sinmis municipio_sinmis 	///
 								tipo_vivienda_hh_sinmis propieta_hh_sinmis auto_hh_sinmis anio_auto_hh_sinmis heladera_hh_sinmis lavarropas_hh_sinmis computadora_hh_sinmis	internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
 								afiliado_segsalud_comp_sinmis ///
-								nivel_educ_sinmis asiste_o_dejoypq_sinmis ///
+								nivel_educ_sinmis ///
 								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
 								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///
 								cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
@@ -714,7 +710,7 @@ matrix drop aux1 aux2 a a1 a2 a3
 								tipo_vivienda_hh_sinmis propieta_hh_sinmis auto_hh_sinmis heladera_hh_sinmis lavarropas_hh_sinmis ///
 								computadora_hh_sinmis internet_hh_sinmis televisor_hh_sinmis calentador_hh_sinmis aire_hh_sinmis tv_cable_hh_sinmis microondas_hh_sinmis ///
 								afiliado_segsalud_comp_sinmis ///
-								nivel_educ_sinmis asiste_o_dejoypq_sinmis ///
+								nivel_educ_sinmis ///
 								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis ///
 								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///
 								cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
@@ -745,7 +741,7 @@ display "`varlist38'"
 		p_propieta_hh_sinmis1 p_propieta_hh_sinmis2 p_propieta_hh_sinmis3 ///
 		p_auto_hh_sinmis1 p_auto_hh_sinmis2 p_auto_hh_sinmis3 p_heladera_hh_sinmis1 p_heladera_hh_sinmis2 p_heladera_hh_sinmis3 p_lavarropas_hh_sinmis1 p_lavarropas_hh_sinmis2 p_lavarropas_hh_sinmis3 p_computadora_hh_sinmis1 p_computadora_hh_sinmis2 p_computadora_hh_sinmis3 p_internet_hh_sinmis1 p_internet_hh_sinmis2 p_internet_hh_sinmis3 p_televisor_hh_sinmis1 p_televisor_hh_sinmis2 p_televisor_hh_sinmis3 p_calentador_hh_sinmis1 p_calentador_hh_sinmis2 p_calentador_hh_sinmis3 p_aire_hh_sinmis1 p_aire_hh_sinmis2 p_aire_hh_sinmis3 p_tv_cable_hh_sinmis1 p_tv_cable_hh_sinmis2 p_tv_cable_hh_sinmis3 p_microondas_hh_sinmis1 p_microondas_hh_sinmis2 p_microondas_hh_sinmis3 ///
 		p_afiliado_segsalud_comp_sinmis1 p_afiliado_segsalud_comp_sinmis2 p_afiliado_segsalud_comp_sinmis3 p_afiliado_segsalud_comp_sinmis4 p_afiliado_segsalud_comp_sinmis5 p_afiliado_segsalud_comp_sinmis6 p_afiliado_segsalud_comp_sinmis7 ///
-		p_nivel_educ_sinmis1 p_nivel_educ_sinmis2 p_nivel_educ_sinmis3 p_nivel_educ_sinmis4 p_nivel_educ_sinmis5 p_nivel_educ_sinmis6 p_nivel_educ_sinmis7 p_nivel_educ_sinmis8 p_asiste_o_dejoypq_sinmis1 p_asiste_o_dejoypq_sinmis2 p_asiste_o_dejoypq_sinmis3 p_asiste_o_dejoypq_sinmis4 p_asiste_o_dejoypq_sinmis5 p_asiste_o_dejoypq_sinmis6 p_asiste_o_dejoypq_sinmis7 p_asiste_o_dejoypq_sinmis8 p_asiste_o_dejoypq_sinmis9 p_asiste_o_dejoypq_sinmis10 p_asiste_o_dejoypq_sinmis11 p_asiste_o_dejoypq_sinmis12 p_asiste_o_dejoypq_sinmis13 p_asiste_o_dejoypq_sinmis14 p_asiste_o_dejoypq_sinmis15 p_asiste_o_dejoypq_sinmis16 p_asiste_o_dejoypq_sinmis17 ///
+		p_nivel_educ_sinmis1 p_nivel_educ_sinmis2 p_nivel_educ_sinmis3 p_nivel_educ_sinmis4 p_nivel_educ_sinmis5 p_nivel_educ_sinmis6 p_nivel_educ_sinmis7 p_nivel_educ_sinmis8 ///
 		p_tarea_sinmis1 p_tarea_sinmis2 p_tarea_sinmis3 p_tarea_sinmis4 p_tarea_sinmis5 p_tarea_sinmis6 p_tarea_sinmis7 p_tarea_sinmis8 p_tarea_sinmis9 p_tarea_sinmis10 p_tarea_sinmis11 p_sector_encuesta_sinmis1 p_sector_encuesta_sinmis2 p_sector_encuesta_sinmis3 p_sector_encuesta_sinmis4 p_sector_encuesta_sinmis5 p_sector_encuesta_sinmis6 p_sector_encuesta_sinmis7 p_sector_encuesta_sinmis8 p_sector_encuesta_sinmis9 p_sector_encuesta_sinmis10 p_sector_encuesta_sinmis11 p_categ_ocu_sinmis1 p_categ_ocu_sinmis2 p_categ_ocu_sinmis3 p_categ_ocu_sinmis4 p_categ_ocu_sinmis5 p_categ_ocu_sinmis6 p_categ_ocu_sinmis7 p_categ_ocu_sinmis8 p_c_sso_sinmis1 p_c_sso_sinmis2 p_c_sso_sinmis3 ///
 		p_c_rpv_sinmis1 p_c_rpv_sinmis2 p_c_rpv_sinmis3 p_c_spf_sinmis1 p_c_spf_sinmis2 p_c_spf_sinmis3 p_c_aca_sinmis1 p_c_aca_sinmis2 p_c_aca_sinmis3 p_c_sps_sinmis1 p_c_sps_sinmis2 p_c_sps_sinmis3 p_c_otro_sinmis1 p_c_otro_sinmis2 p_c_otro_sinmis3 ///
 		p_cuenta_corr_sinmis1 p_cuenta_corr_sinmis2 p_cuenta_corr_sinmis3 p_cuenta_aho_sinmis1 p_cuenta_aho_sinmis2 p_cuenta_aho_sinmis3 p_tcredito_sinmis1 p_tcredito_sinmis2 p_tcredito_sinmis3 p_tdebito_sinmis1 p_tdebito_sinmis2 p_tdebito_sinmis3 p_no_banco_sinmis1 p_no_banco_sinmis2 p_no_banco_sinmis3 ///

@@ -22,13 +22,13 @@ Note: Income imputation - Identification missing values
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta   0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
 				global path "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
@@ -54,21 +54,21 @@ Note: Income imputation - Identification missing values
 ///*** OPEN DATABASE ***///
 	use "$path\ENCOVI_forimputation_2019.dta", clear
 	
-///*** Check missing values to fix
-	 * How many we are going to impute
+///*** CHECKING MISSING VALUES TO BE IMPUTED ***///
+	* How many we are going to impute
 	mdesc ila_m if inlist(recibe_ingresolab_mon,1,2,3) | (ocupado==1 & recibe_ingresolab_mon!=0 & ila==.) 
 
 		// if me decís que recibiste pero ila monteario missing Ó estás ocupado, no decís que no recibís ila_m (eso sería un verdadero missing) y no contestás un monto de ila no mon.
 		* Check: da ok! Igual que la cantidad de miss3
 
-		///*** VARIABLES FOR MINCER EQUATION ***///
+///*** VARIABLES FOR MINCER EQUATION ***///
 
 	 global xvar edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
 					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
 					afiliado_segsalud_comp ///
-					nivel_educ asiste_o_dejoypq ///
+					nivel_educ ///
 					tarea sector_encuesta categ_ocu total_hrtr ///
-					c_sso c_rpv c_spf c_aca c_sps c_otro ///
+					/*c_sso c_rpv c_spf c_aca c_sps c_otro*/ ///
 					cuenta_corr cuenta_aho tcredito tdebito no_banco ///
 					aporte_pension clap ingsuf_comida comida_trueque 
 

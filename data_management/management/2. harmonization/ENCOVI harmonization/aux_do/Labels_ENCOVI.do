@@ -1779,13 +1779,642 @@ label var  	mone_aporta_pension		"Currency"
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-*FALTA CORREGIR POR JULI
+*--------- Informant in this section
+ /* Informante (s10q00): 00. Quién es el informante de esta sección?
+		01 = Jefe del Hogar	
+		02 = Esposa(o) o Compañera(o)
+		03 = Hijo(a)		
+		04 = Hijastro(a)
+		05 = Nieto(a)		
+		06 = Yerno, nuera, suegro (a)
+		07 = Padre, madre       
+		08 = Hermano(a)
+		09 = Cunado(a)         
+		10 = Sobrino(a)
+		
+		1 "Head of the household" ///	
+		2 "Spouse/partner"
+		3 "Son/daughter"		
+		4 "Stepson/stepdaughter"
+		5 "Grandchild"	
+		6 "Son/daugther/father/mother-in-law"
+		7 "Father/mother"       
+		8 "Sibling"
+		9 "Brother/sister-in-law"     
+		10 "Nephew/niece"
+		11 "Other relative"    
+		12 "Other: non relative"
+		13 "House maid"
+ */
+	
+	*-- Label variable
+	label var informant_emig "Informant: Emigration"
+	*-- Label values	
+	label def informant_emig_eng  1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter/stepson/stepdaughter" ///
+							  4 "Grandchild" 5 "Son/daugther/father/mother-in-law" 6 "Father/mother" 7 "Sibling" ///
+							  8 "Brother/sister-in-law" 9 "Nephew/niece" 10 "Other relative" 11 "Other: non relative" ///
+							  12 "House maid"
+	label value informant_emig  informant_emig_eng
+
+
+*--------- Emigrant from the household
+ /* Emigrant(s10q1): 1. Duante los últimos 5 años, desde septiembre de 2014, 
+	¿alguna persona que vive o vivió con usted en su hogar se fue a vivir a otro país?
+         1 = Si
+         2 = No
+ */
+
+	*-- Label variable
+	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
+	*-- Label values
+	label def house_emig_eng 1 "Yes" 2 "No"
+	label value hogar_emig house_emig_eng
+
+*--------- Number of Emigrants from the household
+ /* Number of Emigrants from the household(s10q2): 2. Cuántas personas?
+ 
+ */
+
+	*-- Label variable
+	label var numero_emig "Number of Emigrants from the household"
+	
+*--------- Name of Emigrants from the household
+ /* Name of Emigrants from the household(s10q2a): 2. Cuántas personas?
+        
+ */	
+	
+	*-- We will have 10 variables with names
+	forval i = 0/9{
+	label var nombre_emig_`i' "Name of Emigrants from the household"
+	}
+
+	
+ *--------- Age of the emigrant
+ /* Age of the emigrant(s10q3): 3. Cuántos años cumplidos tiene X?
+        
+ */
+ 	*-- We will have 10 variables with names	
+	forval i = 1/10 {
+		*-- Label variable
+		label var edad_emig_`i' "Age of Emigrants"
+		
+	}
+	
+	
+ *--------- Sex of the emigrant 
+ /* Sex (s10q4): 4. El sexo de X es?
+				01 Masculino
+				02 Femenino
+				
+ */
+ 	*-- We will have 10 variables with names
+	forval i = 1/10 {
+		*-- Label variable
+		label var sexo_emig_`i' "Sex of Emigrants"
+		*-- Label values
+		label def sexo_emig_`i'_eng 1 "Male" 0 "Female"
+		label value sexo_emig_`i' sexo_emig_`i'_eng
+		}
+		
+	
+ /*
+ *--------- Relationship of the emigrant with the head of the household
+ Relationship (s10q5): 5. Cuál es el parentesco de X con el Jefe(a) del hogar?
+        
+ */ 
+	*-- We will have 10 variables with names	
+	forval i = 1/10 {
+	*-- Label variable
+	label var relemig_`i' "Emigrant's relationship with the head of the household"
+	*-- Label values
+	label def remig_`i'_eng 1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter/stepson/stepdaughter" ///
+							  4 "Grandchild" 5 "Son/daugther/father/mother-in-law" 6 "Father/mother" 7 "Sibling" ///
+							  8 "Brother/sister-in-law" 9 "Nephew/niece" 10 "Other relative" 11 "Other: non relative" ///
+							  12 "House maid"
+	label value relemig_`i' remig_`i'_eng
+	}
+	
+	
+ *--------- Year in which the emigrant left the household
+ /* Year (s10q6a): 6a. En qué año se fue X ?
+        
+ */	
+	*-- We will have 10 variables with names 
+	forval i = 1/10 {
+	*-- Label variable
+	label var anoemig_`i' "Year of emigration"
+	}
+	
+	
+ *--------- Month in which the emigrant left the household
+ /* Month (s10q6b): 6a. En qué mes se fue X ?
+        
+ */	
+	*-- We will have 10 variables with names
+	forval i = 1/10 {
+	*-- Label variable
+	label var mesemig_`i' "Month of emigration"
+	*-- Label values
+	label def mesemig_`i'_eng 1 "January" 2 "February" 3 "March" 4 "April" 5 "May" ///
+	6 "June" 7 "July" 8 "August" 9 "September" 10 "October" 11 "November" 12 "December"
+	label val mesemig_`i' mesemig_`i'_eng 
+	}
+
+
+  *--------- Latest education level atained by the emigrant 
+ /* Education level (s10q7): 7. Cuál fue el último nivel educativo en el que
+							 X aprobó un grado, año, semestre o trimestre?  
+			01 Ninguno
+			02 Preescolar
+			03 Régimen anterior: Básica (1-9)
+			04 Régimen anterior: Media Diversificado y Profesional (1-3)
+			05 Régimen actual: Primaria (1-6)
+			06 Régimen actual: Media (1-6)
+			07 Técnico (TSU)
+			08 Universitario
+			09 Postgrado
+
+ */
+ 	
+	*-- Given that the maximum number of emigrantes per household is 10 
+	forval i = 1/10 {
+	*-- Label variable
+	label var leveledu_emig_`i' "Education level emigrant"
+	*-- Label values
+	label def leveledu_emig_`i'_eng 1 "None" ///		
+        2 "Kindergarten" ///
+		3 "Regimen anterior: Basica (1-9)" ///
+		4 "Regimen anterior: Media (1-3)" ///
+		5 "Regimen actual: Primary(1-6)" ///
+		6 "Regimen actual: Media (1-6)" ///
+		7 "Tecnico (TSU)" ///		
+		8 "University" ///
+		9 "Postgraduated"
+	label val leveledu_emig_`i' leveledu_emig_`i'_eng
+	}
+	
+
+ *--------- Latest education grade atained by the emigrant 
+ /* Education level (s10q7a): 7a. Cuál fue el último GRADO aprobado por X?     
+ */	
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var gradedu_emig_`i' "Education grade emigrant"
+	
+	}
+	
+
+ *--------- Education regime 
+ /* Education regime (s10q7ba): 7ba. El régimen de estudio era anual, semestral o
+							   trimestral?
+								01 Anual
+								02 Semestral
+								03 Trimestral     
+ */	
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var regedu_emig_`i' "Education regime: annual, biannual or quarterly"
+	*-- Label values
+	label def regedu_emig_`i'_eng 1 "Annual" 2 "Biannual" 3 "Quarterly"
+	label value regedu_emig_`i' regedu_emig_`i'_eng
+	}
+	
+ *--------- Latest year 
+ /* Education regime (s10q7b): 7b. Cuál fue el último AÑO aprobado por X?    
+ */
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var anoedu_emig_`i' "Last year of education attained"
+	*-- Cross check
+	tab anoedu_emig_`i' hogar_emig
+	}
+
+  *--------- Latest semester
+ /* Education regime (s10q7c): 7c. Cuál fue el último SEMESTRE aprobado por X?   
+ */
+ 	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var semedu_emig_`i' "Last semester of education attained"
+	}
+
+  *--------- Country of residence of the emigrant
+ /* Country (s10q8): 8. En cuál país vive actualmente X?   
+ */
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var paisemig_`i' "Country in which X lives"
+	}
+
+  *--------- Other country of residence 
+ /* Other Country (s10q8_os): 8a. Otro país, especifique
+ */
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var opaisemig_`i' "Country in which X lives (Other)"
+	}
+
+  *--------- City of residence 
+ /* City (s10q8b): 8b. Y en cuál ciudad ?
+ */
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var ciuemig_`i' "City in which X lives"
+	}
+
+   *--------- Emigrated alone or not
+ /* Alone (s10q8c): 8c. X emigró solo/a ?	
+					01 Si
+					02 No
+ */
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var soloemig_`i' "Has X emigrated alone"
+	*-- Label values
+	label def soloemig_`i'_eng 1 "Yes" 0 "No"
+	label value soloemig_`i' soloemig_`i'_eng
+	}
+
+
+  *--------- Emigrated with other people 
+ /*  (s10q8d):8d. Con quién emigró X?				
+				01 Padre/madre
+				02 Hermano/a
+				03 Conyuge/pareja
+				04 Hijos/hijas
+				05 Otro pariente
+				06 No parientes
+ */
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var conemig_`i' "Who emigrated with X"
+	*-- Label values
+	label def conemig_`i'_eng 1 "Father/Mother" 2 "Brother/sister" 3 "Partner" 4 "Son/daughter" 5 "Other relative" 6 "Non relative"
+	label value conemig_`i' conemig_`i'_eng
+	} 
+
+  *--------- Reason for leaving the country
+ /*  Reason (s10q9_os):9. Cuál fue el motivo por el cual X se fue				
+						01 Fue a buscar/consiguió trabajo
+						02 Cambió su lugar de trabajo
+						03 Por razones de estudio
+						04 Reagrupación familiar
+						05 Se casó o unió
+						06 Por motivos de salud
+						07 Por violencia e inseguridad
+						08 Por razones políticas
+						09 Otro
+						
+						1 "Left looking for/got a job"
+						2 "The location of the workplace changed"
+						3 "Education/studies"
+						4 "Family reunification"
+						5 "Marriage/concubinage"
+						6 "Health reasons"
+						7 "Violence/insecurity"
+						8 "Political reasons"
+						9 "Other"
+ */
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var razonemig_`i' "Why X emigrated"
+	*-- Label values
+	label def razonemig_`i'_eng 1 "Left looking for/got a job" ///
+						2 "The location of the workplace changed" ///
+						3 "Education/studies" ///
+						4 "Family reunification" ///
+						5 "Marriage/concubinage" ///
+						6 "Health reasons" ///
+						7 "Violence/insecurity" ///
+						8 "Political reasons" ///
+						9 "Other"
+	label val razonemig_`i' razonemig_`i'_eng
+	} 
+
+  *--------- Occupation: Before leaving the country
+ /*  Occupation before (s10q10):10. Cuál era la ocupación principal de X antes de emigrar?
+			
+					01 Director o gerente
+					02 Profesional científico o intelectual
+					03 Técnico o profesional de nivel medio
+					04 Personal de apoyo administrativo
+					05 Trabajador de los servicios o vendedor de comercios y mercados
+					06 Agricultor o trabajador calificado agropecuario, forestal o pesquero
+					07 Oficial, operario o artesano de artes mecánicas y otros oficios
+					08 Operador de instalaciones fijas y máquinas y maquinarias
+					09 Ocupaciones elementales
+					10 Ocupaciones militares
+					11 No se desempeñaba en alguna ocupación	
+					
+					 1 "Director or manager" 
+					 2 "Scientific or intellectual professional" 
+					 3 "Technician or mid-level professional" 
+					 4 "Administrative support staff" 
+                     5 "Service worker or seller of shops and markets" 
+					 6 "Farmer or skilled agricultural, forestry or fishing worker" 
+                     7 "Official, operator or craftsman of mechanical arts and other trades" 
+					 8 "Operator of fixed installations and machines and machinery" ///
+                     9 "Elementary occupations" 
+					10 "Military occupations"
+					11 "Without occupation"
+ */    
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var ocupaemig_`i' "Which was X occupation before leaving"
+	*-- Label values
+	label def ocupaemig_`i'_eng 1 "Director or manager" ///
+					 2 "Scientific or intellectual professional" ///
+					 3 "Technician or mid-level professional" ///
+					 4 "Administrative support staff" ///
+                     5 "Service worker or seller of shops and markets" /// 
+					 6 "Farmer or skilled agricultural, forestry or fishing worker" /// 
+                     7 "Official, operator or craftsman of mechanical arts and other trades" ///
+					 8 "Operator of fixed installations and machines and machinery" ///
+                     9 "Elementary occupations" ///
+					10 "Military occupations" ///
+					11 "Without occupation"
+	label val ocupaemig_`i'	ocupaemig_`i'_eng				
+	} 
+
+   *--------- Occupation: in the new country
+ /*  Occupation now (s10q11): 11. Qué ocupación tiene X en el país donde vive ?
+			
+					01 Director o gerente
+					02 Profesional científico o intelectual
+					03 Técnico o profesional de nivel medio
+					04 Personal de apoyo administrativo
+					05 Trabajador de los servicios o vendedor de comercios y mercados
+					06 Agricultor o trabajador calificado agropecuario, forestal o pesquero
+					07 Oficial, operario o artesano de artes mecánicas y otros oficios
+					08 Operador de instalaciones fijas y máquinas y maquinarias
+					09 Ocupaciones elementales
+					10 Ocupaciones militares
+					11 No se desempeñaba en alguna ocupación			
+ */    
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var ocupnemig_`i' "Which is X occupation now"
+	*-- Label values
+	label def ocupnemig_`i'_eng 1 "Director or manager" ///
+					 2 "Scientific or intellectual professional" ///
+					 3 "Technician or mid-level professional" ///
+					 4 "Administrative support staff" ///
+                     5 "Service worker or seller of shops and markets" /// 
+					 6 "Farmer or skilled agricultural, forestry or fishing worker" /// 
+                     7 "Official, operator or craftsman of mechanical arts and other trades" ///
+					 8 "Operator of fixed installations and machines and machinery" ///
+                     9 "Elementary occupations" ///
+					10 "Military occupations" ///
+					11 "Without occupation"
+	label val ocupnemig_`i' ocupnemig_`i'_eng
+	} 
+
+ 
+    *--------- The emigrant moved back to the country
+ /*  Moved back (s10q12): 12. X regresó a residenciarse nuevamente al país?
+							1 Si
+							0 No
+		
+ */    
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Label variable
+	label var volvioemig_`i' "Does X moved back to the country?"
+	*-- Label values
+	label def volvioemig_`i'_eng 1 "Yes" 0 "No"
+	label value volvioemig_`i' volvioemig_`i'_eng
+	} 
+
+
+     *--------- Year: The emigrant moved back to the country
+ /*  Year (s10q13a): 13a. En qué año regresó X?
+		
+ */    
+	forval i = 1/10{
+	*-- Label variable
+	label var volvioanoemig_`i' "Year: X moved back to the country?"
+	} 
+
+      *--------- Month: The emigrant moved back to the country
+ /*  Month (s10q13b): 13b. En qué mes regresó X?
+		
+ */ 
+ 	forval i = 1/10{
+	*-- Label variable
+	label var volviomesemig_`i' "Month: X moved back to the country?"
+	} 
+
+ 
+      *--------- Member of the household
+ /*  Member (s10q14):14. En el presente X forma parte de este hogar?
+						1 Si
+						0 No
+	
+ */   
+ 	forval i = 1/10{
+	*-- Label variable
+	label var miememig_`i' "Is X a member of the household?"
+	*-- Label values
+	label def miememig_`i'_eng 1 "Yes" 0 "No"
+	label value miememig_`i' miememig_`i'_eng
+	} 
+
 
 /*(************************************************************************************************************************************************ 
 *---------------------------------------- XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES -------------------------------------
 ************************************************************************************************************************************************)*/
 
-*FALTA CORREGIR POR JULI
+
+*--------- Informant in this section
+ /* Informante (s15q00): 00. Quién es el informante de esta sección?
+		01 = Jefe del Hogar	
+		02 = Esposa(o) o Compañera(o)
+		03 = Hijo(a)		
+		04 = Hijastro(a)
+		05 = Nieto(a)		
+		06 = Yerno, nuera, suegro (a)
+		07 = Padre, madre       
+		08 = Hermano(a)
+		09 = Cunado(a)         
+		10 = Sobrino(a)
+ */
+	
+	*-- Label variable
+	label var informant_shock "Informant: shocks affecting households"
+	*-- Label values	
+	label def informant_shock_eng  1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter/stepson/stepdaughter" ///
+							  4 "Grandchild" 5 "Son/daugther/father/mother-in-law" 6 "Father/mother" 7 "Sibling" ///
+							  8 "Brother/sister-in-law" 9 "Nephew/niece" 10 "Other relative" 11 "Other: non relative" ///
+							  12 "House maid"
+	label value informant_shock  informant_shock_eng
+
+
+*--------- Events which affected the household
+ /* Events(s15q1): 1. Cuáles de los siguientes eventos han afectado a
+su hogar desde el año 2017 ?
+         0 = No
+         1 = Si
+ */
+
+	forval i = 1/21{
+	*-- Label values 
+	label def evento_`i'_eng 0 "No" 1 "Yes"
+	label value evento_`i' evento_`i'_eng
+	}
+	
+*-- Label variable
+	*-- Label variable
+	label var evento_1 "Since 2017, the household faced: dead or disability of an adult memeber which worked"
+	label var evento_2 "Since 2017, the household faced: dead of a person which used to send remittances"
+	label var evento_3 "Since 2017, the household faced: illness of the person with the most important household income"
+	label var evento_4 "Since 2017, the household faced: loss of important contact"
+	label var evento_5 "Since 2017, the household faced: the member with the most important household income lost his/her job"
+	label var evento_6 "Since 2017, the household faced: Exit of family member which earned income due to divorce/separation"
+	label var evento_7 "Since 2017, the household faced: Exit of family member which earned income due to marriage"
+	label var evento_8 "Since 2017, the household faced: Emigration of a member of the household that earned income"
+	label var evento_9 "Since 2017, the household faced: Non-agricultural business failure/closing of business or venture"
+	label var evento_10 "Since 2017, the household faced: theft of crops, cash, livestock or other assets"
+	label var evento_11 "Since 2017, the household faced: crop loss due to fire/drought/floods"
+	label var evento_12 "Since 2017, the household faced: pest invasion that caused crop failure or loss of storage"
+	label var evento_13 "Since 2017, the household faced: damaged/demolished home"
+	label var evento_14 "Since 2017, the household faced: loss of property due to fire or flood"
+	label var evento_15 "Since 2017, the household faced: loss of land"
+	label var evento_16 "Since 2017, the household faced: dead of livestock due to disease"
+	label var evento_17 "Since 2017, the household faced: higher cost of supplies"
+	label var evento_18 "Since 2017, the household faced: lower prices of products"
+	label var evento_19 "Since 2017, the household faced: higher prices of the main sources of food"
+	label var evento_20 "Since 2017, the household faced: kidnapping/robbery/assault"
+	label var evento_21 "Since 2017, the household faced: other"
+	
+	*-- Label variable
+	label var evento_ot "Mention other shocks which affected your household"
+	
+ *--------- Most important events
+ /* s15q2: 2. De la lista de eventos acontecidos en su hogar desde el año 2017, 
+ señale cuáles han sido los 3 más significativos?
+Categories: 
+			1:Muerte o discapacidad de un miembro adulto del hogar que trabajaba
+			2:Muerte de alguien que enviaba remesas al hogar 
+			3:Enfermedad de la persona con el ingreso más importante del hogar
+			4:Pérdida de un contacto importante, 
+			5:Perdida de trabajo de la persona con el ingreso más importante del hogar
+			6:Salida del miembro del hogar que generaba ingresos debido a separación/divorcio
+			7:Salida del miembro de la familia que generaba ingresos debido al matrimonio
+			8:Salida de un miembro del hogar que generaba ingresos por emigración
+			9:Fracaso empresarial no agrícola/cierre de negocio o emprendimiento
+			10:Robo de cultivos, dinero en efectivo, ganado u otros bienes
+			11:Pérdida de cosecha por incendio/sequía/inundaciones
+			12:Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
+			13:Vivienda dañada / demolida
+			14:Pérdida de propiedad por incendio o inundación
+			15:Pérdida de tierras, 16:Muerte de ganado por enfermedad
+			17:Incremento en el precio de los insumos
+			18:Caída en el precio de los productos
+			19:Incremento en el precio de los principales alimentos consumidos
+			20:Secuestro/robo/asalto
+			21:Otro
+        
+ */
+
+	forval i = 1/22 {
+	rename s15q2__`i' s15q2_`i'
+	*-- Standarization of missing values
+	replace s15q2_`i'=. if s15q2_`i'==.a
+		*-- Generate variable
+		clonevar imp_evento_`i' = s15q2_`i'
+	}
+	
+	*-- Label variable
+	*-- Label variable
+	label var imp_evento_1 "Importance: dead or disability of an adult memeber which worked"
+	label var imp_evento_2 "Importance: dead of a person which used to send remittances"
+	label var imp_evento_3 "Importance: illness of the person with the most important household income"
+	label var imp_evento_4 "Importance: loss of important contact"
+	label var imp_evento_5 "Importance: the member with the most important household income lost his/her job"
+	label var imp_evento_6 "Importance: exit of family member which earned income due to divorce/separation"
+	label var imp_evento_7 "Importance: exit of family member which earned income due to marriage"
+	label var imp_evento_8 "Importance: emigration of a member of the household that earned income"
+	label var imp_evento_9 "Importance: non-agricultural business failure/closing of business or venture"
+	label var imp_evento_10 "Importance: theft of crops, cash, livestock or other assets"
+	label var imp_evento_11 "Importance: crop loss due to fire/drought/floods"
+	label var imp_evento_12 "Importance: pest invasion that caused crop failure or loss of storage"
+	label var imp_evento_13 "Importance: damaged/demolished home"
+	label var imp_evento_14 "Importance: loss of property due to fire or flood"
+	label var imp_evento_15 "Importance: loss of land"
+	label var imp_evento_16 "Importance: dead of livestock due to disease"
+	label var imp_evento_17 "Importance: higher cost of supplies"
+	label var imp_evento_18 "Importance: lower prices of products"
+	label var imp_evento_19 "Importance: higher prices of the main sources of food"
+	label var imp_evento_20 "Importance: kidnapping/robbery/assault"
+	label var imp_evento_21 "Importance: other"
+
+ *--------- How many times have the shock occurred since 2017
+ /* (s15q2a)2a. Cuántas veces ocurrió %rostertitle% desde 2017?
+ */
+
+	forval i = 1/21 {
+		*-- Label variable
+		label var veces_evento_`i' "How many times have the shock occurred since 2017"
+		}
+		
+	
+ /*
+ *--------- Year of the event
+ (s15q2b) 2b. En qué año ocurrió ?
+        
+ */ 
+
+	forval i = 1/21 {
+	*-- Label variable
+	label var ano_evento_`i' "Year of the event"
+	}
+	
+
+ *--------- How the houselhold coped with the shock
+ /* (s15q2c): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
+ 
+local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
+	foreach i of local x {
+		forval k = 1/21 {
+	label var reaccion_evento_`i'_`k' "Response to event"
+	*-- Label values
+	label def reaccion_evento_`i'_`k'_eng 0 "Non code" 1 "Selling livestock" 2 "Selling land" 3 "Selling property" ///
+	4 "Sending the children to live with friends" 5 "Stopped sending children to school" ///
+	6 "Working in other income generating activities" ///
+	8 "Received assiatnce from friends and relatives" 9 "Loans from friends and family" ///
+	10 "Loans from financial institution" ///
+	12 "Members of the household emigrated looking for a job" ///
+	13 "Credit purchases" 14 "Delayed payment of obligations" ///
+	15 "Sold the harvest in advance" 16 "Reduced the consumption of food" /// 
+	17 "Reduced consumption of non-food item" 18 "Used savings" ///
+	19 "Received assiatnce from a NGO" 20 "Advance payment from employer" ///
+	21 "Received assiatence from the government" 22 "The insurance covered the costs" ///
+	23 "Nothing" 24 "Other"
+	label val reaccion_evento_`i'_`k' reaccion_evento_`i'_`k'_eng
+		}
+	}
+	
+ *--------- Other responses to the event
+ /* (s15q2d): 2d. Otro arreglo, especifique */	
+	forval i = 1/21 {
+	*-- Label variable
+	label var reaccionot_evento`i' "Other responses to the event"
+	}
+	
 	
 /*(************************************************************************************************************************************************ 
 *---------------------------------------------------- INCOME VARIABLES / VARIABLES DE INGRESO ------------------------------------------------

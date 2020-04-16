@@ -19,13 +19,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0	
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -2264,7 +2264,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	drop informant_ref
 	
 	*-- Label variable
-	label var informant_emig "Informant: Emigration"
+	label var informant_emig "0.Informante: Emigracion"
 	*-- Label values	
 	label def informant_emig  1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
 							  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
@@ -2285,10 +2285,11 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace s10q1=. if s10q1==.a
 	*-- Generate variable
 	clonevar hogar_emig = s10q1
+	replace  hogar_emig = 0 if s10q1==2
 	*-- Label variable
-	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
+	label var hogar_emig "1.Durante los últimos 5 años, desde septiembre de 2014, ¿alguna persona que vive o vivió con usted en su hogar se fue a vivir a otro país? household left the country" 
 	*-- Label values
-	label def house_emig 1 "Yes" 2 "No"
+	label def house_emig 1 "Si" 0 "No"
 	label value hogar_emig house_emig
 
 *--------- Number of Emigrants from the household
@@ -2302,7 +2303,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar numero_emig = s10q2
 	*-- Label variable
-	label var numero_emig "Number of Emigrants from the household"
+	label var numero_emig "2.Cuántas personas emigraron?"
 	*-- Cross check
 	tab numero_emig hogar_emig, mi
 	
@@ -2325,7 +2326,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar nombre_emig_`i' = s10q2a__`i'
 	*-- Label variable
-	label var nombre_emig_`i' "Name of Emigrants from the household"
+	label var nombre_emig_`i' "2a.Nombre de las personas que emigraron"
 	}
 
 	
@@ -2340,13 +2341,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q3`i' s10q3_`i'
 	*-- Label original variable
-	label var s10q3_`i' "3.Cuántos años cumplidos tiene X?"
+	label var s10q3_`i' "3.Cuántos años cumplidos tiene el emigrante?"
 	*-- Standarization of missing values
 	replace s10q3_`i'=. if s10q3_`i'==.a
 		*-- Generate variable
 		clonevar edad_emig_`i' = s10q3_`i'
 		*-- Label variable
-		label var edad_emig_`i' "Age of Emigrants"
+		label var edad_emig_`i' "3.Cuántos años cumplidos tiene el emigrante?"
 		*-- Cross check
 		tab edad_emig_`i' hogar_emig
 	}
@@ -2364,15 +2365,16 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q4`i' s10q4_`i'
 	*-- Label original variable
-	label var s10q4_`i' "4. El sexo de X es?"
+	label var s10q4_`i' "4.El sexo de X es?"
 	*-- Standarization of missing values
 	replace s10q4_`i'=. if s10q4_`i'==.a
 		*-- Generate variable
 		clonevar sexo_emig_`i' = s10q4_`i'
+		replace  sexo_emig_`i' = 0 if sexo_emig_`i'==2
 		*-- Label variable
-		label var sexo_emig_`i' "Sex of Emigrants"
+		label var sexo_emig_`i' "4.El sexo del emigrante es?"
 		*-- Label values
-		label def sexo_emig_`i' 1 "Male" 2 "Female"
+		label def sexo_emig_`i' 1 "Hombre" 0 "Mujer"
 		label value sexo_emig_`i' sexo_emig_`i'
 		}
 		
@@ -2388,7 +2390,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q5`i' s10q5_`i'
 	*-- Label original variable
-	label var s10q5_`i' "5. Cuál es el parentesco de X con el Jefe(a) del hogar?"
+	label var s10q5_`i' "5.Cuál es el parentesco de X con el Jefe(a) del hogar?"
 	*-- Standarization of missing values
 	replace s10q5_`i'=. if s10q5_`i'==.a
 	*-- Generate variable
@@ -2406,7 +2408,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	replace relemig_`i'  = 11	    if  s10q5_`i'==12
 	replace relemig_`i'  = 12	    if  s10q5_`i'==13
 	*-- Label variable
-	label var relemig_`i' "Emigrant's relationship with the head of the household"
+	label var relemig_`i' "5.Parentesco del emigrante con el Jefe(a) del hogar"
 	*-- Label values
 	label def remig_`i' 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" ///
 						  4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)"  6 "Padre, madre" 7 "Hermano(a)" ///
@@ -2432,7 +2434,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar anoemig_`i' = s10q6a_`i'
 	*-- Label variable
-	label var anoemig_`i' "Year of emigration"
+	label var anoemig_`i' "6a.En qué año emigro"
 	*-- Cross check
 	tab anoemig_`i' hogar_emig
 	}
@@ -2454,7 +2456,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar mesemig_`i' = s10q6b_`i'
 	*-- Label variable
-	label var mesemig_`i' "Month of emigration"
+	label var mesemig_`i' "6b.En qué mes emigro"
 	*-- Cross check
 	tab mesemig_`i' hogar_emig
 	}
@@ -2481,13 +2483,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q7`i' s10q7_`i'
 	*-- Label original variable
-	label var s10q7_`i' "7. Cuál fue el último nivel educativo en el que X aprobó un grado, año, semestre o trimestre?"
+	label var s10q7_`i' "7.Cuál fue el último nivel educativo en el que X aprobó un grado, año, semestre o trimestre?"
 	*-- Standarization of missing values
 	replace s10q7_`i'=. if s10q7_`i'==.a
 	*-- Generate variable
 	clonevar leveledu_emig_`i' = s10q7_`i'
 	*-- Label variable
-	label var leveledu_emig_`i' "Education level emigrant"
+	label var leveledu_emig_`i' "7.Nivel educativo del emigrante"
 	}
 	
 
@@ -2506,7 +2508,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar gradedu_emig_`i' = s10q7a_`i'
 	*-- Label variable
-	label var gradedu_emig_`i' "Education grade emigrant"
+	label var gradedu_emig_`i' "7a.Ultimo grado aprobado por el emigrante"
 	*-- Cross check
 	tab gradedu_emig_`i' hogar_emig
 	}
@@ -2531,11 +2533,11 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar regedu_emig_`i' = s10q7ba_`i'
 	*-- Label variable
-	label var regedu_emig_`i' "Education regime: annual, biannual or quarterly"
+	label var regedu_emig_`i' "7ba.Régimen de estudio: anual, semestral o trimestral"
 	*-- Cross check
 	tab regedu_emig_`i' hogar_emig
 	*-- Label values
-	label def regedu_emig_`i' 1 "Annual" 2 "Biannual" 3 "Quarterly"
+	label def regedu_emig_`i' 1 "Anual" 2 "Semestral" 3 "Trimestral"
 	label value regedu_emig_`i' regedu_emig_`i'
 	}
 	
@@ -2554,7 +2556,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar anoedu_emig_`i' = s10q7b_`i'
 	*-- Label variable
-	label var anoedu_emig_`i' "Last year of education attained"
+	label var anoedu_emig_`i' "7b.Ultimo ano educativo aprobado (emigrante)"
 	*-- Cross check
 	tab anoedu_emig_`i' hogar_emig
 	}
@@ -2568,13 +2570,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q7c`i' s10q7c_`i'
 	*-- Label original variable
-	label var s10q7c_`i' "7c. Cuál fue el último SEMESTRE aprobado por X?"
+	label var s10q7c_`i' "7c.Cuál fue el último SEMESTRE aprobado por X?"
 	*-- Standarization of missing values
 	replace s10q7c_`i'=. if s10q7c_`i'==.a
 	*-- Generate variable
 	clonevar semedu_emig_`i' = s10q7b_`i'
 	*-- Label variable
-	label var semedu_emig_`i' "Last semester of education attained"
+	label var semedu_emig_`i' "7c.Ultimo semestre educativo aprobado (emigrante)"
 	*-- Cross check
 	tab semedu_emig_`i' hogar_emig
 	}
@@ -2588,13 +2590,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q8`i' s10q8_`i'
 	*-- Label original variable
-	label var s10q8_`i' "8. En cuál país vive actualmente X?"
+	label var s10q8_`i' "8.En cuál país vive actualmente X?"
 	*-- Standarization of missing values
 	replace s10q8_`i'=. if s10q8_`i'==.a
 	*-- Generate variable
 	clonevar paisemig_`i' = s10q8_`i'
 	*-- Label variable
-	label var paisemig_`i' "Country in which X lives"
+	label var paisemig_`i' "8.País en que vive actualmente (emigrante)"
 	*-- Cross check
 	tab paisemig_`i' hogar_emig
 	}
@@ -2620,7 +2622,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	gen opaisemig_`i' = s10q8_os_`i'
 	*-- Label variable
-	label var opaisemig_`i' "Country in which X lives (Other)"
+	label var opaisemig_`i' "8a.Otro: País en que vive actualmente (emigrante)"
 	*-- Cross check
 	tab opaisemig_`i' hogar_emig
 	}
@@ -2655,7 +2657,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	gen ciuemig_`i' = s10q8b_`i'
 	*-- Label variable
-	label var ciuemig_`i' "City in which X lives"
+	label var ciuemig_`i' "Ciudad en que vive actualmente (emigrante)"
 	*-- Cross check
 	tab ciuemig_`i' hogar_emig
 	}
@@ -2671,18 +2673,19 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q8c`i' s10q8c_`i'
 	*-- Label original variable
-	label var s10q8c_`i' "8c. X emigró solo/a ?"
+	label var s10q8c_`i' "8c. X emigró solo/a?"
 	*-- Standarization of missing values
 	replace s10q8c_`i'=. if s10q8c_`i'==.a
 	*-- Generate variable
 	clonevar soloemig_`i' = s10q8c_`i'
+	replace  soloemig_`i' = 0 if soloemig_`i' == 2
 	*-- Label variable
-	label var soloemig_`i' "Has X emigrated alone"
+	label var soloemig_`i' "8c.La persona emigró solo/a"
+	*-- Label values
+	label def soloemig_`i' 1 "Si" 0 "No"
+	label value soloemig_`i' soloemig_`i'
 	*-- Cross check
 	tab soloemig_`i' hogar_emig
-	*-- Label values
-	label def soloemig_`i' 1 "Yes" 2 "No"
-	label value soloemig_`i' soloemig_`i'
 	}
 
 
@@ -2707,12 +2710,9 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar conemig_`i' = s10q8d_`i'
 	*-- Label variable
-	label var conemig_`i' "Who emigrated with X"
+	label var conemig_`i' "8d.Con quién emigró?"
 	*-- Cross check
 	tab conemig_`i' hogar_emig
-	*-- Label values
-	label def conemig_`i' 1 "Father/Mother" 2 "Brother/sister" 3 "Partner" 4 "Son/duther" 5 "Other relative" 6 "Non relative"
-	label value conemig_`i' conemig_`i'
 	} 
 
   *--------- Reason for leaving the country
@@ -2727,21 +2727,41 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 						08 Por razones políticas
 						09 Otro			
  */
+
+
+  	*-- Given that the maximum number of emigrantes per household is 10 
+	*-- We will have 10 variables with names
+	forval i = 1/10{
+	*-- Rename main variable 
+	rename s10q9`i' s10q9_`i'
+	*-- Label original variable
+	label var s10q9_`i' "9. Cuál fue el motivo por el cual X se fue"
+	*-- Standarization of missing values
+	replace s10q9_`i'=. if s10q9_`i'==.a
+	*-- Generate variable
+	clonevar razonemig_`i' = s10q9_`i'
+	*-- Label variable
+	label var razonemig_`i' "9. Cuál fue el motivo por el cual X se fue"
+	*-- Cross check
+	tab razonemig_`i' hogar_emig
+	} 
+	
+	*-- Other Reasons (s10q9_os)
   	*-- Given that the maximum number of emigrantes per household is 10 
 	*-- We will have 10 variables with names
 	forval i = 1/10{
 	*-- Rename main variable 
 	rename s10q9_os`i' s10q9_os_`i'
 	*-- Label original variable
-	label var s10q9_os_`i' "9. Cuál fue el motivo por el cual X se fue"
+	label var s10q9_os_`i' "9a. Cuál fue el motivo por el cual se fue (otro)"
 	*-- Standarization of missing values
 	replace s10q9_os_`i'="." if s10q9_os_`i'==".a"
 	*-- Generate variable
-	gen razonemig_`i' = s10q9_os_`i'
+	clonevar orazonemig_`i' = s10q9_os_`i'
 	*-- Label variable
-	label var razonemig_`i' "Why X emigrated"
+	label var orazonemig_`i' "9a. Cuál fue el motivo por el cual se fue (Otro)"
 	*-- Cross check
-	tab razonemig_`i' hogar_emig
+	tab orazonemig_`i' hogar_emig
 	} 
 
   *--------- Occupation: Before leaving the country
@@ -2771,7 +2791,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Generate variable
 	clonevar ocupaemig_`i' = s10q10_`i'
 	*-- Label variable
-	label var ocupaemig_`i' "Which was X occupation before leaving"
+	label var ocupaemig_`i' "10.Cuál era la ocupación principal antes de emigrar?"
 	*-- Cross check
 	tab ocupaemig_`i' hogar_emig
 	} 
@@ -2797,13 +2817,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q11`i' s10q11_`i'
 	*-- Label original variable
-	label var s10q11_`i' "11. Qué ocupación tiene X en el país donde vive?"
+	label var s10q11_`i' "11.Qué ocupación tiene X en el país donde vive?"
 	*-- Standarization of missing values
 	replace s10q11_`i'=. if s10q11_`i'==.a
 	*-- Generate variable
 	gen ocupnemig_`i' = s10q11_`i'
 	*-- Label variable
-	label var ocupnemig_`i' "Which is X occupation now"
+	label var ocupnemig_`i' "11.Qué ocupación tiene en el país donde vive?"
 	*-- Cross check
 	tab ocupnemig_`i' hogar_emig
 	} 
@@ -2821,17 +2841,18 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q12`i' s10q12_`i'
 	*-- Label original variable
-	label var s10q12_`i' "12. X regresó a residenciarse nuevamente al país?"
+	label var s10q12_`i' "12.Regresó a residenciarse nuevamente al país?"
 	*-- Standarization of missing values
 	replace s10q12_`i'=. if s10q12_`i'==.a
 	*-- Generate variable
 	clonevar volvioemig_`i' = s10q12_`i'
+	replace  volvioemig_`i' = 0 if s10q12_`i'==2
 	*-- Label variable
-	label var volvioemig_`i' "Does X moved back to the country?"
+	label var volvioemig_`i' "12.Regresó a residenciarse nuevamente al país?"
 	*-- Cross check
 	tab volvioemig_`i' hogar_emig
 	*-- Label values
-	label def volvioemig_`i' 1 "Yes" 2 "No"
+	label def volvioemig_`i' 1 "Si" 0 "No"
 	label value volvioemig_`i' volvioemig_`i'
 	} 
 
@@ -2863,13 +2884,13 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q13b`i' s10q13b_`i'
 	*-- Label original variable
-	label var s10q13b_`i' "13b. En qué mes regresó X?"
+	label var s10q13b_`i' "13b.En qué mes regresó al pais?"
 	*-- Standarization of missing values
 	replace s10q13b_`i'=. if s10q13b_`i'==.a
 	*-- Generate variable
 	clonevar volviomesemig_`i' = s10q13b_`i'
 	*-- Label variable
-	label var volviomesemig_`i' "Month: X moved back to the country?"
+	label var volviomesemig_`i' "13b.En qué mes regresó al pais?"
 	*-- Cross check
 	tab volviomesemig_`i' hogar_emig
 	} 
@@ -2885,17 +2906,18 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 	*-- Rename main variable 
 	rename s10q14`i' s10q14_`i'
 	*-- Label original variable
-	label var s10q14_`i' "14. En el presente X forma parte de este hogar?"
+	label var s10q14_`i' "14.En el presente el emeigrante forma parte de este hogar?"
 	*-- Standarization of missing values
 	replace s10q14_`i'=. if s10q14_`i'==.a
 	*-- Generate variable
 	clonevar miememig_`i' = s10q14_`i'
+	replace  miememig_`i' = 0 if s10q14_`i'==2
 	*-- Label variable
-	label var miememig_`i' "Is X a member of the household?"
+	label var miememig_`i' "14.En el presente el emigrante forma parte de este hogar?"
 	*-- Cross check
 	tab miememig_`i' hogar_emig
 	*-- Label values
-	label def miememig_`i' 1 "Yes" 2 "No"
+	label def miememig_`i' 1 "Si" 0 "No"
 	label value miememig_`i' miememig_`i'
 	} 
 
@@ -3194,13 +3216,14 @@ Categories:
 			21:Otro
         
  */
-
-	forval i = 1/22 {
-	rename s15q2__`i' s15q2_`i'
+// Pasa algo raro que no corre cuando se corre de cero pero que se si corre solo este loop anda
+// Aunque se rompe el loop crea las variables, asi que no se 
+	cap forval i = 1/22 {
+	*rename s15q2__`i' s15q2_`i'
 	*-- Standarization of missing values
-	replace s15q2_`i'=. if s15q2_`i'==.a
-		*-- Generate variable
-		clonevar imp_evento_`i' = s15q2_`i'
+	replace s15q2__`i'=. if s15q2__`i'==.a
+	*-- Generate variable
+	clonevar imp_evento_`i'=s15q2__`i'
 	}
 	
 	
@@ -3210,7 +3233,7 @@ Categories:
 
 	forval i = 1/21 {
 	*-- Label original variable
-	label var s15q2a_`i' "2a. Cuántas veces ocurrió X desde 2017?"
+	label var s15q2a_`i' "2a.Cuántas veces ocurrió el evento desde 2017?"
 	*-- Standarization of missing values
 	replace s15q2a_`i'=. if s15q2a_`i'==.a
 		*-- Generate variable
@@ -3228,13 +3251,13 @@ Categories:
 
 	forval i = 1/21 {
 	*-- Label original variable
-	label var s15q2b_`i' "2b. En qué año ocurrió?"
+	label var s15q2b_`i' "2b.En qué año ocurrió?"
 	*-- Standarization of missing values
 	replace s15q2b_`i'=. if s15q2b_`i'==.a
 	*-- Generate variable
 	clonevar ano_evento_`i'  = s15q2b_`i'
 	*-- Label variable
-	label var ano_evento_`i' "Year of the event"
+	label var ano_evento_`i' "2b.Año en que ocurrió el evento"
 	}
 	
 
@@ -3247,13 +3270,13 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	*-- Rename original variable 
 	rename (s15q2c__`i'_`k') (s15q2c_`i'_`k')
 	*-- Label original variable
-	label var s15q2c_`i'_`k' "2c. Cómo se las arregló su hogar con el choque más reciente?"
+	label var s15q2c_`i'_`k' "2c.Cómo se las arregló su hogar con el choque más reciente?"
 	*-- Standarization of missing values
 	replace s15q2c_`i'_`k'=. if s15q2c_`i'_`k'==.a
 	*-- Generate variable
 	clonevar reaccion_evento_`i'_`k' = s15q2c_`i'_`k'
 	*-- Label variable
-	label var reaccion_evento_`i'_`k' "Response to event"
+	label var reaccion_evento_`i'_`k' "2c.Cómo se las arregló su hogar con el choque más reciente?"
 	*-- Label values
 	label def reaccion_evento_`i'_`k' 0 "No codificado" 1 "Venta de ganado" 2 "Venta de terreno" 3 "Venta de propiedad" ///
 	4 "Envían niños a vivir con amigos" 5 "Se retiraron los niños de escuela" ///
@@ -3275,13 +3298,13 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
  /* (s15q2d): 2d. Otro arreglo, especifique */	
 	forval i = 1/21 {
 	*-- Label original variable
-	label var s15q2d_`i' "2d. Otro arreglo, especifique"
+	label var s15q2d_`i' "2d.Otro arreglo, especifique"
 	*-- Standarization of missing values
 	replace s15q2d_`i'="." if s15q2d_`i'==".a"
 	*-- Generate variable
 	clonevar reaccionot_evento`i' = s15q2d_`i'
 	*-- Label variable
-	label var reaccionot_evento`i' "Other responses to the event"
+	label var reaccionot_evento`i' "2d.Otro arreglo, especifique"
 	*-- Cross check
 	tab reaccionot_evento`i'
 	}

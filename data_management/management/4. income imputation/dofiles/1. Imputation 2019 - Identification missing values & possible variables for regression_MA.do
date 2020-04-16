@@ -428,9 +428,9 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 
 	** Missing values outliers 
 	clonevar `x'_out=`x'
-	outliers `x' 10 90 5 5
-	sum	`x'_out if	out_`x'==1 //
-	gen d`x'_out=out_`x'==1 if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1) // Lo miramos dentro del universo (antes estaba mal)
+	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
+	sum	`x'_out if	out_`x'==1 
+	gen d`x'_out=out_`x'==1 if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1) & `x'!=. // Lo miramos dentro del universo (antes estaba mal)
 	sum d`x'_out
 	local a3=r(sum)
 	 
@@ -450,7 +450,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a5=r(N)
 
 	** Total employed, or receive ila mon
-	sum ocup_o_rtarecibenilamon if ocup_o_rtarecibenilamon==1
+	sum ocup_o_rtarecibenilamon if ocup_o_rtarecibenilamon==1 // Universo
 	local a6=r(N)
 
 	*Creating matrix
@@ -488,9 +488,9 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	
 	** Outliers 
 	clonevar `x'_out=`x'
-	outliers `x' 10 90 5 5 
-	sum	`x'_out if	out_`x'==1 //
-	gen d`x'_out=out_`x'==1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0
+	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
+	sum	`x'_out if	out_`x'==1 
+	gen d`x'_out=out_`x'==1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0  & `x'!=.
 	sum d`x'_out
 	local a3=r(sum)
 	
@@ -510,7 +510,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a5=r(N)
 
 	** All pensioners and retired, or receive pension/retirement benefits
-	sum jubi_o_rtarecibejubi if jubi_o_rtarecibejubi==1
+	sum jubi_o_rtarecibejubi if jubi_o_rtarecibejubi==1 // Universo
 	local a6=r(N)
 
 	*Creating matrix
@@ -520,7 +520,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 		matrix a`i'=nullmat(a`i'), aux1, aux2
 	}
 
-*** Non-monetary labor income
+*** Labor benefits / Non-monetary labor income
 	local i=2
 	foreach x in bene {
 
@@ -540,8 +540,8 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	
 	** Missing values: Outliers
 	clonevar `x'_out=`x'
-	outliers `x' 10 90 5 5 
-	sum	`x'_out if out_`x'==1 //
+	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
+	sum	`x'_out if out_`x'==1 
 	gen d`x'_out=out_`x'==1 if recibe_ingresolab_nomon==1
 	sum d`x'_out
 	local a2=r(sum)
@@ -558,7 +558,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a4=r(N)
 
 	** All receiving non-monetary labor income
-	sum recibe_ingresolab_nomon if recibe_ingresolab_nomon==1
+	sum recibe_ingresolab_nomon if recibe_ingresolab_nomon==1 // Universo
 	local a5=r(N)
 
 	*Creating matrix
@@ -588,7 +588,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	
 	** Missing values: Outliers
 	clonevar `x'_out=`x'
-	outliers `x' 10 90 5 5 
+	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
 	sum	`x'_out if out_`x'==1 //
 	gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3)
 	sum d`x'_out
@@ -606,7 +606,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a4=r(N)
 
 	** All receiving non-monetary labor income
-	sum recibe_ingresonolab if inlist(recibe_ingresonolab,1,2,3)
+	sum recibe_ingresonolab if inlist(recibe_ingresonolab,1,2,3) // Universo
 	local a5=r(N)
 
 	*Creating matrix
@@ -630,7 +630,7 @@ local row= `row' + rowsof(a3)+4
 matrix drop aux1 aux2 a a1 a2 a3
 
 *br interview__key interview__id quest dila_m_out djubpen_out dbene_out dinlanojub_out if (dila_m_out==1 | djubpen_out==1 | dbene_out==1 | dinlanojub_out==1) 
-stop
+
 
 *****************************************************************
 *** POSSIBLE VARIABLES FOR REGRESSION 

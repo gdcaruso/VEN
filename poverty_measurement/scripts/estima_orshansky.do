@@ -21,34 +21,34 @@ Note:
 
 // // Define rootpath according to user
 //
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta2   1
-//		
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath ""
-// 		}
-// 	    if $lauta2 {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-// 		}
-//
-// // set raw data path
-// global merged "$rootpath\data_management\output\merged"
-// global cleaned "$rootpath\data_management\output\cleaned"
-// global input "$rootpath\poverty_measurement\input"
-// global output "$rootpath\poverty_measurement\output"
+	    * User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   0
+		
+		* User 3: Lautaro
+		global lauta   0
+		
+		* User 3: Lautaro
+		global lauta2   1
+		
+		
+		* User 4: Malena
+		global male   0
+			
+		if $juli {
+				global rootpath ""
+		}
+	    if $lauta2 {
+				global rootpath "C:\Users\wb563365\GitHub\VEN"
+		}
+
+// set raw data path
+global merged "$rootpath\data_management\output\merged"
+global cleaned "$rootpath\data_management\output\cleaned"
+global input "$rootpath\poverty_measurement\input"
+global output "$rootpath\poverty_measurement\output"
 
 
 *
@@ -92,6 +92,8 @@ use "$output/pob_referencia.dta", replace
 
 // remove hh with imputed income
 merge 1:1 interview__id interview__key quest using `imputedhh'
+
+
 drop if _merge!=1
 drop _merge
 tempfile reference
@@ -108,19 +110,23 @@ save `reference'
 	*** 0.0 To take everything to bolívares of Feb 2020 (month with greatest sample) ***
 		
 		* Deflactor
-			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
+
+//use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
+
+use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
 			
-use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
-			
-			forvalues j = 11(1)12 {
+			forvalues j = 10(1)12 {
 				sum indice if mes==`j' & ano==2019
 				local indice`j' = r(mean) 			
 				}
-			forvalues j = 1(1)3 {
+			forvalues j = 1(1)4 {
 				sum indice if mes==`j' & ano==2020
 				display r(mean)
 				local indice`j' = r(mean)				
 				}
+				
+				
+				
 			local deflactor11 `indice2'/`indice11'
 			local deflactor12 `indice2'/`indice12'
 			local deflactor1 `indice2'/`indice1'
@@ -137,7 +143,7 @@ use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 			
 			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
-			local meses 1 2 3 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
+			local meses 1 2 3 4 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
 			use "$rootpath\data_management\management\1. merging\exchange rates/TC_cierre_provisorio.dta", clear
 			
@@ -149,6 +155,22 @@ use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacio
 					di `tc`i'mes`j''
 				}
 			}
+
+di `tc1mes3'
+di `tc2mes1'
+di `tc2mes12'
+di `tc2mes11'
+di `tc2mes2'
+di `tc3mes2'
+di `tc3mes12'
+di `tc3mes3'
+di `tc4mes1'
+di `deflactor11'
+di `deflactor12'
+di `deflactor1'
+di `deflactor2'
+di `deflactor3'
+di `deflactor4' //falta!
 
 
 
@@ -278,6 +300,7 @@ foreach mes in `month_levels'{
 	
 	}
 	}
+replace gasto_feb20 = round(gasto_feb20)
 
 // just to test the previous loop, 13th april its working well
 // gen gasto_feb20_b=.
@@ -331,15 +354,29 @@ gen gasto_mensual = gasto_feb20* 30.42/7 if type_good==1
 // gen gasto_mensual = gasto_feb20* 30.42/15 if type_good==1
 
 replace gasto_mensual = gasto_feb20* 30.42/7 if type_good==2
-replace gasto_mensual = gasto_feb20* 30.42/15 if type_good==3
-replace gasto_mensual = gasto_feb20/3 if type_good==4
-replace gasto_mensual = gasto_feb20* 30.42/7 if type_good==5
-replace gasto_mensual = gasto_feb20* 30.42/15 if type_good==6
+replace gasto_mensual = gasto_feb20* 30.42/15 if type_good==3 //bath&cleaning twice a week
+replace gasto_mensual = gasto_feb20/3 if type_good==4 //clothes in three months
+replace gasto_mensual = gasto_feb20* 30.42/7 if type_good==5 //durables not current
+replace gasto_mensual = gasto_feb20* 30.42/7 if type_good==6 //eatingout weekly
+replace gasto_mensual = gasto_feb20* 30.42/30.42 if type_good==7 // monthly for enterainment
 replace gasto_mensual = round(gasto_mensual)
 
 // // genera gasto mensual raw, sin multiplicadores de frecuencia de consumos
 // gen gasto_mensual = gasto_feb20
 
+
+// outliars detection
+xtile q = gasto_mensual, nq(100)
+gen flag = q > 99
+gsort -gasto_mensual
+tab q [fw=gasto_mensual] //top 1% of current expenditure gets 98% of total expenditure
+drop if q >99 // drop top 1%
+
+tab q [fw=gasto_mensual] //now looks more reasonable
+
+// composition of expenditures
+tab type_good
+tab type_good [fw=gasto_mensual]
 
 tempfile conSpending
 save `conSpending'
@@ -361,7 +398,7 @@ tab superavit
 codebook ingfam
 
 
-
+stop
 /*(************************************************************************************************************************************************* 
 * // HH section  (wide shape) 
 *********************************************************************************************************************)*/

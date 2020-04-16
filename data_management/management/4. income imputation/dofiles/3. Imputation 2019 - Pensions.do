@@ -31,7 +31,7 @@ Note: Income imputation - Identification missing values
 			
 		if $juli {
 				global path "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-				global pathpathoutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"
+				global pathoutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"
 		}
 	    if $lauta {
 
@@ -104,7 +104,8 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 		For this specification, you may want to use the command lassoregress. 
 		You will first need to install the package elasticregress, using the command line ssc install elasticregress. 
 		For the purposes of this exercise, please use as argument for the Lasso command set seed 1 and the default number of folds to be 10. */
-				
+		
+		set seed 1
 		lassoregress log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, numfolds(5)
 		display e(varlist_nonzero)
 		global lassovars = e(varlist_nonzero)
@@ -118,16 +119,9 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 		* Select model with highest R2 como criterio
 		* return - rpret list
 		//vselect log_jubpen $xvar1 if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, best
-		//display r(predlist)
-		//local vselectvars = r(predlist)
 	
 	* Best: model with 21 vars. Copy and paste them here:
-		global vselectvars  region_est1 no_banco_sinmis entidad calentador_hh_sinmis tdebito_sinmis ///
-		afiliado_segsalud_comp_sinmis computadora_hh_sinmis comida_trueque_sinmis npers_viv ///
-		asiste_o_dejoypq_sinmis cuenta_corr_sinmis municipio estado_civil_sinmis tipo_vivienda_hh relacion_comp ///
-		cuenta_aho_sinmis heladera_hh_sinmis aire_hh_sinmis auto_hh_sinmis tv_cable_hh_sinmis agegroup
-
-
+		//global vselectvars  
 	
 ///*** EQUATION ***///
 	
@@ -183,14 +177,14 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	drop if imp_id==0 // Saco la base sin imputaciones
 	collapse (mean) jubpen, by(id com) // La imputacion va a ser el promedio de las bases imputadas
 	rename jubpen jubpen_imp1
-	save "$pathpathoutexcel\VEN_jubpen_imp1.dta", replace
+	save "$pathoutexcel\VEN_jubpen_imp1.dta", replace
 
 ********************************************************************************
 *** Analyzing imputed data
 ********************************************************************************
 use "$path\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 id com using "$pathpathoutexcel\VEN_jubpen_imp1.dta"
+merge 1:1 id com using "$path\VEN_jubpen_imp1.dta"
 
 
 foreach x of varlist jubpen {
@@ -199,11 +193,12 @@ gen log_`x'_imp1=ln(`x'_imp1)
 }
 
 *** Comparing not imputed versus imputed labor income distribution
+cd "$pathoutexcel\income_imp"
 foreach x in jubpen {
 twoway (kdensity log_`x' if `x'>0 & jubi_o_rtarecibejubi==1 , lcolor(blue) bw(0.45)) ///
        (kdensity log_`x'_imp1 if `x'_imp1>0 & jubi_o_rtarecibejubi==1, lcolor(red) lp(dash) bw(0.45)), ///
-	    legend(order(1 "Not imputed" 2 "Imputed")) title("") xtitle("") ytitle("") graphregion(color(white) fcolor(white)) name(kd_`x'1_`y', replace) saving(kd_`x'1_`y', replace)
-graph export kd_`x'1.png, replace
+	    legend(order(1 "Not imputed" 2 "Imputed")) title("") xtitle("") ytitle("") graphregion(color(white) fcolor(white)) name(kd_`x'1, replace) saving(kd_`x'1, replace)
+graph export "kd_`x'1.png", replace
 }
 
 foreach x in jubpen {
@@ -217,7 +212,7 @@ foreach x in jubpen {
 matrix rownames imp="2019"
 matrix list imp
 
-putexcel set "$pathpathoutexcel\VEN_income_imputation_2019_JL.xlsx", sheet("labor_jubpenimp_stochastic_reg") modify
+putexcel set "$pathoutexcel\VEN_income_imputation_2019_JL.xlsx", sheet("labor_jubpenimp_stochastic_reg") modify
 putexcel A3=matrix(imp), names
 matrix drop imp
 

@@ -20,33 +20,33 @@ Note:
 
 // Define rootpath according to user
 
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta   1
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath "C:\Users\wb563583\GitHub\VEN"
-		}
-	    if $lauta {"C:\Users\wb563365\GitHub\VEN\"
-		}
-		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-		}
-		if $male   {
-				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
+// 		}
+// 	    if $lauta {"C:\Users\wb563365\GitHub\VEN\"
+// 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
 
 // set raw data path
-global raw "$rootpath\data_management\input\latest"
-global output "$rootpath\data_management\output\merged"
+// global input "$datapath\data_management\input\latest"
+// global output "$datapath\data_management\output\merged"
 
 ********************************************************************************
 
@@ -66,9 +66,9 @@ Construction of aproved surveys
 // We will keep only the approved by HQ
 
 // set the path for our 3 types of questionaires
-global new "$raw\ENCOVI_3_STATA_All"
-global old "$raw\ENCOVI_MainSurvey_Final_3_STATA_All"
-global pixel "$raw\ENCOVI_pixel_Qx_9_STATA_All"
+global new "$input\ENCOVI_3_STATA_All"
+global old "$input\ENCOVI_MainSurvey_Final_3_STATA_All"
+global pixel "$input\ENCOVI_pixel_Qx_9_STATA_All"
 
 // load and append data of the 3 questionaires
 use  "$old\interview__actions.dta", clear
@@ -204,4 +204,4 @@ foreach dtafile in $dtalist{
 
 compress
 	
-save "$rootpath\data_management\output\merged\individual.dta", replace
+save "$output\individual.dta", replace

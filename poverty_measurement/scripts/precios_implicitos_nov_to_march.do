@@ -17,7 +17,6 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-
 // Define rootpath according to user
 
 	    * User 1: Trini
@@ -27,29 +26,24 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
-		
-		* User 3: Lautaro
-		global lauta2   1
-		
+		global lauta   1
 		
 		* User 4: Malena
 		global male   0
 			
 		if $juli {
-				global rootpath ""
+				global rootpath "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
-				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+		global dopath "C:\Users\wb563365\GitHub\VEN"
+		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
-	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\GitHub\VEN"
+		if $trini   {
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
-
-// set path
-global merged "$rootpath\data_management\output\merged"
-global cleaned "$rootpath\data_management\output\cleaned"
-global output "$rootpath\poverty_measurement\output"
+		if $male   {
+				global rootpath "C:\Users\wb550905\GitHub\VEN"
+		}
 *
 ********************************************************************************
 
@@ -60,6 +54,15 @@ version 14
 drop _all
 set more off
 
+
+// set path of data
+global encovifilename "ENCOVI_2019.dta"
+global cleaned "$datapath\data_management\output\cleaned"
+global merged "$datapath\data_management\output\merged"
+global input "$datapath\poverty_measurement\input"
+global output "$datapath\poverty_measurement\output"
+global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 
 
 /*==============================================================================
@@ -72,7 +75,7 @@ set more off
 * Deflactor DEPRECIATED
 *Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-use "$cleaned\InflacionVerdadera_26-3-20.dta", clear
+//use "$cleaned\InflacionVerdadera_26-3-20.dta", clear
 //		
 // forvalues j = 11(1)12 {
 // 	sum indice if mes==`j' & ano==2019
@@ -106,7 +109,7 @@ local deflactor3 1
 local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 local meses 1 2 3 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 
-use "$cleaned\exchenge_rate_price.dta", clear
+use "$exrate", clear
 
 destring mes, replace
 foreach i of local monedas {
@@ -152,7 +155,7 @@ drop if unidad_medida==.
 
 // merge with sedlac to get hh size
 preserve
-use  "$cleaned/ENCOVI_2019.dta", clear
+use  "$cleaned/$encovifilename", clear
 collapse (max) com, by (interview__id interview__key quest)
 rename com miembros
 tempfile hhsize
@@ -252,8 +255,7 @@ gen pimp = gasto_bol/comprado
 collapse (p50) pimp, by(bien month)
 drop if month ==.
 
+save "$output/precios_implicitos_nov_to_march.dta", replace
 
-save $output/precios_implicitos_nov_to_march.dta, replace
 
-replace month = month + 12 if month <10
-export excel $output/precios_implicitos_nov_to_march.xlsx, firstrow(variables) replace
+export excel "$output/precios_implicitos_nov_to_march.xlsx", firstrow(variables) replace

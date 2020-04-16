@@ -45,7 +45,7 @@ Note:
 // global merged "$rootpath\data_management\output\merged"
 // global input "$rootpath/poverty_measurement/input"
 // global output "$rootpath\poverty_measurement\output"
-// *
+//global encovifilename "ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos_IMPUTADA.dta"
 ********************************************************************************
 
 
@@ -64,7 +64,7 @@ global calreq = 2000
 *************************************************************************************************************************************************)*/
 
 // merges with income data
-use "$cleaned/ENCOVI_2019", replace
+use "$cleaned/$encovifilename", replace
 keep if interview_month==2
 //bys interview__id interview__key quest: egen miembros = max(com)
 
@@ -108,7 +108,7 @@ sort ipcf
 //gen baskets and caloric supply of each food
 tempfile baskets
 preserve
-use "$cleaned\product_hh_homogeneous.dta", replace
+use "$merged\product_hh_homogeneous.dta", replace
 rename bien COD_GASTO
 merge m:1 COD_GASTO using "$input/Calories.dta"
 
@@ -202,7 +202,7 @@ twoway line av_cal mobquant if mobquant<81 ///
 || line cal_req mobquant if mobquant<81
 
 // select where mobile quant matchs requirements
-keep if cal_req <= av_cal & mobquant!=1 // we exclude mobile quant=1 because there are 0 income hh that report sustancial consumption
+keep if cal_req <= median_cal & mobquant!=1 // we exclude mobile quant=1 because there are 0 income hh that report sustancial consumption
 local ref = mobquant[1]
 display "`ref'"
 restore

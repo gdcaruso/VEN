@@ -75,7 +75,9 @@ egen costo_canasta = total(valor)
 global costodiario = costo_canasta[1]
 di $costodiario
 // import harmonized hh-individual data with incomes
-use "$cleaned\ENCOVI_2019.dta" , replace
+use "$cleaned/$encovifilename" , replace
+ds
+local vars = r(varlist)
 
 // gen new lines
 gen le_new = $costodiario * 30.42
@@ -145,3 +147,16 @@ gen pob_75off = ipcf<lp_new*0.25
 sum pob_base pob_??off ext_base ext_??off
 
 sum pob_base pob_??off ext_base ext_??off if ipcf>0
+
+rename le_new lp_extrema
+rename lp_new lp_moderada
+
+drop ipc ipc11 ppp11 pobre
+gen ipc = 2659537979000 
+gen ipc11 = 3558.84
+gen ppp11 = 2.92 / 100000 //bol. fuertes/ dolarppp * bol.sob / bol.fuerte
+gen pobre = ipcf<lp_moderada
+
+keep `varlist' lp_extrema lp_moderada pobre ipc ipc11 ppp11
+
+save "$output/VEN_2019_ENCOVI_v01_M_v01_A_FULL-03_all.dta", replace

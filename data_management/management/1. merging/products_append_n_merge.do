@@ -49,9 +49,9 @@ Note:
 // 				global rootpath ""
 // 		}
 //
-// // set raw data path
-// global input "$rootpath\data_management\input\latest"
-// global output "$rootpath\data_management\output"
+// // // set raw data path
+// global input "$datapath\data_management\input\latest"
+// global output "$datapath\data_management\output"
 
 ********************************************************************************
 
@@ -96,7 +96,7 @@ bys quest interview__key interview__id (date time): keep if _n==_N //& approved 
 duplicates tag interview__key interview__id quest, generate(dupli)
 preserve
 keep if dupli >= 1
-save "$rootpath\data_management\output\merged\duplicates-prod.dta", replace
+save "$output\duplicates-prod.dta", replace
 restore	
 
 drop if dupli >= 1
@@ -508,7 +508,7 @@ label values unidad_medida measure
 // also pick dates when data collection started
 
 preserve
-use "$rootpath\data_management\output\merged\household", replace
+use "$output\household", replace
 keep interview__key interview__id quest s12aq1*os s12a_star
 
 //date formt

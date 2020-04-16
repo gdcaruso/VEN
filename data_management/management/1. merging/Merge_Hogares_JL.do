@@ -46,9 +46,9 @@ Note:
 // 		}	
 //
 
-
-// global input "$rootpath\data_management\input\latest"
-// global output "$rootpath\data_management\output\merged"
+//
+// global input "$datapath\data_management\input\latest"
+// global output "$datapath\data_management\output\merged"
 
 // Set the path for the three questionnaires
 global pathnew "$input\ENCOVI_3_STATA_All"

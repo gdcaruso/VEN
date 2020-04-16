@@ -51,6 +51,7 @@ Note:
 // global merged "$rootpath\data_management\output\merged"
 // global cleaned "$rootpath\data_management\output\cleaned"
 // global output "$rootpath\poverty_measurement\output"
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 *
 ********************************************************************************
 
@@ -70,31 +71,7 @@ set more off
 
 *** 0.0 To take everything to bolívares ***
 
-* Deflactor DEPRECIATED
-*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
-			
-//use "$cleaned\InflacionVerdadera_26-3-20.dta", clear
-//		
-// forvalues j = 11(1)12 {
-// 	sum indice if mes==`j' & ano==2019
-// 	local indice`j' = r(mean) 			
-// 	di `indice`j''
-// 	}
-//
-//	
-// forvalues j = 1(1)3 {
-// 	qui sum indice if mes==`j' & ano==2020
-// 	display r(mean)
-// 	local indice`j' = r(mean)				
-// 	}
-// local deflactor11 `indice2'/`indice11'
-// local deflactor12 `indice2'/`indice12'
-// local deflactor1 `indice2'/`indice1'
-// local deflactor2 `indice2'/`indice2'
-// local deflactor3 `indice2'/`indice3'
-
-
-// or use this to mute all inflation effects
+//use this to mute all inflation effects
 local deflactor11 1
 local deflactor12 1
 local deflactor1 1
@@ -107,7 +84,7 @@ local deflactor3 1
 local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 local meses 1 2 3 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 
-use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
+use "$exrate", clear
 
 destring mes, replace
 foreach i of local monedas {
@@ -153,7 +130,7 @@ drop if unidad_medida==.
 
 // merge with sedlac to get hh size
 preserve
-use  "$cleaned/ENCOVI_2019.dta", clear
+use  "$cleaned/$encovifilename", clear
 collapse (max) com, by (interview__id interview__key quest)
 rename com miembros
 tempfile hhsize
@@ -254,7 +231,7 @@ gen pimp = gasto_bol/comprado
 
 collapse (p50) pimp, by(bien)
 
-export excel $output/precios_implicitos.xlsx, firstrow(variables) replace
-save $output/precios_implicitos.dta, replace
+export excel "$output/precios_implicitos.xlsx", firstrow(variables) replace
+save "$output/precios_implicitos.dta", replace
 
 

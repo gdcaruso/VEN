@@ -21,37 +21,37 @@ Note:
 
 // Define rootpath according to user
 
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta   0
-		
-		* User 3: Lautaro
-		global lauta2   1
-		
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath ""
-		}
-	    if $lauta2 {
-				global rootpath "C:\Users\wb563365\GitHub\VEN"
-		}
-
-// set raw data path
-global merged "$rootpath\data_management\output\merged"
-global cleaned "$rootpath\data_management\output\cleaned"
-global input "$rootpath\poverty_measurement\input"
-global output "$rootpath\poverty_measurement\output"
-
-
-*
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta2   1
+//		
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath ""
+// 		}
+// 	    if $lauta2 {
+// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 		}
+//
+// // set raw data path
+// global merged "$rootpath\data_management\output\merged"
+// global cleaned "$rootpath\data_management\output\cleaned"
+// global input "$rootpath\poverty_measurement\input"
+// global output "$rootpath\poverty_measurement\output"
+//
+//
+// *
 ********************************************************************************
 
 /*==============================================================================
@@ -69,17 +69,17 @@ set more off
 *************************************************************************************************************************************************)*/
 
 // we dont want to be misleaded by imputed income, so we remove this households
-import excel "$input\imputacion_ingreso_lista_hh.xlsx", firstrow clear
-keep interview__key interview__id quest
-bys interview__key interview__id quest: keep if _n==1
-replace quest = "1" if quest == "Tradicional - Viejo"
-replace quest = "2" if quest == "Tradicional - Nuevo"
-replace quest = "3" if quest == "Remoto"
-destring quest, replace
-
-
-tempfile imputedhh
-save `imputedhh'
+// import excel "$input\imputacion_ingreso_lista_hh.xlsx", firstrow clear
+// keep interview__key interview__id quest
+// bys interview__key interview__id quest: keep if _n==1
+// replace quest = "1" if quest == "Tradicional - Viejo"
+// replace quest = "2" if quest == "Tradicional - Nuevo"
+// replace quest = "3" if quest == "Remoto"
+// destring quest, replace
+//
+//
+// tempfile imputedhh
+// save `imputedhh'
 
 
 // import data of pop of reference
@@ -90,12 +90,12 @@ use "$output/pob_referencia.dta", replace
 // use "$cleaned/ENCOVI_2019.dta", replace
 // collapse (max) ipcf (max)miembros, by(interview__id interview__key quest)
 
-// remove hh with imputed income
-merge 1:1 interview__id interview__key quest using `imputedhh'
-
-
-drop if _merge!=1
-drop _merge
+// // remove hh with imputed income
+// merge 1:1 interview__id interview__key quest using `imputedhh'
+//
+//
+// drop if _merge!=1
+//drop _merge
 tempfile reference
 replace ipcf = round(ipcf)
 save `reference'
@@ -113,7 +113,7 @@ save `reference'
 
 //use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
 
-use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
+use "$inflation", clear
 			
 			forvalues j = 10(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -145,7 +145,7 @@ use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimen
 			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses 1 2 3 4 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$rootpath\data_management\management\1. merging\exchange rates/TC_cierre_provisorio.dta", clear
+			use "$exrate", clear
 			
 			destring mes, replace
 			foreach i of local monedas {
@@ -402,7 +402,7 @@ codebook ingfam
 * // HH section  (wide shape) 
 *********************************************************************************************************************)*/
 // import other expenditure data
-use "$cleaned/ENCOVI_2019.dta", replace
+use "$cleaned/$encovifilename", replace
 drop ipcf
 drop _merge
 merge m:1 interview__id interview__key quest using `reference'

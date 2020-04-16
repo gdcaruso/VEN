@@ -20,30 +20,30 @@ Note:
 
 // Define rootpath according to user
 
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta   1
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
-		}
-	    if $lauta {
-		global rootpath "C:\Users\wb563365\GitHub\VEN"
-		}
-		if $trini   {
-				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-		}
-		if $male   {
-				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
+// 		}
+// 	    if $lauta {
+// 		global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 		}
+// 		if $trini   {
+// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
 
 ********************************************************************************
 
@@ -57,22 +57,28 @@ drop _all
 set more off
 
 // set path for files
-global input "$rootpath\poverty_measurement\input"
-global merged "$rootpath\data_management\output\merged"
-global cleaned "$rootpath\data_management\output\cleaned"
-global output "$rootpath\poverty_measurement\output"
-global scripts "$rootpath\poverty_measurement\scripts"
+// global input "$datapath\poverty_measurement\input"
+// global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global output "$datapath\poverty_measurement\output"
+// global scripts "$datapath\poverty_measurement\scripts"
+// global encovifilename "ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos_IMPUTADA.dta"
+
+
 /*==============================================================================
 run dos to estimate poverty
 ==============================================================================*/
 
 //defines poblation of references and normative basket
-run "$scripts/genera_poblacion_y_canasta.do"
+do "$povmeasure/genera_poblacion_y_canasta.do"
 //calculate prices (implicit)
-run "$scripts/precios_implicitos.do"
+do "$povmeasure/precios_implicitos.do"
+do "$povmeasure/precios_implicitos_nov_to_march.do"
+do "$povmeasure/genera_inflacion_canastas.do"
+
 // //generate cost of basket
-run "$scripts/genera_costo_canasta.do"
+do "$povmeasure/genera_costo_canasta.do"
 // //estimates orshansky
-do "$scripts/estima_orshansky.do"
+do "$povmeasure/estima_orshansky.do"
 // //estimates poverty headcount
-do "$scripts/estima_pobreza.do"
+do "$povmeasure/estima_pobreza.do"

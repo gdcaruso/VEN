@@ -181,7 +181,7 @@ Note: Income imputation - Identification missing values
 ********************************************************************************
 use "$path\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 id com using "$path\VEN_bene_imp1.dta"
+merge 1:1 interview__key interview__id quest com using "$path\VEN_bene_imp1.dta"
 
 
 foreach x of varlist bene {

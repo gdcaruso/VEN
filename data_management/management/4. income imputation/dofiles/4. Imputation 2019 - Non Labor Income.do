@@ -173,7 +173,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 ********************************************************************************
 use "$path\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 id com using "$path\VEN_inlanojub_imp1.dta"
+merge 1:1 id interview__key interview__id quest com "$path\VEN_inlanojub_imp1.dta"
 
 foreach x in inlanojub {
 gen log_`x'=ln(`x')

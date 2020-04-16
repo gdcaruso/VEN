@@ -404,6 +404,7 @@ codebook ingfam
 // import other expenditure data
 use "$cleaned/ENCOVI_2019.dta", replace
 drop ipcf
+drop _merge
 merge m:1 interview__id interview__key quest using `reference'
 keep if _merge == 3
 drop _merge

@@ -143,3 +143,5 @@ gen pob_50off = ipcf<lp_new*0.5
 gen pob_75off = ipcf<lp_new*0.25
 
 sum pob_base pob_??off ext_base ext_??off
+
+sum pob_base pob_??off ext_base ext_??off if ipcf>0

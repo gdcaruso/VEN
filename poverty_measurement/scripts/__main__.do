@@ -70,9 +70,9 @@ run dos to estimate poverty
 run "$scripts/genera_poblacion_y_canasta.do"
 //calculate prices (implicit)
 run "$scripts/precios_implicitos.do"
-//generate cost of basket
+// //generate cost of basket
 run "$scripts/genera_costo_canasta.do"
-//estimates orshansky
-run "$scripts/estima_orshansky.do"
-//estimates poverty headcount
+// //estimates orshansky
+do "$scripts/estima_orshansky.do"
+// //estimates poverty headcount
 do "$scripts/estima_pobreza.do"

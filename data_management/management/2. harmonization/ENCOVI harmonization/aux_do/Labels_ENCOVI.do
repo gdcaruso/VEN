@@ -2329,16 +2329,7 @@ Categories:
 			21:Otro
         
  */
-
-	forval i = 1/22 {
-	rename s15q2__`i' s15q2_`i'
-	*-- Standarization of missing values
-	replace s15q2_`i'=. if s15q2_`i'==.a
-		*-- Generate variable
-		clonevar imp_evento_`i' = s15q2_`i'
-	}
 	
-	*-- Label variable
 	*-- Label variable
 	label var imp_evento_1 "Importance: dead or disability of an adult memeber which worked"
 	label var imp_evento_2 "Importance: dead of a person which used to send remittances"
@@ -2514,3 +2505,26 @@ label	var	ieb		"Equivalized income B"
 label	var	iec		"Equivalized income C"
 label	var	ied		"Equivalized income D"
 label	var	iee		"Equivalized income E"
+cap label var    ilea_m          "Equivalized labor income - monetary" 
+cap label var    lp_extrema	     "Official extreme poverty line"
+cap label var    lp_moderada     "Official moderate poverty line"
+cap label var    ing_pob_ext     "Income used to estimate official extreme poverty"
+cap label var    ing_pob_mod     "Income used to estimate official moderate poverty"
+cap label var    ing_pob_mod_lp  "Official income / Poverty Line"
+cap label var    p_reg	         "Adjustment factor for regional prices"
+cap label var    ipc	         "CPI base month" 
+cap label var    pipcf	         "Percentiles household per capita income"
+cap label var    dipcf	         "Income deciles per capita household income"
+cap label var    p_ing_ofi	     "Income percentiles to estimate official poverty"
+cap label var    d_ing_ofi	     "Income deciles to estimate official poverty"
+cap label var    piea	     	 "Percentiles equivalized income A"
+cap label var    qiea	         "Quintiles equivalized income A"
+cap label var    pondera_i	     "Weight for income variables"  
+cap label var    ipc05	         "Average Consumer Price Index for 2005"
+cap label var    ipc11	     	 "Average Consumer Price Index for 2011"
+cap label var    ppp05	   	 	 "PPP conversion factor (2005)"
+cap label var    ppp11	         "PPP conversion factor (2011)"
+cap label var    ipcf_cpi05	     "Per capita household income (2005 values)"
+cap label var    ipcf_cpi11	     "Per capita household income (2011 values)"
+cap label var    ipcf_ppp05	     "Per capita household income (2005 dollars)"
+cap label var    ipcf_ppp11	     "Per capita household income (2011 dollars)"

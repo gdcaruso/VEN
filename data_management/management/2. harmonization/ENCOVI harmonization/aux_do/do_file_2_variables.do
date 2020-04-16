@@ -175,8 +175,6 @@ drop ae aef
 *-----------------------------------------------------------------------  3.7 PERCENTILES  --------------------------------------------------------------------------------
 ************************************************************************************************************************************************************************)*/
 
-/* MA: faltan los ponderadores
-
 *** Ingreso per capita familiar 
 * Percentiles
 cuantiles ipcf [w=pondera] if ipcf>=0 & cohh==1, n(100) orden_aux(id com relacion edad) g(pipcf)
@@ -187,10 +185,10 @@ cuantiles ipcf [w=pondera] if ipcf>=0 & cohh==1, n(10)  orden_aux(id com relacio
 	
 *** Ingreso "oficial" 
 * Percentiles
-cuantiles ing_pob_mod_lp [w=pondera] if ing_pob_mod_lp>=0 & coh_oficial==1, n(100) orden_aux(id com relacion edad) g(p_ing_ofi)
+*cuantiles ing_pob_mod_lp [w=pondera] if ing_pob_mod_lp>=0 & coh_oficial==1, n(100) orden_aux(id com relacion edad) g(p_ing_ofi)
 
 * Deciles
-cuantiles ing_pob_mod_lp [w=pondera] if ing_pob_mod_lp>=0 & coh_oficial==1, n(10)  orden_aux(id com relacion edad) g(d_ing_ofi)
+*cuantiles ing_pob_mod_lp [w=pondera] if ing_pob_mod_lp>=0 & coh_oficial==1, n(10)  orden_aux(id com relacion edad) g(d_ing_ofi)
 
 
 *** Ingreso equivalente 
@@ -208,6 +206,7 @@ cuantiles iea [w=pondera] if iea>=0 & cohh==1, n(5)   orden_aux(id com relacion 
 * Ponderador de Ingresos
 gen pondera_i = pondera
 
+/* 
 * IPC promedio del año 2005 
 gen	ipc05 = 161.728		if  pais=="ARG"
 replace ipc05 = 116.628		if  pais=="BOL"
@@ -227,8 +226,10 @@ replace ipc05 = 150.876		if  pais=="PRY"
 replace ipc05 = 110.114		if  pais=="PER"
 replace ipc05 = 162.281		if  pais=="URY"
 replace ipc05 = 254.992		if  pais=="VEN"
+*/
 
 * IPC promedio del año 2011
+/*
 gen	ipc11 = 464.420		if  pais=="ARG"
 replace ipc11 = 175.438		if  pais=="BOL"
 replace ipc11 = 202.995		if  pais=="BRA"
@@ -246,8 +247,11 @@ replace ipc11 = 106.488		if  pais=="PAN"
 replace ipc11 = 228.908		if  pais=="PRY"
 replace ipc11 = 130.643		if  pais=="PER"
 replace ipc11 = 249.065		if  pais=="URY"
-replace ipc11 = 887.767		if  pais=="VEN"
+*/
+gen ipc11 =.
+replace ipc11 = 3321.98		if  pais=="VEN" // Canasta alimentaria CENDAS Octubre 2011 (cuando en general se hacían las ENCOVIs anteriores) vs. Febrero 2020 (el momento en el que tenemos más muestra)
 
+/*
 * Factor de Paridad de Poder de Compra 2005 
 gen	ppp05 =    1.353	if  pais=="ARG"
 replace ppp05 =    2.571	if  pais=="BOL"
@@ -267,33 +271,37 @@ replace ppp05 = 2127.796	if  pais=="PRY"
 replace ppp05 =    1.653	if  pais=="PER"
 replace ppp05 =   15.310	if  pais=="URY"
 replace ppp05 = 1251.122	if  pais=="VEN"
+*/
 
 * Factor de Paridad de Poder de Compra 2011 
-gen	ppp11 =    2.768382	if  pais=="ARG"
-replace ppp11 =    2.9061057	if  pais=="BOL"
-replace ppp11 =    1.6587826	if  pais=="BRA"
-replace ppp11 =  391.64424	if  pais=="CHL"
-replace ppp11 = 1196.9546	if  pais=="COL"
-replace ppp11 =  343.78567	if  pais=="CRI"
-replace ppp11 =   20.74103	if  pais=="DOM"
-replace ppp11 =    0.54723445	if  pais=="ECU"
-replace ppp11 =    0.53077351	if  pais=="SLV"
-replace ppp11 =    3.8732392	if  pais=="GTM"
-replace ppp11 =   10.080314	if  pais=="HND"
-replace ppp11 =    8.9402123	if  pais=="MEX"
-replace ppp11 =    9.1600754	if  pais=="NIC"
-replace ppp11 =    0.55340803	if  pais=="PAN"
+/*
+gen	ppp11 =    	2.768382	if  pais=="ARG"
+replace ppp11 =	2.9061057	if  pais=="BOL"
+replace ppp11 =	1.6587826	if  pais=="BRA"
+replace ppp11 =	391.64424	if  pais=="CHL"
+replace ppp11 =	1196.9546	if  pais=="COL"
+replace ppp11 =	343.78567	if  pais=="CRI"
+replace ppp11 =	20.74103	if  pais=="DOM"
+replace ppp11 =	0.54723445	if  pais=="ECU"
+replace ppp11 =	0.53077351	if  pais=="SLV"
+replace ppp11 =	3.8732392	if  pais=="GTM"
+replace ppp11 =	10.080314	if  pais=="HND"
+replace ppp11 =	8.9402123	if  pais=="MEX"
+replace ppp11 =	9.1600754	if  pais=="NIC"
+replace ppp11 =	0.55340803	if  pais=="PAN"
 replace ppp11 = 2309.44		if  pais=="PRY"
-replace ppp11 =    1.568639	if  pais=="PER"
-replace ppp11 =   16.42385	if  pais=="URY"
-replace ppp11 =    2.915	if  pais=="VEN"
+replace ppp11 =	1.568639	if  pais=="PER"
+replace ppp11 =	16.42385	if  pais=="URY"
+*/
+gen ppp11 = .
+replace ppp11 =	2.92 / 100000	if  pais=="VEN" // Fuente Banco Mundial expresados en bolívares soberanos
 
 * Ingreso per cápita familiar ajustado por IPC
-gen ipcf_cpi05 = ipcf * (ipc05/ipc)
+* gen ipcf_cpi05 = ipcf * (ipc05/ipc)
 gen ipcf_cpi11 = ipcf * (ipc11/ipc)
 
 * Ingreso per cápita familiar ajustado por PPP
-gen ipcf_ppp05 = ipcf * (ipc05/ipc) * (1/ppp05)
+* gen ipcf_ppp05 = ipcf * (ipc05/ipc) * (1/ppp05)
 gen ipcf_ppp11 = ipcf * (ipc11/ipc) * (1/ppp11)
    
 capture drop __*

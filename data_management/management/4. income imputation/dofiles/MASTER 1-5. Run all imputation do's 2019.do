@@ -39,7 +39,7 @@
 **********************************
 
 run "$pathrun\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
-	* Obs: dofile 1 uses "ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos.dta"
+	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
 run "$pathrun\2. Imputation 2019 - Monetary labor income.do"
 run "$pathrun\3. Imputation 2019 - Pensions.do"
 run "$pathrun\4. Imputation 2019 - Non Labor Income.do"
@@ -127,12 +127,22 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 ****************************************************
 //*** Replacing imputed labor income variables ***//
 ****************************************************
-
-	drop ingresoslab_mon
-	rename ila_m_imp1 ingresoslab_mon
 	
-	drop ingresoslab_bene 
-	rename bene_imp1 ingresoslab_bene
+	*Labor income
+	
+		drop ingresoslab_mon
+		rename ila_m_imp1 ingresoslab_mon
+		
+		drop ingresoslab_bene 
+		rename bene_imp1 ingresoslab_bene
+	
+	*Non labor income
+	
+		drop inla_otro
+		rename inlanojub_imp1 inla_otro
+		
+		drop ijubi_m 
+		rename jubpen_imp1 ijubi_m 
 	
 	******************************************
 	/* OUR DOFILE: LABOR & NON-LABOR INCOME */
@@ -168,19 +178,12 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 
 		****** SECONDARY LABOR INCOME ******
 
-		* Nothing to replace, they were all missing
+			* Nothing to replace, they were all missing. 
+			* I added a "cap" in front of this lines, which got executed to create the first database but won't get executed this time.
 		
 		****** NON-LABOR INCOME ******
 		
-		* s9q28__4==1 // Pensión por divorcio, separación, alimentación
-		* Tal vez sería mejor ponerlo adentro de "transferencias privadas" itranp_o_m
-		* If so, cambiar en la otra base y en SEDLAS
-		
-		* No pudimos recrear ijubi_m, icap_m, rem, itranp_o_m, itranp_ns, cct, itrane_o_m, itrane_ns, inla_otro
-		
-		drop inla inla_m
-		egen inla = rsum(jubpen_imp1 inlanojub_imp1)
-		egen inla_m = rsum(jubpen_imp1 inlanojub_imp1)
+			* Nothing to replace besides the imputed variables ijubi_m and inla_otro
 	
 	********************
 	/* Dofile CEDLAS 1*/
@@ -194,12 +197,16 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 		foreach i in ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila {
 			cap drop `i'  	
 		}
+		/* ing. no laborales */
+		foreach i in ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m  {
+			cap drop `i'  	
+		}
 		/* ing. individuales totales */ 
 		foreach i in ii ii_m perii  {
 			cap drop `i'  	
 		}
 		/* ing. familiares totales */ 
-		foreach i in n_perila_h ilf ilf_m inlaf_m itf_m itf_sin_ri n_perii_h inlaf {
+		foreach i in n_perila_h n_perii_h ilf ilf_m inlaf inlaf_m itf_m itf_sin_ri {
 			cap drop `i'  	
 		}
 	
@@ -246,11 +253,16 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	/* Dofile CEDLAS 2 */
 	*********************
 	
+	/* Cálculos e ingresos inconsistentes */
 	foreach i in itf cohi cohh aux_ocu jefe_ocu max_edu edu_max coh_oficial {
 			cap drop `i'  	
 		}
-	/*ING. FAM. AJUSTADOS POR FACTORES DEMO. */ 
+	/*Ing. fam. ajustados por valores demo. */ 
 	foreach i in ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf aefa iea ilea_m ieb iec ied iee {
+			cap drop `i'  	
+		}
+	/* Percentiles */
+	foreach i in pipcf dipcf d_ing_ofi p_ing_ofi piea qiea ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 {
 			cap drop `i'  	
 		}
 	
@@ -266,5 +278,5 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 //*** SAVING IMPUTED DATABASE: HURRAY!!!!!!!!!!***//
 ****************************************************
 
-save "$dataout\ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos_IMPUTADA.dta", replace
+save "$dataout\ENCOVI_2019.dta", replace
 	

@@ -19,13 +19,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta  0	
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -3218,7 +3218,7 @@ Categories:
  */
 // Pasa algo raro que no corre cuando se corre de cero pero que se si corre solo este loop anda
 // Aunque se rompe el loop crea las variables, asi que no se 
-	cap forval i = 1/22 {
+	forval i = 1/22 {
 	*rename s15q2__`i' s15q2_`i'
 	*-- Standarization of missing values
 	replace s15q2__`i'=. if s15q2__`i'==.a
@@ -3314,7 +3314,7 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 *---------------------------------------------------------- 1.9: Income Variables ----------------------------------------------------------
 *****************************************************************************************************************************************)*/
 
-global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns /*inla_otro*/ inla_extraord
+global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro
 
 * Check for negative variables
 	forvalues i = 1(1)12 {	
@@ -3799,12 +3799,12 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 			* s9q28__1==1 // Pensión de incapacidad, orfandad, sobreviviente
 			* s9q28__2==1 // Pensión de vejez por el seguro social
 			* s9q28__3==1 // Jubilación por trabajo
-			* s9q28__4==1 // Pensión por divorcio, separación, alimentación
 			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
 		*Transferencias estatales // itrane_o_m 
 			* s9q28__5==1 // Beca o ayuda escolar pública 
 			* s9q28__7==1 // Ayuda de instituciones públicas
 		*Transferencias privadas // itranp_o_m 
+			* s9q28__4==1 // Pensión por divorcio, separación, alimentación
 			* s9q28__6==1 // Beca o ayuda escolar privada
 			* s9q28__8==1 // Ayuda de instituciones privadas
 			* s9q28__9==1 // Ayudas familiares o contribuciones de otros hogares
@@ -3822,7 +3822,8 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 			* s9q29a__9==1 // Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)
 		* Ingresos no laborales extraordinarios
 			* s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord o inla_otro
-			* s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord o inla_otro
+			* s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord
+	* Imputaciones: inla_otro
 
   
 ****** 9.3.1.JUBILACIONES Y PENSIONES ******	  
@@ -3849,22 +3850,11 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		
 /* ijubi_m: Ingreso monetario por jubilaciones y pensiones */
 
-	*Reception
-	gen recibe_penojub_mon = .
-	replace recibe_penojub_mon = 1 if (s9q28__1==1 | s9q28__2==1 | s9q28__3==1 | s9q28__4==1) | s9q28_petro==1 | s9q29a__5==1 // Recibió pensión o jubilación en algún concepto
-	replace recibe_penojub_mon = 0 if (s9q28__1==0 & s9q28__2==0 & s9q28__3==0 & s9q28__4==0) & s9q28_petro==2 & s9q29a__5==0 // No recibió pensión o jubilación en ningún concepto
-	tab recibe_penojub_mon s9q12, missing
-	/* Obs: there are many people who did not say they were "jubilados o pensionados" but receive pensiones o jubilaciones, thus we will not control for having answered s9q12==6 */
-	
 	*We create ijubi_m
-	gen ijubi_mpetro=.
-	gen ijubi_mpetro_dummy=.
-
 	gen ijubi_m_bolfeb = .
-	gen ijubi_m_dummy = .
 		
 	*Local
-		forvalues i = 1(1)4 {
+		forvalues i = 1(1)3 {
 		replace ijubi_m_bolfeb = ijubi_m_bolfeb + s9q28a_`i'_bolfeb 	if ijubi_m_bolfeb!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a) // For the next ones to add up (same later for employers)
 		replace ijubi_m_bolfeb = s9q28a_`i'_bolfeb 						if ijubi_m_bolfeb==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a) // For the first not missing one to add up
 		* Obs: The last parenthesis controls for cases where they say they received jubilaciones o pensiones, but don't say how much		
@@ -3873,18 +3863,12 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		replace ijubi_m_bolfeb = ijubi_m_bolfeb + s9q29b_5_bolfeb / 12 	if ijubi_m_bolfeb!=. & (s9q29b_5!=. & s9q29b_5!=.a)
 		replace ijubi_m_bolfeb = s9q29b_5_bolfeb / 12 					if ijubi_m_bolfeb==. & (s9q29b_5!=. & s9q29b_5!=.a)
 	
-	*Putting all together by currency
-		replace ijubi_m_dummy = 0 	if recibe_penojub_mon==1 & ijubi_m_bolfeb==. // Dicen que reciben pero no reportan cuánto
-		replace ijubi_m_dummy = 1 	if ijubi_m_bolfeb>=0 & ijubi_m_bolfeb!=.
-			
-		tab ijubi_m_dummy
-		sum ijubi_m_bolfeb
-	
 	*Petro "currency"
+		gen ijubi_mpetro=.
 		replace ijubi_mpetro = ijubi_mpetro + s9q28_petromonto 	if ijubi_mpetro!=. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
 		replace ijubi_mpetro = s9q28_petromonto 				if ijubi_mpetro==. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
 
-		replace ijubi_mpetro_dummy = 0 	if recibe_penojub_mon==1 & ijubi_mpetro==. // Dicen que reciben pero no reportan cuánto
+		gen ijubi_mpetro_dummy=.
 		replace ijubi_mpetro_dummy = 1 	if ijubi_mpetro>=0 & ijubi_mpetro!=.
 			
 		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
@@ -3893,19 +3877,9 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		tab ijubi_mpetro_dummy
 		sum ijubi_mpetro
 			
-	/*Checking
-		gen noreporta=1 if ijubi_m1_dummy==0 & ijubi_m2_dummy==0 & ijubi_m3_dummy==0 & ijubi_m4_dummy==0 & ijubi_mpetro_dummy==0
-		egen cuantasreporta=rowtotal(ijubi_m1_dummy ijubi_m2_dummy ijubi_m3_dummy ijubi_m4_dummy ijubi_mpetro_dummy)
-		tab cuantasreporta
-		tab noreporta
-		drop noreporta cuantasreporta
-		* Note: by February 26, of the people who reported having jubilacion o pension, 92.1% reported in Bolívares, 0.08% in Dollars, 0.04% in Euros, 0.3% in Colombian pesos, and 48.6% in Petros.
-	*/
-		
 	egen ijubi_m = rowtotal(ijubi_m_bolfeb ijubi_mpe_bolfeb), missing
 	sum ijubi_m
                          
-
 * No monetario	
 	gen     ijubi_nm=.
 	notes ijubi_nm: the survey does not include information to define this variable
@@ -3951,7 +3925,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 
 	gen itranp_o_m = .
 		
-	foreach i of numlist 6 8 9 10 {
+	foreach i of numlist 4 6 8 9 10 {
 		replace itranp_o_m = itranp_o_m + s9q28a_`i'_bolfeb 	if itranp_o_m!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
 		replace itranp_o_m = s9q28a_`i'_bolfeb 					if itranp_o_m==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
 	}		
@@ -4014,7 +3988,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	sum itrane_ns
 	
 		
-***** iV) OTROS INGRESOS NO LABORALES / V) INGRESOS NO LABORALES EXTRAORDINARIOS 
+***** V) INGRESOS NO LABORALES EXTRAORDINARIOS 
 
 	gen inla_extraord = .
 	foreach i of numlist 3 8 {
@@ -4023,10 +3997,10 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		}		
 	sum inla_extraord
 
-	* rename  inla_extraord inla_otro // Because it appeared like this in CEDLAS' do_file_1_variables
 	
-
-
+***** IV) OTROS INGRESOS NO LABORALES
+	gen  inla_otro = .
+	
 
 	
 
@@ -4036,16 +4010,17 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 
 /* We are missing information to complete this */
 
-/*
+
 **** Ajuste por inflacion
 * Mes en el que están expresados los ingresos de cada observación
 gen mes_ingreso = .
 
 * IPC del mes base
-gen ipc = 316025018				/*  MES BASE: promedio Enero-Diciembre			*/
+gen ipc = 2661830760000 // Updated with Canasta Alimentaria CENDAS
 
-gen cpiperiod = "2018m01-2018m11"
+gen cpiperiod = "2020m02"
 
+/*
 gen     ipc_rel = 1
 /*replace ipc_rel = 1 if  mes==1
 replace ipc_rel = 1	if  mes==2
@@ -4172,6 +4147,9 @@ include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonizat
 		*replace renta_imp = renta_imp / p_reg
 		*replace renta_imp = renta_imp / ipc_rel 
 
+gen pondera=1
+* Cambiar con la verdadera variable de ponderadores cuando la tengamos
+ 
 include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
 * El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
@@ -4201,19 +4179,19 @@ compress
 
 sort id com
 
-*Silencing para que se corra más rápido (des-silenciar luego)
+*Silencing para que corra más rápido (des-silenciar luego)
 /* 
 order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
-/* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
+/* Más variables de ingreso CEDLAS */ pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
 interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
 */
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
-/* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
+/* Más variables de ingreso CEDLAS */ pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
 interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
 *save "$dataout\ENCOVI_2019.dta", replace
 *save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
-save "$dataout\ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos.dta", replace
+save "$dataout\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

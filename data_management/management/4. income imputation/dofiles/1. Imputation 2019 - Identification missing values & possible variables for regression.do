@@ -60,7 +60,7 @@ program drop _all
 
 qui: do "$pathdo\outliers.do" 
 *use "$pathdata\ENCOVI_2019_Asamblea Nacional.dta", clear
-use "$pathdata\ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos.dta", clear 
+use "$pathdata\ENCOVI_2019_Sin imputar (con precios implicitos).dta", clear 
 
 
 ///*** DESCRIPTION INCOME ***///

@@ -13,7 +13,7 @@ if (`segundoorden'==1) {
 gen	p_reg = 1
 replace p_reg = 0.8695			if  urbano==0
 
-foreach i of varlist iasalp_m iasalp_nm  ictapp_m ictapp_nm  ipatrp_m ipatrp_nm  iolp_m iolp_nm  iasalnp_m iasalnp_nm  ictapnp_m ictapnp_nm  ipatrnp_m ipatrnp_nm  iolnp_m iolnp_nm  ijubi_con ijubi_ncon ijubi_o  icap  icct inocct_m inocct_nm itrane_ns  itranext_m itranext_nm itranint_m itranint_nm itranp_ns  inla_extraord	{
+foreach i of varlist iasalp_m iasalp_nm  ictapp_m ictapp_nm  ipatrp_m ipatrp_nm  iolp_m iolp_nm  iasalnp_m iasalnp_nm  ictapnp_m ictapnp_nm  ipatrnp_m ipatrnp_nm  iolnp_m iolnp_nm  ijubi_con ijubi_ncon ijubi_o  icap  icct inocct_m inocct_nm itrane_ns  itranext_m itranext_nm itranint_m itranint_nm itranp_ns inla_otro inla_extraord	{
 		replace `i' = `i' / p_reg 
 		replace `i' = `i' / ipc_rel 
 		}
@@ -227,27 +227,26 @@ replace perila = 1		if  ila>0 & ila~=.
 ******************** INGRESOS NO LABORALES
 
 * Ingresos por Jubilaciones y Pensiones
-cap egen ijubi = rsum(ijubi_m ijubi_nm), missing
+egen ijubi = rsum(ijubi_m ijubi_nm), missing
 
 * Ingresos por Capital
-cap egen icap = rsum(icap_m icap_nm), missing
-
+egen icap = rsum(icap_m icap_nm), missing
 
 * Ingresos por Transferencias Privadas
-cap egen itranp   = rsum(rem itranp_o_m itranp_o_nm itranp_ns), missing
-cap egen itranp_m = rsum(rem itranp_o_m), missing
+egen itranp   = rsum(rem itranp_o_m itranp_o_nm itranp_ns), missing
+egen itranp_m = rsum(rem itranp_o_m), missing
 
 * Ingreso por Transferencias Estatales
-cap egen itrane   = rsum(cct itrane_o_m itrane_o_nm itrane_ns), missing
-cap egen itrane_m = rsum(cct itrane_o_m), missing
+egen itrane   = rsum(cct itrane_o_m itrane_o_nm itrane_ns), missing
+egen itrane_m = rsum(cct itrane_o_m), missing
 
 * Ingresos por Transferencias Totales
-cap egen itran   = rsum(itrane   itranp), missing
-cap egen itran_m = rsum(itrane_m itranp_m), missing
+egen itran   = rsum(itrane   itranp), missing
+egen itran_m = rsum(itrane_m itranp_m), missing
 
 * Ingreso no Laboral Total
-cap egen inla   = rsum(ijubi icap itran   inla_extraord), missing 
-cap egen inla_m = rsum(ijubi icap itran_m inla_extraord), missing
+egen inla   = rsum(ijubi icap itran   inla_otro inla_extraord), missing 
+egen inla_m = rsum(ijubi icap itran_m inla_otro inla_extraord), missing
 
 
 

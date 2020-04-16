@@ -173,7 +173,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	drop _mi_id _mi_miss _mi_m	
 
 	drop if imp_id==0 // Saco la base sin imputaciones
-	collapse (mean) jubpen, by(id com) // La imputacion va a ser el promedio de las bases imputadas
+	collapse (mean) jubpen, by(interview__key interview__id quest com) // La imputacion va a ser el promedio de las bases imputadas
 	rename jubpen jubpen_imp1
 	save "$path\VEN_jubpen_imp1.dta", replace
 

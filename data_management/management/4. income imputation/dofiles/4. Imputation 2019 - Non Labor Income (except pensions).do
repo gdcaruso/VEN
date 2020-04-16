@@ -160,7 +160,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 	drop _mi_id _mi_miss _mi_m	
 
 	drop if imp_id==0 // Saco la variable sin imputar
-	collapse (mean) inlanojub, by(id com) // La imputacion va a ser el promedio de las bases imputadas
+	collapse (mean) inlanojub, by(interview__key interview__id quest com) // La imputacion va a ser el promedio de las bases imputadas
 	
 	* Chequear que el número de obs. sea el mismo que en la base original
 	
@@ -173,7 +173,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 ********************************************************************************
 use "$path\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 id interview__key interview__id quest com "$path\VEN_inlanojub_imp1.dta"
+merge 1:1 interview__key interview__id quest com using "$path\VEN_inlanojub_imp1.dta"
 
 foreach x in inlanojub {
 gen log_`x'=ln(`x')

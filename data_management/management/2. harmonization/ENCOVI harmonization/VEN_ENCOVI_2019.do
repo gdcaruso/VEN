@@ -3821,7 +3821,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 			* s9q29a__6==1 // Intereses y dividendos
 			* s9q29a__9==1 // Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)
 		* Ingresos no laborales extraordinarios
-			* s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord o inla_otro
+			* s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord
 			* s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord
 	* Imputaciones: inla_otro
 
@@ -3832,8 +3832,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 
 	s9q28__1 // Recibe pensión de sobreviviente, orfandad, incapacidad
 	s9q28__2 // Recibe pensión de vejez por el seguro social
-	s9q28__4 // Recibe pensión por divorcio, separación, alimentación
-
 	s9q28__3 // Recibe jubilación por trabajo
 
 	s9q28a_* // Monto recibido
@@ -4000,6 +3998,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	
 ***** IV) OTROS INGRESOS NO LABORALES
 	gen  inla_otro = .
+	* Se usará luego para poner valores imputados
 	
 
 	

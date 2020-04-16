@@ -37,14 +37,14 @@
 ***********************************
 //*** Running all imputations ***//
 **********************************
-
+/*
 run "$pathrun\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
 run "$pathrun\2. Imputation 2019 - Monetary labor income.do"
 run "$pathrun\3. Imputation 2019 - Pensions.do"
-run "$pathrun\4. Imputation 2019 - Non Labor Income.do"
+run "$pathrun\4. Imputation 2019 - Non Labor Income (except pensions).do"
 run "$pathrun\5. Imputation 2019 - Labor benefits (non monetary income).do"
-
+*/
 
 **************************************
 /* NUESTRO DOFILE: TC Y DEFLACTORES */
@@ -113,15 +113,15 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 
 	* Mergeamos jubpen_imp1
 	capture drop _merge
-	merge 1:1 id com using "$path\VEN_jubpen_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$path\VEN_jubpen_imp1.dta"
 
 	* Mergeamos inlanojub_imp1
 	capture drop _merge
-	merge 1:1 id com using "$path\VEN_inlanojub_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$path\VEN_inlanojub_imp1.dta"
 
 	* Mergeamos bene_imp1
 	capture drop _merge
-	merge 1:1 id com using "$path\VEN_bene_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$path\VEN_bene_imp1.dta"
 
 	
 ****************************************************
@@ -137,12 +137,22 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 		rename bene_imp1 ingresoslab_bene
 	
 	*Non labor income
-	
-		drop inla_otro
-		rename inlanojub_imp1 inla_otro
-		
 		drop ijubi_m 
 		rename jubpen_imp1 ijubi_m 
+		
+		drop inla_otro
+		replace inlanojub=. if dinlanojub_out==1
+			* Polémico, pero no queda otra para que tengan sentido los nuevos agregados monetarios de los outliers:
+			replace icap_m=. if dinlanojub_out==1
+			replace rem=. if dinlanojub_out==1
+			replace itranp_o_m=. if dinlanojub_out==1
+			replace itranp_ns=. if dinlanojub_out==1
+			replace itrane_o_m=. if dinlanojub_out==1
+			replace itrane_ns=. if dinlanojub_out==1
+			replace inla_extraord=. if dinlanojub_out==1
+		gen inla_otro = .
+		replace inla_otro = cond(missing(inlanojub_imp1), ., inlanojub_imp1) - cond(missing(inlanojub), 0, inlanojub)
+		replace inla_otro =. if inla_otro==0
 	
 	******************************************
 	/* OUR DOFILE: LABOR & NON-LABOR INCOME */
@@ -272,6 +282,23 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	include "$pathcorto\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
 	
 	* El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
+
+	
+************************************************************
+//*** QUICK CHECK TO SEE IF EVERYTHING IS WORKING FINE ***//
+************************************************************
+
+egen ila_nuestro = rowtotal(ingresoslab_mon ingresoslab_bene), mi
+gen dummy_nocoincideila = 1 if ila != ila_nuestro
+tab dummy_nocoincideila
+	*Check: fine!
+
+egen inla_nuestro = rowtotal(inlanojub_imp1 ijubi_m), mi
+gen dummy_nocoincideinla = 1 if inla != inla_nuestro
+tab dummy_nocoincideinla
+*br inla inla_nuestro inla_otro dinlanojub_out inlanojub_imp1 inlanojub dummy_nocoincideinla if dummy_nocoincideinla==1
+	*Check: fine!
+drop inlanojub_imp1
 
 
 ****************************************************

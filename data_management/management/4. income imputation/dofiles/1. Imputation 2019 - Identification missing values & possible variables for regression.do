@@ -194,7 +194,7 @@ use "$pathdata\ENCOVI_2019_Sin imputar (con precios implicitos).dta", clear
 				
 			* Ingreso no laboral monetario (local) excepto jubilación/pension, segun si recibieron en el último MES
 				gen recibe_ingresonolab_mes = .
-				replace recibe_ingresonolab_mes = 1 if (inla_pens_dsa==1 | inla_beca_pub==1 | inla_beca_pri==1 | inla_ayuda_pu==1 | inla_ayuda_pr==1 | inla_ayuda_fa==1 | inla_asig_men==1 | inla_otros==1 )
+				replace recibe_ingresonolab_mes = 1 if (inla_pens_dsa==1 | inla_beca_pub==1 | inla_beca_pri==1 | inla_ayuda_pu==1 | inla_ayuda_pr==1 | inla_ayuda_fa==1 | inla_asig_men==1 | inla_otros==1)
 					// Recibió ingreso monetario no laboral en algún concepto en el último mes
 				replace recibe_ingresonolab_mes = 0 if (inla_pens_dsa==0 & inla_beca_pub==0 & inla_beca_pri==0 & inla_ayuda_pu==0 & inla_ayuda_pr==0 & inla_ayuda_fa==0 & inla_asig_men==0 & inla_otros==0) 
 					// No recibió ingreso laboral monetario en ningún concepto mensual
@@ -222,7 +222,7 @@ use "$pathdata\ENCOVI_2019_Sin imputar (con precios implicitos).dta", clear
 			tab recibe_ingresonolab, mi 
 
 				* Crossed with the amount of income
-				egen inla_aux = rsum(inla_otros itrane_ns itrane_o_m itranp_ns itranp_o_m rem icap_m s9q28a_4_bolfeb), mi
+				egen inla_aux = rsum(inla_extraord itrane_ns itrane_o_m itranp_ns itranp_o_m rem icap_m), mi
 				gen report_ingnolab_nocuanto = .
 				replace report_ingnolab_nocuanto = 1 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux==. // Dicen que reciben inla monetario (no jubi/pens), pero no reportan cuánto
 				replace report_ingnolab_nocuanto = 0 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux>=0 & inla_aux!=.
@@ -263,10 +263,10 @@ use "$pathdata\ENCOVI_2019_Sin imputar (con precios implicitos).dta", clear
 			tab recibe_ingresopenjub, mi 
 
 				* Crossed with the amount of income
-				egen ijubi_aux = rsum(s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb), mi
+				clonevar ijubi_aux = ijubi_m
 				gen report_pensjub_nocuanto = .
 				replace report_pensjub_nocuanto = 1 	if inlist(recibe_ingresopenjub,1,2,3) & ijubi_aux==. // Dicen que reciben jubi/pens, pero no reportan cuánto
-				replace report_pensjub_nocuanto = 0 	if inlist(recibe_ingresopenjub,1,2,3) & ijubi_aux>=0 & inla_aux!=.
+				replace report_pensjub_nocuanto = 0 	if inlist(recibe_ingresopenjub,1,2,3) & ijubi_aux>=0 & ijubi_aux!=.
 				*replace report_ingnolab_nocuanto = 0 	if ijubi_aux>=0 & ijubi_aux!=. // Same result as above line
 					label def report_pensjub_nocuanto 			1 "No reportan cuánto, pero dicen que reciben jubi/pen" 0 "Reportan cuánto"
 					label values report_pensjub_nocuanto report_pensjub_nocuanto
@@ -406,7 +406,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	foreach x in ila_m {
 
 	** Real zeros:
-	gen d`x'_zero=(ila==0 | recibe_ingresolab_mon==0)
+	gen d`x'_zero=1 if (ila==0 | recibe_ingresolab_mon==0)
 			label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive ila)"
 			label values d`x'_zero d`x'_zero
 	sum d`x'_zero
@@ -466,7 +466,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	foreach x in jubpen {
 			
 	** Real zeros:
-	gen d`x'_zero=( (recibe_ingresopenjub==0 & jubi_pens==1) | (inlist(recibe_ingresopenjub,1,2,3) & ijubi_aux==0))
+	gen d`x'_zero=1 if (recibe_ingresopenjub==0 | ijubi_aux==0)
 			label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive pension)"
 			label values d`x'_zero d`x'_zero
 	sum d`x'_zero
@@ -514,7 +514,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a6=r(N)
 
 	*Creating matrix
-		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' \ `a6')
+		matrix aux1=(`a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' \ `a6')
 		*Percentage
 		matrix aux2=((`a0'/`a6')\(`a1'/`a6')\(`a2'/`a6')\(`a3'/`a6')\(`a4'/`a6')\(`a5'/`a6')\(`a6'/`a6'))*100
 		matrix a`i'=nullmat(a`i'), aux1, aux2
@@ -573,7 +573,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	foreach x in inlanojub {
 
 	** Zeros: answered 0 or said didn't receive monetary non-labor income
-	gen d`x'_zero=1 if recibe_ingresonolab_mes==0 | (recibe_ingresonolab_mes==1 & inla_aux==0)
+	gen d`x'_zero=1 if recibe_ingresonolab_mes==0 | (recibe_ingresonolab_mes==1 & `x'==0)
 		label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive monetary non-labor income other than pensions)"
 		label values d`x'_zero d`x'_zero
 	sum d`x'_zero
@@ -631,7 +631,7 @@ matrix drop aux1 aux2 a a1 a2 a3
 
 *br interview__key interview__id quest dila_m_out djubpen_out dbene_out dinlanojub_out if (dila_m_out==1 | djubpen_out==1 | dbene_out==1 | dinlanojub_out==1) 
 
-
+stop
 *****************************************************************
 *** POSSIBLE VARIABLES FOR REGRESSION 
 *****************************************************************

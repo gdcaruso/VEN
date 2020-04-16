@@ -171,7 +171,7 @@ Note: Income imputation - Identification missing values
 	drop _mi_id _mi_miss _mi_m	
 
 	drop if imp_id==0 // Saco la base sin imputaciones
-	collapse (mean) bene, by(id com) // La imputacion va a ser el promedio de las bases imputadas
+	collapse (mean) bene, by(interview__key interview__id quest com) // La imputacion va a ser el promedio de las bases imputadas
 	* Chequear que la cantidad de observaciones sea la misma que la variable original
 	rename bene bene_imp1
 	save "$path\VEN_bene_imp1.dta", replace

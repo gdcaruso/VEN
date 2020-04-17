@@ -276,6 +276,7 @@ label var	razon_incorp_hh	"Reason for incorporating to the household"
 label def 	razon_incorp_hh	1 "New born" 2 "Separated, divorced, cancelled marriage" 3 "Married or came to live with couple" 4 "Came to live as close friend" 5 "Came back from work" 6 "Came back from studying" ///
 							7 "Came because of improved economic situation" 8 "Came because of worsened economic situation" 9 "Came because of bad family relationships" 10 "Came back from living abroad" 12 "Came for other reasons"
 label values razon_incorp_hh razon_incorp_hh
+label var razon_incorp_hh_o "Reason for incorporating to the household(Other)"
 label var	certificado_naci "Birth certificate"
 label var	cedula 			"ID card"
 label var	razon_nocertificado "Reason for not having ID card"
@@ -1487,6 +1488,7 @@ label var	razon_no_medico "Why didn't you try to consult to treat the sickness o
 label def	razon_no_medico 1 "Self-medicated, used home-made medicines" 2 "Doesn't have money to pay for consultation, exams, medicines" 3 "Didn't consider it necessary, didn't do anything" ///
 							4 "Consultation place is far from the household" 5 "Attention is not adecuate" 6 "Waiting time is too long" 7 "Didn't get attended" 8 "Other"
 label values razon_no_medico razon_no_medico
+label var razon_no_medico_o "Why didn't you try to consult to treat the sickness or accident?(Other)"
 label var	medico_o_quien 	"Who did you mainly consult to treat the sickness or accident?"
 label def	medico_o_quien	1 "Doctor" 2 "Nurse or another paramedic assistant" 3 "Pharmacist" 4 "Healer, herbalist, or warlock" 5 "Other"
 label values medico_o_quien medico_o_quien

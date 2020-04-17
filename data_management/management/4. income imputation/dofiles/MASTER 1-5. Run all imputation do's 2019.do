@@ -62,12 +62,12 @@ Note:
 //*** Running all imputations ***//
 **********************************
 
-run "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
+do "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
-run "$impdos\2. Imputation 2019 - Monetary labor income.do"
-run "$impdos\3. Imputation 2019 - Pensions.do"
-run "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
-run "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
+do "$impdos\2. Imputation 2019 - Monetary labor income.do"
+do "$impdos\3. Imputation 2019 - Pensions.do"
+do "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
+do "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
 
 
 **************************************
@@ -302,7 +302,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	
 	clonevar relacion = relacion_comp
 	clonevar nivel = nivel_educ
-	
+	include "$pathaux\cuantiles.do"
 	include "$pathaux\do_file_2_variables.do"
 	
 	* El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear

@@ -27,10 +27,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
+		global lauta   1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -76,7 +76,7 @@ global input "$datapath\data_management\input\latest"
 global output "$datapath\data_management\output\merged"
 
 *run merge
-do "$merging/__main__merge.do"
+run "$merging/__main__merge.do"
 
 
 /*==============================================================================
@@ -90,15 +90,16 @@ global harmonization "$dopath\data_management\management\2. harmonization"
 *Specific inputs: imputation do's and auxiliary SEDLAC do's 
 global pathaux "$harmonization\ENCOVI harmonization\aux_do"
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
-
+run "$pathaux\cuantiles.do"
 
 //run ENCOVI harmonization
-do "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
+run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
 
 
 *Specific inputs: imputation do's and auxiliary SEDLAC do's 
 global pathaux "$harmonization\ENCOVI harmonization\aux_do"
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
+run "$pathaux\cuantiles.do"
 
 *Specific for imputation
 global forimp 	"$datapath\data_management\output\for imputation"
@@ -106,7 +107,7 @@ global pathoutexcel "$dopath\data_management\management\4. income imputation\out
 
 
 //run ENCOVI imputation
-do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
+run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
 
 
 /*==============================================================================
@@ -119,7 +120,7 @@ global input "$datapath\poverty_measurement\input"
 global output "$datapath\poverty_measurement\output"
 
 //run poverty estimation
-do "$povmeasure\__main__.do"
+do "$povmeasure\__main__pobreza.do"
 
 /*==============================================================================
 final variable selection

@@ -218,7 +218,7 @@ matrix rownames imp="2019"
 matrix list imp
 
 putexcel set "$pathoutexcel\VEN_income_imputation_2019.xlsx", sheet("labor_jubpenimp_stochastic_reg") modify
-putexcel A3=matrix(imp), names
+putexcel A3=matrix(imp)
 matrix drop imp
 
 ********************************************************************************

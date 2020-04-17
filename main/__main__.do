@@ -27,10 +27,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -61,10 +61,12 @@ set more off
 //set universal paths
 global merged "$datapath\data_management\output\merged"
 global cleaned "$datapath\data_management\output\cleaned"
+global harmonization "$dopath\data_management\management\2. harmonization"
 
-//inflation and exchange rate inputs
+//inflation, exchange rate inputs and auxiliaries
 global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+global pathaux "$harmonization\ENCOVI harmonization\aux_do"
 
 /*==============================================================================
  merging data
@@ -85,10 +87,8 @@ hh-individual database and imputation
 
 //set path of data
 
-global harmonization "$dopath\data_management\management\2. harmonization"
-
 *Specific inputs: imputation do's and auxiliary SEDLAC do's 
-global pathaux "$harmonization\ENCOVI harmonization\aux_do"
+global pathaux "$harmonization\aux_do"
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 run "$pathaux\cuantiles.do"
 
@@ -97,7 +97,6 @@ run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
 
 
 *Specific inputs: imputation do's and auxiliary SEDLAC do's 
-global pathaux "$harmonization\ENCOVI harmonization\aux_do"
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 run "$pathaux\cuantiles.do"
 
@@ -126,20 +125,63 @@ do "$povmeasure\__main__pobreza.do"
 final variable selection
 ==============================================================================*/
 //run cleaning of variables
-run "$povmeasure\final_variable_selection.do"
+run "$dopath\data_management\management\3. cleaning\final_variable_selection.do"
 
 /*==============================================================================
-labeling
+creating separate dataset for variables to merge with SEDLAC version
 ==============================================================================*/
-* English
-	*llamar a los labels en ingles y generar una base
-	
-* Spanish
-	*llamar a los labels en español y generar una base
+
+preserve
+keep interview__key interview__id quest com ///
+iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ///
+ijubi_nm icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns ///
+rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp ///
+iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ///
+ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ///
+ila ila_m ilaho ilaho_m perila ijubi icap ///
+itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ///
+ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m ///
+itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m ///
+inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee  pipcf dipcf ///
+piea qiea ipc11 ppp11 ipcf_cpi11 ipcf_ppp11  pipcf dipcf  piea qiea ipc11 ppp11 ipcf_cpi11 ipcf_ppp11
+
+save "$pathaux\Variables to merge with SEDLAC.dta" //, replace
+restore
+
+/*==============================================================================
+labeling and saving final full databases
+==============================================================================*/
+
+//run spanish labeling
+preserve
+run "$pathaux\labels ENCOVI spanish.do"
+save "$datapath\ENCOVI_2019_Spanish labels.dta" //, replace
+restore
+
+//run english labeling
+run "$pathaux\labels ENCOVI english.do"
+save "$datapath\ENCOVI_2019_English labels.dta" //, replace
+
+/*==============================================================================
+run sedlac and adding variables of income, prices and poverty
+==============================================================================*/
+do "$harmonization\VEN_2019_ENFT_v01_M_v01_A_SEDLAC-01_MA y Trini.do"
+
+merge 1:1 interview__key interview__id quest com using "$pathaux\Variables to merge with SEDLAC.dta"
 	
 /*==============================================================================
 encovi sedlac formatting
 ==============================================================================*/
-* Creating encovi for sedlac
 
+//run spanish labeling
+preserve
+run "$pathaux\labels SEDLAC spanish.do"
+save "$datapath\VEN_2019_ENFT_v01_M_v01_A_SEDLAC-01_Spanish labels.dta" //, replace
+restore
+
+//run english labeling
+run "$pathaux\labels SEDLAC english.do"
+save "$datapath\VEN_2018_ENFT_v01_M_v01_A_SEDLAC-01_English labels.dta" //, replace
+
+clear all
 

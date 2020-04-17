@@ -1469,7 +1469,7 @@ gen mes_ingreso = .
 
 * IPC del mes base
 */
-gen ipc = .
+* gen ipc = .
 /*
 gen ipc = 316025018				/*  MES BASE: promedio Enero-Diciembre			*/
 
@@ -1491,7 +1491,7 @@ replace ipc_rel = 1 if  mes==12
 */
 **** Ajuste por precios regionales: se ajustan los ingresos rurales 
 */
-gen p_reg = .
+* gen p_reg = .
 /*
 gen     p_reg = 1
 *replace p_reg = 0.8695				if  urbano==0

@@ -27,10 +27,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   1
+		global lauta   0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -69,7 +69,7 @@ global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 /*==============================================================================
  merging data
  ==============================================================================*/
-/*
+
 *set path of data
 global merging "$dopath\data_management\management\1. merging"
 global input "$datapath\data_management\input\latest"
@@ -77,7 +77,7 @@ global output "$datapath\data_management\output\merged"
 
 *run merge
 do "$merging/__main__merge.do"
-*/
+
 
 /*==============================================================================
 hh-individual database and imputation
@@ -103,27 +103,42 @@ global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 *Specific for imputation
 global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-*/
+
 
 //run ENCOVI imputation
-do "$impdos/MASTER 1-5. Run all imputation do's 2019.do"
+do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
 
 
 /*==============================================================================
 poverty estimation
 ==============================================================================*/
 
-/*
 // set path of data
 global povmeasure "$dopath\poverty_measurement\scripts"
 global input "$datapath\poverty_measurement\input"
 global output "$datapath\poverty_measurement\output"
 
 //run poverty estimation
-do "$povmeasure/__main__.do"
+do "$povmeasure\__main__.do"
 
+/*==============================================================================
+final variable selection
+==============================================================================*/
 //run cleaning of variables
-run "$povmeasure/final_variable_selection.do"
+run "$povmeasure\final_variable_selection.do"
+
+/*==============================================================================
+labeling
+==============================================================================*/
+* English
+	*llamar a los labels en ingles y generar una base
+	
+* Spanish
+	*llamar a los labels en español y generar una base
+	
+/*==============================================================================
+encovi sedlac formatting
+==============================================================================*/
+* Creating encovi for sedlac
 
 
-*/

@@ -133,19 +133,19 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 
 	* Mergeamos ila_m_imp1
 	capture drop _merge
-	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_ila_m_imp1.dta" // da lo mismo usando id com
+	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_ila_m_imp1_2019.dta" // da lo mismo usando id com
 
 	* Mergeamos jubpen_imp1
 	capture drop _merge
-	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_jubpen_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_jubpen_imp1_2019.dta"
 
 	* Mergeamos inlanojub_imp1
 	capture drop _merge
-	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_inlanojub_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_inlanojub_imp1_2019.dta"
 
 	* Mergeamos bene_imp1
 	capture drop _merge
-	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_bene_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_bene_imp1_2019.dta"
 
 	
 ****************************************************

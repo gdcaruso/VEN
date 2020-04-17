@@ -154,10 +154,23 @@ rename le_new lp_extrema
 rename lp_new lp_moderada
 
 drop ipc ipc11 ppp11 pobre
-gen ipc = 2659537979000 
-gen ipc11 = 3558.84
-gen ppp11 = 2.915005297 / 100000 //bol. fuertes/ dolarppp * bol.sob / bol.fuerte
+// gen ipc = 2659537979000 
+// gen ipc11 = 3558.84
+// gen ppp11 = 2.915005297 / 100000 //bol. fuertes/ dolarppp * bol.sob / bol.fuerte
 gen pobre = ipcf<lp_moderada
+
+
+// * IPC del mes base
+// gen ipc = 2661830760000 // Updated with Canasta Alimentaria CENDAS
+// gen cpiperiod = "2020m02"
+//
+// from Malena Acuna (internal) to everyone:
+// replace ppp11 =    2.92 / 100000    if  pais=="VEN" // Fuente Banco Mundial expresados en bolívares soberanos
+//
+// from Malena Acuna (internal) to everyone:
+// gen ipc11 =.
+// replace ipc11 = 3321.98        if  pais=="VEN" // Canasta alimentaria CENDAS Octubre 2011 (cuando en general se hacían las ENCOVIs anteriores) vs. Febrero 2020 (el momento en el que tenemos más muestra)
+
 
 drop  lp19 lp32 lp55 lp_ofi le_ofi extremo_new extremo_ofi pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi ext_10off ext_20off ext_50off ext_75off pob_??off
 save "$output/VEN_2019_ENCOVI_v01_M_v01_A_FULL-03_all.dta", replace

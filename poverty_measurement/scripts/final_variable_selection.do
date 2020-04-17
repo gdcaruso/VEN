@@ -41,7 +41,7 @@ use "$datapath\ENCOVI_2019_postpobreza.dta", replace
 								recibe_ingresopenjub ila_dummy norta_sirecibeila ///
 								ocup_norta_sirecibeila jubi_pens ijubpen_dummy jubi_norta_sirecibejubi ///
 								aimputar_ila_mon aimputar_jubipen ocup_o_rtarecibenilamon jubi_o_rtarecibejubi ///
-								jubpen ijubi_aux djubpen ijubpen_dummy bene ingresoslab_bene inlanojub inla_aux
+								jubpen ijubi_aux djubpen ijubpen_dummy bene /*ingresoslab_bene*/ inlanojub inla_aux
 
 
 
@@ -154,7 +154,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		iext_sueldo_mone	iext_ingnet_mone	iext_indemn_mone	iext_remesa_mone	iext_penjub_mone	iext_intdiv_mone	iext_becaes_mone	iext_extrao_mone	iext_alquil_mone
 
 *----10: Emigración / Emigration
-		global emigra_ENCOVI informant_emig hogar_emig numero_emig nombre_emig_* edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* leveledu_emig_* ///
+		global emigra_ENCOVI informant_emig hogar_emig numero_emig /*nombre_emig_**/ edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* leveledu_emig_* ///
 				gradedu_emig_* regedu_emig_* anoedu_emig_* semedu_emig_* paisemig_* opaisemig_* ciuemig_* soloemig_* conemig_* razonemig_* ocupaemig_* ocupnemig_* ///
 				volvioemig_* volvioanoemig_* volviomesemig_* miememig_*
 
@@ -194,7 +194,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $ingreso_ENCOVI $from_cedlas
 
 *---- Drop de las que teniamos dudas
-drop quest informant_emig informant_shock centropo nombcp segmento peso_segmento combined_id tipo_muestra /*gps* */ id_str statut sector_urb d_renta_imp_b
+drop quest informant_emig informant_shock /*centropo nombcp segmento peso_segmento combined_id tipo_muestra /*gps* */ id_str statut sector_urb d_renta_imp_b*/
 
 compress
 

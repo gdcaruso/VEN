@@ -86,9 +86,9 @@ drop ipc ipc11 ppp11 pobre
 gen ipc = 2659537979000 //feb20 CENDAS food basket
 gen ipc11 = 3558.84 //dic11 CENDAS food basket
 gen ppp11 = 2.915005297 / 100000 //bol. fuertes/ dolarppp * bol.sob / bol.fuerte
-gen pobre = ipcf<lp_moderada
-gen cpiperiod = "2020m02"
 
+gen cpiperiod = "2020m02"
+drop pobre_extremo
 
 // gen new lines
 gen le_new = $costodiario * 30.42
@@ -108,9 +108,9 @@ gen extremo_new = ipcf<le_new
 gen pobre_new = ipcf<lp_new
 gen extremo_ofi = ipcf<le_ofi
 gen pobre_ofi = ipcf<lp_ofi
-gen pobre_19 = ipcf<lp19
-gen pobre_32 = ipcf<lp32
-gen pobre_55 = ipcf<lp55
+gen pobre_19 = ipcf<lp_19
+gen pobre_32 = ipcf<lp_32
+gen pobre_55 = ipcf<lp_55
 
 
 // just to tabulate, 0 is extreme poverty
@@ -132,10 +132,10 @@ tab pobre_55, mi
 sort ipcf
 gen obs = _n
 preserve
-graph twoway line ipcf obs  if obs<30000, lcolor("black") ///
-|| line lp19 obs, lcolor("blue") ///
-|| line lp32 obs, lcolor("blue") ///
-|| line lp55 obs, lcolor("blue") ///
+graph twoway line ipcf obs  if obs<32000, lcolor("black") ///
+|| line lp_19 obs, lcolor("blue") ///
+|| line lp_32 obs, lcolor("blue") ///
+|| line lp_55 obs, lcolor("blue") ///
 || line lp_new obs, lcolor("red") ///
 || line le_new obs, lcolor("red") ///
 || line le_ofi obs, lcolor("green") ///
@@ -162,6 +162,8 @@ sum pob_base pob_??off ext_base ext_??off if ipcf>0
 rename le_new lp_extrema
 rename lp_new lp_moderada
 
+gen pobre = ipcf<lp_moderada
+gen pobre_extremo = ipcf<lp_extrema
 
 //cleaning
 

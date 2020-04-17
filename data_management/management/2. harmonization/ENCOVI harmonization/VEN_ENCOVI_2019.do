@@ -3110,7 +3110,46 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 			2=No 
 	*/
 	gen 	comida_trueque = s13q3==1 if (s13q3!=. & s13q3!=.a)
-		
+
+/*(************************************************************************************************************************************************ 
+*----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
+************************************************************************************************************************************************)*/
+
+global antropo_ENCOVI
+
+* For children younger than 5 years old
+
+*** Was the child measured?
+	/*s14q1 Fue medido?
+			1=Si
+			2=No 
+	*/
+	gen 	medido = s14q1==1 if s6q5=<5 & (s14q1!=. & s14q1!=.a)
+
+*** Why wasn't the child measured?
+	/*s14q2 Por qué no fue medido?
+			1=No estaba en casa al momento de hacer la entrevista
+			2=Estaba enfermo
+			3=No está disponible
+			4=Otra razón 
+	*/
+	gen 	razon_nomedido = s14q2==1 if s14q1==2 & s6q5=<5 & (s14q2!=. & s14q2!=.a)
+
+*** Confirm child's reported age (in months)
+	/*s14q3 Confirmar la edad (en meses) reportada del niño
+			1=Si, es correcto
+			2=No, no es correcto
+	*/
+	gen 	confirma_edad = person_confirm==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
+	
+*** Was the child able to be alone in the measurement instrument?
+	/*s14q1 Fue capaz de permanecer solo en el instrumento de medición?
+			1=Si
+			2=No 
+	*/
+	gen 	solo_medicion = s14q14==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
+
+
 /*(************************************************************************************************************************************************ 
 *---------------------------------------- XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES -------------------------------------
 ************************************************************************************************************************************************)*/

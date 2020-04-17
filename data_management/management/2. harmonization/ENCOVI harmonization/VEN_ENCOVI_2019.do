@@ -15,42 +15,43 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta  0	
-		
-		* User 4: Malena
-		global male   1
-		
-			
-		if $juli {
-				global rootpath "C:\Users\wb563583\GitHub\VEN"
-				global dataout 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
-		}
-	    if $lauta {
-				global rootpath "C:\Users\wb563365\GitHub\VEN"
-				global dataout 	"C:\Users\wb563365\GitHub\VEN\data_management\output\cleaned"
-				//"C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
-		}
-		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN" 
-				global dataout 	PONGAN ONE DRIVE PORQUE YA ES MUY PESADA (VER ABAJO EN MALE)
-		}
-		
-		if $male   {
-				global rootpath "C:\Users\wb550905\Github\VEN"
-				global dataout "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
-		}
+// Define rootpath according to user
 
-		
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta   1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+// 	    if $lauta {
+// 		global dopath "C:\Users\wb563365\GitHub\VEN"
+// 		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+//
+//		
 // Set paths
-global dataofficial "$rootpath\data_management\output\merged"
-global input "$rootpath\data_management\input"
+//
+// global encovisinimputarfilename "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global merged "$datapath\data_management\output\merged"
+// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 
 ********************************************************************************
 
@@ -71,6 +72,8 @@ local period   ""       // Periodo, ejemplo -S1 -S2
 local alterna  ""       // 
 local vr       "01"     // version renta
 
+run "$harmonization\ENCOVI harmonization\aux_do\cuantiles.do"
+
 /*==================================================================================================================================================
 								1: Data preparation: First-Order Variables
 ==================================================================================================================================================*/
@@ -82,7 +85,7 @@ local vr       "01"     // version renta
 			
 			*use "$rootpath\data_management\output\cleaned\inflacion\InflacionVerdadera_04-09-20.dta", clear
 			*use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_PARA NOMINAL.dta", clear
-			use "$rootpath\data_management\output\cleaned\inflacion\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
+			use "$inflation", clear
 			*use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
 
 			
@@ -118,7 +121,7 @@ local vr       "01"     // version renta
 			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses 1 2 3 4 10 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march, 4=april
 			
-			use "$rootpath\data_management\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
+			use "$exrate", clear
 			
 		// if we consider that incomes are earned one month previous to data collection use this			
 					destring mes, replace
@@ -149,13 +152,13 @@ local vr       "01"     // version renta
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 
 *Generate unique household identifier by strata
-use "$dataofficial\household.dta", clear
+use "$merged\household.dta", clear
 tempfile household_hhid
 bysort combined_id: gen hh_by_combined_id = _n
 save `household_hhid'
 
 * Open "output" database
-use "$dataofficial\individual.dta", clear
+use "$merged\individual.dta", clear
 merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
 * I drop those who do not collaborate in the survey
@@ -4070,7 +4073,7 @@ capture label drop nivel
 	gen `uno' = 1
 	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
 
-include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
+include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 
 * RENTA IMPUTADA
 	/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
@@ -4146,10 +4149,10 @@ include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonizat
 gen pondera=1
 * Cambiar con la verdadera variable de ponderadores cuando la tengamos
  
-include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
+include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
 * El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
-include "$rootpath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
+include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
 * Terminar de chequear nuestros labels!!
 
 
@@ -4189,5 +4192,5 @@ interview_month interview__id interview__key quest labor_status miembros relab s
 
 *save "$dataout\ENCOVI_2019.dta", replace
 *save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
-save "$dataout\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
+//save "$cleaned\$encovisinimputarfilename", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

@@ -24,10 +24,10 @@ Note:
  		global juli   0
 		
  		* User 3: Lautaro
- 		global lauta   1
+ 		global lauta   0
 		
  		* User 4: Malena
- 		global male   0
+ 		global male   1
 			
  		if $juli {
  				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -44,7 +44,7 @@ Note:
  				global dopath "C:\Users\wb550905\Github\VEN"
  				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
-		
+	
 *Inputs
 		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
@@ -52,7 +52,7 @@ Note:
 		global pathaux "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do"
 *Outputs
 		global cleaned "$datapath\data_management\output\cleaned"
- */
+*/
 ********************************************************************************
 
 /*==============================================================================
@@ -72,7 +72,7 @@ local period   ""       // Periodo, ejemplo -S1 -S2
 local alterna  ""       // 
 local vr       "01"     // version renta
 
-run "$harmonization\ENCOVI harmonization\aux_do\cuantiles.do"
+run "$pathaux\cuantiles.do"
 
 /*==================================================================================================================================================
 								1: Data preparation: First-Order Variables
@@ -3124,7 +3124,7 @@ global antropo_ENCOVI
 			1=Si
 			2=No 
 	*/
-	gen 	medido = s14q1==1 if s6q5=<5 & (s14q1!=. & s14q1!=.a)
+	gen 	medido = s14q1==1 if s6q5<=5 & (s14q1!=. & s14q1!=.a)
 
 *** Why wasn't the child measured?
 	/*s14q2 Por qué no fue medido?
@@ -3133,7 +3133,7 @@ global antropo_ENCOVI
 			3=No está disponible
 			4=Otra razón 
 	*/
-	gen 	razon_nomedido = s14q2==1 if s14q1==2 & s6q5=<5 & (s14q2!=. & s14q2!=.a)
+	gen 	razon_nomedido = s14q2==1 if s14q1==2 & s6q5<=5 & (s14q2!=. & s14q2!=.a)
 
 *** Confirm child's reported age (in months)
 	/*s14q3 Confirmar la edad (en meses) reportada del niño
@@ -4112,7 +4112,7 @@ capture label drop nivel
 	gen `uno' = 1
 	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
 
-include "$harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
+include "$pathaux\do_file_1_variables_MA.do"
 
 * RENTA IMPUTADA
 	/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
@@ -4149,37 +4149,14 @@ include "$harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 				replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
 			}
 		}
-
-		// tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated   
-		//
-		//       7. Para su hogar, la vivienda es? |      Freq.     Percent        Cum.
-		// ----------------------------------------+-----------------------------------
-		//                           Propia pagada |        252       11.91       11.91
-		//                        Propia pagándose |         62        2.93       14.84
-		//                               Alquilada |        420       19.85       34.69
-		//          Alquilada parte de la vivienda |         14        0.66       35.35
-		// Adjudicada pagándose Gran Misión Vivien |         23        1.09       36.44
-		//         Adjudicada Gran Misión Vivienda |         10        0.47       36.91
-		//           Cedida por razones de trabajo |         33        1.56       38.47
-		//           Prestada por familiar o amigo |        895       42.30       80.77
-		//                                  Tomada |        181        8.55       89.32
-		//                                    Otra |        226       10.68      100.00
-		// ----------------------------------------+-----------------------------------
-		//                                   Total |      2,116      100.00
+		
+		gen d_renta_imp_en = .
+		replace d_renta_imp_en = 1 if renta_imp_en>=0 // Dummy for other calculations
+		
+		* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated   
 		gen renta_imp_b = itf_sin_ri*0.1
 
-		// twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny) ///
-		// || line renta_imp renta_imp if renta_imp<10000000 & renta_imp_b<10000000
-
-		// gen test_renta = renta_imp>renta_imp_b
-		// tab test_renta
-		//  test_renta |      Freq.     Percent        Cum.
-		// ------------+-----------------------------------
-		//           0 |      1,021        3.20        3.20
-		//           1 |     30,927       96.80      100.00
-		// ------------+-----------------------------------
-		//       Total |     31,948      100.00
-
+		* twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny)
 		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //complete with 10% in cases where no guess is provided by hh.
 
 		*replace renta_imp = renta_imp / p_reg
@@ -4188,10 +4165,10 @@ include "$harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 gen pondera=1
 * Cambiar con la verdadera variable de ponderadores cuando la tengamos
  
-include "$harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
+include "$pathaux\do_file_2_variables.do"
 * El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
-include "$harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
+include "$pathaux\Labels_ENCOVI.do"
 * Terminar de chequear nuestros labels!!
 
 

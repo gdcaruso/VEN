@@ -183,14 +183,14 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	collapse (mean) bene, by(interview__key interview__id quest com) // La imputacion va a ser el promedio de las bases imputadas
 	* Chequear que la cantidad de observaciones sea la misma que la variable original
 	rename bene bene_imp1
-	save "$forimp\VEN_bene_imp1.dta", replace
+	save "$forimp\VEN_bene_imp1_2019.dta", replace
 
 ********************************************************************************
 *** Analyzing imputed data
 ********************************************************************************
 use "$forimp\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 interview__key interview__id quest com using "$forimp\VEN_bene_imp1.dta"
+merge 1:1 interview__key interview__id quest com using "$forimp\VEN_bene_imp1_2019.dta"
 
 
 foreach x of varlist bene {

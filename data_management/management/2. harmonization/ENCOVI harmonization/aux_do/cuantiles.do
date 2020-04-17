@@ -39,7 +39,7 @@ program define cuantiles
     gen `suma'=sum(`mipondera')
 
     *ppquan = Personas Por Quantil
-    *ppquan es el número de personas que debería tener cada quantil
+    *ppquan es el nÃºmero de personas que deberÃ­a tener cada quantil
 
     summ `mipondera', meanonly
     
@@ -57,7 +57,4 @@ program define cuantiles
     tabulate `quanpers' [`weight'`exp'], summ(`1')
   }
 end
-
-
-
 

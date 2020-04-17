@@ -197,7 +197,7 @@ clear all
 	* Chequear que el número de obs. sea el mismo que en la base original
 	
 	rename ila_m ila_m_imp1
-	save "$forimp\VEN_ila_m_imp1.dta", replace
+	save "$forimp\VEN_ila_m_imp1_2019.dta", replace
 
 	
 ********************************************************************************
@@ -206,7 +206,7 @@ clear all
 
 use "$forimp\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 interview__key interview__id quest com using "$forimp\VEN_ila_m_imp1.dta" // da lo mismo usando id com
+merge 1:1 interview__key interview__id quest com using "$forimp\VEN_ila_m_imp1_2019.dta" // da lo mismo usando id com
 
 foreach x in ila_m {
 gen log_`x'=ln(`x')

@@ -4,13 +4,13 @@
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta   0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 			
 		if $juli {
 				global pathcorto "C:\Users\wb563583\Github\VEN\data_management"
@@ -141,15 +141,15 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 		rename jubpen_imp1 ijubi_m 
 		
 		drop inla_otro
-		replace inlanojub=. if dinlanojub_out==1
+		//replace inlanojub=. if dinlanojub_out==1
 			* Polémico, pero no queda otra para que tengan sentido los nuevos agregados monetarios de los outliers:
-			replace icap_m=. if dinlanojub_out==1
-			replace rem=. if dinlanojub_out==1
-			replace itranp_o_m=. if dinlanojub_out==1
-			replace itranp_ns=. if dinlanojub_out==1
-			replace itrane_o_m=. if dinlanojub_out==1
-			replace itrane_ns=. if dinlanojub_out==1
-			replace inla_extraord=. if dinlanojub_out==1
+			//replace icap_m=. if dinlanojub_out==1
+			//replace rem=. if dinlanojub_out==1
+			//replace itranp_o_m=. if dinlanojub_out==1
+			//replace itranp_ns=. if dinlanojub_out==1
+			//replace itrane_o_m=. if dinlanojub_out==1
+			//replace itrane_ns=. if dinlanojub_out==1
+			//replace inla_extraord=. if dinlanojub_out==1
 		gen inla_otro = .
 		replace inla_otro = cond(missing(inlanojub_imp1), ., inlanojub_imp1) - cond(missing(inlanojub), 0, inlanojub)
 		replace inla_otro =. if inla_otro==0

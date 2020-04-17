@@ -24,13 +24,13 @@ clear all
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -587,22 +587,23 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a1=r(sum)
 	
 	** Missing values: Outliers
-	clonevar `x'_out=`x'
-	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
-	sum	`x'_out if out_`x'==1 //
-	gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3)
-	sum d`x'_out
-	local a2=r(sum)
+	//clonevar `x'_out=`x'
+	//outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
+	//sum	`x'_out if out_`x'==1 //
+	//gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3)
+	//sum d`x'_out
+	//local a2=(sum)
+	local a2 "."
 	
 	** Missing values: sum of both
-	gen d`x'_miss2=1 if (report_ingnolab_nocuanto==1 | d`x'_out==1)
+	gen d`x'_miss2=1 if (report_ingnolab_nocuanto==1) /*| d`x'_out==1*/
 			label def d`x'_miss2 1 "Said received monetary non-labor income, but amount missing or outlier"
-			label values d`x'_miss2 d`x'_miss2
+			//label values d`x'_miss2 d`x'_miss2
 	sum d`x'_miss2
 	local a3=r(sum)
 
 	** Non-zero values
-	sum `x' if `x'>0 & `x'!=. & inlist(recibe_ingresonolab,1,2,3) & d`x'_out!=1
+	sum `x' if `x'>0 & `x'!=. & inlist(recibe_ingresonolab,1,2,3) //& d`x'_out!=1
 	local a4=r(N)
 
 	** All receiving non-monetary labor income
@@ -610,7 +611,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a5=r(N)
 
 	*Creating matrix
-		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4'\ `a5' )
+		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5')
 		*Percentages
 		matrix aux2=((`a0'/`a5')\(`a1'/`a5')\(`a2'/`a5')\(`a3'/`a5')\(`a4'/`a5')\(`a5'/`a5'))*100
 		matrix a`i'=nullmat(a`i'), aux1, aux2

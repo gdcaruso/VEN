@@ -631,7 +631,6 @@ matrix drop aux1 aux2 a a1 a2 a3
 
 *br interview__key interview__id quest dila_m_out djubpen_out dbene_out dinlanojub_out if (dila_m_out==1 | djubpen_out==1 | dbene_out==1 | dinlanojub_out==1) 
 
-stop
 *****************************************************************
 *** POSSIBLE VARIABLES FOR REGRESSION 
 *****************************************************************

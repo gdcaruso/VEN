@@ -104,9 +104,6 @@ local vr       "01"     // version renta
 						local deflactor3 `indice2'/`indice2'
 						local deflactor4 `indice2'/`indice3'
 						
-						display `deflactor11'
-						display `deflactor4'
-						
 			// if we consider that incomes are earned in the same month than the survey is collected use this
 			// 			local deflactor11 `indice2'/`indice11'
 			// 			local deflactor12 `indice2'/`indice12'
@@ -3361,8 +3358,8 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 	local incomevar19 _1  _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 
 	foreach i of local incomevar19 {
 
-		* Bolívares s9q19a`i'_bolfeb = s9q19a`i' * `deflactor11'
-			gen s9q19a`i'_bolfeb = s9q19a`i' * `deflactor11'  if interview_month==11 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
+		* Bolívares 
+			gen s9q19a`i'_bolfeb = s9q19a`i' 					* `deflactor11'  if interview_month==11 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor12'	if interview_month==12 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor1'	if interview_month==1 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
 			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor2' 	if interview_month==2 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
@@ -3418,7 +3415,7 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes11'	* `deflactor11'	if  interview_month==11 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes12' * `deflactor12'	if  interview_month==12 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes1'	* `deflactor1'	if  interview_month==1 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes2'* `deflactor2' 	if  interview_month==2 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
+			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes2' 	* `deflactor2' 	if  interview_month==2 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes3'	* `deflactor3'	if  interview_month==3 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
 			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes4'* `deflactor4' if  interview_month==4 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a 
 		}
@@ -3587,17 +3584,16 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 		* MONTO (s9q23a): Amount received
 		* CURRENCY (s9q23b): Currency
 		
-	* For self-employed (s9q15==6)
+	* For self-employed (s9q15==6)	
 		* MONETARY PAYMENTS (s9q25): Durante los últimos doce (12) meses, recibió dinero por ganancias o utilidades netas derivadas del negocio o actividad?
 			1 = si
 			2 = no
 		* MONTO (s9q25a): Amount received
 		* CURRENCY (s9q25b): Currency
 		
-			* For monthly analysis (no taken into account here because of inconsistencies in the results, e.g. negative income because of people who answer q27 and not q26, or there may be confusion with time span with q25):
-			* MONETARY PAYMENTS (s9q26): El mes pasado, recibió ingresos por su actividad para gastos propios o de su hogar?
+		* MONETARY PAYMENTS (s9q26): El mes pasado, recibió ingresos por su actividad para gastos propios o de su hogar?
 				*Obs: this question seemed to be elaborated to represent non-monetary payments but the execution makes it seem more monetary so we added it here.
-			* SUBSTRACTED FROM MONETARY PAYMENTS (s9q27): El mes pasado, ¿cuánto dinero gastó para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?
+		* SUBSTRACTED FROM MONETARY PAYMENTS (s9q27): El mes pasado, ¿cuánto dinero gastó para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?
 */
 
 
@@ -3630,6 +3626,7 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 		* If not, we will use the yearly data (q25a) divided by 12 when available.
 		
 		gen indep_ingneto_mens 	= cond(missing(s9q26a_bolfeb), ., s9q26a_bolfeb) - cond(missing(s9q27_bolfeb), 0, s9q27_bolfeb)
+		replace indep_ingneto_mens = . if (s9q26a_bolfeb==. | s9q26a_bolfeb==.a)
 		gen indep_registraingpaglabmon_men = 1 if (s9q26a_bolfeb>=0 & s9q26a_bolfeb!=. & s9q26a_bolfeb!=.a) & (s9q27_bolfeb>=0 & s9q27_bolfeb!=. & s9q27_bolfeb!=.a)
 		gen indep_usamos_mens = 1 if indep_registraingpaglabmon_men==1 & indep_ingneto_mens>=0
 

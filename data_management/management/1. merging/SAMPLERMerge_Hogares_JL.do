@@ -15,40 +15,13 @@ Output:			Merged Dataset ENCOVI
 Note: 
 =============================================================================*/
 ********************************************************************************
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//
-//			
-// 		if $juli {
-// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
-// 		}
-// 	    if $lauta {
-// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-// 		}
-// 	    if $lautaa {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-// 		}
-// 		if $trini {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-// 		}
-//		
-// 		if $male {
-// 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019"
-// 		}	
+global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+
 //
 
 //
-// global input "$datapath\data_management\input\latest"
-// global output "$datapath\data_management\output\merged"
+global input "$datapath\data_management\input\latest"
+global output "$datapath\data_management\output\merged"
 
 // Set the path for the three questionnaires
 global pathnew "$input\ENCOVI_3_STATA_All"
@@ -109,11 +82,13 @@ local vsp      "01"	// version ASPIRE
 	// Create a tempfile for approved surveys
     tempfile approved_surveys
 	
-	// Create identification for completed surveys
-	bys quest interview__key interview__id (date time): keep if action[_N]==6 // 6= approved by HQ (as last step)
-	
+	// Keep aproved interviews by HQ
+	preserve
+	bys quest interview__key interview__id (date time): keep if action==3 // 3=Completed & approved by HQ (as last step)
 
-	
+	// To identify unique interviews according the last date and time entered
+	bys interview__key interview__id (date time) : keep if _n==_N
+
 	
 	// Change format
 	replace date = subinstr(date, "-", "/",.)
@@ -279,5 +254,5 @@ foreach file in `com_data' {
 	compress
 *-------- Save 
 
-save "$output\household.dta", replace
+save "$output\SAMPLERhousehold.dta", replace
 

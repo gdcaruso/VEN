@@ -15,44 +15,23 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-// Define rootpath according to user (silenced as this is done by main now)
-/*
- 	    * User 1: Trini
- 		global trini 0
-		
- 		* User 2: Julieta
- 		global juli   0
-		
- 		* User 3: Lautaro
- 		global lauta   1
-		
- 		* User 4: Malena
- 		global male   0
-			
- 		if $juli {
- 				global dopath "C:\Users\wb563583\GitHub\VEN"
- 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
- 		}
- 	    if $lauta {
-				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
- 		if $trini   {
- 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
- 		}
- 		if $male   {
- 				global dopath "C:\Users\wb550905\Github\VEN"
- 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
-		
-*Inputs
-		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-		global merged "$datapath\data_management\output\merged"
-		global pathaux "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do"
-*Outputs
-		global cleaned "$datapath\data_management\output\cleaned"
- */
+// Define rootpath according to user
+// set path of data (CORREGIR)
+global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+
+global dopath "C:\Users\wb563365\GitHub\VEN\"
+global merging "$dopath\data_management\management\1. merging"
+global harmonization "$dopath\data_management\management\2. harmonization"
+global povmeasure "$dopath\poverty_measurement\scripts"
+
+
+global encovisininpfilename "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
+global cleaned "$datapath\data_management\output\cleaned"
+global merged "$datapath\data_management\output\merged"
+global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+
+
 ********************************************************************************
 
 /*==============================================================================
@@ -152,13 +131,13 @@ run "$harmonization\ENCOVI harmonization\aux_do\cuantiles.do"
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 
 *Generate unique household identifier by strata
-use "$merged\household.dta", clear
+use "$merged\SAMPLERhousehold.dta", clear
 tempfile household_hhid
 bysort combined_id: gen hh_by_combined_id = _n
 save `household_hhid'
 
 * Open "output" database
-use "$merged\individual.dta", clear
+use "$merged\SAMPLERindividual.dta", clear
 merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
 * I drop those who do not collaborate in the survey
@@ -3110,46 +3089,7 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 			2=No 
 	*/
 	gen 	comida_trueque = s13q3==1 if (s13q3!=. & s13q3!=.a)
-
-/*(************************************************************************************************************************************************ 
-*----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
-************************************************************************************************************************************************)*/
-
-global antropo_ENCOVI
-
-* For children younger than 5 years old
-
-*** Was the child measured?
-	/*s14q1 Fue medido?
-			1=Si
-			2=No 
-	*/
-	gen 	medido = s14q1==1 if s6q5=<5 & (s14q1!=. & s14q1!=.a)
-
-*** Why wasn't the child measured?
-	/*s14q2 Por qué no fue medido?
-			1=No estaba en casa al momento de hacer la entrevista
-			2=Estaba enfermo
-			3=No está disponible
-			4=Otra razón 
-	*/
-	gen 	razon_nomedido = s14q2==1 if s14q1==2 & s6q5=<5 & (s14q2!=. & s14q2!=.a)
-
-*** Confirm child's reported age (in months)
-	/*s14q3 Confirmar la edad (en meses) reportada del niño
-			1=Si, es correcto
-			2=No, no es correcto
-	*/
-	gen 	confirma_edad = person_confirm==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
-	
-*** Was the child able to be alone in the measurement instrument?
-	/*s14q1 Fue capaz de permanecer solo en el instrumento de medición?
-			1=Si
-			2=No 
-	*/
-	gen 	solo_medicion = s14q14==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
-
-
+		
 /*(************************************************************************************************************************************************ 
 *---------------------------------------- XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES -------------------------------------
 ************************************************************************************************************************************************)*/
@@ -4112,7 +4052,7 @@ capture label drop nivel
 	gen `uno' = 1
 	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
 
-include "$harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
+include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 
 * RENTA IMPUTADA
 	/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
@@ -4188,10 +4128,10 @@ include "$harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 gen pondera=1
 * Cambiar con la verdadera variable de ponderadores cuando la tengamos
  
-include "$harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
+include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
 * El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
-include "$harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
+include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
 * Terminar de chequear nuestros labels!!
 
 
@@ -4226,8 +4166,11 @@ interview_month interview__id interview__key quest labor_status miembros relab s
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
+interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb //linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
-save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
+*save "$dataout\ENCOVI_2019.dta", replace
+*save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
+
+save "$cleaned/SAMPLERENCOVI_sinimputar", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

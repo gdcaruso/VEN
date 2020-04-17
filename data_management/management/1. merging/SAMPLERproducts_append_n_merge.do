@@ -19,39 +19,10 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user
+global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019"
 
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta  1
-//		
-//
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath ""
-// 		}
-// 	    if $lauta {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN\"
-//
-// 		}
-// 		if $trini   {
-// 				global rootpath ""
-// 		}
-//		
-// 		if $male   {
-// 				global rootpath ""
-// 		}
-//
-// // // set raw data path
-// global input "$datapath\data_management\input\latest"
-// global output "$datapath\data_management\output"
+global input "$datapath\data_management\input\latest"
+global output "$datapath\data_management\output\merged"
 
 ********************************************************************************
 
@@ -89,7 +60,8 @@ replace quest=3 if quest==. & quest!=1 & quest!=2
 
 //	Create a temporary db with surveys approved by HQ 
 
-bys quest interview__key interview__id (date time): keep if action[_N]==6 // Last condition:aprov. by HQ
+bys quest interview__key interview__id (date time): keep if action==3 // 3=Completed 
+bys quest interview__key interview__id (date time): keep if _n==_N //& approved by HQ (as last step)
 
 // check, log and delete duplicates
 duplicates tag interview__key interview__id quest, generate(dupli)
@@ -507,7 +479,7 @@ label values unidad_medida measure
 // also pick dates when data collection started
 
 preserve
-use "$output\household", replace
+use "$output\SAMPLERhousehold.dta", replace
 keep interview__key interview__id quest s12aq1*os s12a_star
 
 //date formt
@@ -549,7 +521,7 @@ drop s12aq1*_os
 
 
 // save the product-household dataset
-save "$output\product-hh.dta", replace
+save "$output\SAMPLERproduct-hh.dta", replace
 
 
 

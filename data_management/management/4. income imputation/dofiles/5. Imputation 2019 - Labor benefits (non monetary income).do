@@ -8,7 +8,7 @@ Survey:			ENCOVI
 Vintage:		
 Project:	
 ---------------------------------------------------------------------------
-Authors:			
+Authors:			Malena Acuña, Julieta Ladronis, Trinidad Saavedra
 Dependencies:		The World Bank
 Creation Date:		March, 2020
 Modification Date:  
@@ -17,37 +17,46 @@ Output:
 Note: Income imputation - Identification missing values
 =============================================================================*/
 ********************************************************************************
+clear all
+
+// Define rootpath according to user (silenced as this is done by main now)
+/*
 	    * User 1: Trini
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
-				global path "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-				global pathoutexceloutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"
+				global dopath "C:\Users\wb563583\GitHub\VEN"
+				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
 	    if $lauta {
 
 		}
 		if $trini   {
-				global path "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
 		}
 		
 		if $male   {
-		        global path "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-
+		        global dopath "C:\Users\wb550905\GitHub\VEN"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
+
+	global forimp "$datapath\data_management\output\for imputation"
+	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
+*/
+
+********************************************************************************
 
 ///*** OPEN DATABASE & PATHS ***///
 
-	use "$path\ENCOVI_forimputation_2019.dta", clear
+use "$forimp\ENCOVI_forimputation_2019.dta", clear
 
 ///*** CHECKING MISSING VALUES TO BE IMPUTED ***///
 	 * How many we are going to impute
@@ -174,14 +183,14 @@ Note: Income imputation - Identification missing values
 	collapse (mean) bene, by(interview__key interview__id quest com) // La imputacion va a ser el promedio de las bases imputadas
 	* Chequear que la cantidad de observaciones sea la misma que la variable original
 	rename bene bene_imp1
-	save "$path\VEN_bene_imp1.dta", replace
+	save "$forimp\VEN_bene_imp1.dta", replace
 
 ********************************************************************************
 *** Analyzing imputed data
 ********************************************************************************
-use "$path\ENCOVI_forimputation_2019.dta", clear
+use "$forimp\ENCOVI_forimputation_2019.dta", clear
 capture drop _merge
-merge 1:1 interview__key interview__id quest com using "$path\VEN_bene_imp1.dta"
+merge 1:1 interview__key interview__id quest com using "$forimp\VEN_bene_imp1.dta"
 
 
 foreach x of varlist bene {

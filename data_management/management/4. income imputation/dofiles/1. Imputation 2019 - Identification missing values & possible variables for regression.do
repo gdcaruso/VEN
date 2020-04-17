@@ -20,37 +20,42 @@ Note:
 ********************************************************************************
 clear all 
 
+// Define rootpath according to user (silenced as this is done by main now)
+/*
 		* User 1: Trini
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
-				global pathdata "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
-				global pathout "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-				global pathoutexcel "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\output"
-				global pathdo "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\dofiles"
-		}
+				global dopath "C:\Users\wb563583\GitHub\VEN"
+				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+			}
 	    if $lauta {
 		}
 		if $trini   {
 		}
 		if $male   {
-				global pathdata "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
-				global pathout "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"
-				global pathoutexcel "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\output"
-				global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\dofiles"
-		}
+				global dopath "C:\Users\wb550905\GitHub\VEN"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+					}
 
-		
+*Inputs
+	global impdos "$dopath\data_management\management\4. income imputation\dofiles"
+	global cleaned "$datapath\data_management\output\cleaned"
+*Outputs
+	global forimp "$datapath\data_management\output\for imputation"
+	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
+*/
+********************************************************************************
 
 ****************************************************************
 *** IDENTIFICATION OF MISSING VALUES 
@@ -58,9 +63,9 @@ clear all
  
 program drop _all
 
-qui: do "$pathdo\outliers.do" 
-*use "$pathdata\ENCOVI_2019_Asamblea Nacional.dta", clear
-use "$pathdata\ENCOVI_2019_Sin imputar (con precios implicitos).dta", clear 
+qui: do "$impdos\outliers.do" 
+*use "$cleaned\ENCOVI_2019_Asamblea Nacional.dta", clear
+use "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", clear 
 
 
 ///*** DESCRIPTION INCOME ***///
@@ -755,7 +760,7 @@ display "`varlist38'"
 	* Ingreso no laboral
 	* Jubilación/Pensión
 	
-save "$pathout\ENCOVI_forimputation_2019.dta", replace
+save "$forimp\ENCOVI_forimputation_2019.dta", replace
 
 
 *****************************************************************

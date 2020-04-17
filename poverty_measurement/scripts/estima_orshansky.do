@@ -111,7 +111,6 @@ save `reference'
 		
 		* Deflactor
 
-//use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
 
 use "$inflation", clear
 			
@@ -173,12 +172,6 @@ di `deflactor3'
 di `deflactor4' //falta!
 
 
-/*(************************************************************************************************************************************************* 
-* 1: collect data of spending in feb2020
-*************************************************************************************************************************************************)*/
-
-// there are two data sources of spending. 1) Household-individual section of survey and 2) Consumption section. Also, there are two types of spending: a) food b) non-food. So we aggregate each type of consumption in each section of the survey
-
 
 /*(************************************************************************************************************************************************* 
 * // Consumption section  (long shape)
@@ -222,63 +215,6 @@ drop if current_good !=1
 // keep if type_good == 1
 
 
-// d) define date of purchases
-// problem: dates of purchase is different among goods
-
-/* FOR FOOD and alcohol&smoke
-
-
-. tab type_good fecha
-
-              |   8. ¿Cuando fue la última vez que compró  .... para
-              |                       su hogar?
-    type_good |      Ayer  Últimos 7  Últimos 1  Más de 15      Nunca |     Total
---------------+-------------------------------------------------------+----------
-         food |     2,190     14,768      4,086      4,895        552 |    26,491 
-alcohol&smoke |        47         68         12          6          1 |       134 
---------------+-------------------------------------------------------+----------
-        Total |     2,237     14,836      4,098      4,901        553 |    26,625 
-
-//FOR bath&cleaning 15 days
-// FOR clothes 3 months
-// FOR eatingout 7 days
-// FOR entertainment last month	
-
-// FOOD AND ALCOHOL
-
-Solution:
-a) we reimputate month of purchase to january if he or she answered more that 15 days and the date of the survey is earlier that Feb 14th.
-b) we reimputate month of purchase to jan if he/she answered that they bought 7 days before and date is earlier than 7th
-
-
-           |   8. ¿Cuando fue la
-           |    última vez que
-date_consu | compró  .... para su
-mption_sur |        hogar?
-       vey | Últimos 1  Más de 15 |     Total
------------+----------------------+----------
-    1Feb20 |        63         45 |       108 
-    2Feb20 |        36         70 |       106 
-    3Feb20 |       117        193 |       310 
-    4Feb20 |       150        204 |       354 
-    5Feb20 |       192        174 |       366 
-    6Feb20 |       171        162 |       333 
-    7Feb20 |       208        204 |       412 
-    8Feb20 |       159        179 |       338 
-    9Feb20 |        53         75 |       128 
-   10Feb20 |       256        272 |       528 
-   11Feb20 |       173        250 |       423 
-   12Feb20 |       293        259 |       552 
-   13Feb20 |       176        278 |       454 
-   14Feb20 |       170        213 |       383 
-   15Feb20 |       156        176 |       332 
-   16Feb20 |        22         34 |        56 
-   17Feb20 |       122        183 |       305 
-   18Feb20 |       136        158 |       294 
-   19Feb20 |       248        311 |       559 
-... and keeps going
-*/
-
 
 //homogenize currencies
 // we simplify the analysis assuming that any purchase of the consumption interview of Feb is done within Feb, and each purchase of a survey of march is done within march
@@ -301,37 +237,7 @@ foreach mes in `month_levels'{
 	}
 replace gasto_feb20 = round(gasto_feb20)
 
-// just to test the previous loop, 13th april its working well
-// gen gasto_feb20_b=.
-// replace gasto_feb20_b = gasto if moneda == 1 & month ==2
-// replace gasto_feb20_b = gasto * `tc2mes2' if moneda == 2  & month ==2
-// replace gasto_feb20_b = gasto * `tc3mes2' if moneda == 3  & month ==2
-// replace gasto_feb20_b = gasto * `tc4mes2' if moneda == 4 & month ==2
-//
-// // march (alredy food only)
-// replace gasto_feb20_b = gasto*`deflactor3' if moneda == 1 & month ==3
-// replace gasto_feb20_b = gasto*`deflactor3' * `tc2mes3' if moneda == 2 & month ==3
-// replace gasto_feb20_b = gasto*`deflactor3' * `tc3mes3'  if moneda == 3 & month ==3
-// replace gasto_feb20_b = gasto*`deflactor3' * `tc4mes3' if moneda == 4 & month ==3
-
-
-
-
 /*
-
-// e) define frequency of purchases
-// problem:
-we dont know how recurrent are the purchased of different goods
-FOR FOOD and alcohol&smoke
-              |   8. ¿Cuando fue la última vez que compró  .... para
-              |                       su hogar?
-    type_good |      Ayer  Últimos 7  Últimos 1  Más de 15      Nunca |     Total
---------------+-------------------------------------------------------+----------
-         food |    10,751     80,381     22,814     28,394      2,426 |   144,766 
-alcohol&smoke |       264        374         36         46          1 |       721 
---------------+-------------------------------------------------------+----------
-        Total |    11,015     80,755     22,850     28,440      2,427 |   145,487 
-
 FOR bath&cleaning 15 days
 FOR clothes 3 months
 FOR eatingout 7 days
@@ -920,35 +826,11 @@ xtile ors_quant = orshansky, nq(100)
 
 sort orshansky
 gen obs = _n
-twoway line orshansky obs if ors_quant<100 
+// twoway line orshansky obs if ors_quant<100 
 
 xtile exp_quant = exp, nq(100)
 
+//  saves orshansky
 sum orshansky, detail
 global orsh = r(p50)
 
-drop if ors_quant>99
-sum orsh, detail
-
-
-
-// TO ANALYSE COMPOSITION OF EXPENDITURE IN THE THE ENVIROMENT OF ORSHANSNKY
-// keep if orshansky <$orsh*1.30
-// keep if orshansky >$orsh*0.7
-//
-// local values 1 3 4 7 8 9 10 11 12 
-//
-// foreach i in `values'{
-// 	egen total`i' = total(gasto_mensual`i')
-// 	}
-//
-
-
-// TO COMPARE EXPENDITURE AND INCOME IN THE POB OF REFERENCE
-// twoway scatter food ingreso if food< 10000000, msize(tiny) ///
-// || lfit food ingreso if food<10000000 ///
-// || line food food if food<10000000, sort
-//
-// gen flag = food > ingreso
-// tab flag
-//

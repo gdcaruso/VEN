@@ -18,35 +18,11 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user
-
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
-// 		}
-// 	    if $lauta {"C:\Users\wb563365\GitHub\VEN\"
-// 		}
-// 		if $trini   {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-// 		}
-// 		if $male   {
-// 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
+global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 
 // set raw data path
-// global input "$datapath\data_management\input\latest"
-// global output "$datapath\data_management\output\merged"
+global input "$datapath\data_management\input\latest"
+global output "$datapath\data_management\output\merged"
 
 ********************************************************************************
 
@@ -80,9 +56,10 @@ replace quest=2 if quest==. & quest!=1
 append using "$pixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
-// Keep aproved interviews by HQ
-bys quest interview__key interview__id (date time): keep if action[_N]==6 // approved by HQ (as last step)
+	bys quest interview__key interview__id (date time): keep if action==3 // 3=Completed & approved by HQ (as last step)
 
+// To identify unique interviews according the last date and time entered
+bys interview__key interview__id (date time) : keep if _n==_N
 
 //check, log and delete duplicates
 duplicates tag interview__key interview__id quest, generate(dupli)
@@ -90,7 +67,7 @@ duplicates tag interview__key interview__id quest, generate(dupli)
 //drop duplicates, (but saved in a log)
 preserve
 keep if dupli >= 1
-save "$output\duplicates-ind.dta", replace
+save "$output\SAMPLERduplicates-ind.dta", replace
 restore	
 drop if dupli >= 1
 
@@ -202,4 +179,4 @@ foreach dtafile in $dtalist{
 
 compress
 	
-save "$output\individual.dta", replace
+save "$output\SAMPLERindividual.dta", replace

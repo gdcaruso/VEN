@@ -1,7 +1,7 @@
 ********************************************************************************
 	* DROP VARIABLES 
 ********************************************************************************
-use "$datapath/ENCOVI_2019_postpobreza.dta", replace
+use "$datapath\ENCOVI_2019_postpobreza.dta", replace
 	***********************
 	* FROM SURVEY
 	***********************
@@ -198,4 +198,4 @@ drop quest informant_emig informant_shock centropo nombcp segmento peso_segmento
 
 compress
 
-save "$datapath/varcleaned_ENCOVI_2019_postpobreza.dta", replace
+save "$datapath\varcleaned_ENCOVI_2019_postpobreza.dta", replace

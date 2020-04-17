@@ -65,7 +65,7 @@ set more off
 * 1: basket value by month (at national level)
 *************************************************************************************************************************************************)*/
 
-// import prices (REPLACE WITH IMPLICIT PRICES!!!!!!!)
+// import prices
 use "$output/precios_implicitos.dta", replace
 
 

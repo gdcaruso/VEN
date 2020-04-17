@@ -194,7 +194,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $ingreso_ENCOVI $from_cedlas
 
 *---- Drop de las que teniamos dudas
-drop quest informant_emig informant_shock centropo nombcp segmento peso_segmento combined_id tipo_muestra /*gps* */ id_str statut sector_urb 
+drop quest informant_emig informant_shock centropo nombcp segmento peso_segmento combined_id tipo_muestra /*gps* */ id_str statut sector_urb d_renta_imp_b
 
 compress
 

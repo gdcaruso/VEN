@@ -38,7 +38,7 @@ in the exchange rates
 			
 		if $juli {
 				global rootpath "C:\Users\wb563583\GitHub\VEN\data_management\management\1. merging\exchange rates" 
-				global dataout "$rootpath\"
+				global dataout "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\input"
 				
 		}
 	    if $lauta {
@@ -441,7 +441,7 @@ append using `exch5', force
 *--- Save exchange rates dataset
 *********************************************************************************
 	 
-	save "$rootpath\exchenge_rate_sum", replace
+	save "$dataout\exchenge_rate_sum", replace
 
 *********************************************************************************
 *--- Generate dataset to merge with prices
@@ -466,4 +466,4 @@ append using `exch5', force
 *--- Save exchange rates dataset to merge with prices
 *********************************************************************************
 	
-	save "$rootpath\exchenge_rate_price", replace
+	save "$dataout\exchenge_rate_price", replace

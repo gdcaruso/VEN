@@ -308,7 +308,7 @@ codebook ingfam
 * // HH section  (wide shape) 
 *********************************************************************************************************************)*/
 // import other expenditure data
-use "$cleaned/$encovifilename", replace
+use "$cleaned/ENCOVI_2019_pre pobreza.dta", replace
 drop ipcf
 drop _merge
 merge m:1 interview__id interview__key quest using `reference'

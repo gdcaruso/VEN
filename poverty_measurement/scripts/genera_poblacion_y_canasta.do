@@ -74,7 +74,7 @@ global calreq = 2000
 *************************************************************************************************************************************************)*/
 
 // merges with income data
-use "$cleaned/$encovifilename", replace
+use "$cleaned/ENCOVI_2019_pre pobreza.dta", replace
 keep if interview_month==2
 //bys interview__id interview__key quest: egen miembros = max(com)
 

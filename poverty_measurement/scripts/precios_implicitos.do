@@ -100,11 +100,6 @@ foreach i of local monedas {
 1: Data loading
 ==============================================================================*/
 
-*************************************************************************************************************
-*** COMPLETAR UNIDADES MAL IMPUTADAS (KG x GR o viceversa)
-*** COMPLETAR TAMAñOS
-*** COMPLETAR BIENES NO ESTANDARIZADOS
-****************************************************************************************************************
 
 // load food data
 use  "$merged/product-hh.dta", clear

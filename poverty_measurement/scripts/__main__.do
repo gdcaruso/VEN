@@ -73,8 +73,6 @@ run dos to estimate poverty
 do "$povmeasure/genera_poblacion_y_canasta.do"
 //calculate prices (implicit)
 do "$povmeasure/precios_implicitos.do"
-// do "$povmeasure/precios_implicitos_nov_to_march.do"
-// do "$povmeasure/genera_inflacion_canastas.do"
 
 // //generate cost of basket
 do "$povmeasure/genera_costo_canasta.do"

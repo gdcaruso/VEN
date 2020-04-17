@@ -233,9 +233,6 @@ save "$output/pob_referencia.dta", replace
 * 1: generates basket
 *************************************************************************************************************************************************)*/
 
-// chilenean methodolody does not provide details on how to summaries each basket from the population of reference into a representative basket. We choose then to follow (cuasi) Colombian approach.
-
-
 // recover product dimension
 merge 1:m interview__id interview__key quest using `basketnoout'
 sort quant _merge

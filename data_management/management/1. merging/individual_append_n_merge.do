@@ -81,10 +81,8 @@ append using "$pixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
 // Keep aproved interviews by HQ
-bys quest interview__key interview__id (date time): keep if action[_N]==6 // 3=Completed & approved by HQ (as last step)
+bys quest interview__key interview__id (date time): keep if action[_N]==6 // approved by HQ (as last step)
 
-// To identify unique interviews according the last date and time entered
-bys interview__key interview__id (date time) : keep if _n==_N
 
 //check, log and delete duplicates
 duplicates tag interview__key interview__id quest, generate(dupli)

@@ -795,11 +795,11 @@ save "$forimp\ENCOVI_forimputation_2019.dta", replace
 	}
 	local j=`j'+1
 	}
-	matrix colnames a="Labor income" "Pensions"
+	*matrix colnames a="Labor income" "Pensions"
 	matrix list a
 	
 	putexcel set "$pathoutexcel\VEN_income_imputation_2019.xlsx", sheet("profile_missing_values") modify
-	putexcel B2=matrix(a), colnames
+	putexcel B2=matrix(a) //, colnames
 	
 	
 /* Lo dejo muteado - solo aquí para referencia

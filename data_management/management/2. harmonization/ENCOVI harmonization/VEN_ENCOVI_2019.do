@@ -4150,11 +4150,12 @@ include "$pathaux\do_file_1_variables_MA.do"
 			}
 		}
 		
-		gen d_renta_imp_en = .
-		replace d_renta_imp_en = 1 if renta_imp_en>=0 // Dummy for other calculations
 		
 		* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated   
 		gen renta_imp_b = itf_sin_ri*0.1
+		
+		gen d_renta_imp_b = .
+		replace d_renta_imp_b = 1 if renta_imp_en==. & propieta_no_paga == 1 // Dummy for other calculations
 
 		* twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny)
 		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //complete with 10% in cases where no guess is provided by hh.

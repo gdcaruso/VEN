@@ -15,6 +15,9 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
+
+// Define rootpath according to user (silenced as this is done by main now)
+
 	    * User 1: Trini
 		global trini 0
 		
@@ -71,44 +74,9 @@ local vr       "01"     // version renta
 								1: Data preparation: First-Order Variables
 ==================================================================================================================================================*/
 
-	*** 0.0 To take everything to bolívares of Feb 2020 (month with greatest sample) ***
-		
-		* Deflactor
-			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
-			
-			use "$dataout\InflacionVerdadera_26-3-20.dta", clear
-			
-			forvalues j = 11(1)12 {
-				sum indice if mes==`j' & ano==2019
-				local indice`j' = r(mean) 			
-				}
-			forvalues j = 1(1)3 {
-				sum indice if mes==`j' & ano==2020
-				display r(mean)
-				local indice`j' = r(mean)				
-				}
-			local deflactor11 `indice2'/`indice11'
-			local deflactor12 `indice2'/`indice12'
-			local deflactor1 `indice2'/`indice1'
-			local deflactor2 `indice2'/`indice2'
-			local deflactor3 `indice2'/`indice3'
-			
-		* Exchange Rates / Tipo de cambio
-			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
-			
-			local monedas "1 2 3 4" // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
-			local meses "1 2 3 11 12" // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
-			
-			use "$dataout\exchenge_rate_price.dta", clear
-			
-			destring mes, replace
-			foreach i of local monedas {
-				foreach j of local meses {
-					sum mean_moneda	if moneda==`i' & mes==`j'
-					local tc`i'mes`j' = r(mean)
-				}
-			}
-			
+* The other do-file, with all the ENCOVI data (not SEDLAC harmonization) imports exchange rates and inflation at first, 
+* this one won't do it as we will merge all the income agreggates from the other, more complete, database
+
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 

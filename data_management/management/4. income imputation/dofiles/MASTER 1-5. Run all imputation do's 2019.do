@@ -1,49 +1,73 @@
-* Run 1-5 imputation do's 2019
+/*===========================================================================
+Puropose: Run 1-5 imputation do's for ENCOVI 2019
+===========================================================================
+Country name:	Venezuela
+Year:			2019
+Survey:			ENCOVI
+Vintage:		
+Project:	
+---------------------------------------------------------------------------
+Authors:			Malena Acuña
+
+Dependencies:		The World Bank
+Creation Date:		17th April, 2020
+Modification Date:  
+Output:			
+
+Note: 
+=============================================================================*/
 ********************************************************************************
+
+// Define rootpath according to user (silenced as this is done by main now)
+/*
 	    * User 1: Trini
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
-				global pathcorto "C:\Users\wb563583\Github\VEN\data_management"
-				global pathaux "C:\Users\wb563583\GitHub\VEN\data_management\management\2. harmonization\ENCOVI harmonization\aux_do"
-				global pathrun "C:\Users\wb563583\Github\VEN\data_management\management\4. income imputation\dofiles"
-				global dataout "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
-				global path "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"		
+				global dopath "C:\Users\wb563583\GitHub\VEN"
+				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
 	    if $lauta {
 
 		}
-		if $trini   {
+		if $trini {
 		}
 		
 		if $male   {
-		        global pathcorto "C:\Users\wb550905\Github\VEN\data_management"
-				global pathaux "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization\aux_do"
-				global pathrun "C:\Users\wb550905\Github\VEN\data_management\management\4. income imputation\dofiles"
-				global dataout "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\cleaned"
-				global path "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\output\for imputation"		
-		}
+				global dopath "C:\Users\wb550905\GitHub\VEN"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+			}
 
-
+*Inputs
+	global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+	global exrate 	"$datapath\data_management\input\exchenge_rate_price.dta"
+	global pathaux 	"$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do"
+	global impdos 	"$dopath\data_management\management\4. income imputation\dofiles"
+	global forimp 	"$datapath\data_management\output\for imputation"
+*Output
+	global cleaned "$datapath\data_management\output\cleaned"
+*/
+********************************************************************************
+	
 ***********************************
 //*** Running all imputations ***//
 **********************************
 
-run "$pathrun\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
+run "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
-run "$pathrun\2. Imputation 2019 - Monetary labor income.do"
-run "$pathrun\3. Imputation 2019 - Pensions.do"
-run "$pathrun\4. Imputation 2019 - Non Labor Income (except pensions).do"
-run "$pathrun\5. Imputation 2019 - Labor benefits (non monetary income).do"
+run "$impdos\2. Imputation 2019 - Monetary labor income.do"
+run "$impdos\3. Imputation 2019 - Pensions.do"
+run "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
+run "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
 
 
 **************************************
@@ -55,7 +79,7 @@ run "$pathrun\5. Imputation 2019 - Labor benefits (non monetary income).do"
 		* Deflactor
 			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
 			
-			use "$pathcorto\output\cleaned\inflacion\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
+			use "$inflation", clear
 			*use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
 
 			
@@ -83,7 +107,7 @@ run "$pathrun\5. Imputation 2019 - Labor benefits (non monetary income).do"
 			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses 1 2 3 4 10 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march, 4=april
 			
-			use "$pathcorto\management\1. merging\exchange rates\exchenge_rate_price.dta", clear
+			use "$exrate", clear
 			
 		// if we consider that incomes are earned one month previous to data collection use this			
 					destring mes, replace
@@ -105,23 +129,23 @@ run "$pathrun\5. Imputation 2019 - Labor benefits (non monetary income).do"
 //*** Merging ENCOVI 2019 database with imputed incomes ***//
 ************************************************************
 
-use "$path\ENCOVI_forimputation_2019.dta", clear
+use "$forimp\ENCOVI_forimputation_2019.dta", clear
 
 	* Mergeamos ila_m_imp1
 	capture drop _merge
-	merge 1:1 interview__key interview__id quest com using "$path\VEN_ila_m_imp1.dta" // da lo mismo usando id com
+	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_ila_m_imp1.dta" // da lo mismo usando id com
 
 	* Mergeamos jubpen_imp1
 	capture drop _merge
-	merge 1:1 interview__key interview__id quest com using "$path\VEN_jubpen_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_jubpen_imp1.dta"
 
 	* Mergeamos inlanojub_imp1
 	capture drop _merge
-	merge 1:1 interview__key interview__id quest com using "$path\VEN_inlanojub_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_inlanojub_imp1.dta"
 
 	* Mergeamos bene_imp1
 	capture drop _merge
-	merge 1:1 interview__key interview__id quest com using "$path\VEN_bene_imp1.dta"
+	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_bene_imp1.dta"
 
 	
 ****************************************************
@@ -225,7 +249,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	cap gen hstrt= hstr_ppal 
 		replace hstrt = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
 
-	include "$pathcorto\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
+	include "$pathaux\do_file_1_variables_MA.do"
 	
 	************************************
 	/* NUESTRO DOFILE: RENTA IMPUTADA */
@@ -279,7 +303,7 @@ use "$path\ENCOVI_forimputation_2019.dta", clear
 	clonevar relacion = relacion_comp
 	clonevar nivel = nivel_educ
 	
-	include "$pathcorto\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
+	include "$pathaux\do_file_2_variables.do"
 	
 	* El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
@@ -305,5 +329,4 @@ drop inlanojub_imp1
 //*** SAVING IMPUTED DATABASE: HURRAY!!!!!!!!!!***//
 ****************************************************
 
-save "$dataout\ENCOVI_2019.dta", replace
-	
+save "$cleaned\ENCOVI_2019_pre pobreza.dta", replace

@@ -15,44 +15,44 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-// Define rootpath according to user
-
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global dopath "C:\Users\wb563583\GitHub\VEN"
-// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-// 	    if $lauta {
-// 		global dopath "C:\Users\wb563365\GitHub\VEN"
-// 		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-// 		if $trini   {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-// 		}
-// 		if $male   {
-// 				global dopath "C:\Users\wb550905\Github\VEN"
-// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-//
-//		
-// Set paths
-//
-// global encovisinimputarfilename "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
-// global cleaned "$datapath\data_management\output\cleaned"
-// global merged "$datapath\data_management\output\merged"
-// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-
+// Define rootpath according to user (silenced as this is done by main now)
+/*
+ 	    * User 1: Trini
+ 		global trini 0
+		
+ 		* User 2: Julieta
+ 		global juli   0
+		
+ 		* User 3: Lautaro
+ 		global lauta   1
+		
+ 		* User 4: Malena
+ 		global male   0
+			
+ 		if $juli {
+ 				global dopath "C:\Users\wb563583\GitHub\VEN"
+ 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 		}
+ 	    if $lauta {
+				global dopath "C:\Users\wb563365\GitHub\VEN"
+				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}
+ 		if $trini   {
+ 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+ 		}
+ 		if $male   {
+ 				global dopath "C:\Users\wb550905\Github\VEN"
+ 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}
+		
+*Inputs
+		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+		global merged "$datapath\data_management\output\merged"
+		global pathaux "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do"
+*Outputs
+		global cleaned "$datapath\data_management\output\cleaned"
+ */
 ********************************************************************************
 
 /*==============================================================================
@@ -4073,7 +4073,7 @@ capture label drop nivel
 	gen `uno' = 1
 	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
 
-include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
+include "$harmonization\ENCOVI harmonization\aux_do\do_file_1_variables_MA.do"
 
 * RENTA IMPUTADA
 	/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
@@ -4149,10 +4149,10 @@ include "$dopath\data_management\management\2. harmonization\ENCOVI harmonizatio
 gen pondera=1
 * Cambiar con la verdadera variable de ponderadores cuando la tengamos
  
-include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
+include "$harmonization\ENCOVI harmonization\aux_do\do_file_2_variables.do"
 * El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
-include "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
+include "$harmonization\ENCOVI harmonization\aux_do\Labels_ENCOVI.do"
 * Terminar de chequear nuestros labels!!
 
 
@@ -4190,8 +4190,5 @@ keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI
 interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
-*save "$dataout\ENCOVI_2019.dta", replace
-*save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
-
-save "$cleaned/$encovisininpfilename", replace
+save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

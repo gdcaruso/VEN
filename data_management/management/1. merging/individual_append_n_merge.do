@@ -18,8 +18,8 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user
-
+// // Define rootpath according to user
+//
 // 	    * User 1: Trini
 // 		global trini 0
 //		
@@ -33,18 +33,22 @@ Note:
 // 		global male   0
 //			
 // 		if $juli {
-// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 // 		}
-// 	    if $lauta {"C:\Users\wb563365\GitHub\VEN\"
+// 	    if $lauta {
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 // 		}
 // 		if $trini   {
 // 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 // 		}
 // 		if $male   {
-// 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-
-// set raw data path
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// }		
+//
+// // set raw data path
 // global input "$datapath\data_management\input\latest"
 // global output "$datapath\data_management\output\merged"
 
@@ -83,9 +87,12 @@ replace quest=3 if quest==. & quest!=1 & quest!=2
 // Keep aproved interviews by HQ
 bys quest interview__key interview__id (date time): keep if action[_N]==6 // approved by HQ (as last step)
 
+// To identify unique interviews according the last date and time entered
+bys interview__key interview__id (date time) : keep if _n==_N
 
 //check, log and delete duplicates
 duplicates tag interview__key interview__id quest, generate(dupli)
+
 
 //drop duplicates, (but saved in a log)
 preserve
@@ -132,19 +139,7 @@ merge m:1 interview__id interview__key quest using `approved_surveys'
 keep if _merge==3
 drop _merge
 
-// Merge other individual level datasets to the main (Miembro.dta)
-// But previously, we have to change sub-indiviudal level datasets to individual level
-// by reshaping datasets to a wide shape.
-// example:
-// pre-reshape subindividual level dataset
-// individual | concept | amount
-// 1          | toast   | 10
-// 1          | butter  | 12
 
-// after-reshape individual level dataset
-// individual | amount_toast | amount_butter |
-// 1          | 10           | 20
-// now we can merge with other individual level datasets
 
 // list subindividual level datasets
 global dtalist s7q10 s9q19_monto s9q20_monto s9q21_monto s9q22_monto s9q28_monto s9q29_monto

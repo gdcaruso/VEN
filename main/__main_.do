@@ -69,7 +69,7 @@ global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 /*==============================================================================
  merging data
  ==============================================================================*/
-///*
+/*
 *set path of data
 global merging "$dopath\data_management\management\1. merging"
 global input "$datapath\data_management\input\latest"
@@ -77,12 +77,12 @@ global output "$datapath\data_management\output\merged"
 
 *run merge
 do "$merging/__main__merge.do"
-//*/
+*/
 
 /*==============================================================================
 hh-individual database and imputation
 ==============================================================================*/
-
+///*
 //set path of data
 
 global harmonization "$dopath\data_management\management\2. harmonization"
@@ -92,18 +92,24 @@ global pathaux "$harmonization\ENCOVI harmonization\aux_do"
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 
 
+//run ENCOVI harmonization
+do "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
+
 
 *Specific for imputation
 global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
 
 
-
+//run ENCOVI imputation
+do "$dopath/MASTER 1-5. Run all imputation do's 2019.do"
+//*/
 
 /*==============================================================================
 poverty estimation
 ==============================================================================*/
 
+/*
 // set path of data
 global povmeasure "$dopath\poverty_measurement\scripts"
 global input "$datapath\poverty_measurement\input"
@@ -112,3 +118,8 @@ global output "$datapath\poverty_measurement\output"
 //run poverty estimation
 do "$povmeasure/__main__.do"
 
+//run cleaning of variables
+run "$povmeasure/final_variable_selection.do"
+
+
+*/

@@ -34,18 +34,28 @@ Note:
 // 		global male   0
 //			
 // 		if $juli {
-// 				global rootpath ""
+// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
 // 		}
-//  	    if $lauta {
-//  				global rootpath "C:\Users\wb563365\GitHub\VEN"
-//  		}
+// 	    if $lauta {
+// 		global dopath "C:\Users\wb563365\GitHub\VEN"
+// 		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global rootpath "C:\Users\wb550905\GitHub\VEN"
+// 		}
+//
 // //
-// // set raw data path
-// global cleaned "$rootpath\data_management\output\cleaned"
-// global merged "$rootpath\data_management\output\merged"
-// global input "$rootpath/poverty_measurement/input"
-// global output "$rootpath\poverty_measurement\output"
-//global encovifilename "ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos_IMPUTADA.dta"
+// // set path of data
+// global encovifilename "ENCOVI_2019.dta"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global merged "$datapath\data_management\output\merged"
+// global input "$datapath\poverty_measurement\input"
+// global output "$datapath\poverty_measurement\output"
+// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 ********************************************************************************
 
 
@@ -142,6 +152,7 @@ rename (Energia_kcal_m Proteina_m) (cal prot)
 gen cal_intake = (((cantidad_h*cal)/100))
 gen prot_intake = (((cantidad_h*prot)/100))
 
+
 keep bien cantidad_h cal_intake prot_intake interview__key interview__id quest ipcf miembros quant entidad cal prot
 tempfile basketnoout
 save `basketnoout'
@@ -149,7 +160,11 @@ save `basketnoout'
 collapse (sum) cal_intake prot_intake, by (interview__key interview__id quest ipcf miembros quant entidad)
 rename (cal_intake prot_intake) (cal_intake_hh prot_intake_hh)
 gen cal_intake_pc = cal_intake_hh/miembros
-
+gen overcal = cal_intake_pc>$calreq
+preserve
+keep overcal cal_intake_pc interview__id interview__key quest
+save "$output/pob_cal_intake.dta", replace
+restore
 
 /*(************************************************************************************************************************************************* 
 * 1: sets population of reference

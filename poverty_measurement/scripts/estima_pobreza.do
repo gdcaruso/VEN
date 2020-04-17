@@ -19,37 +19,41 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// // Define rootpath according to user
-//
 // 	    * User 1: Trini
 // 		global trini 0
 //		
 // 		* User 2: Julieta
 // 		global juli   0
 //		
-//		
 // 		* User 3: Lautaro
 // 		global lauta   1
-//		
 //		
 // 		* User 4: Malena
 // 		global male   0
 //			
 // 		if $juli {
-// 				global rootpath ""
+// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
 // 		}
-//
 // 	    if $lauta {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 		global dopath "C:\Users\wb563365\GitHub\VEN"
+// 		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global rootpath "C:\Users\wb550905\GitHub\VEN"
 // 		}
 //
-// // set raw data path
-// global cleaned "$rootpath\data_management\output\cleaned"
-// global merged "$rootpath\data_management\output\merged"
-// global input  "$rootpath\poverty_measurement\input"
-// global output "$rootpath\poverty_measurement\output"
-//
-// global orsh=1.7
+// //
+// // set path of data
+// global encovifilename "ENCOVI_2019.dta"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global merged "$datapath\data_management\output\merged"
+// global input "$datapath\poverty_measurement\input"
+// global output "$datapath\poverty_measurement\output"
+// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 
 ********************************************************************************
 
@@ -76,8 +80,6 @@ global costodiario = costo_canasta[1]
 di $costodiario
 // import harmonized hh-individual data with incomes
 use "$cleaned/$encovifilename" , replace
-ds
-local vars = r(varlist)
 
 // gen new lines
 gen le_new = $costodiario * 30.42
@@ -157,6 +159,5 @@ gen ipc11 = 3558.84
 gen ppp11 = 2.92 / 100000 //bol. fuertes/ dolarppp * bol.sob / bol.fuerte
 gen pobre = ipcf<lp_moderada
 
-keep `varlist' lp_extrema lp_moderada pobre ipc ipc11 ppp11
-
+drop  lp19 lp32 lp55 lp_ofi le_ofi extremo_new extremo_ofi pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi ext_10off ext_20off ext_50off ext_75off pob_??off
 save "$output/VEN_2019_ENCOVI_v01_M_v01_A_FULL-03_all.dta", replace

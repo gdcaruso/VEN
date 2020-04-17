@@ -53,7 +53,7 @@ Note:
 *********************************************************************************
 *--------------- 1T 2019		
 *--------------- Set the dates of the exchange rate as a local 
-* These are the names of the excel spreadsheet which contain daily data for each trimester	
+/* These are the names of the excel spreadsheet which contain daily data for each trimester	
 	local fechas_T1_2019 30092019 27092019 26092019 25092019 24092019 23092019 ///
 	20092019 19092019 18092019 17092019 13092019 12092019 11092019 10092019 09092019 ///
 	06092019 05092019 04092019 03092019 02092019 30082019 29082019 28082019 27082019 26082019 ///
@@ -165,7 +165,7 @@ Note:
 
 	// Save as temporal file
 	save `exch2', replace
-	clear
+	clear */
 *--------------- 3T 2019		
 *--------------- Set the dates of the exchange rate as a local 
 * These are the names of the excel spreadsheet which contain daily data for each trimester	
@@ -173,7 +173,7 @@ Note:
 	20092019 19092019 18092019 17092019 13092019 12092019 11092019 10092019 09092019 ///
 	06092019 05092019 04092019 03092019 02092019 30082019 29082019 28082019 27082019 26082019 ///
 	23082019 22082019 21082019 20082019 16082019 15082019 14082019 13082019 12082019 09082019 ///
-	08082019 07082019 06082019 05082019 
+	08082019 07082019 06082019 05082019 02082019 01082019 
 	
 	foreach k of local fechas_T3_2019 {
 			  cap import excel using "$rootpath\2_1_2c19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
@@ -401,11 +401,12 @@ encode COD_moneda, gen(COD_moneda_e)
 ********************************************************************************
 *---  Append both databases
 ********************************************************************************
-append using `exch1', force
-append using `exch2', force
+//append using `exch1', force
+//append using `exch2', force
 append using `exch3', force
 append using `exch4', force
 append using `exch5', force
+
 *********************************************************************************
 *--- To select the currency units included in the survey
 *********************************************************************************
@@ -438,7 +439,7 @@ append using `exch5', force
 *********************************************************************************
 
     // Keep only relevant data
-	collapse (mean) mean_moneda=Venta (median) median_moneda=Venta, by (month COD_moneda)
+	collapse (mean) mean_moneda=Venta (median) median_moneda=Venta, by (month year COD_moneda)
 	gen moneda=.
 	replace moneda=2 if COD_moneda=="USD"
 	replace moneda=3 if COD_moneda=="EUR"

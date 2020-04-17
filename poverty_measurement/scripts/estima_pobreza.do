@@ -79,7 +79,7 @@ egen costo_canasta = total(valor)
 global costodiario = costo_canasta[1]
 di $costodiario
 // import harmonized hh-individual data with incomes
-use "$cleaned/$encovifilename" , replace
+use "$cleaned/ENCOVI_2019_pre pobreza.dta" , replace
 
 // gen ipc and ppp
 drop ipc ipc11 ppp11 pobre

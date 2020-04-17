@@ -125,7 +125,7 @@ drop if unidad_medida==.
 
 // merge with sedlac to get hh size
 preserve
-use  "$cleaned/$encovifilename", clear
+use  "$cleaned/ENCOVI_2019_pre pobreza.dta", clear
 collapse (max) com, by (interview__id interview__key quest)
 rename com miembros
 tempfile hhsize

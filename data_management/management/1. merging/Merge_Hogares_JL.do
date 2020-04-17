@@ -112,7 +112,8 @@ local vsp      "01"	// version ASPIRE
 	// Create identification for completed surveys
 	bys quest interview__key interview__id (date time): keep if action[_N]==6 // 6= approved by HQ (as last step)
 	
-
+// To identify unique interviews according the last date and time entered
+bys interview__key interview__id (date time) : keep if _n==_N
 	
 	
 	// Change format

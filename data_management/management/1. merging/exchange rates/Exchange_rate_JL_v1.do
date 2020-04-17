@@ -1,18 +1,26 @@
 /*===========================================================================
-Purpose: import exchange rate data a
+Purpose: import daily exchange rate data and produce montly exchange 
+rates for 2019 and 2020
 
 Country name:	Venezuela
-Year:			2014
+Year:			2019 and 2020
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Lautaro Chittaro, Julieta Ladronis, Trinidad Saavedra
+Authors:			Julieta Ladronis
 
 Dependencies:		The World Bank -- Poverty Unit
 Creation Date:		February, 2020
 Modification Date:  
 Output:			    Exchange rates dataset
 
-Note: 
+
+*--- Source: 1.	Banco Central de Venezuela (BCV), daily data 
+(http://www.bcv.org.ve/estadisticas/tipo-de-cambio). 
+
+*--- Note (1): Using 2.	Dólar Today (https://dolartoday.com/), daily data was very similar. 
+*--- Note (2): We decide to use the official exchange rates to avoid some daily jumps 
+in the exchange rates
+
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
@@ -30,7 +38,7 @@ Note:
 			
 		if $juli {
 				global rootpath "C:\Users\wb563583\GitHub\VEN\data_management\management\1. merging\exchange rates" 
-				global dataout "$rootpath\"
+				global dataout "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\data_management\input"
 				
 		}
 	    if $lauta {
@@ -49,7 +57,7 @@ Note:
 		
 *********************************************************************************
 *--- Import official data of exchange rates
-*--- Source: 
+
 *********************************************************************************
 *--------------- 1T 2019		
 *--------------- Set the dates of the exchange rate as a local 
@@ -112,9 +120,9 @@ Note:
 *--------------- 2T 2019		
 *--------------- Set the dates of the exchange rate as a local 
 * These are the names of the excel spreadsheet which contain daily data for each trimester	
-	local fechas_T2_2019 30092019 27092019 26092019 25092019 24092019 23092019 ///
-	20092019 19092019 18092019 17092019 13092019 12092019 11092019 10092019 09092019 ///
-	06092019 05092019 04092019 03092019 02092019 30082019 29082019 28082019 27082019 26082019 ///
+	local fechas_T2_2019 28062019 27062019 26062019 25062019 21062019 20062019 ///
+	19062019 18062019 14062019 13062019 12062019 11062019 10062019 07062019 06062019 ///
+	05062019 04062019 31052019 30052019 29052019 28052019 27052019 24052019 27082019 26082019 ///
 	23082019 22082019 21082019 20082019 16082019 15082019 14082019 13082019 12082019 09082019 ///
 	08082019 07082019 06082019 05082019 
 	
@@ -173,8 +181,9 @@ Note:
 	20092019 19092019 18092019 17092019 13092019 12092019 11092019 10092019 09092019 ///
 	06092019 05092019 04092019 03092019 02092019 30082019 29082019 28082019 27082019 26082019 ///
 	23082019 22082019 21082019 20082019 16082019 15082019 14082019 13082019 12082019 09082019 ///
-	08082019 07082019 06082019 05082019 02082019 01082019 
-	
+	08082019 07082019 06082019 05082019 02082019 01082019 31072019 30072019 29072019 27072019 26072019 ///
+	25072019 23072019 22072019 19072019 18072019 17072019 16072019 15072019 12072019 11072019 10072019 ///
+	09072019 08072019 04072019 03072019 02072019 01072019
 	foreach k of local fechas_T3_2019 {
 			  cap import excel using "$rootpath\2_1_2c19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
 		gen date="`k'"
@@ -432,7 +441,7 @@ append using `exch5', force
 *--- Save exchange rates dataset
 *********************************************************************************
 	 
-	save "$rootpath\exchenge_rate_sum", replace
+	save "$dataout\exchenge_rate_sum", replace
 
 *********************************************************************************
 *--- Generate dataset to merge with prices
@@ -457,4 +466,4 @@ append using `exch5', force
 *--- Save exchange rates dataset to merge with prices
 *********************************************************************************
 	
-	save "$rootpath\exchenge_rate_price", replace
+	save "$dataout\exchenge_rate_price", replace

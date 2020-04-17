@@ -27,10 +27,10 @@ Note:
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta   0
+		global lauta   1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -70,20 +70,20 @@ global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
  merging data
  ==============================================================================*/
 /*
-set path of data
+*set path of data
 global merging "$dopath\data_management\management\1. merging"
 global input "$datapath\data_management\input\latest"
 global output "$datapath\data_management\output\merged"
 
-run merge
+*run merge
 do "$merging/__main__merge.do"
 */
 
 /*==============================================================================
 hh-individual database and imputation
 ==============================================================================*/
-
-set path of data
+///*
+//set path of data
 
 global harmonization "$dopath\data_management\management\2. harmonization"
 
@@ -91,24 +91,26 @@ global harmonization "$dopath\data_management\management\2. harmonization"
 global pathaux "$harmonization\ENCOVI harmonization\aux_do"
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 
+
+//run ENCOVI harmonization
+do "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
+
+
 *Specific for imputation
 global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
 
-set path of data  (CORREGIR)
-global input "$datapath\data_management\output\harmonized"
-global output "$datapath\data_management\output\harmonized"
 
-imputate incomes (CORREGIR)
-global "$harmonization\ENCOVI harmonization\????????"
-
+//run ENCOVI imputation
+do "$dopath/MASTER 1-5. Run all imputation do's 2019.do"
+//*/
 
 /*==============================================================================
 poverty estimation
 ==============================================================================*/
 
+/*
 // set path of data
-*global encovifilename "ENCOVI_2019_pre pobreza.dta" // LAUTI, FALTARÍA CAMBIA ESTO EN TUS DO'S YA CON EL NOMBRE EN VEZ DE UNA GLOBAL
 global povmeasure "$dopath\poverty_measurement\scripts"
 global input "$datapath\poverty_measurement\input"
 global output "$datapath\poverty_measurement\output"
@@ -116,9 +118,8 @@ global output "$datapath\poverty_measurement\output"
 //run poverty estimation
 do "$povmeasure/__main__.do"
 
-/*==============================================================================
-attach pov to harmonized data
-==============================================================================*/
+//run cleaning of variables
+run "$povmeasure/final_variable_selection.do"
 
-// use x, replace
-// merge m:1 inter, keep(match)
+
+*/

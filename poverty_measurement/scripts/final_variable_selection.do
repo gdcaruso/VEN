@@ -94,7 +94,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 *---- From CEDLAS (auxiliary)
 	   global cedlas relab 
 *---- II. Interview Control / Control de la entrevista
-		global control_ent entidad region_est1 municipio nombmun parroquia nombpar centropo nombcp segmento peso_segmento combined_id tipo_muestra /*gps* */ id_str statut sector_urb 
+		global control_ent entidad region_est1 municipio nombmun parroquia nombpar 
 *----III Household determination / Determinacion de hogares
 		global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
 *----1.1: Identification Variables / Variables de identificación
@@ -194,7 +194,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $ingreso_ENCOVI $from_cedlas
 
 *---- Drop de las que teniamos dudas
-drop quest informant_emig informant_shock
+drop quest informant_emig informant_shock centropo nombcp segmento peso_segmento combined_id tipo_muestra /*gps* */ id_str statut sector_urb 
 
 compress
 

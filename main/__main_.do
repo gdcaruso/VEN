@@ -70,12 +70,12 @@ global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
  merging data
  ==============================================================================*/
 ///*
-set path of data
+*set path of data
 global merging "$dopath\data_management\management\1. merging"
 global input "$datapath\data_management\input\latest"
 global output "$datapath\data_management\output\merged"
 
-run merge
+*run merge
 do "$merging/__main__merge.do"
 //*/
 
@@ -91,16 +91,13 @@ global harmonization "$dopath\data_management\management\2. harmonization"
 global pathaux "$harmonization\ENCOVI harmonization\aux_do"
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 
+
+
 *Specific for imputation
 global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
 
-*set path of data  (CORREGIR)
-global input "$datapath\data_management\output\harmonized"
-global output "$datapath\data_management\output\harmonized"
 
-*imputate incomes (CORREGIR)
-global "$harmonization\ENCOVI harmonization\????????"
 
 
 /*==============================================================================
@@ -115,9 +112,3 @@ global output "$datapath\poverty_measurement\output"
 //run poverty estimation
 do "$povmeasure/__main__.do"
 
-/*==============================================================================
-attach pov to harmonized data
-==============================================================================*/
-
-// use x, replace
-// merge m:1 inter, keep(match)

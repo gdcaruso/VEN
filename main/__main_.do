@@ -58,15 +58,15 @@ version 14
 drop _all
 set more off
 
-// set path for dofiles
+//set path for dofiles
 global merging "$dopath\data_management\management\1. merging"
 global harmonization "$dopath\data_management\management\2. harmonization"
 global povmeasure "$dopath\poverty_measurement\scripts"
-
-/*==============================================================================
-merging data
-==============================================================================*/
 //
+// /*==============================================================================
+// merging data
+// ==============================================================================*/
+// //
 // // set path of data
 // global input "$datapath\data_management\input\latest"
 // global output "$datapath\data_management\output\merged"
@@ -75,20 +75,20 @@ merging data
 // //run merge
 // do "$merging/__main__merge.do"
 //
-
-/*==============================================================================
-hh-individual database and imputation (CORREGIR)
-==============================================================================*/
-
+//
+// /*==============================================================================
+// hh-individual database and imputation (CORREGIR)
+// ==============================================================================*/
+//
 // // set path of data (CORREGIR)
-global encovisinimputarfilename "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
-global cleaned "$datapath\data_management\output\cleaned"
-global merged "$datapath\data_management\output\merged"
-global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-
-//harmonization without imputation
-run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
+// global encovisininpfilename "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global merged "$datapath\data_management\output\merged"
+// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+//
+// //harmonization without imputation
+// run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
 
 // // set path of data  (CORREGIR)
 // global input "$datapath\data_management\output\harmonized"
@@ -102,18 +102,18 @@ run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
 poverty estimation
 ==============================================================================*/
 //
-// // set path of data
-// global encovifilename "ENCOVI_2019.dta"
-// global cleaned "$datapath\data_management\output\cleaned"
-// global merged "$datapath\data_management\output\merged"
-// global input "$datapath\poverty_measurement\input"
-// global output "$datapath\poverty_measurement\output"
-// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-//
-//
-// //run poverty estimation
-// do "$povmeasure/__main__.do"
+// set path of data
+global encovifilename "ENCOVI_2019.dta"
+global cleaned "$datapath\data_management\output\cleaned"
+global merged "$datapath\data_management\output\merged"
+global input "$datapath\poverty_measurement\input"
+global output "$datapath\poverty_measurement\output"
+global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+
+
+//run poverty estimation
+do "$povmeasure/__main__.do"
 //
 // /*==============================================================================
 // attach pov to harmonized data

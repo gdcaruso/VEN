@@ -4192,5 +4192,6 @@ interview_month interview__id interview__key quest labor_status miembros relab s
 
 *save "$dataout\ENCOVI_2019.dta", replace
 *save "$dataout\ENCOVI_2019_ING SIN AJUSTE POR INFLACION.dta", replace
-//save "$cleaned\$encovisinimputarfilename", replace
+
+save "$cleaned/$encovisininpfilename", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

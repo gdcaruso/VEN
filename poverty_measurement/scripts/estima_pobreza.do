@@ -156,7 +156,7 @@ rename lp_new lp_moderada
 drop ipc ipc11 ppp11 pobre
 gen ipc = 2659537979000 
 gen ipc11 = 3558.84
-gen ppp11 = 2.92 / 100000 //bol. fuertes/ dolarppp * bol.sob / bol.fuerte
+gen ppp11 = 2.915005297 / 100000 //bol. fuertes/ dolarppp * bol.sob / bol.fuerte
 gen pobre = ipcf<lp_moderada
 
 drop  lp19 lp32 lp55 lp_ofi le_ofi extremo_new extremo_ofi pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi ext_10off ext_20off ext_50off ext_75off pob_??off

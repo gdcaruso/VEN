@@ -82,7 +82,7 @@ do "$merging/__main__merge.do"
 /*==============================================================================
 hh-individual database and imputation
 ==============================================================================*/
-///*
+
 //set path of data
 
 global harmonization "$dopath\data_management\management\2. harmonization"
@@ -96,14 +96,18 @@ global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 do "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
 
 
+*Specific inputs: imputation do's and auxiliary SEDLAC do's 
+global pathaux "$harmonization\ENCOVI harmonization\aux_do"
+global impdos "$dopath\data_management\management\4. income imputation\dofiles"
+
 *Specific for imputation
 global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-
+*/
 
 //run ENCOVI imputation
-do "$dopath/MASTER 1-5. Run all imputation do's 2019.do"
-//*/
+do "$impdos/MASTER 1-5. Run all imputation do's 2019.do"
+
 
 /*==============================================================================
 poverty estimation

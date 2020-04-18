@@ -179,7 +179,9 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 *----XIII: FOOD SAFETY / SEGURIDAD ALIMENTARIA 
 		global segalimentaria_ENCOVI ingsuf_comida preocucomida_norecursos faltacomida_norecursos nosaludable_norecursos pocovariado_norecursos salteacomida_norecursos comepoco_norecursos ///
 				hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_me18_norecursos comepoco_me18_norecursos nocomedia_me18_norecursos comida_trueque
-
+*----XIV: FOOD SAFETY / SEGURIDAD ALIMENTARIA 
+		global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
+		
 *----XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES 
 		global shocks_ENCOVI informant_shock evento_* evento_ot imp_evento_* veces_evento_* ano_evento_* ///
 				reaccion_evento_* reaccionot_evento*
@@ -198,4 +200,4 @@ drop quest informant_emig informant_shock /*centropo nombcp segmento peso_segmen
 
 compress
 
-save "$datapath\varcleaned_ENCOVI_2019_postpobreza.dta", replace
+*save "$datapath\varcleaned_ENCOVI_2019_postpobreza.dta", replace

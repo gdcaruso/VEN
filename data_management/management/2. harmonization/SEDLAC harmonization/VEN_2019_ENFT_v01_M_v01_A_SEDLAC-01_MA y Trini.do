@@ -30,26 +30,26 @@ Note:
 		* User 4: Malena
 		global male   1
 		
-			
 		if $juli {
-				global rootpath ""
+ 				global dopath "C:\Users\wb563583\GitHub\VEN"
+ 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 		}
+ 	    if $lauta {
+				global dopath "C:\Users\wb563365\GitHub\VEN"
+				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
-	    if $lauta {
-				global rootpath "C:\Users\wb563365\GitHub\VEN"
-		}
-		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\ENCOVI-2019"  
-		}
-		
-		if $male   {
-				global rootpath "C:\Users\wb550905\Github\VEN"
-				
+ 		if $trini   {
+ 		}
+ 		if $male   {
+ 				global dopath "C:\Users\wb550905\Github\VEN"
+ 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
 
 		
 // Set output data path
-global dataout 	"$rootpath\data_management\output\cleaned"
-global dataofficial "$rootpath\data_management\output\merged"
+global dataout 	"$dopath\data_management\output\cleaned"
+global dataofficial "$dopath\data_management\output\merged"
+global cleaned "$datapath\data_management\output\cleaned"
 
 ********************************************************************************
 
@@ -163,6 +163,7 @@ gen psu = combined_id
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global demo_SEDLAC relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua
+
 * Relation to the head:	relacion
 /* Categories of the new harmonized variable:
 		1:  Jefe		
@@ -309,6 +310,8 @@ notes   lengua: the survey does not include information to define this variable
 /*(*************************************************************************************************************************************************
 *-------------------------------------------------------------	1.3: Variables regionales  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/
+global regional_SEDLAC // completar
+
 * Creación de Variable Geográficas Desagregadas
 	
 * Desagregación 1 (Regiones politico-administrativas): region_est1
@@ -351,30 +354,8 @@ notes   lengua: the survey does not include information to define this variable
         25 Dependencias Federales
  */
 tab entidad, nolab
-/*
-      1. ENTIDAD |
-         FEDERAL |      Freq.     Percent        Cum.
------------------+-----------------------------------
-      Anzoategui |        627       11.66       11.66
-           Apure |         69        1.28       12.94
-          Aragua |        421        7.83       20.77
-         Bolivar |        134        2.49       23.26
-         Cojedes |         53        0.99       24.24
-          Falcon |         52        0.97       25.21
-         Guarico |        210        3.90       29.11
-            Lara |        141        2.62       31.73
-         Miranda |         83        1.54       33.28
-         Monagas |        219        4.07       37.35
-   Nueva Esparta |        773       14.37       51.72
-      Portuguesa |         69        1.28       53.00
-           Sucre |        758       14.09       67.09
-         Tachira |        964       17.92       85.02
-         Yaracuy |        419        7.79       92.81
-           Zulia |        387        7.19      100.00
------------------+-----------------------------------
-           Total |      5,379      100.00
-*/
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   //Region Central
+
+gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   // Region Central
 replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
 replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental
 replace region_est1 =  4 if entidad==23                                            // Region Zuliana
@@ -514,6 +495,7 @@ notes migra_rec: the survey does not include information to define this variable
 *------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global dwell_SEDLAC propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici 
+
 * Propiedad de la vivienda:	propieta
 /* TENENCIA_VIVIENDA (s5q7): régimen de  de la vivienda  
 		1 = Propia pagada		
@@ -662,8 +644,9 @@ notes   telef: the survey does not include information to define this variable
 
 
 /*(************************************************************************************************************************************************* 
-*--------------------------------------------------------- 1.5: Durables goods  --------------------------------------------------------
+*--------------------------------------------------------- 1.5: Durable goods  --------------------------------------------------------
 *************************************************************************************************************************************************)*/
+global durables_SEDLAC // completar
 
 * Heladera (s5q6__1): ¿Posee este hogar nevera?
 gen     heladera = s5q6__1==1 if (s5q6__1!=. & s5q6__1!=.a)
@@ -764,6 +747,7 @@ notes bici: the survey does not include information to define this variable
 *---------------------------------------------------------- 1.6: Education --------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 global educ_SEDLAC alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp
+
 /* NIVEL_EDUC_EN (s7q11): ¿Cual fue el ultimo nivel educativo en el que aprobo un grado, ano, semetre, trimestre?  
 		1 = Ninguno		
         2 = Preescolar
@@ -958,11 +942,13 @@ enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_c
 			2 = no
 			99 = NS/NR 
 	*/
-
 gen     seguro_salud = 1	if  s8q17==1
 replace seguro_salud = 0	if  s8q17==2
 
 * Tipo de seguro de salud: tipo_seguro
+	/*  0 = esta afiliado a algun seguro de salud publico o vinculado al trabajo (obra social)
+        1 = si esta afiliado a algun seguro de salud privado
+	*/
 	/* s8q18: ¿Con cuál seguro médico está afiliado? 
 		1 = Instituto Venezolano de los Seguros Sociales (IVSS)
 	    2 = Instituto de prevision social publico (IPASME, IPSFA, otros)
@@ -970,11 +956,6 @@ replace seguro_salud = 0	if  s8q17==2
 	    4 = Seguro medico contratado por institucion privada
 	    5 = Seguro medico privado contratado de forma particular
 	 */
-		
-	/*  0 = esta afiliado a algun seguro de salud publico o vinculado al trabajo (obra social)
-        1 = si esta afiliado a algun seguro de salud privado
-	*/
-	
 gen afiliado_segsalud = 1     if s8q18==1 
 replace afiliado_segsalud = 2 if s8q18==2 
 replace afiliado_segsalud = 3 if s8q18==3 
@@ -1177,6 +1158,7 @@ notes deporte: the survey does not include information to define this variable
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Labor Variables ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
+global labor_SEDLAC // completar
 
 *Notes: interviews done if age>9
 
@@ -1445,780 +1427,15 @@ gen     pea = (ocupado==1 | desocupa ==1)
 *---------------------------------------------------------- 1.9: Income Variables ----------------------------------------------------------
 *****************************************************************************************************************************************)*/
 
-* Check for negative variables
-	forvalues i = 1(1)12 {	
-	tab s9q19a_`i' if s9q19a_`i'<0
-	}
-	forvalues i = 1(1)9 {	
-	tab s9q21a_`i' if s9q21a_`i'<0
-	}
-	forvalues i = 1(1)6 {	
-	tab s9q20a_`i' if s9q20a_`i'<0
-	}
-	forvalues i = 1(1)7 {	
-	tab s9q22a_`i' if s9q22a_`i'<0
-	}
-	tab s9q23a if s9q23a<0
-	tab s9q24a if s9q24a<0
-	tab s9q25a if s9q25a<0
-	tab s9q26a if s9q26a<0
-	tab s9q27 if s9q27<0
-	forvalues i = 1(1)11 {		
-	tab s9q28a_`i' if s9q28a_`i'<0
-	}
-	* One is negative (less than 0), change for 0
-	replace s9q28a_11=0 if s9q28a_11<0
-	forvalues i = 1(1)9 {
-	tab s9q29b_`i' if s9q29b_`i'<0
-	}
+* This was done with the complete dataset (not only SEDLAC variables), information on aggregate income variables will be attached at the end
 
-	* What to do with questions 20, 22, 26 y 27? We take them as "auxiliares", they won't end up counting for the final income aggregates
-	
-********** A. LABOR INCOME **********
-	
-****** 9.0. SET-UP ******
+/*(******************************************************************************************************************************************* 
+*-------------------------------------------------------- 1.10: LINEAS DE POBREZA  -------------------------------------------------------------
+********************************************************************************************************************************************)*/
 
-* Assumption for our new variables: No response and doesn't apply both are categorized as missing
-
-*** We take all variables we will need to Bolivares of February 2020 (given that we have more sample) ***
-
-*Note: Used the exchange rate of the doc "exchenge_rate_price", which comes from http://www.bcv.org.ve/estadisticas/tipo-de-cambio
-*Note: We used Inflacion verdadera's inflation to build the deflactor
-		
-	* gen XX_bolfeb = XX		*tipo de cambio	* deflactor a febrero if interview_month=M & moneda=J
-
-	local incomevar19 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 
-	foreach i of local incomevar19 {
-		* Bolívares
-			gen s9q19a`i'_bolfeb = s9q19a`i'					* `deflactor11'	if interview_month==11 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor12'	if interview_month==12 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor1'	if interview_month==1 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'				 				if interview_month==2 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'				* `deflactor3'	if interview_month==3 & s9q19b`i'==1 & s9q19a`i'!=. & s9q19a`i'!=.a
-		* Dólares
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes2' 					if interview_month==2 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==2 & s9q19a`i'!=. & s9q19a`i'!=.a
-		* Euros
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes2'					if interview_month==2 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==3 & s9q19a`i'!=. & s9q19a`i'!=.a
-		* Colombianos
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes2'					if interview_month==2 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
-			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
-		}
-		
-	local incomevar21 _1 _2 _3 _4 _5 _6 _7 _8 _9
-	foreach i of local incomevar21 {
-		* Bolívares
-			gen s9q21a`i'_bolfeb = s9q21a`i'					* `deflactor11'	if interview_month==11 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'				* `deflactor12'	if interview_month==12 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'				* `deflactor1'	if interview_month==1 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'				 				if interview_month==2 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'				* `deflactor3'	if interview_month==3 & s9q21b`i'==1 & s9q21a`i'!=. & s9q21a`i'!=.a
-		* Dólares
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes2' 					if interview_month==2 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q21b`i'==2 & s9q21a`i'!=. & s9q21a`i'!=.a
-		* Euros
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes2'					if interview_month==2 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q21b`i'==3 & s9q21a`i'!=. & s9q21a`i'!=.a
-		* Colombianos
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes2'					if interview_month==2 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
-		}
-
-	local incomevar2345 23 24 25
-	foreach i of local incomevar2345 {
-		* Bolívares
-			gen s9q`i'a_bolfeb = s9q`i'a					* `deflactor11'	if interview_month==11 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a				* `deflactor12'	if interview_month==12 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a				* `deflactor1'	if interview_month==1 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a				 				if interview_month==2 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a				* `deflactor3'	if interview_month==3 & s9q`i'b==1 & s9q`i'a!=. & s9q`i'a!=.a
-		* Dólares
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes2' 					if interview_month==2 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q`i'b==2 & s9q`i'a!=. & s9q`i'a!=.a
-		* Euros
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes2'					if interview_month==2 & s9q`i'b==3 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q`i'b==3
-		* Colombianos
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes2'					if interview_month==2 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
-			replace s9q`i'a_bolfeb = s9q`i'a	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q`i'b==4 & s9q`i'a!=. & s9q`i'a!=.a
-		}
-
-	local incomevar28 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11
-	foreach i of local incomevar28 {
-		* Bolívares
-			gen s9q28a`i'_bolfeb = s9q28a`i'					* `deflactor11'	if interview_month==11 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor12'	if interview_month==12 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor1'	if interview_month==1 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'				 				if interview_month==2 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'				* `deflactor3'	if interview_month==3 & s9q28b`i'==1 & s9q28b`i'!=. & s9q28b`i'!=.a
-		* Dólares
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes2' 					if interview_month==2 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q28b`i'==2 & s9q28b`i'!=. & s9q28b`i'!=.a
-		* Euros
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes2'					if interview_month==2 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q28b`i'==3 & s9q28b`i'!=. & s9q28b`i'!=.a
-		* Colombianos
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes2'					if interview_month==2 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
-			replace s9q28a`i'_bolfeb = s9q28a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q28b`i'==4 & s9q28b`i'!=. & s9q28b`i'!=.a
-		}
-
-	local incomevar29 _1 _2 _3 _4 _5 _6 _7 _8 _9  
-	foreach i of local incomevar21 {
-		* Bolívares
-			gen s9q29b`i'_bolfeb = s9q29b`i'					* `deflactor11'	if interview_month==11 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'				* `deflactor12'	if interview_month==12 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'				* `deflactor1'	if interview_month==1 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'				 				if interview_month==2 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'				* `deflactor3'	if interview_month==3 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
-		* Dólares
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes11'	* `deflactor11'	if interview_month==11 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes2' 					if interview_month==2 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q29c`i'==2 & s9q29b`i'!=. & s9q29b`i'!=.a
-		* Euros
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes2'					if interview_month==2 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q29c`i'==3 & s9q29b`i'!=. & s9q29b`i'!=.a
-		* Colombianos
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes2'					if interview_month==2 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
-			replace s9q29b`i'_bolfeb = s9q29b`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q29c`i'==4 & s9q29b`i'!=. & s9q29b`i'!=.a
-		}
-
-
-		
-*** MONETARY
-
-/* * For those not self-employed or employers (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9)
-		* MONETARY PAYMENTS (s9q19__*): ¿Con respecto al mes pasado, recibió en todos sus trabajos o negocios ingresos por los siguientes conceptos? (each one is a dummy)
-			1 = Sueldos y salarios
-			2 = Horas extras
-			3 = Propinas
-			4 = Comisiones
-			5 = Cesta ticket, tarjeta de alimentación
-			6 = Aporte por guardería
-			7 = Beca estudio
-			8 = Prima por hijos
-			9 = Antigüedad
-			10 = Bono de transporte
-			11 = Bono por rendimiento
-			12 = Otros bonos y compensaciones
-		* MONTO (s9q19a_*): Amount received (1 variable for each of the 12 options)
-		* CURRENCY (s9q19b_*): Currency (1 variable for each of the 12 options) 
-
-		* MONETARY PAYMENTS (s9q19_petro): Received payment through Petro (mostly for aguinaldo) // Added in the last questionnaire update
-		* MONTO (s9q19_petromonto): Amount received
-		
-		* MONETARY PAYMENTS (s9q29a): Con respecto a los últimos 12 meses: ¿recibió ingresos provenientes del exterior por alguno de los siguientes conceptos y cuánto:
-			1=Sueldos o salarios
-			2=Ingresos netos de los trabajadores independientes
-			...
-		* MONTO (s9q29b_*): Amount received
-		* CURRENCY (s9q29c_*): Currency  
-		
-	* For employers (s9q15==5)	
-		* MONETARY PAYMENTS (s9q23): ¿El mes pasado recibió dinero por la venta de los productos, bienes o servicios de su negocio o actividad? (only for employers, s9q15==5)
-			1 = si
-			2 = no
-		* MONTO (s9q23a): Amount received
-		* CURRENCY (s9q23b): Currency
-		
-	* For self-employed (s9q15==6)
-		* MONETARY PAYMENTS (s9q25): Durante los últimos doce (12) meses, recibió dinero por ganancias o utilidades netas derivadas del negocio o actividad?
-			1 = si
-			2 = no
-		* MONTO (s9q25a): Amount received
-		* CURRENCY (s9q25b): Currency
-		
-			* For monthly analysis (no taken into account here because of inconsistencies in the results, e.g. negative income because of people who answer q27 and not q26, or there may be confusion with time span with q25):
-			* MONETARY PAYMENTS (s9q26): El mes pasado, recibió ingresos por su actividad para gastos propios o de su hogar?
-				*Obs: this question seemed to be elaborated to represent non-monetary payments but the execution makes it seem more monetary so we added it here.
-			* SUBSTRACTED FROM MONETARY PAYMENTS (s9q27): El mes pasado, ¿cuánto dinero gastó para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?
-*/
-
-	
-* Creating local (not foreign) variables
-
-	* Note: while respondants can register different concepts with different currencies, they can't register one concept with multiple currencies (ej. "sueldo y salario" paid in 2 different currencies) 
-
-	gen ingresoslab_mon_local = .
-			
-	*For the not self-employed nor employers (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9)
-		forvalues i = 1(1)12 {
-		replace ingresoslab_mon_local = s9q19a_`i'_bolfeb 							if ingresoslab_mon_local==. & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19a_`i'!=. & s9q19a_`i'!=.a)
-		replace ingresoslab_mon_local = ingresoslab_mon_local + s9q19a_`i'_bolfeb 	if ingresoslab_mon_local!=. & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19a_`i'!=. & s9q19a_`i'!=.a)
-			* Obs: First line is for the first not missing one to add up, second line is for the next ones to add up (same later for employers and self-employed)
-			* Obs: The last parenthesis controls for cases where they say they were paid in a certain money, but don't say how much (same later for employers and self-employed)
-	}
-		gen ingresoslab_monpe = . 	// Those who received payment in Petro
-		replace ingresoslab_monpe = s9q19_petromonto 	if s9q19_petro==1 & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19_petro!=. & s9q19_petro!=.a)	// Al final no usamos esto
-		gen ingresoslab_monpe_dummy = .
-		replace ingresoslab_monpe_dummy = 1 	if ingresoslab_monpe>=0 & ingresoslab_monpe!=.
-		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
-		gen ingresoslab_monpe_bolfeb  = ingresoslab_monpe_dummy	* 30 * 73460.1238 		if ingresoslab_monpe_dummy==1
-	
-	*For employers (s9q15==5)
-		replace ingresoslab_mon_local = s9q23a_bolfeb 							if ingresoslab_mon_local==. & s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
-		replace ingresoslab_mon_local = ingresoslab_mon_local + s9q23a_bolfeb 	if ingresoslab_mon_local!=. & s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
-	
-	*For self-employed (s9q15==6)
-		replace ingresoslab_mon_local = s9q25a_bolfeb / 12 							if ingresoslab_mon_local==. & s9q15==6 & (s9q25a!=. & s9q25a!=.a)
-		replace ingresoslab_mon_local = ingresoslab_mon_local + s9q25a_bolfeb / 12	if ingresoslab_mon_local!=. & s9q15==6 & (s9q25a!=. & s9q25a!=.a)
-				
-		
-	/* Note: by February 25, of the people that reported having monetary payments, 81.4% reported having at least one in Bolívares, 7.8% in Dollars, 8.9% in Colombian pesos, none in Euros, and 11% in Petro (employers and self employed use foreign currency more).
-	* Check: OK porque a Febrero 26, 4374 reportes de monedas - 480 repetidos + 123 que no reportan ninguna moneda = 3934 - 480 + 123 = 4017, el total que reportan haber recibido ingreso laboral monetario
-		gen noreporta=1 if ingresoslab_mon1_dummy==0 & ingresoslab_mon2_dummy==0 & ingresoslab_mon3_dummy==0 & ingresoslab_mon4_dummy==0 & ingresoslab_monpe_dummy==0
-		egen cuantasreporta=rowtotal(ingresoslab_mon1_dummy ingresoslab_mon2_dummy ingresoslab_mon3_dummy ingresoslab_mon4_dummy ingresoslab_monpe_dummy)
-		tab cuantasreporta
-		tab noreporta
-		drop noreporta cuantasreporta */
-		tab relab, sum(ingresoslab_mon_local)
-	
-		rename ingresoslab_mon_local ingresoslab_mon_local_sinpetro 
-		
-	egen ingresoslab_mon_local = rowtotal(ingresoslab_mon_local_sinpetro ingresoslab_monpe_bolfeb), missing
-	
-			
-* Creating foreign variables (salary or net income for independent workers)
-	
-	gen ingresoslab_mon_afuera = .
-	foreach i of numlist 1 2 {
-		replace ingresoslab_mon_afuera = s9q29b_`i'_bolfeb / 12 							if ingresoslab_mon_afuera==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-		replace ingresoslab_mon_afuera = ingresoslab_mon_afuera + s9q29b_`i'_bolfeb / 12 	if ingresoslab_mon_afuera!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-		}
-	
-* Monetary labor income (local and foreign)
-
-	egen ingresoslab_mon = rowtotal(ingresoslab_mon_local ingresoslab_mon_afuera), missing
-	sum ingresoslab_mon
-	
-
-	
-*** NON-MONETARY
-
-/*  * For those not self-employed or employers (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9)
-		* BENEFITS / NON-MONETARY PAYMENTS (s9q21__*): ¿Con respecto al mes pasado, recibió alguno de los siguientes beneficios en su trabajo u otros empleos? 
-			1 = Alimentación
-			2 = Productos de la empresa
-			3 = Transporte
-			4 = Vehículo para uso privado
-			5 = Exoneración del pago de estacionamiento
-			6 = Teléfono personal
-			7 = Servicios básicos de vivienda
-			8 = Guardería del trabajo
-			9 = Otros beneficios
-		* MONTO (s9q21a_*): Amount received, or estimation of how much they would have paid for the benefit (1 variable for each of the 9 options)
-		* CURRENCY (s9q21b_*): Currency (1 variable for each of the 9 options)
-		
-	* For employers (s9q15==5)	
-		* BENEFITS/NON-MONETARY PAYMENTS FOR EMPLOYERS (s9q24): ¿El mes pasado retiró productos del negocio o actividad para consumo propio o de su hogar?
-			1 = si
-			2 = no
-		* MONTO (s9q24a): Amount received, or estimation of how much they would have paid for the benefit
-		* CURRENCY (s9q24b): Currency
-*/
-		
-	gen ingresoslab_bene = .
-		
-	forvalues i = 1(1)9 {
-			
-		*For the not self-employed or employers (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9)
-		replace ingresoslab_bene = s9q21a_`i'_bolfeb 					if ingresoslab_bene==. & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q21a_`i'!=. & s9q21a_`i'!=.a)
-		replace ingresoslab_bene = ingresoslab_bene + s9q21a_`i'_bolfeb if ingresoslab_bene!=. & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q21a_`i'!=. & s9q21a_`i'!=.a)
-		* Obs: First line is for the first not missing one to add up, second line is for the next ones to add up (same later for employers)
-		* Obs: The last parenthesis controls for cases where they say they received benefits, but don't say how much (same later for employers)
-	}
-		*For employers (s9q15==5)
-		replace ingresoslab_bene = s9q24a_bolfeb 					if ingresoslab_bene==. & s9q15==5 & (s9q24!=. & s9q24a!=.a)
-		replace ingresoslab_bene = ingresoslab_bene + s9q24a_bolfeb if ingresoslab_bene!=. & s9q15==5 & (s9q24!=. & s9q24a!=.a)
-		
-		sum ingresoslab_bene
-
-	/* Note: by February 26, of the people who reported having benefits, 89.5% reported their value in Bolívares, 2.7% in Dollars, 6.2% in Colombian pesos, and none in Euros.
-	* Corroboro: OK porque a Feb26 367 reportan en una u otra moneda, más 9 que no reportan ninguna moneda, menos 3 que repiten monedas = 367-9+3 = 373, el total que reportan haber recibido ingreso laboral no monetario
-		gen noreporta=1 if ingresoslab_bene1_dummy==0 & ingresoslab_bene2_dummy==0 & ingresoslab_bene3_dummy==0 & ingresoslab_bene4_dummy==0
-		egen cuantasreporta=rowtotal(ingresoslab_bene1_dummy ingresoslab_bene2_dummy ingresoslab_bene3_dummy ingresoslab_bene4_dummy)
-		tab cuantasreporta
-		tab noreporta
-		drop noreporta cuantasreporta */
-
-	
-****** 9.1.PRIMARY LABOR INCOME ******
+* This was done in another dofile, the variables will be attached at the end
 
 /*
-ipatrp_m: ingreso monetario laboral de la actividad principal si es patrón
-iasalp_m: ingreso monetario laboral de la actividad principal si es asalariado
-ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propia */
-
-
-**Note: We are still missing the exchange rates, but when we have them we should change everything into bolívares following the daily rates.
-
-*****  i)  PATRÓN
-	* Monetario	
-	* Ingreso monetario laboral de la actividad principal si es patrón
-	gen     ipatrp_m = ingresoslab_mon if relab==1  
-
-	* No monetario
-	gen     ipatrp_nm = ingresoslab_bene if relab==1 	
-
-****  ii)  ASALARIADOS
-	* Monetario	
-	* Ingreso monetario laboral de la actividad principal si es asalariado
-	gen     iasalp_m = ingresoslab_mon if relab==2
-
-	* No monetario
-	gen     iasalp_nm = ingresoslab_bene if relab==2
-
-
-***** iii)  CUENTA PROPIA
-	* Monetario	
-	* Ingreso monetario laboral de la actividad principal si es cuenta propia
-	gen     ictapp_m = ingresoslab_mon if relab==3
-
-	* No monetario
-	gen     ictapp_nm = ingresoslab_bene if relab==3
-	
-***** iv) Otros - trabajador sin salario
-	gen iolp_m = ingresoslab_mon if relab==4
-	
-	gen iolp_nm = ingresoslab_bene if relab==4
-
-	
-****** 9.2. SECONDARY LABOR INCOME ******
-*The survey does not differenciate between both
-
-	* Monetary
-	gen     ipatrnp_m = .
-	gen     iasalnp_m = .
-	gen     ictapnp_m = .
-	gen     iolnp_m=.
-
-	* Non-monetary
-	gen     ipatrnp_nm = .
-	gen     iasalnp_nm = .
-	gen     ictapnp_nm = .
-	gen     iolnp_nm = .
-
-
-		
-********** B. NON-LABOR INCOME **********
-
-****** 9.3.NON-LABOR INCOME ******
-/* Incluye 
-	1) Jubilaciones y pensiones
-	2) Ingresos de capital (capital, intereses, alquileres, rentas, beneficios y dividendos)
-	3) Transferencias privadas y estatales
-*/
-
-*Organization
-	*Locales (no provenientes del exterior)
-		*Jubilaciones y pensiones // ijubi_m
-			* s9q28__1==1 // Pensión de incapacidad, orfandad, sobreviviente
-			* s9q28__2==1 // Pensión de vejez por el seguro social
-			* s9q28__3==1 // Jubilación por trabajo
-			* s9q28__4==1 // Pensión por divorcio, separación, alimentación
-			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
-		*Transferencias estatales // itrane_o_m 
-			* s9q28__5==1 // Beca o ayuda escolar pública 
-			* s9q28__7==1 // Ayuda de instituciones públicas
-		*Transferencias privadas // itranp_o_m 
-			* s9q28__6==1 // Beca o ayuda escolar privada
-			* s9q28__8==1 // Ayuda de instituciones privadas
-			* s9q28__9==1 // Ayudas familiares o contribuciones de otros hogares
-			* s9q28__10==1 // Asignación familiar por menores a su cargo
-		*Transferencias (no claro si públicas o privadas) // otro - itrane_ns 	
-			* s9q28__11==1 
-	*Provenientes del exterior
-		*Jubilaciones y pensiones
-			* s9q29a__5==1 // Pensión y jubilaciones // ijubi_m
-		*Transferencias privadas y estatales
-			* s9q29a__4==1 // Remesas o ayudas periódicas de otros hogares del exterior  //  rem
-			* s9q29a__7==1 // Becas y/o ayudas escolares // itranp_ns
-		*Ingresos de capital //  icap_m
-			* s9q29a__6==1 // Intereses y dividendos
-			* s9q29a__9==1 // Alquileres (vehículos, tierras o terrenos, inmueble residenciales o no)
-		* Ingresos no laborales extraordinarios
-			* s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord o inla_otro
-			* s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord o inla_otro
-
-  
-****** 9.3.1.JUBILACIONES Y PENSIONES ******	  
-	
-	/* 	s9q12==6 // Está jubilado o pensionado
-
-	s9q28__1 // Recibe pensión de sobreviviente, orfandad, incapacidad
-	s9q28__2 // Recibe pensión de vejez por el seguro social
-	s9q28__4 // Recibe pensión por divorcio, separación, alimentación
-
-	s9q28__3 // Recibe jubilación por trabajo
-
-	s9q28a_* // Monto recibido
-	s9q28b_* // Moneda
-	
-	s9q28_petro // Recibió petro
-	s9q28_petromonto // Monto recibido
-	
-	s9q29a__5==1 // Recibe pensión o jubilacion del exterior
-	s9q29b__5 // Monto que recibe del exterior por su pensión o jubilación
-	s9q29b__5 // Moneda														*/
-
-* Monetary
-		
-/* ijubi_m: Ingreso monetario por jubilaciones y pensiones */
-
-	*Reception
-	gen recibe_penojub_mon = .
-	replace recibe_penojub_mon = 1 if (s9q28__1==1 | s9q28__2==1 | s9q28__3==1 | s9q28__4==1) | s9q28_petro==1 | s9q29a__5==1 // Recibió pensión o jubilación en algún concepto
-	replace recibe_penojub_mon = 0 if (s9q28__1==0 & s9q28__2==0 & s9q28__3==0 & s9q28__4==0) & s9q28_petro==2 & s9q29a__5==0 // No recibió pensión o jubilación en ningún concepto
-	tab recibe_penojub_mon s9q12, missing
-	/* Obs: there are many people who did not say they were "jubilados o pensionados" but receive pensiones o jubilaciones, thus we will not control for having answered s9q12==6 */
-	
-	*We create ijubi_m
-	gen ijubi_mpetro=.
-	gen ijubi_mpetro_dummy=.
-
-	gen ijubi_m_bolfeb = .
-	gen ijubi_m_dummy = .
-		
-	*Local
-		forvalues i = 1(1)4 {
-		replace ijubi_m_bolfeb = s9q28a_`i'_bolfeb 						if ijubi_m_bolfeb==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a) // For the first not missing one to add up
-		replace ijubi_m_bolfeb = ijubi_m_bolfeb + s9q28a_`i'_bolfeb 	if ijubi_m_bolfeb!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a) // For the next ones to add up (same later for employers)
-		* Obs: The last parenthesis controls for cases where they say they received jubilaciones o pensiones, but don't say how much		
-		}		
-	*From abroad
-		replace ijubi_m_bolfeb = s9q29b_5_bolfeb / 12 					if ijubi_m_bolfeb==. & (s9q29b_5!=. & s9q29b_5!=.a)
-		replace ijubi_m_bolfeb = ijubi_m_bolfeb + s9q29b_5_bolfeb / 12 	if ijubi_m_bolfeb!=. & (s9q29b_5!=. & s9q29b_5!=.a)
-
-	*Putting all together by currency
-		replace ijubi_m_dummy = 0 	if recibe_penojub_mon==1 & ijubi_m_bolfeb==. // Dicen que reciben pero no reportan cuánto
-		replace ijubi_m_dummy = 1 	if ijubi_m_bolfeb>=0 & ijubi_m_bolfeb!=.
-			
-		tab ijubi_m_dummy
-		sum ijubi_m_bolfeb
-	
-	*Petro "currency"
-		replace ijubi_mpetro = s9q28_petromonto 				if ijubi_mpetro==. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
-		replace ijubi_mpetro = ijubi_mpetro + s9q28_petromonto 	if ijubi_mpetro!=. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
-
-		replace ijubi_mpetro_dummy = 0 	if recibe_penojub_mon==1 & ijubi_mpetro==. // Dicen que reciben pero no reportan cuánto
-		replace ijubi_mpetro_dummy = 1 	if ijubi_mpetro>=0 & ijubi_mpetro!=.
-			
-		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
-		gen ijubi_mpe_bolfeb  = ijubi_mpetro_dummy	* 30 * 73460.1238 	if ijubi_mpetro_dummy==1
-	
-		tab ijubi_mpetro_dummy
-		sum ijubi_mpetro
-			
-	/*Checking
-		gen noreporta=1 if ijubi_m1_dummy==0 & ijubi_m2_dummy==0 & ijubi_m3_dummy==0 & ijubi_m4_dummy==0 & ijubi_mpetro_dummy==0
-		egen cuantasreporta=rowtotal(ijubi_m1_dummy ijubi_m2_dummy ijubi_m3_dummy ijubi_m4_dummy ijubi_mpetro_dummy)
-		tab cuantasreporta
-		tab noreporta
-		drop noreporta cuantasreporta
-		* Note: by February 26, of the people who reported having jubilacion o pension, 92.1% reported in Bolívares, 0.08% in Dollars, 0.04% in Euros, 0.3% in Colombian pesos, and 48.6% in Petros.
-	*/
-		
-	egen ijubi_m = rowtotal(ijubi_m_bolfeb ijubi_mpe_bolfeb), missing
-	sum ijubi_m
-                         
-
-* No monetario	
-	gen     ijubi_nm=.
-	notes ijubi_nm: the survey does not include information to define this variable
-
-	
-****** 9.3.2.INGRESOS DE CAPITAL ******	
-		
-/*icap_m: Ingreso monetario de capital, intereses, alquileres, rentas, beneficios y dividendos */
-		
-		gen icap_m = .
-		
-		foreach i of numlist 6 9 {
-				
-			replace icap_m = s9q29b_`i'_bolfeb / 12				if icap_m==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a) // for the first not missing one to add up
-			replace icap_m = icap_m + s9q29b_`i'_bolfeb / 12 	if icap_m!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a) // for the next ones to add up
-			* Obs: The last parenthesis controls for cases where they say they received interests, dividends or rent from abroad, but don't say how much
-		}		
-			sum icap_m
-
-	* No monetario	
-	gen     icap_nm=.
-	notes icap_nm: the survey does not include information to define this variable
-
-****** 9.3.3.REMESAS ******	
-
-/*rem: Ingreso monetario de remesas */
-	
-	gen rem = .
-		
-	foreach i of numlist 4 {
-	*Assumption only the option "Remesas o ayudas periódicas de otros hogares del exterior" counts as remesas
-		replace rem = s9q29b_`i'_bolfeb / 12		if rem==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-		replace rem = rem + s9q29b_`i'_bolfeb / 12	if rem!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-	}		
-		sum rem 
-	
-	
-****** 9.3.4.TRANSFERENCIAS PRIVADAS ******	
-		
-/* itranp_o_m Ingreso monetario de otras transferencias privadas diferentes a remesas */
-
-* Monetario
-
-	gen itranp_o_m = .
-		
-	foreach i of numlist 6 8 9 10 {
-		replace itranp_o_m = s9q28a_`i'_bolfeb 					if itranp_o_m==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
-		replace itranp_o_m = itranp_o_m + s9q28a_`i'_bolfeb 	if itranp_o_m!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
-	}		
-	sum itranp_o_m
-	
-	
-* No monetario	
-	gen    itranp_o_nm =.
-
-****** 9.3.5 TRANSFERENCIAS PRIVADAS ******	
-
-* Monetario
-*itranp_ns: Ingreso monetario de transferencias privadas, cuando no se puede distinguir entre remesas y otras
-
-	gen itranp_ns = .
-		
-	foreach i of numlist 7 {
-		replace itranp_ns = s9q29b_`i'_bolfeb / 12				if itranp_ns==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-		replace itranp_ns = itranp_ns + s9q29b_`i'_bolfeb / 12	if itranp_ns!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-	}		
-	sum itranp_ns
-		
-
-****** 9.3.6 TRANSFERENCIAS ESTATALES ******	
-
-****** 9.3.6.1 TRANSFERENCIAS ESTATALES CONDICIONADAS******
-* cct: Ingreso monetario por transferencias estatales relacionadas con transferencias monetarias condicionadas
-
-	gen     cct = .
-	notes cct: the survey does not include information to define this variable
-	
-****** 9.3.6.2 OTRAS TRANSFERENCIAS ESTATALES******
-* itrane_o_m Ingreso monetario por transferencias estatales diferentes a las transferencias monetarias condicionadas
-
-* Monetarias
-	
-	gen itrane_o_m = .
-		
-	foreach i of numlist 5 7 {
-		replace itrane_o_m = s9q28a_`i'_bolfeb 					if itrane_o_m==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
-		replace itrane_o_m = itrane_o_m + s9q28a_`i'_bolfeb 	if itrane_o_m!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
-	}		
-	sum itrane_o_m
-	
-	
-*No monetarias
-	gen     itrane_o_nm = .
-	notes itrane_o_nm: the survey does not include information to define this variable
-
-
-****** 9.3.7 OTRAS TRANSFERENCIAS ******	
-*itrane_ns Ingreso monetario por transferencias cuando no se puede distinguir 
-
-	gen itrane_ns = .
-		
-	foreach i of numlist 11 {
-		replace itrane_ns = s9q28a_`i'_bolfeb 					if itrane_ns==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
-		replace itrane_ns = itrane_ns + s9q28a_`i'_bolfeb 	if itrane_ns!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
-	}		
-	sum itrane_ns
-	
-		
-***** iV) OTROS INGRESOS NO LABORALES / V) INGRESOS NO LABORALES EXTRAORDINARIOS 
-
-	gen inla_extraord = .
-	foreach i of numlist 3 8 {
-		replace inla_extraord = s9q29b_`i'_bolfeb / 12					if inla_extraord==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-		replace inla_extraord = inla_extraord + s9q29b_`i'_bolfeb / 12	if inla_extraord!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-	}		
-	sum inla_extraord
-
-	rename  inla_extraord inla_otro // Because it appeared like this in CEDLAS' do_file_1_variables
-	
-
-	
-****** PLUS: INCOME ANALYSIS ******
-
-* MONETARY LABOR INCOME
-
-	* Ingreso laboral monetario (empleados y empleadores), segun si recibieron o no en el ultimo mes
-		gen recibe_ingresolab_mon_mes = .
-		replace recibe_ingresolab_mon_mes = 1 if (s9q19__1==1 | s9q19__2==1 | s9q19__3==1 | s9q19__4==1 | s9q19__5==1 | s9q19__6==1 | s9q19__7==1 | s9q19__8==1 | s9q19__9==1 | s9q19__10==1 | s9q19__11==1 | s9q19__12==1) ///
-			| s9q19_petro==1 | s9q23==1 // Recibió ingreso monetario en algún concepto en el último mes (no usamos s9q26 porque se decidió que s9q25 engloba ambas 26 y 27)
-		replace recibe_ingresolab_mon_mes = 0 if inlist(s9q19__1,0,.,.a) & inlist(s9q19__2,0,.,.a) & inlist(s9q19__3,0,.,.a) & inlist(s9q19__4,0,.,.a) & inlist(s9q19__5,0,.) & inlist(s9q19__6,0,.,.a) & inlist(s9q19__7,0,.,.a) & inlist(s9q19__8,0,.,.a) & inlist(s9q19__9,0,.,.a) & inlist(s9q19__10,0,.,.a) & inlist(s9q19__11,0,.,.a) & inlist(s9q19__12,0,.,.a) ///
-			& inlist(s9q19_petro,2,.,.a) & inlist(s9q23,2,.,.a) // No recibió ingreso laboral monetario en ningún concepto mensual
-		* Problem: income from abroad for salaries/wages and net benefits for independent workers (s9q29a_1 and _2), and local benefits/utilities of independent workers (s9q25) are measured on a yearly basis, not monthly as the others
-		* If we include them in this dummy, there ends up being some unemployed or inactives who report labor income.
-	
-	*Ingreso laboral monetario (independientes y otros), , segun si recibieron o no en el ultimo año
-		* Thus, analysis on the side for imputation for those 3 variables, create a new variables
-		gen recibe_ingresolab_mon_ano = .
-		replace recibe_ingresolab_mon_ano = 1 if s9q25==1 | (s9q29a__1==1 | s9q29a__2==1)
-		replace recibe_ingresolab_mon_ano = 0 if s9q25==2 & s9q29a__1==0 & s9q29a__2==0
-	
-	* Checks (data April 6)
-	tab recibe_ingresolab_mon_ano recibe_ingresolab_mon_mes, missing // 157 observations have =1 in both
-	tab labor_status recibe_ingresolab_mon_mes, missing // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving monetary labor income
-	tab labor_status recibe_ingresolab_mon_ano, missing // 32 observations not OK (unemployed or inactive who have labor income, reasonable they could have earned it before)
-	
-	gen recibe_ingresolab_mon = .
-	replace recibe_ingresolab_mon = 0 if recibe_ingresolab_mon_mes==0 & recibe_ingresolab_mon_ano==0
-	replace recibe_ingresolab_mon = 1 if recibe_ingresolab_mon_mes==1
-	replace recibe_ingresolab_mon = 2 if recibe_ingresolab_mon_ano==1
-	replace recibe_ingresolab_mon = 3 if recibe_ingresolab_mon_mes==1 & recibe_ingresolab_mon_ano==1
-		label def recibe_ingresolab_mon 0 "Dice que no recibe nada" 1 "Dice que recibio en el ultimo mes" 2 "Dice que recibio en el último año" 3 "Dice que en el último mes Y último año"
-		label values recibe_ingresolab_mon recibe_ingresolab_mon
-	
-	tab recibe_ingresolab_mon, mi 
-	
-		* Crossed with the amount of income
-		gen report_inglabmon_perocuanto = .
-		replace report_inglabmon_perocuanto = 0 	if inlist(recibe_ingresolab_mon,1,2,3) & ingresoslab_mon==. // Dicen que reciben ila monetario, pero no reportan cuánto
-		replace report_inglabmon_perocuanto = 1 	if inlist(recibe_ingresolab_mon,1,2,3) & ingresoslab_mon>=0 & ingresoslab_mon!=.
-		*replace report_inglabmon_perocuanto = 1 	if ingresoslab_mon>=0 & ingresoslab_mon!=. // Same result as above line
-		
-	tab report_inglabmon_perocuanto, mi // We will have to impute 287 observations that declare to have earned monetary labor income but don't say how much
-	
-	
-* NON-MONETARY LABOR INCOME
-	
-	* Ingreso laboral no monetario: todo analizado para el último mes (más fácil)
-		gen recibe_ingresolab_nomon = .
-		replace recibe_ingresolab_nomon = 1 if (s9q21__1==1 | s9q21__2==1 | s9q21__3==1 | s9q21__4==1 | s9q21__5==1 | s9q21__6==1 | s9q21__7==1 | s9q21__8==1 | s9q21__9==1 ) | s9q24==1 // Recibió ingreso no monetario en algún concepto
-		replace recibe_ingresolab_nomon = 0 if inlist(s9q21__1,0,.,.a) & inlist(s9q21__2,0,.,.a) & inlist(s9q21__3,0,.,.a) & inlist(s9q21__4,0,.,.a) & inlist(s9q21__5,0,.) & inlist(s9q21__6,0,.,.a) & inlist(s9q21__7,0,.,.a) & inlist(s9q21__8,0,.,.a) & inlist(s9q21__9,0,.,.a) & inlist(s9q24,2,.,.a) // No recibió ingreso laboral no monetario en ningún concepto
-		
-	* Checks (data April 6)
-	tab labor_status recibe_ingresolab_nomon, mi  // OK: No unemployed (3), inactive (5-9), or person with missing (.) labor status report receiving non monetary labor income
-	tab recibe_ingresolab_nomon, mi  
-	
-		* Crossed with the amount of income
-		gen report_inglabnomon_perocuanto = .
-		replace report_inglabnomon_perocuanto = 0 	if recibe_ingresolab_nomon==1 & ingresoslab_bene==. // Dicen que reciben ila no monetario, pero no reportan cuánto
-		replace report_inglabnomon_perocuanto = 1 	if recibe_ingresolab_nomon==1 & ingresoslab_bene>=0 & ingresoslab_bene!=.
-		*replace report_inglabnomon_perocuanto = 1 	if ingresoslab_bene>=0 & ingresoslab_bene!=. // Same result as above line
-		
-	tab report_inglabnomon_perocuanto, mi // We will have to impute 26 observations that declare to have earned non-monetary labor income but don't say how much
-
-	
-* NON-LABOR (MONETARY) INCOME
-	
-	* Number of non-labor income sources that people received
-	egen cuantasinlarecibe = rowtotal(inla_pens_soi	inla_pens_vss inla_jubi_emp inla_pens_dsa inla_beca_pub inla_beca_pri inla_ayuda_pu inla_ayuda_pr inla_ayuda_fa inla_asig_men inla_otros inla_petro ///
-					iext_indemn	iext_remesa	iext_penjub	iext_intdiv	iext_becaes	iext_extrao iext_alquil), mi
-	tab cuantasinlarecibe, mi // By April 7th, 8.1% received 0, 11.1% received 1, 0.5% missing, and the rest more than 1
-
-	/*      cuantasinla |
-				 recibe |      Freq.     Percent        Cum.
-			------------+-----------------------------------
-					  0 |      2,589        8.08        8.08
-					  1 |        975        3.04       11.12
-					  2 |     19,794       61.74       72.86
-					  3 |      6,717       20.95       93.81
-					  4 |      1,563        4.88       98.69
-					  5 |        244        0.76       99.45
-					  6 |         22        0.07       99.52
-					  7 |          2        0.01       99.53
-					  8 |          1        0.00       99.53
-					  . |        151        0.47      100.00
-			------------+-----------------------------------
-				  Total |     32,058      100.00				*/ 
-
-				  
-	* Ingreso no laboral monetario (local), segun si recibieron o no en el ultimo mes
-		gen recibe_ingresonolab_mes = .
-		replace recibe_ingresonolab_mes = 1 if (s9q28__1==1 | s9q28__2==1 | s9q28__3==1 | s9q28__4==1 | s9q28__5==1 | s9q28__6==1 | s9q28__7==1 | s9q28__8==1 | s9q28__9==1 | s9q28__10==1 | s9q28__11==1 ) ///
-			| s9q28_petro==1 | (s9q29a__3==1 | s9q29a__4==1 | s9q29a__5==1 | s9q29a__6==1 | s9q29a__7==1 | s9q29a__8==1 | s9q29a__9==1) // Recibió ingreso monetario no laboral en algún concepto en el último mes
-		replace recibe_ingresonolab_mes = 0 if inlist(s9q28__1,0,.,.a) & inlist(s9q28__2,0,.,.a) & inlist(s9q28__3,0,.,.a) & inlist(s9q28__4,0,.,.a) & inlist(s9q28__5,0,.) & inlist(s9q28__6,0,.,.a) & inlist(s9q28__7,0,.,.a) & inlist(s9q28__8,0,.,.a) & inlist(s9q28__9,0,.,.a) & inlist(s9q28__10,0,.,.a) & inlist(s9q28__11,0,.,.a) ///
-			& inlist(s9q28_petro,2,.,.a) & inlist(s9q29b_3,0,.,.a) & inlist(s9q29b_4,0,.,.a) & inlist(s9q29b_5,0,.,.a) & inlist(s9q29b_6,0,.,.a) & inlist(s9q29b_7,0,.,.a) & inlist(s9q29b_8,0,.,.a) & inlist(s9q29b_9,0,.,.a) // No recibió ingreso laboral monetario en ningún concepto mensual
-		* Problem: income from abroad (s9q29a_3 to _9) are measured on a yearly basis, not monthly as the others.
-	
-	*Ingreso no laboral monetario (proveniente del exterior), segun si recibieron o no en el ultimo año
-		* Thus, analysis on the side for imputation for those 3 variables, create a new variables
-		gen recibe_ingresonolab_ano = .
-		replace recibe_ingresonolab_ano = 1 if (s9q29a__3==1 | s9q29a__4==1 | s9q29a__5==1 | s9q29a__6==1 | s9q29a__7==1 | s9q29a__8==1 | s9q29a__9==1)
-		replace recibe_ingresonolab_ano = 0 if inlist(s9q29a__3,0,.,.a) & inlist(s9q29a__4,0,.,.a) & inlist(s9q29a__5,0,.,.a) & inlist(s9q29a__6,0,.,.a) & inlist(s9q29a__7,0,.,.a) & inlist(s9q29a__8,0,.,.a) & inlist(s9q29a__9,0,.,.a)
-	
-	* Checks (data April 7)
-	tab recibe_ingresonolab_ano recibe_ingresonolab_mes, missing // 1,448 observations have =1 in both
-	tab labor_status recibe_ingresonolab_mes, missing 
-	tab labor_status recibe_ingresonolab_ano, missing 
-	
-	gen recibe_ingresonolab = .
-	replace recibe_ingresonolab = 0 if recibe_ingresonolab_mes==0 & recibe_ingresonolab_ano==0
-	replace recibe_ingresonolab = 1 if recibe_ingresonolab_mes==1
-	replace recibe_ingresonolab = 2 if recibe_ingresonolab_ano==1
-	replace recibe_ingresonolab = 3 if recibe_ingresonolab_mes==1 & recibe_ingresonolab_ano==1
-		label def recibe_ingresonolab 0 "Dice que no recibe nada" 1 "Dice que recibio en el ultimo mes" 2 "Dice que recibio en el último año" 3 "Dice que en el último mes Y último año"
-		label values recibe_ingresonolab recibe_ingresonolab
-	
-	tab recibe_ingresonolab, mi 
-	
-		* Crossed with the amount of income
-		egen inla_aux = rsum(inla_otro itrane_ns itrane_o_m itranp_ns itranp_o_m rem icap_m ijubi_m), mi
-		gen report_ingnolab_perocuanto = .
-		replace report_ingnolab_perocuanto = 0 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux==. // Dicen que reciben ila monetario, pero no reportan cuánto
-		replace report_ingnolab_perocuanto = 1 	if inlist(recibe_ingresonolab,1,2,3) & inla_aux>=0 & inla_aux!=.
-		*replace report_ingnolab_perocuanto = 1 	if inla_aux>=0 & inla_aux!=. // Same result as above line
-		
-	tab report_ingnolab_perocuanto, mi // We will have to impute 124 observations that declare to have received non labor income but don't say how much
-
-
-/*(************************************************************************************************************************************************ 
-*------------------------------------------------------------- 1.10: LINEAS DE POBREZA  -------------------------------------------------------------
-************************************************************************************************************************************************)*/
-
-/* !! We are missing information to complete this !! */
-
 **** Lineas internacionales 
 * Linea de pobreza 1.9 USD a day at 2011 PPP
 gen     lp_1usd= 1.9
@@ -2230,20 +1447,20 @@ gen     lp_3usd= 3.2
 gen     lp_5usd= 5.5
 
 **** Linea de Pobreza Oficial
-gen     lp_extrema  = 2650116
-gen     lp_moderada = 6360278
+gen     lp_extrema  = .
+gen     lp_moderada = .
 
 **** Ingreso Oficial
 gen     ing_pob_ext    = .
 gen     ing_pob_mod    = .
 gen     ing_pob_mod_lp = ing_pob_mod / lp_moderada
-
+*/
 
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: PRECIOS  ------------------------------------------------------------------
 ************************************************************************************************************************************************)*/
 
-/* We are missing information to complete this */
+* This was done in another dofile, most of them will be attached at the end
 
 /*
 **** Ajuste por inflacion
@@ -2252,7 +1469,7 @@ gen mes_ingreso = .
 
 * IPC del mes base
 */
-gen ipc = .
+* gen ipc = .
 /*
 gen ipc = 316025018				/*  MES BASE: promedio Enero-Diciembre			*/
 
@@ -2274,7 +1491,7 @@ replace ipc_rel = 1 if  mes==12
 */
 **** Ajuste por precios regionales: se ajustan los ingresos rurales 
 */
-gen p_reg = .
+* gen p_reg = .
 /*
 gen     p_reg = 1
 *replace p_reg = 0.8695				if  urbano==0
@@ -2291,41 +1508,20 @@ foreach i of varlist iasalp_m iasalp_nm  ictapp_m ictapp_nm  ipatrp_m ipatrp_nm 
 /*=================================================================================================================================================
 					2: Preparacion de los datos: Variables de segundo orden
 =================================================================================================================================================*/
+* This was done in another dofile, will be attached at the end
+
+* iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee */ ///
+* pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11 
+* renta_imp
+
 capture label drop relacion
 capture label drop hombre
 capture label drop nivel
-include "$rootpath\data_management\management\2. harmonization\aux_do\cuantiles.do"
-*include "$aux_do\do_file_aspire.do" // It was used to create specific things for another World Bank Practice
-include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_1_variables.do"
+*include "$dopath\data_management\management\2. harmonization\aux_do\cuantiles.do"
+*include "$dopath\data_management\management\2. harmonization\aux_do\do_file_1_variables.do"
+*include "$dopath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
+*include "$dopath\data_management\management\2. harmonization\aux_do\labels.do" /// this will get done in the Master
 
-/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
-		1 = Propia pagada		
-		2 = Propia pagandose
-		3 = Alquilada
-		4 = Alquilada parte de la vivienda
-		5 = Adjudicada pagándose Gran Misión Vivienda
-		6 = Adjudicada Gran Misión Vivienda
-		7 = Cedida por razones de trabajo
-		8 = Prestada por familiar o amigo
-		9 = Tomada
-		10 = Otra
-		
-		*Obs: Before there were options saying "De algun programa de gobierno (con titulo de propiedad)" and "De algun programa de gobierno (sin titulo de propiedad)"
-*/
-
-* Implicit rent inclusion
-	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6
-	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=7 & tenencia_vivienda<=10) | tenencia_vivienda==.
-	bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
-
-	gen     renta_imp = .
-	replace renta_imp = 0.10*itf_sin_ri  if  propieta_no_paga == 1
-
-	*replace renta_imp = renta_imp / p_reg
-	*replace renta_imp = renta_imp / ipc_rel 
-
-include "$rootpath\data_management\management\2. harmonization\aux_do\do_file_2_variables.do"
-include "$rootpath\data_management\management\2. harmonization\aux_do\labels.do"
 compress
 
 /*==================================================================================================================================================
@@ -2335,7 +1531,6 @@ compress
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
 *************************************************************************************************************************************************)*/
-egen ingresoslab = rowtotal(ingresoslab_mon ingresoslab_bene), missing
 
 order pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
 region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
@@ -2344,9 +1539,10 @@ alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
 seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
 enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
 relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-/*pobreza_enc pobreza_extrema_enc*/ lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc /*pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/ ///
-interview_month
+/*iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee*/ ///
+/*aux do_file_2_variables*/ /* pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11 */ ///
+/*pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/ ///
+interview_month interview__key interview__id quest
 				
 keep pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
 region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
@@ -2355,12 +1551,12 @@ alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
 seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
 enfermo interrumpio visita razon_no_medico lugar_consulta pago_consulta tiempo_consulta obtuvo_remedio razon_no_remedio fumar deporte ///
 relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sector1d sector sector_encuesta tarea contrato ocuperma djubila dsegsale /*d*/aguinaldo dvacaciones sindicato prog_empleo ocupado desocupa pea ///
-iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
-/*pobreza_enc pobreza_extrema_enc*/ lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc /*pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/  ///
-interview_month interview__key interview__id quest ///
+/* iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee */ ///
+/*aux do_file_2_variables*/ /* pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11 */ ///
+/* pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/  ///
+interview_month interview__key interview__id quest
 
-*Obs: We are missing the weights to be able to generate these in the aux do_file_2_variables: "pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11"
-notes: Venezuela changed its currency during the recolection of data. Income variables were changed to be expressed in bolivares of February 2020.
+notes: Income variables were changed to be expressed in bolivares of February 2020.
 
-save "$dataout\base_out_nesstar_cedlas_2019.dta", replace
+save "$cleaned\base_out_nesstar_cedlas_2019_pre labels and missing vars.dta" //, replace
 

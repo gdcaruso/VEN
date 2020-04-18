@@ -1,6 +1,6 @@
 /*===========================================================================
 Country name:	Venezuela
-Year:			2019
+Year:			2019/2020
 Survey:			ECNFT
 Vintage:		01M-01A
 Project:	
@@ -8,7 +8,7 @@ Project:
 Authors:			Malena Acuña, Trinidad Saavedra, Lautaro Chittaro, Julieta Ladronis
 
 Dependencies:		CEDLAS/UNLP -- The World Bank
-Creation Date:		March, 2020
+Creation Date:		March/April, 2020
 Modification Date:  
 Output:			sedlac do-file template
 
@@ -49,7 +49,7 @@ Note:
 		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 		global merged "$datapath\data_management\output\merged"
-		global pathaux "$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do"
+		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
 *Outputs
 		global cleaned "$datapath\data_management\output\cleaned"
 */
@@ -3115,7 +3115,7 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 *----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
 ************************************************************************************************************************************************)*/
 
-global antropo_ENCOVI
+global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
 
 * For children younger than 5 years old
 
@@ -3124,7 +3124,7 @@ global antropo_ENCOVI
 			1=Si
 			2=No 
 	*/
-	gen 	medido = s14q1==1 if s6q5<=5 & (s14q1!=. & s14q1!=.a)
+	gen 	medido = s14q1==1 if age_months<=120 & (s14q1!=. & s14q1!=.a)
 
 *** Why wasn't the child measured?
 	/*s14q2 Por qué no fue medido?
@@ -3133,7 +3133,7 @@ global antropo_ENCOVI
 			3=No está disponible
 			4=Otra razón 
 	*/
-	gen 	razon_nomedido = s14q2==1 if s14q1==2 & s6q5<=5 & (s14q2!=. & s14q2!=.a)
+	gen 	razon_nomedido = s14q2==1 if s14q1==2 & age_months<=120 & (s14q2!=. & s14q2!=.a)
 
 *** Confirm child's reported age (in months)
 	/*s14q3 Confirmar la edad (en meses) reportada del niño
@@ -3143,12 +3143,76 @@ global antropo_ENCOVI
 	gen 	confirma_edad = person_confirm==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
 	
 *** Was the child able to be alone in the measurement instrument?
-	/*s14q1 Fue capaz de permanecer solo en el instrumento de medición?
+	/*s14q14 Fue capaz de permanecer solo en el instrumento de medición?
 			1=Si
 			2=No 
 	*/
-	gen 	solo_medicion = s14q14==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
+	gen 	solo_medicion = s14q14==1 if s14q1==1 & age_months<=120 & (s14q14!=. & s14q14!=.a)
 
+*** Register the weight in kilograms (twice, third if too much difference between first two)
+	*weight_1 Registre el peso en kilogramos
+	*weight_2 Segundo registro del peso 
+	*weight_3 Tercer registro (si mucha diferencia en los 2 primeros)
+	gen		peso1 = weight_1 if s14q1==1 & age_months<=120 & (weight_1!=. & weight_1!=.a)
+	gen		peso2 = weight_2 if s14q1==1 & age_months<=120 & (weight_2!=. & weight_2!=.a)
+	gen		peso3 = weight_3 if weight_diff12>0.1 & s14q1==1 & age_months<=120 & (weight_3!=. & weight_3!=.a)
+
+*** Weight (in kg) calculated by the survey
+	*weight Peso en kilogramos calculado por la encuesta
+	gen 	peso = weight if s14q1==1 & age_months<=120 & (weight!=. & weight!=.a)
+	
+*** Register the altitude/longitude in centimeters (twice)
+	*height_1 Registre la altura/longitud en centímetros
+	*height_2 Segundo registro de la altura/longitud
+	*height_3 Tercer registro (si mucha diferencia en los 2 primeros)
+	gen		altura1 = height_1 if s14q1==1 & age_months<=120 & (height_1!=. & height_1!=.a)
+	gen		altura2 = height_2 if s14q1==1 & age_months<=120 & (height_2!=. & height_2!=.a)
+	gen		altura3 = height_3 if height_diff12>0.5 & s14q1==1 & age_months<=120 & (height_3!=. & height_3!=.a)
+
+***Height (in cm) calculated by the survey
+	*height Altura en centímetros calculada por la encuesta 
+	gen		altura = height if s14q1==1 & age_months<=120 & (height!=. & height!=.a)
+
+*** Was the child measured standing or lying down?
+	/* posicion Entrevistador: El menor fue medido de pie o acostado?
+			1=De pie
+			2=Acostado
+	*/
+	*replace	posicion=. if age_months=<120 
+	replace posicion=. if posicion!=.a
+	
+*** When weighting, was there why you couldn't weight (ex. heavy clothes that the child didn't take out)?
+	/*weight_comments Al pesar, existía algo por lo que pudiera pesar más (por ejemplo ropa pesada que no se le quitó) ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_pesar = weight_comments if age_months<=120 & (weight_comments!=. & weight_comments!=.a)
+
+*** When measuring, was there something why you could not measure more (ex. thick shoes or accesories)?
+	/*height_comments Al medir, había algo por lo que pudiera medir más (por ejemplo zapatos gruesos o accesorios) ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_medir = height_comments if age_months<=120 & (height_comments!=. & height_comments!=.a)
+
+*** When measuring, was there irregularities in the surface of the floor where you placed the stadiometer?
+	/*height_comments2 Al medir, había irregularidad en la superficie del piso donde se colocó el tallímetro ?
+			1=Si
+			2=No 
+	*/
+	gen 	problema_medir2 = height_comments2 if age_months<=120 & (height_comments2!=. & height_comments2!=.a)
+
+*** Height for age index, calculated by the survey
+	* hfa Índice de altura para la edad
+	replace hfa =. if age_months<=120 & (hfa!=. & hfa!=.a)
+	
+*** Weight for age index, calculated by the survey
+	* wfa Índice de peso para la edad
+	replace wfa =. if age_months<=120 & (wfa!=. & wfa!=.a)
+	
+*** Weight for height index, calculated by the survey
+	* wfh Índice de peso para la altura
+	replace wfh =. if age_months<=120 & (wfh!=. & wfh!=.a)
 
 /*(************************************************************************************************************************************************ 
 *---------------------------------------- XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES -------------------------------------
@@ -4054,8 +4118,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 gen mes_ingreso = .
 
 * IPC del mes base
-gen ipc = 2661830760000 // Updated with Canasta Alimentaria CENDAS
-
+gen ipc = 2659537979000 //feb20 CENDAS food basket
 gen cpiperiod = "2020m02"
 
 /*
@@ -4167,10 +4230,8 @@ gen pondera=1
 * Cambiar con la verdadera variable de ponderadores cuando la tengamos
  
 include "$pathaux\do_file_2_variables.do"
-* El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
 
-include "$pathaux\Labels_ENCOVI.do"
-* Terminar de chequear nuestros labels!!
+* include "$pathaux\Labels_ENCOVI.do" // This will get done in the Master do, in English and Spanish, at the end
 
 
 *(************************************************************************************************************************************************ 
@@ -4196,11 +4257,11 @@ compress
 sort id com
 
 *Silencing para que corra más rápido (des-silenciar luego)
-/* 
+ 
 order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
-*/
+interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
+
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///

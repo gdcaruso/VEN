@@ -18,12 +18,14 @@ foreach i of varlist iasalp_m iasalp_nm  ictapp_m ictapp_nm  ipatrp_m ipatrp_nm 
 		replace `i' = `i' / ipc_rel 
 		}
 }
-
+*/
 
 /*(************************************************************************************************************************************************************************ 
 *-------------------------------------------------------------	2.3: Variables demograficas  ------------------------------------------------------------------------------
 ************************************************************************************************************************************************************************)*/
 
+* Malena: Lo que se silencio a continuación ya está en nuestro dofile madre
+/*
 * Genera grupos de edad
 gen     gedad1 = 1		if  edad<=14
 replace gedad1 = 2		if  edad>=15 & edad<=24
@@ -86,6 +88,10 @@ replace supc = 1		if  nivel==6
 gen     exp = edad-aedu-7
 replace exp = 0			if  exp<0
 	
+	* Malena: nuestros dofiles hacen exp=edad-aedu-6 porque el manual decía:
+		* "Se calcula como la diferencia entre la edad del individuo y sus años de educación formal más 6, 
+		* excepto que sepamos con seguridad que la educación primaria en un determinado país o año comienza a una edad distinta de 6." 
+
 
 /*(************************************************************************************************************************************************************************ 
 *-------------------------------------------------------------	2.9: Variables laborales  --------------------------------------------------------------------------------
@@ -107,8 +113,8 @@ replace grupo_lab = 7		if  relab==4
 * Categorias de condicion laboral
 gen     categ_lab = 1		if  grupo_lab>=1 & grupo_lab<=4
 replace categ_lab = 2		if  grupo_lab>=5 & grupo_lab<=7
-*/	
 
+*/
 /*(************************************************************************************************************************************************************************ 
 *-------------------------------------------------------------	2.11: Variables de ingresos  ------------------------------------------------------------------------------
 ************************************************************************************************************************************************************************)*/

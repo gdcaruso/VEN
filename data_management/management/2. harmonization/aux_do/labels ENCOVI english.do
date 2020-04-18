@@ -9,26 +9,26 @@ label var    municipio 	"Municipality"
 label var    nombmun 	"Municipality's name"
 label var    parroquia 	"Parish"
 label var    nombpar 	"Parish name"
-label var    centropo 	"Populated center"
-label var    nombcp 	"Name of populated center"
-label var    segmento 	"Segment"
-label var    peso_segmento	"Segment weight"
-label var    combined_id 	"Combined identifiers"
-label var    tipo_muestra 	"Sample type"			
-label var    gps_struc_latitud	"GPS coordinates of the structure (from listing): Latitude"
-label var    gps_struc_longitud	"GPS coordinates of the structure (from listing): Longitude"
-label var    gps_struc_exactitud 	"GPS coordinates of the structure (from listing): Accuracy"
-label var    gps_struc_altitud 	"GPS coordinates of the structure (from listing): Altitude"
-label var    gps_struc_tiempo	"GPS coordinates of the structure (from listing): Time stamp"
-label var    gps_coord_latitud 	"GPS coordinates: Latitude"
-label var    gps_coord_longitud "GPS coordinates: Longitude"
-label var    gps_coord_exactitud 	"GPS coordinates: Accuracy"
-label var    gps_coord_altitud 	"GPS coordinates: Altitude"
-label var    gps_coord_tiempo	"GPS coordinates: Time stamp"
-label var    id_str 	"Number of structures according to listing"
-label var    statut 	"Number of the household in the structure"
-label def 	 status		1 "Residential" 2 "Non-residential"
-label var    sector_urb "Sector/Urbanization/Neighborhood according to listing"
+*label var    centropo 	"Populated center"
+*label var    nombcp 	"Name of populated center"
+*label var    segmento 	"Segment"
+*label var    peso_segmento	"Segment weight"
+*label var    combined_id 	"Combined identifiers"
+*label var    tipo_muestra 	"Sample type"			
+*label var    gps_struc_latitud	"GPS coordinates of the structure (from listing): Latitude"
+*label var    gps_struc_longitud	"GPS coordinates of the structure (from listing): Longitude"
+*label var    gps_struc_exactitud 	"GPS coordinates of the structure (from listing): Accuracy"
+*label var    gps_struc_altitud 	"GPS coordinates of the structure (from listing): Altitude"
+*label var    gps_struc_tiempo	"GPS coordinates of the structure (from listing): Time stamp"
+*label var    gps_coord_latitud 	"GPS coordinates: Latitude"
+*label var    gps_coord_longitud "GPS coordinates: Longitude"
+*label var    gps_coord_exactitud 	"GPS coordinates: Accuracy"
+*label var    gps_coord_altitud 	"GPS coordinates: Altitude"
+*label var    gps_coord_tiempo	"GPS coordinates: Time stamp"
+*label var    id_str 	"Number of structures according to listing"
+*label var    statut 	"Number of the household in the structure"
+*label def 	 status		1 "Residential" 2 "Non-residential"
+*label var    sector_urb "Sector/Urbanization/Neighborhood according to listing"
 
 
 /*(************************************************************************************************************************************************* 
@@ -595,10 +595,10 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 *** Dummy household owns cars
 *  AUTO (s5q4): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
 		*-- Label variable
-		label var auto "Dummy household owns cars"
+		cap label var auto "Dummy household owns cars"
 		*-- Label values
-		label def auto 1 "Yes" 0 "No"
-		label val auto auto
+		cap label def auto 1 "Yes" 0 "No"
+		cap label val auto auto
 
 *** Number of functioning cars in the household
 * NCARROS (s5q4a) : ¿De cuantos carros dispone este hogar que esten en funcionamiento?
@@ -863,10 +863,10 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 */
 
 		*-- Label variable
-		label var tipo_centro_educ "The educational center is: (this survey)"
+		*label var tipo_centro_educ "The educational center is: (this survey)"
 		*-- Label values
-		label def tipo_centro_educ 1 "Private" 2 "Public"
-		label value tipo_centro_educ tipo_centro_educ
+		*label def tipo_centro_educ 1 "Private" 2 "Public"
+		*label value tipo_centro_educ tipo_centro_educ
 		
 		*-- Label variable
 		label var edu_pub "The educational center is:(harmonized)"
@@ -1375,7 +1375,7 @@ label values pagosegsalud pagosegsalud
 label var	quien_pagosegsalud 	"Who paid for the health insurance?"
 label def 	quien_pagosegsalud	1 "Labor benefit" 2 "Family member abroad" 3 "Another household member" 4 "Other"
 label values quien_pagosegsalud quien_pagosegsalud
-label var  	quien_pagosegsalud_o "Who paid for the health insurance? Other"
+*label var  	quien_pagosegsalud_o "Who paid for the health insurance? Other"
 label var	cant_pagosegsalud 	"How much did you pay for the health insurance?"
 label var	mone_pagosegsalud 	"In which currency did you pay for the health insurance?"
 label def	mone_pagosegsalud	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
@@ -1425,10 +1425,10 @@ label var  	dili_credito  	"Have you searched for credit or a shop in the last 4
 label var  	dili_tramite 	"Have you done permit or legalization paperwork for work in the last 4 weeks?"
 label var  	dili_compra 	"Have you bought supplies or raw materials in the last 4 weeks?"
 label var  	dili_contacto  	"Have you contacted staff in the last 4 weeks?"
-label var  	dili_otro	 	"Have you done other diligencies to start work in the last 4 weeks?"
+*label var  	dili_otro	 	"Have you done other diligencies to start work in the last 4 weeks?"
 label var  	como_busco_semana 	"Have you carried out any of these proceedings in that period? (4 weeks)"
 
-foreach i of varlist dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto dili_otro {
+foreach i of varlist dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto /*dili_otro*/ {
 	label def	`i'	1 "Yes" 0 "No"
 	label values `i' `i'
 	}
@@ -1634,13 +1634,13 @@ label var  	mone_aporta_pension		"Currency"
  */
 	
 	*-- Label variable
-	label var informant_emig "Informant: Emigration"
+	*label var informant_emig "Informant: Emigration"
 	*-- Label values	
-	label def informant_emig_eng  1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter/stepson/stepdaughter" ///
-							  4 "Grandchild" 5 "Son/daugther/father/mother-in-law" 6 "Father/mother" 7 "Sibling" ///
-							  8 "Brother/sister-in-law" 9 "Nephew/niece" 10 "Other relative" 11 "Other: non relative" ///
-							  12 "House maid"
-	label value informant_emig  informant_emig_eng
+	*label def informant_emig_eng  1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter/stepson/stepdaughter" ///
+	*						  4 "Grandchild" 5 "Son/daugther/father/mother-in-law" 6 "Father/mother" 7 "Sibling" ///
+	*						  8 "Brother/sister-in-law" 9 "Nephew/niece" 10 "Other relative" 11 "Other: non relative" ///
+	*						  12 "House maid"
+	*label value informant_emig  informant_emig_eng
 
 
 *--------- Emigrant from the household
@@ -1670,9 +1670,9 @@ label var  	mone_aporta_pension		"Currency"
  */	
 	
 	*-- We will have 10 variables with names
-	forval i = 0/9{
-	label var nombre_emig_`i' "Name of Emigrants from the household"
-	}
+	*forval i = 0/9{
+	*label var nombre_emig_`i' "Name of Emigrants from the household"
+	*}
 
 	
  *--------- Age of the emigrant
@@ -2080,13 +2080,13 @@ label var  	mone_aporta_pension		"Currency"
  */
 	
 	*-- Label variable
-	label var informant_shock "Informant: shocks affecting households"
+	*label var informant_shock "Informant: shocks affecting households"
 	*-- Label values	
-	label def informant_shock_eng  1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter/stepson/stepdaughter" ///
-							  4 "Grandchild" 5 "Son/daugther/father/mother-in-law" 6 "Father/mother" 7 "Sibling" ///
-							  8 "Brother/sister-in-law" 9 "Nephew/niece" 10 "Other relative" 11 "Other: non relative" ///
-							  12 "House maid"
-	label value informant_shock  informant_shock_eng
+	*label def informant_shock_eng  1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter/stepson/stepdaughter" ///
+	*						  4 "Grandchild" 5 "Son/daugther/father/mother-in-law" 6 "Father/mother" 7 "Sibling" ///
+	*						  8 "Brother/sister-in-law" 9 "Nephew/niece" 10 "Other relative" 11 "Other: non relative" ///
+	*						  12 "House maid"
+	*label value informant_shock  informant_shock_eng
 
 
 *--------- Events which affected the household

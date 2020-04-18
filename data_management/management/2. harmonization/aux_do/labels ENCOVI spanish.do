@@ -112,7 +112,7 @@ label values empezo_negocio empezo_negocio
 label var  	como_busco_semana 	"¿Realizó alguna de esas diligencias la semana pasada? "
 label def	como_busco_semana	1 "Si" 0 "No"
 label values  como_busco_semana como_busco_semana
-foreach i of varlist dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto dili_otro {
+foreach i of varlist dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto /*dili_otro*/ {
 	label def	`i'				1 "Si" 0 "No"
 	label values `i' `i'
 	}

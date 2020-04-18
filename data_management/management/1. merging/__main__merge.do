@@ -18,8 +18,8 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user
-
+// Define rootpath according to user // This is silenced now because it is established in the main master
+/*
 	    * User 1: Trini
 		global trini 0
 		
@@ -36,16 +36,18 @@ Note:
 				global rootpath "C:\Users\wb563583\GitHub\VEN"
 		}
 	    if $lauta {
-		global dopath "C:\Users\wb563365\GitHub\VEN"
-		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+				global dopath "C:\Users\wb563365\GitHub\VEN"
+				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
-				global rootpath "C:\Users\wb550905\GitHub\VEN"
-		}
+				global dopath "C:\Users\wb550905\Github\VEN"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 
+		}
+*/
 ********************************************************************************
 
 

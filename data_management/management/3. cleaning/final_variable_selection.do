@@ -1,11 +1,13 @@
 ********************************************************************************
 	* DROP VARIABLES 
 ********************************************************************************
-use "$datapath\ENCOVI_2019_postpobreza.dta", replace
+
+use "$output\ENCOVI_2019_postpobreza.dta", clear
+
 	***********************
 	* FROM SURVEY
 	***********************
-	
+
 *---- Geolocalization	
 		global geoloc 			gps_struc_latitud gps_struc_longitud gps_struc_exactitud gps_struc_altitud gps_struc_tiempo ///
 								gps_coord_latitud gps_coord_longitud gps_coord_exactitud gps_coord_altitud gps_coord_tiempo	
@@ -109,6 +111,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 							fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
 							comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
 							pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
+		global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas telefono_fijo
 *----VII. EDUCATION / EDUCACIÓN 
 		global educ_ENCOVI contesta_ind_e quien_contesta_e asistio_educ razon_noasis asiste nivel_educ_act g_educ_act regimen_act a_educ_act s_educ_act t_educ_act edu_pub ///
 				fallas_agua fallas_elect huelga_docente falta_transporte falta_comida_hogar falta_comida_centro inasis_docente protesta nunca_deja_asistir ///
@@ -117,17 +120,17 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 				cuota_insc_monto compra_utiles_monto compra_uniforme_monto costo_men_monto costo_transp_monto otros_gastos_monto ///
 				cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon ///
 				cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m ///
-				nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/ edad_dejo_estudios razon_dejo_estudios razon_dejo_est_comp
-*----VIII. HEALTH / SALUD 
+				nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/ edad_dejo_estudios razon_dejo_estudios razon_dejo_est_comp /* tipo_centro_educ */
 
+*----VIII. HEALTH / SALUD
 		global health_ENCOVI enfermo enfermedad enfermedad_o visita razon_no_medico razon_no_medico_o medico_o_quien medico_o_quien_o lugar_consulta lugar_consulta_o pago_consulta cant_pago_consulta mone_pago_consulta ///
 				mes_pago_consulta receto_remedio recibio_remedio donde_remedio donde_remedio_o pago_remedio mone_pago_remedio mes_pago_remedio pago_examen cant_pago_examen ///
 				mone_pago_examen mes_pago_examen remedio_tresmeses cant_remedio_tresmeses mone_remedio_tresmeses mes_remedio_tresmeses seguro_salud ///
-				afiliado_segsalud pagosegsalud quien_pagosegsalud cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
+				afiliado_segsalud pagosegsalud quien_pagosegsalud /*quien_pagosegsalud_o*/ cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
 
 *----IX: LABOR / EMPLEO	
 	global labor_ENCOVI ocupado trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
-			dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto ///
+			dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto /*dili_otro*/ ///
 			como_busco_semana razon_no_busca razon_no_busca_o actividades_inactivos tarea sector_encuesta categ_ocu hstr_ppal trabajo_secundario hstr_todos /// 
 			im_sueldo im_hsextra im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_petro ///
 			im_sueldo_cant im_hsextra_cant im_propina_cant im_comision_cant im_ticket_cant im_guarderia_cant im_beca_cant im_hijos_cant im_antiguedad_cant im_transporte_cant im_rendimiento_cant im_otro_cant im_petro_cant ///
@@ -179,7 +182,8 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 *----XIII: FOOD SAFETY / SEGURIDAD ALIMENTARIA 
 		global segalimentaria_ENCOVI ingsuf_comida preocucomida_norecursos faltacomida_norecursos nosaludable_norecursos pocovariado_norecursos salteacomida_norecursos comepoco_norecursos ///
 				hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_me18_norecursos comepoco_me18_norecursos nocomedia_me18_norecursos comida_trueque
-*----XIV: FOOD SAFETY / SEGURIDAD ALIMENTARIA 
+
+*----XIV: ANTROPOMETRÍA
 		global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
 		
 *----XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES 
@@ -190,13 +194,33 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 
 *----Más variables de ingreso CEDLAS 
 		global from_cedlas pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-				interview_month interview__id interview__key quest linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
-
+				interview_month interview__id interview__key quest  // additional
+*----Pobreza
+		/* rename pobre_19 pobre_19usd
+		rename pobre_32 pobre_32usd
+		rename pobre_55 pobre_55usd */
+		rename lp_19 lp_19usd
+		rename lp_32 lp_32usd
+		rename lp_55 lp_55usd
+		global pobreza pobre /*pobre_19usd pobre_32usd pobre_55usd*/ lp_19usd lp_32usd lp_55usd lp_moderada lp_extrema pobre_extremo 
+		
 *---- Keep 		
-keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $ingreso_ENCOVI $from_cedlas
+keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $ingreso_ENCOVI $from_cedlas $pobreza
 
 *---- Drop de las que teniamos dudas
-drop quest informant_emig informant_shock /*centropo nombcp segmento peso_segmento combined_id tipo_muestra /*gps* */ id_str statut sector_urb d_renta_imp_b*/
+cap drop quest 
+cap drop informant_emig 
+cap drop informant_shock 
+cap drop centropo 
+cap drop nombcp 
+cap drop segmento 
+cap drop peso_segmento 
+cap drop combined_id 
+cap drop tipo_muestra 
+cap drop id_str 
+cap drop statut 
+cap drop sector_urb 
+cap drop d_renta_imp_b
 
 compress
 

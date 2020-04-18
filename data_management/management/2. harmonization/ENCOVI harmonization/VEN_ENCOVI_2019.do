@@ -870,7 +870,7 @@ cuota_insc compra_utiles compra_uniforme costo_men costo_transp otros_gastos ///
 cuota_insc_monto compra_utiles_monto compra_uniforme_monto costo_men_monto costo_transp_monto otros_gastos_monto ///
 cuota_insc_mon compra_utiles_mon compra_uniforme_mon costo_men_mon costo_transp_mon otros_gastos_mon ///
 cuota_insc_m compra_utiles_m compra_uniforme_m costo_men_m costo_transp_m otros_gastos_m ///
-nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/ edad_dejo_estudios razon_dejo_estudios razon_dejo_est_comp
+nivel_educ_en nivel_educ g_educ regimen a_educ s_educ t_educ alfabeto /*titulo*/ edad_dejo_estudios razon_dejo_estudios razon_dejo_est_comp tipo_centro_educ
 
 *** Is the "member" answering by himself/herself?
 gen contesta_ind_e=s7q0 if (s7q0!=. & s7q0!=.a)
@@ -1181,7 +1181,7 @@ label value razon_dejo_est_comp razon_dejo_est_comp
 global health_ENCOVI enfermo enfermedad enfermedad_o visita razon_no_medico razon_no_medico_o medico_o_quien medico_o_quien_o lugar_consulta lugar_consulta_o pago_consulta cant_pago_consulta mone_pago_consulta ///
 	mes_pago_consulta receto_remedio recibio_remedio donde_remedio donde_remedio_o pago_remedio mone_pago_remedio mes_pago_remedio pago_examen cant_pago_examen ///
 	mone_pago_examen mes_pago_examen remedio_tresmeses cant_remedio_tresmeses mone_remedio_tresmeses mes_remedio_tresmeses seguro_salud ///
-	afiliado_segsalud pagosegsalud quien_pagosegsalud cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
+	afiliado_segsalud pagosegsalud quien_pagosegsalud quien_pagosegsalud_o cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
 
 
 *** Have you had any health problem, illness, or accident in the last 30 days?
@@ -1421,7 +1421,7 @@ clonevar   	mes_pagosegsalud = s8q21c if s8q19==1 & (s8q21c!=. & s8q21c!=.a)
 *************************************************************************************************************************************************)*/
 
 global labor_ENCOVI trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
-dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto ///
+dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto dili_otro ///
 como_busco_semana razon_no_busca razon_no_busca_o actividades_inactivos tarea sector_encuesta categ_ocu hstr_ppal trabajo_secundario hstr_todos /// 
 im_sueldo im_hsextra im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_petro ///
 im_sueldo_cant im_hsextra_cant im_propina_cant im_comision_cant im_ticket_cant im_guarderia_cant im_beca_cant im_hijos_cant im_antiguedad_cant im_transporte_cant im_rendimiento_cant im_otro_cant im_petro_cant ///

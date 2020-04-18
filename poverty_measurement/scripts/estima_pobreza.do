@@ -170,4 +170,4 @@ gen pobre_extremo = ipcf<lp_extrema
 drop lp_ofi le_ofi extremo_new extremo_ofi pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi ext_10off ext_20off ext_50off ext_75off pob_??off obs
 
 //save
-save "$datapath/ENCOVI_2019_postpobreza.dta", replace
+save "$output\ENCOVI_2019_postpobreza.dta", replace

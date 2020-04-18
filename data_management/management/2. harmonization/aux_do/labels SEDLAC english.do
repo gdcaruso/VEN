@@ -111,7 +111,7 @@ label var    migra_rec       "Dummy for recent migrant"
 label define migra_rec 		 0 "No" 1 "Yes"
 label values migra_rec migra_rec
 
-label var    nuevareg        "Geographical coverage of survey"
+cap label var    nuevareg        "Geographical coverage of survey"
 
 label var    agua            "Does the dwelling have access to a water supply system?"
 label define agua 			 0 "No" 1 "Yes"
@@ -256,13 +256,13 @@ label var    relab           "Type of employment in the main occupation"
 label define relab 			 1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
 label values relab relab
 
-label var    relab_s         "Type of employment in the secondary occupation"
-label define relab_s 		 1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
-label values relab_s relab_s
+cap label var    relab_s         "Type of employment in the secondary occupation"
+cap label define relab_s 		 1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
+cap label values relab_s relab_s
 
-label var    relab_o         "Type of employment in the terciary occupation"
-label define relab_o 		 1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
-label values relab_o relab_o
+cap label var    relab_o         "Type of employment in the terciary occupation"
+cap label define relab_o 		 1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
+cap label values relab_o relab_o
 
 label var    asal            "Dummy for salaried worker in the main occupation" 
 label define asal 			 0 "Not salaried worker" 1 "Salaried worker" 
@@ -421,13 +421,13 @@ label var    iec             "Equivalized income C"
 label var    ied             "Equivalized income D" 
 label var    iee             "Equivalized income E" 
 label var    ilea_m          "Equivalized labor income - monetary" 
-label var    lp_extrema	     "Official extreme poverty line"
-label var    lp_moderada     "Official moderate poverty line"
-label var    ing_pob_ext     "Income used to estimate official extreme poverty"
-label var    ing_pob_mod     "Income used to estimate official moderate poverty"
-label var    ing_pob_mod_lp  "Official income / Poverty Line"
-label var    p_reg	         "Adjustment factor for regional prices"
-label var    ipc	         "CPI base month" 
+cap label var    lp_extrema	     "Official extreme poverty line"
+cap label var    lp_moderada     "Official moderate poverty line"
+cap label var    ing_pob_ext     "Income used to estimate official extreme poverty"
+cap label var    ing_pob_mod     "Income used to estimate official moderate poverty"
+cap label var    ing_pob_mod_lp  "Official income / Poverty Line"
+cap label var    p_reg	         "Adjustment factor for regional prices"
+cap label var    ipc	         "CPI base month" 
 cap label var    pipcf	         "Percentiles household per capita income"
 cap label var    dipcf	         "Income deciles per capita household income"
 cap label var    p_ing_ofi	     "Income percentiles to estimate official poverty"

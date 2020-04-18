@@ -1235,8 +1235,9 @@ global labor_SEDLAC // completar
 
 	* s9q18: ¿Cuántas horas trabaja a la semana en todos sus trabajos o negocios?
 	gen      hstrt = . 
-	replace  hstrt = s9q18 if (relab>=1 & relab<=4) & (s9q18>=0 & s9q18!=.) & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means being economically active
-
+	replace  hstrt = s9q16 if (relab>=1 & relab<=4) & (s9q16>=0 & s9q16!=.) & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means being economically active
+	replace  hstrt = s9q18 if s9q17==1 & (relab>=1 & relab<=4) & (s9q18>=0 & s9q18!=.) & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) // para los que tienen dos trabajos
+	
 	* s9q16: ¿Cuántas horas trabajó durante la semana pasada en su ocupación principal?
 	gen      hstrp = . 
 	replace  hstrp = s9q16 if (relab>=1 & relab<=4) & (s9q16>=0 & s9q16!=.) & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means being economically active
@@ -1558,5 +1559,5 @@ interview_month interview__key interview__id quest
 
 notes: Income variables were changed to be expressed in bolivares of February 2020.
 
-save "$cleaned\base_out_nesstar_cedlas_2019_pre labels and missing vars.dta" //, replace
+save "$cleaned\base_out_nesstar_cedlas_2019_pre labels and missing vars.dta", replace
 

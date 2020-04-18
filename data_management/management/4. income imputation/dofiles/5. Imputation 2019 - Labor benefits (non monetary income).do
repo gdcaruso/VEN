@@ -110,10 +110,18 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		You will first need to install the package elasticregress, using the command line ssc install elasticregress. 
 		For the purposes of this exercise, please use as argument for the Lasso command set seed 1 and the default number of folds to be 10. */
 		
-		set seed 1
-		lassoregress log_bene $xvar1 if log_bene>0 & recibe_ingresolab_nomon==1, numfolds(5)
-		display e(varlist_nonzero)
-		global lassovars = e(varlist_nonzero)
+		*set seed 1
+		*lassoregress log_bene $xvar1 if log_bene>0 & recibe_ingresolab_nomon==1, numfolds(5)
+		*display e(varlist_nonzero)
+		
+		global lassovars hombre total_hrtr_sinmis p_agegroup_sinmis1 p_relacion_comp_sinmis2 p_relacion_comp_sinmis3 p_relacion_comp_sinmis4 ///
+		p_relacion_comp_sinmis10 p_estado_civil_sinmis1 p_region_est1_sinmis3 p_region_est1_sinmis5 p_region_est1_sinmis8 p_municipio_sinmis1 ///
+		p_municipio_sinmis6 p_municipio_sinmis7 p_municipio_sinmis8 p_municipio_sinmis11 p_municipio_sinmis13 p_municipio_sinmis15 ///
+		p_municipio_sinmis16 p_municipio_sinmis17 p_municipio_sinmis23 p_municipio_sinmis24 p_propieta_hh_sinmis1 p_auto_hh_sinmis1 ///
+		p_heladera_hh_sinmis1 p_computadora_hh_sinmis2 p_calentador_hh_sinmis2 p_aire_hh_sinmis2 p_microondas_hh_sinmis2 ///
+		p_afiliado_segsalud_comp_sinmis1 p_tarea_sinmis4 p_tarea_sinmis6 p_tarea_sinmis8 p_tarea_sinmis9 p_sector_encuesta_sinmis1 ///
+		p_sector_encuesta_sinmis3 p_sector_encuesta_sinmis6 p_sector_encuesta_sinmis8 p_categ_ocu_sinmis1 p_categ_ocu_sinmis5 ///
+		p_cuenta_corr_sinmis1 p_tdebito_sinmis1 p_aporte_pension_sinmis2 p_clap_sinmis1 p_comida_trueque_sinmis1
 
 	** Vselect
 		*Problema: no se puede poner variable como factor variables (incluir dummys una a una) 
@@ -139,9 +147,9 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	* The variables which leads to the maximun R2 are selected for the imputation
 	set more off
 	mi set flong
-	set seed 66778899
+	*set seed 66778899
 	mi register imputed log_bene
-	mi impute regress log_bene $lassovars if log_bene>0 & recibe_ingresolab_nomon==1, add(2) rseed(66778899) force noi 
+	mi impute regress log_bene $lassovars if log_bene>0 & recibe_ingresolab_nomon==1, add(30) rseed(66778899) force noi 
 	mi unregister log_bene
 
 	//clonevar dila_m_zero = dlinc_zero 

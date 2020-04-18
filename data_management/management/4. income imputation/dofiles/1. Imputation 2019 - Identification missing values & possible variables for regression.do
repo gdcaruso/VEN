@@ -18,10 +18,9 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-clear all 
 
 // Define rootpath according to user (silenced as this is done by main now)
-/*
+
 		* User 1: Trini
 		global trini 0
 		
@@ -54,7 +53,7 @@ clear all
 *Outputs
 	global forimp "$datapath\data_management\output\for imputation"
 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-*/
+
 ********************************************************************************
 
 ****************************************************************

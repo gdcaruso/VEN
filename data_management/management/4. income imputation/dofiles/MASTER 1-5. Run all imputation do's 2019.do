@@ -20,6 +20,7 @@ Note:
 
 // Define rootpath according to user (silenced as this is done by main now)
 /*
+clear all
 	    * User 1: Trini
 		global trini 0
 		
@@ -50,7 +51,7 @@ Note:
 *Inputs
 	global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 	global exrate 	"$datapath\data_management\input\exchenge_rate_price.dta"
-	global pathaux 	"$dopath\data_management\management\2. harmonization\ENCOVI harmonization\aux_do"
+	global pathaux 	"$dopath\data_management\management\2. harmonization\aux_do"
 	global impdos 	"$dopath\data_management\management\4. income imputation\dofiles"
 	global forimp 	"$datapath\data_management\output\for imputation"
 *Output
@@ -61,6 +62,8 @@ Note:
 ***********************************
 //*** Running all imputations ***//
 **********************************
+
+*set seed 1
 
 do "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
@@ -305,8 +308,6 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	include "$pathaux\cuantiles.do"
 	include "$pathaux\do_file_2_variables.do"
 	
-	* El do de CEDLAS que está en aux_do parece disinto que el do de CEDLAS adentro de ENCOVI harmonization, chequear
-
 	
 ************************************************************
 //*** QUICK CHECK TO SEE IF EVERYTHING IS WORKING FINE ***//

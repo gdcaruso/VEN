@@ -1,3 +1,7 @@
+ 
+
+label var razon_no_busca_o "Why aren't you currently looking for a job? (Other reasons)"
+
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- XVI: BANKING / BANCARIZACIÓN ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
@@ -47,3 +51,21 @@ label var quien_contesta_b "Who is answering instead of 'member'?"
 
 *** Reasons for not holding any bank account or card?
 	label var razon_nobanco "Reasons for not holding any bank account or card?"
+	
+/*(************************************************************************************************************************************************ 
+*------------------------------------------------------------- POVERTY ---------------------------------------------------------------
+************************************************************************************************************************************************)*/
+	*** International poverty line 1.9 USD	
+	label var lp_19usd "International poverty line 1.9 USD"
+
+	*** International poverty line 3.2 USD	
+	label var lp_32usd "International poverty line 3.2 USD"
+
+	*** International poverty line 5.5 USD	
+	label var lp_55usd "International poverty line 5.5 USD"
+	
+	*** Poverty identifier
+	label var pobre "Poverty identifier"
+	
+	*** Extreme poverty identifier
+	label var pobre_extremo "Extreme poverty identifier"

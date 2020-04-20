@@ -20,7 +20,7 @@ Note: Income imputation - Identification missing values
 clear all
 
 // Define rootpath according to user (silenced as this is done by main now)
-
+/*
 	    * User 1: Trini
 		global trini 0
 		
@@ -50,7 +50,7 @@ clear all
 
 	global forimp "$datapath\data_management\output\for imputation"
 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-
+*/
 ********************************************************************************
 
 ///*** OPEN DATABASE ***///
@@ -87,7 +87,7 @@ clear all
 	values in the independent variables as an additional category. The missing values in the dependent variable are estimated from
 	the posterior distribution of model parameters or from the large-sample normal approximation of the posterior distribution*/
 
-	  	global xvar1 edad edad2 agegroup hombre npers_viv miembros total_hrtr_sinmis ///
+	  	global xvar1 edad edad2 hombre npers_viv miembros total_hrtr_sinmis ///
 		p_agegroup_sinmis1 p_agegroup_sinmis2 p_agegroup_sinmis3 p_agegroup_sinmis4 p_agegroup_sinmis5 p_agegroup_sinmis6 p_agegroup_sinmis7 p_agegroup_sinmis8 ///
 		p_relacion_comp_sinmis1 p_relacion_comp_sinmis2 p_relacion_comp_sinmis3 p_relacion_comp_sinmis4 p_relacion_comp_sinmis5 p_relacion_comp_sinmis6 p_relacion_comp_sinmis7 p_relacion_comp_sinmis8 p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_relacion_comp_sinmis11 p_relacion_comp_sinmis12 p_relacion_comp_sinmis13 ///
 		p_estado_civil_sinmis1 p_estado_civil_sinmis2 p_estado_civil_sinmis3 p_estado_civil_sinmis4 p_estado_civil_sinmis5 p_estado_civil_sinmis6 p_region_est1_sinmis1 p_region_est1_sinmis2 p_region_est1_sinmis3 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis6 p_region_est1_sinmis7 p_region_est1_sinmis8 p_region_est1_sinmis9 ///
@@ -118,29 +118,32 @@ clear all
 		You will first need to install the package elasticregress, using the command line ssc install elasticregress. 
 		For the purposes of this exercise, please use as argument for the Lasso command set seed 1 and the default number of folds to be 10. */
 		
-		*set seed 1 
-		*lassoregress log_ila_m $xvar1 if log_ila_m>0 & log_ila_m!=. & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, numfolds(5)
-		*display e(varlist_nonzero)
+		sort interview__id interview__key quest com
+		set seed 66778899 
+		lassoregress log_ila_m $xvar1 if log_ila_m>0 & log_ila_m!=. & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, numfolds(10)
+		display e(varlist_nonzero)
+		global lassovars = e(varlist_nonzero)
 		
-		*Selected on april 18:
-		global lassovars edad2 agegroup hombre npers_viv total_hrtr_sinmis p_agegroup_sinmis1 p_agegroup_sinmis2 p_relacion_comp_sinmis1 ///
+		*Selected on april 20:
+		/*
+		global lassovars edad edad2 hombre miembros total_hrtr_sinmis p_agegroup_sinmis1 p_agegroup_sinmis2 p_agegroup_sinmis4 p_agegroup_sinmis5 p_agegroup_sinmis6 p_relacion_comp_sinmis1 ///
 		p_relacion_comp_sinmis2 p_relacion_comp_sinmis4 p_relacion_comp_sinmis5 p_relacion_comp_sinmis6 p_relacion_comp_sinmis7 p_relacion_comp_sinmis8 ///
-		p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_relacion_comp_sinmis11 p_estado_civil_sinmis1 p_estado_civil_sinmis3 p_estado_civil_sinmis4 ///
-		p_region_est1_sinmis1 p_region_est1_sinmis2 p_region_est1_sinmis3 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis6 p_region_est1_sinmis7 ///
-		p_region_est1_sinmis8 p_municipio_sinmis1 p_municipio_sinmis2 p_municipio_sinmis3 p_municipio_sinmis4 p_municipio_sinmis5 p_municipio_sinmis6 ///
-		p_municipio_sinmis7 p_municipio_sinmis8 p_municipio_sinmis9 p_municipio_sinmis10 p_municipio_sinmis11 p_municipio_sinmis13 p_municipio_sinmis16 ///
-		p_municipio_sinmis17 p_municipio_sinmis18 p_municipio_sinmis20 p_municipio_sinmis21 p_municipio_sinmis22 p_municipio_sinmis23 p_municipio_sinmis24 ///
-		p_tipo_vivienda_hh_sinmis1 p_tipo_vivienda_hh_sinmis2 p_tipo_vivienda_hh_sinmis3 p_tipo_vivienda_hh_sinmis4 p_tipo_vivienda_hh_sinmis5 p_tipo_vivienda_hh_sinmis6 ///
-		p_propieta_hh_sinmis1 p_auto_hh_sinmis2 p_heladera_hh_sinmis1 p_lavarropas_hh_sinmis1 p_lavarropas_hh_sinmis2 p_computadora_hh_sinmis1 p_computadora_hh_sinmis2 ///
-		p_internet_hh_sinmis1 p_internet_hh_sinmis2 p_televisor_hh_sinmis1 p_calentador_hh_sinmis2 p_aire_hh_sinmis2 p_tv_cable_hh_sinmis1 p_tv_cable_hh_sinmis2 ///
-		p_microondas_hh_sinmis2 p_afiliado_segsalud_comp_sinmis1 p_afiliado_segsalud_comp_sinmis2 p_afiliado_segsalud_comp_sinmis3 p_afiliado_segsalud_comp_sinmis5 ///
-		p_nivel_educ_sinmis1 p_nivel_educ_sinmis2 p_nivel_educ_sinmis4 p_nivel_educ_sinmis5 p_nivel_educ_sinmis6 p_nivel_educ_sinmis7 p_tarea_sinmis1 p_tarea_sinmis2 ///
-		p_tarea_sinmis3 p_tarea_sinmis4 p_tarea_sinmis5 p_tarea_sinmis6 p_tarea_sinmis7 p_tarea_sinmis8 p_tarea_sinmis10 p_sector_encuesta_sinmis1 p_sector_encuesta_sinmis2 ///
-		p_sector_encuesta_sinmis3 p_sector_encuesta_sinmis4 p_sector_encuesta_sinmis5 p_sector_encuesta_sinmis6 p_sector_encuesta_sinmis7 p_sector_encuesta_sinmis8 ///
-		p_sector_encuesta_sinmis9 p_sector_encuesta_sinmis10 p_categ_ocu_sinmis1 p_categ_ocu_sinmis2 p_categ_ocu_sinmis3 p_categ_ocu_sinmis4 p_categ_ocu_sinmis5 ///
-		p_categ_ocu_sinmis6 p_cuenta_corr_sinmis2 p_cuenta_aho_sinmis1 p_tcredito_sinmis1 p_tdebito_sinmis1 p_no_banco_sinmis1 p_aporte_pension_sinmis1 p_aporte_pension_sinmis2 ///
-		p_aporte_pension_sinmis3 p_aporte_pension_sinmis4 p_clap_sinmis1 p_clap_sinmis2 p_ingsuf_comida_sinmis2 p_comida_trueque_sinmis2
-	
+		p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_relacion_comp_sinmis11 p_estado_civil_sinmis2 p_estado_civil_sinmis3 p_estado_civil_sinmis4 p_estado_civil_sinmis5 ///
+		p_region_est1_sinmis1 p_region_est1_sinmis2 p_region_est1_sinmis3 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis6 p_region_est1_sinmis7 p_region_est1_sinmis8 ///
+		p_municipio_sinmis1 p_municipio_sinmis2 p_municipio_sinmis3 p_municipio_sinmis4 p_municipio_sinmis5 p_municipio_sinmis6 p_municipio_sinmis7 p_municipio_sinmis8 ///
+		p_municipio_sinmis9 p_municipio_sinmis10 p_municipio_sinmis11 p_municipio_sinmis13 p_municipio_sinmis16 p_municipio_sinmis17 p_municipio_sinmis18 p_municipio_sinmis19 ///
+		p_municipio_sinmis20 p_municipio_sinmis21 p_municipio_sinmis22 p_municipio_sinmis23 p_municipio_sinmis24 p_tipo_vivienda_hh_sinmis1 p_tipo_vivienda_hh_sinmis2 ///
+		p_tipo_vivienda_hh_sinmis3 p_tipo_vivienda_hh_sinmis4 p_tipo_vivienda_hh_sinmis5 p_tipo_vivienda_hh_sinmis6 p_propieta_hh_sinmis1 p_auto_hh_sinmis2 p_heladera_hh_sinmis1 ///
+		p_lavarropas_hh_sinmis1 p_lavarropas_hh_sinmis2 p_computadora_hh_sinmis1 p_computadora_hh_sinmis2 p_internet_hh_sinmis1 p_internet_hh_sinmis2 p_televisor_hh_sinmis1 ///
+		p_calentador_hh_sinmis1 p_aire_hh_sinmis1 p_aire_hh_sinmis2 p_tv_cable_hh_sinmis2 p_microondas_hh_sinmis2 p_afiliado_segsalud_comp_sinmis1 p_afiliado_segsalud_comp_sinmis2 ///
+		p_afiliado_segsalud_comp_sinmis3 p_afiliado_segsalud_comp_sinmis5 p_nivel_educ_sinmis1 p_nivel_educ_sinmis2 p_nivel_educ_sinmis3 p_nivel_educ_sinmis4 p_nivel_educ_sinmis5 ///
+		p_nivel_educ_sinmis6 p_nivel_educ_sinmis7 p_tarea_sinmis1 p_tarea_sinmis2 p_tarea_sinmis3 p_tarea_sinmis4 p_tarea_sinmis5 p_tarea_sinmis6 p_tarea_sinmis7 p_tarea_sinmis8 p_tarea_sinmis10 ///
+		p_sector_encuesta_sinmis1 p_sector_encuesta_sinmis2 p_sector_encuesta_sinmis3 p_sector_encuesta_sinmis4 p_sector_encuesta_sinmis5 p_sector_encuesta_sinmis6 ///
+		p_sector_encuesta_sinmis7 p_sector_encuesta_sinmis8 p_sector_encuesta_sinmis9 p_sector_encuesta_sinmis10 p_categ_ocu_sinmis1 p_categ_ocu_sinmis2 p_categ_ocu_sinmis3 ///
+		p_categ_ocu_sinmis4 p_categ_ocu_sinmis5 p_categ_ocu_sinmis6 p_cuenta_corr_sinmis2 p_cuenta_aho_sinmis1 p_tcredito_sinmis1 p_tdebito_sinmis1 p_no_banco_sinmis1 ///
+		p_aporte_pension_sinmis1 p_aporte_pension_sinmis2 p_aporte_pension_sinmis3 p_aporte_pension_sinmis4 p_clap_sinmis1 p_clap_sinmis2 p_ingsuf_comida_sinmis2 p_comida_trueque_sinmis2
+		*/
+		
 	** Vselect
 		* Se puede usar R2adjustado como criterio. Ojo, no se puede poner variable como factor variables 
 		* return - rpret list
@@ -169,10 +172,11 @@ clear all
 	// reg log_ila_m `vselectvars' if log_ila_m>0 & log_ila_m!=. & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0 // R2ajustado .1436, mejor que Lasso
 
 	set more off
+	sort interview__id interview__key quest com
 	mi set flong
 	*set seed 66778899
 	mi register imputed log_ila_m
-	mi impute regress log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, add(30) rseed(66778899) force noi 
+	mi impute regress log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, add(2) rseed(66778899) force noi 
 	mi unregister log_ila_m
 	* Obs.: _mi_m es la variable que crea Stata luego de la imputacion e identifica cada base
 		*Ej. si haces 20 imputaciones _mi_m tendra valores de 0 a 20, donde 0 corresponde a la variable sin imputar e 1 a 20 a las bases con un posible valor para los missing values

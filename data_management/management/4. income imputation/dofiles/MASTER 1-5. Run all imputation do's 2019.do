@@ -19,8 +19,9 @@ Note:
 ********************************************************************************
 
 // Define rootpath according to user (silenced as this is done by main now)
+
+clear all 
 /*
-clear all
 	    * User 1: Trini
 		global trini 0
 		
@@ -56,14 +57,16 @@ clear all
 	global forimp 	"$datapath\data_management\output\for imputation"
 *Output
 	global cleaned "$datapath\data_management\output\cleaned"
+	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
 */
+
 ********************************************************************************
 	
 ***********************************
 //*** Running all imputations ***//
 **********************************
 
-*set seed 1
+*set seed 1 // The seeds are in the do's in the end
 
 do "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
@@ -71,12 +74,12 @@ do "$impdos\2. Imputation 2019 - Monetary labor income.do"
 do "$impdos\3. Imputation 2019 - Pensions.do"
 do "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
 do "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
-
+stop
 
 **************************************
 /* NUESTRO DOFILE: TC Y DEFLACTORES */
 **************************************
-	
+
 	*** 0.0 To take everything to bolívares of Feb 2020 (month with greatest sample) ***
 		
 		* Deflactor
@@ -127,7 +130,7 @@ do "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
 							display `tc`i'mes`k''
 							}
 						}
-						
+					
 *************************************************************
 //*** Merging ENCOVI 2019 database with imputed incomes ***//
 ************************************************************

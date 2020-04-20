@@ -28,10 +28,10 @@ clear all
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -39,7 +39,7 @@ clear all
 		}
 	    if $lauta {
 				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+				global datapath "C:\Users\wb563365\DataEncovi\"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
@@ -59,13 +59,17 @@ version 14
 drop _all
 set more off
 
-//set universal paths
+//set universal datapaths
 global merged "$datapath\data_management\output\merged"
 global cleaned "$datapath\data_management\output\cleaned"
-global harmonization "$dopath\data_management\management\2. harmonization"
+global forinflation "$datapath\data_management\output\for inflation"
 
-//inflation, exchange rate inputs and auxiliaries
-global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+//set universal dopath
+global harmonization "$dopath\data_management\management\2. harmonization"
+global inflado "$dopath\data_management\management\5. inflation"
+
+//Exchange rate inputs and auxiliaries
+
 global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 global pathaux "$harmonization\aux_do"
 
@@ -77,9 +81,26 @@ global pathaux "$harmonization\aux_do"
 global merging "$dopath\data_management\management\1. merging"
 global input "$datapath\data_management\input\latest"
 global output "$datapath\data_management\output\merged"
-
+/*
 * run merge
 run "$merging\__main__merge.do"
+
+
+/*==============================================================================
+Inflation
+==============================================================================*/
+
+
+// specific path to inflation estimation
+global povinput "$datapath\poverty_measurement\input\"
+global inflationout "$datapath\data_management\input"
+
+// calculates inflation
+
+run "$inflado/__main__inflation.do"
+
+// set global inflation input
+global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 
 
 /*==============================================================================
@@ -95,7 +116,7 @@ run "$pathaux\cuantiles.do"
 
 //run ENCOVI harmonization
 run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
-
+*/
 
 *Specific inputs: imputation do's and auxiliary SEDLAC do's 
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
@@ -108,7 +129,7 @@ global pathoutexcel "$dopath\data_management\management\4. income imputation\out
 
 //run ENCOVI imputation
 run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
-
+stop
 
 /*==============================================================================
 poverty estimation
@@ -120,7 +141,7 @@ global input "$datapath\poverty_measurement\input"
 global output "$datapath\poverty_measurement\output"
 
 //run poverty estimation
-do "$povmeasure\__main__pobreza.do"
+run "$povmeasure\__main__pobreza.do"
 
 /*==============================================================================
 creating separate dataset for variables to merge with SEDLAC version

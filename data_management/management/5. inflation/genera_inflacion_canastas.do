@@ -103,5 +103,5 @@ rename month mes
 gen ano = 2019 if mes >9
 replace ano = 2020 if mes <5
 
-save "$inflationout/inflacion_canasta_alimentos_diaria_precios_implicitos2.dta", replace
-export excel "$inflationout/serie_inflacion_canasta2.xlsx", firstrow(variables) replace
+save "$inflationout/inflacion_canasta_alimentos_diaria_precios_implicitos.dta", replace
+export excel "$inflationout/inflacion_canasta_alimentos_diaria_precios_implicitos.xlsx", firstrow(variables) replace

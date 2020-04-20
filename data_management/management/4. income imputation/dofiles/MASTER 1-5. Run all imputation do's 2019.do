@@ -20,7 +20,7 @@ Note:
 
 // Define rootpath according to user (silenced as this is done by main now)
 
-clear all 
+// clear all 
 /*
 	    * User 1: Trini
 		global trini 0
@@ -74,7 +74,7 @@ do "$impdos\2. Imputation 2019 - Monetary labor income.do"
 do "$impdos\3. Imputation 2019 - Pensions.do"
 do "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
 do "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
-stop
+
 
 **************************************
 /* NUESTRO DOFILE: TC Y DEFLACTORES */

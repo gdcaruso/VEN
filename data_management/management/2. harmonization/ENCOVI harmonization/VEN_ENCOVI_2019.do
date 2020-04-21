@@ -196,15 +196,15 @@ replace interview_month = new_interview_month if (interview_month==.a | intervie
 //drop if interview month is november
 // drop if interview_month==11
 
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   // Region Central
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital
+gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   // Region Central: Aragua (5), Carabobo (8), Cojedes (9)
+replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos: Guarico (12), Apure (4) 
+replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental: Falcon (11), Lara (13), Portuguesa (18), Yaracuy (22)
+replace region_est1 =  4 if entidad==23                                            // Region Zuliana: Zulia (23)
+replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes: Barinas (6), Merida (14), Tachira (20), Trujillo (21)
+replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental: Anzoategui (3), Monagas (16), Sucre (19)
+replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular: Nueva Esparta (17), Otros (25)
+replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana: Bolivar (7), Amazonas (2), Delta Amacuro (10)
+replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital: Vargas (24), Distrito Capital (1)
 label var region_est1 "Region"
 label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
           5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
@@ -252,7 +252,7 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 	tostring hh_by_combined_id, replace
 	*Up to 10 hh by combined_id
 	replace hh_by_combined_id = "0"+hh_by_combined_id if length(hh_by_combined_id)==1
-	gen id = combined_id + hh_by_combined_id 
+	gen id = combined_id + hh_by_combined_id
 	
 * Component identifier: com
 	** ENCOVI 2018 used "lin" (número de linea) which seems to be a created variable
@@ -262,14 +262,26 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 		gen id_numeric=id
 		destring id_numeric, replace
 		format id_numeric %14.0f
-		*Age
+		* Age
 		clonevar edad = s6q5 if (s6q5!=. & s6q5!=.a)
+		* Sex 
+			/* SEXO (s6q3): El sexo de ... es
+				1 = Masculino
+				2 = Femenino
+			*/
+			clonevar sexo = s6q3 if (s6q3!=. & s6q3!=.a)
+			label define sexo 1 "Male" 2 "Female"
+			label value sexo sexo
+			gen hombre = sexo==1 if sexo!=.
+		* Name
+			clonevar nombre = s6q1
 		*Random var
+		gsort interview__key interview__id quest -edad hombre nombre
 		set seed 123
 		generate z = runiform()
-		gsort z 
+		gsort z
 		*Sorting
-		gsort id_numeric -edad z
+		gsort id_numeric - edad z
 		egen min =  min(_n), by(id)
 		replace min = -min
 		
@@ -347,14 +359,7 @@ rename reltohead relacion_comp
 label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
 *** Sex 
-/* SEXO (s6q3): El sexo de ... es
-	1 = Masculino
-	2 = Femenino
-*/
-clonevar sexo = s6q3 if (s6q3!=. & s6q3!=.a)
-label define sexo 1 "Male" 2 "Female"
-label value sexo sexo
-gen hombre = sexo==1 if sexo!=.
+* Definido arriba
 
 *** Age
 * EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
@@ -4283,7 +4288,7 @@ sort id com
 *Silencing para que corra más rápido (des-silenciar luego)
 /* 
 order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
-/* Más variables de ingreso CEDLAS */ pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
+/* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
 interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
 */
 

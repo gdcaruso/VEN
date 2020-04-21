@@ -16,7 +16,7 @@ Note:
 =============================================================================*/
 ********************************************************************************
 // Define rootpath according to user (silenced as this is done by main now)
-/*
+
  	    * User 1: Trini
  		global trini 0
 		
@@ -52,7 +52,7 @@ Note:
 		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
 *Outputs
 		global cleaned "$datapath\data_management\output\cleaned"
-*/
+
 ********************************************************************************
 
 /*==============================================================================
@@ -163,7 +163,8 @@ merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
 * I drop those who do not collaborate in the survey
 drop if colabora_entrevista==2
-*Obs: there are still 2 observations which do not merge. Maybe they are people who started to answer but then stopped answering
+
+*Obs: there are 42 observations which do not merge. Maybe they are people who started to answer but then stopped answering
 
 *Change names to lower cases
 rename _all, lower
@@ -269,10 +270,9 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 				1 = Masculino
 				2 = Femenino
 			*/
-			clonevar sexo = s6q3 if (s6q3!=. & s6q3!=.a)
-			label define sexo 1 "Male" 2 "Female"
-			label value sexo sexo
-			gen hombre = sexo==1 if sexo!=.
+			gen hombre = (s6q3==1) if (s6q3!=. & s6q3!=.a)
+			label define hombre 1 "Masculino" 0 "Femenino"
+			label value hombre hombre
 		* Name
 			clonevar nombre = s6q1
 		*Random var
@@ -291,7 +291,7 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 	duplicates report id com //verification
 
 * Weights: pondera
-	gen pondera=1
+	gen pondera=1 //round(pesoper)
 	* Cambiar con la verdadera variable de ponderadores cuando la tengamos
 	
 * Strata: strata
@@ -359,7 +359,7 @@ rename reltohead relacion_comp
 label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
 *** Sex 
-* Definido arriba
+	* Definido arriba
 
 *** Age
 * EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
@@ -4201,7 +4201,11 @@ capture label drop nivel
 	gen hstrt= hstr_ppal 
 		replace hstrt = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
 
-	gen hogarsec=0
+	* Miembros de hogares secundarios (seleccionando personal doméstico): hogarsec 
+	gen hogarsec =.
+	replace hogarsec =1 if relacion_en==13
+	replace hogarsec =0 if inrange(relacion_en, 1,12)
+
 	gen     	relacion = 1		if  relacion_en==1
 		replace relacion = 2		if  relacion_en==2
 		replace relacion = 3		if  relacion_en==3  | relacion_en==4
@@ -4297,12 +4301,12 @@ sort id com
 /* 
 order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
+hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
 */
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
+hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
 save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace

@@ -85,13 +85,11 @@ harmonization without inflation
 
 do "$pathaux\cuantiles.do"
 
-
 //run ENCOVI harmonization
-// do "$inflado\armonization_for_inflation.do"
+ do "$inflado\armonization_for_inflation.do"
 
 // set population and basket
 do "$inflado\genera_poblacion_y_canasta_para_inflacion.do"
-
 
 // define prices
 do "$inflado\precios_implicitos_nov_to_march.do"

@@ -28,10 +28,10 @@ clear all
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -85,18 +85,15 @@ global output "$datapath\data_management\output\merged"
 * run merge
 do "$merging\__main__merge.do"
 
-stop
 /*==============================================================================
 Inflation
 ==============================================================================*/
 
-
 // specific path to inflation estimation
 global povinput "$datapath\poverty_measurement\input\"
-global inflationout "$datapath\data_management\input"
+global inflationout "$datapath\data_management\input\"
 
 // calculates inflation
-
 run "$inflado/__main__inflation.do"
 
 // set global inflation input

@@ -232,7 +232,7 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		label val sum_agua_cisterna sum_agua
 		label val sum_agua_pozobomb sum_agua
 		label val sum_agua_pozoprot sum_agua
-		label val sum_agua_otro sum agua
+		label val sum_agua_otro sum_agua
 		
 		label var sum_agua_otro_esp	"Last 3 months: Water supply from other sources, specify"
 

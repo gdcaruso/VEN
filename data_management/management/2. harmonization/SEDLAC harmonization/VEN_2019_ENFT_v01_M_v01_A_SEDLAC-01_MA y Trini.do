@@ -393,12 +393,14 @@ replace   cen = 1 if enti==5 // Aragua
 replace   cen = 1 if enti==8 // Carabobo
 replace   cen = 1 if enti==9 // Cojedes
 replace   cen = 0 if enti!=5 & enti!=8 & enti!=9 & enti!=.
+label var  cen   "Region Central"
 
 *2. Región de los Llanos
 gen       lla = .
 replace   lla = 1 if enti==12 // Guarico
 replace   lla = 1 if enti==4  // Apure
 replace   lla = 0 if enti!=12 & enti!=4 & enti!=.
+label var  lla   "Region Los Llanos"
 
 *3. Región Centro-Occidental
 gen       ceo = .
@@ -407,11 +409,13 @@ replace   ceo = 1 if enti==13 // Lara
 replace   ceo = 1 if enti==18 // Portuguesa
 replace   ceo = 1 if enti==22 // Yaracuy
 replace   ceo = 0 if enti!=11 & enti!=13 & enti!=18 & enti!=22 & enti!=.
+label var  ceo   "Region Centro-Occidental"
 
 *4. Región Zuliana: Zulia
 gen       zul = .
 replace   zul = 1 if enti==23 // Zulia
 replace   zul = 0 if enti!=23 & enti!=.
+label var  zul   "Region Zulia"
 
 *5. Región de los Andes
 gen       and = .
@@ -420,19 +424,22 @@ replace   and = 1 if enti==14 // Merida
 replace   and = 1 if enti==20 // Tachira 
 replace   and = 1 if enti==21 // Trujillo
 replace   and = 0 if enti!=6 & enti!=14 & enti!=20 & enti!=21 & enti!=.
+label var  pais   "Region Los Andes"
 
-*6. Región Nor-Oriental 
+*6. Región Nor-Oriental
 gen       nor = .
 replace   nor = 1 if enti==3  // Anzoategui
 replace   nor = 1 if enti==16 // Monagas
 replace   nor = 1 if enti==19 // Sucre
 replace   nor = 0 if enti!=3 & enti!=16 & enti!=19 & enti!=.
+label var  nor   "Region Nor-Oriental"
 
 *7. Región Insular
 gen       isu = .
 replace   isu = 1 if enti==17 // Nueva Esparta
 replace   isu = 1 if enti==25 // Dependencias Federales
 replace   isu = 0 if enti!=17 & enti!=25 & enti!=.
+label var  isu   "Region Insular"
 
 *8. Región Guayana
 gen       gua = .
@@ -440,6 +447,7 @@ replace   gua = 1 if enti==7  // Bolivar
 replace   gua = 1 if enti==2  // Amazonas
 replace   gua = 1 if enti==10 // Delta Amacuro
 replace   gua = 0 if enti!=7 & enti!=2 & enti!=10 & enti!=.
+label var  gua   "Region Guyana"
 
 *8. Región Capital
 gen       capital = .
@@ -447,6 +455,7 @@ replace   capital = 1 if enti==15  // Miranda
 replace   capital = 1 if enti==24  // Vargas
 replace   capital = 1 if enti==1  // Distrito Capital
 replace   capital = 0 if enti!=15 & enti!=24 & enti!=1 & enti!=.
+label var  capital   "Region Capital"
 
 * Areas no incluidas en años previos:	nueva_region
 gen       nuevareg = .

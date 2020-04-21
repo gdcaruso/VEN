@@ -263,7 +263,7 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 		destring id_numeric, replace
 		format id_numeric %14.0f
 		*Age
-		gen edad = s6q5 if (s6q5!=. & s6q5!=.a)
+		clonevar edad = s6q5 if (s6q5!=. & s6q5!=.a)
 		*Random var
 		set seed 123
 		generate z = runiform()
@@ -344,6 +344,7 @@ label def reltohead 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/
 		            6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"	
 label value reltohead reltohead
 rename reltohead relacion_comp
+label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
 *** Sex 
 /* SEXO (s6q3): El sexo de ... es
@@ -430,11 +431,11 @@ clonevar razon_nocertificado_o = s6q12_os if (s6q12!=. & s6q12!=.a) & s6q12==7
 */
 clonevar estado_civil_en = s6q13 if (s6q13!=. & s6q13!=.a)
 
-gen     marital_status = 1	if  estado_civil_encuesta==1 | estado_civil_encuesta==2
-replace marital_status = 2	if  estado_civil_encuesta==8 
-replace marital_status = 3	if  estado_civil_encuesta==3 | estado_civil_encuesta==4
-replace marital_status = 4	if  estado_civil_encuesta==5 | estado_civil_encuesta==6
-replace marital_status = 5	if  estado_civil_encuesta==7
+gen     marital_status = 1	if  estado_civil_en==1 | estado_civil_en==2
+replace marital_status = 2	if  estado_civil_en==8 
+replace marital_status = 3	if  estado_civil_en==3 | estado_civil_en==4
+replace marital_status = 4	if  estado_civil_en==5 | estado_civil_en==6
+replace marital_status = 5	if  estado_civil_en==7
 label def marital_status 1 "Married" 2 "Never married" 3 "Living together" 4 "Divorced/Separated" 5 "Widowed"
 label value marital_status marital_status
 rename marital_status estado_civil
@@ -464,14 +465,17 @@ replace dia_ult_hijo = s6q16a if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9
 
 
 /*(************************************************************************************************************************************************* 
-*------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
+*------------------------------ IV. Dwelling / Vivienda & part of V. Household / hogar  ----------------------------------------------------
 *************************************************************************************************************************************************)*/
-global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda suministro_agua suministro_agua_comp frecuencia_agua ///
-serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
-pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago renta_imp_en renta_imp_mon titulo_propiedad ///
+global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda ///
+sum_agua_acueduct sum_agua_pilaoest sum_agua_cisterna sum_agua_pozobomb sum_agua_pozoprot sum_agua_otro sum_agua_otro_esp suministro_agua_comp frecuencia_agua ///
+serv_elect_red_pub serv_elect_planta_priv serv_elect_otro serv_elect_otro_esp electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
+pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago implicancias_nopago_o renta_imp_en renta_imp_mon titulo_propiedad ///
 fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
 comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
 pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
+
+* VIVIENDA
 
 *** Type of flooring material
 /* MATERIAL_PISO (s4q1)
@@ -518,7 +522,7 @@ clonevar  material_techo = s4q3           if (s4q3!=. & s4q3!=.a)
 clonevar tipo_vivienda = s4q4 if (s4q4!=. & s4q4!=.a)
 
 *** Water supply
-/* SUMINISTRO_AGUA (s4q5): Cuales han sido las principales fuentes de suministro de agua en esta vivienda?
+/* SUMINISTRO_AGUA (s4q5): Cuales han sido las principales fuentes de suministro de agua en esta vivienda? (0=no, 1=opcion más utilizada, 2=segunda opcion más utilizada, 3=tercera)
 		1 = Acueducto
 		2 = Pila o estanque
 		3 = Camion Cisterna
@@ -526,18 +530,31 @@ clonevar tipo_vivienda = s4q4 if (s4q4!=. & s4q4!=.a)
 		5 = Pozo protegido
 		6 = Otros medios
 */
-gen     suministro_agua = 1 if  s4q5__1==1
-replace suministro_agua = 2 if  s4q5__2==1
-replace suministro_agua = 3 if  s4q5__3==1
-replace suministro_agua = 4 if  s4q5__4==1
-replace suministro_agua = 5 if  s4q5__5==1
-replace suministro_agua = 6 if  s4q5__6==1	
-label def suministro_agua 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Pozo con bomba" 5 "Pozo protegido" 6 "Otros medios"
-label value suministro_agua suministro_agua
-* Comparable across all years
-recode suministro_agua (5 6=4), g(suministro_agua_comp)
-label def suministro_agua_comp 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Otros medios"
-label value suministro_agua_comp suministro_agua_comp
+clonevar	sum_agua_acueduct = s4q5__1 if s4q5__1!=. & s4q5__1!=.a
+clonevar	sum_agua_pilaoest = s4q5__2	if s4q5__2!=. & s4q5__2!=.a
+clonevar	sum_agua_cisterna = s4q5__3	if s4q5__3!=. & s4q5__3!=.a
+clonevar	sum_agua_pozobomb = s4q5__4	if s4q5__4!=. & s4q5__4!=.a
+clonevar	sum_agua_pozoprot = s4q5__5	if s4q5__5!=. & s4q5__5!=.a
+clonevar	sum_agua_otro = s4q5__6 	if s4q5__6!=. & s4q5__6!=.a	
+
+	*All options
+	gen     suministro_agua = 1 if  s4q5__1==1
+	replace suministro_agua = 2 if  s4q5__2==1
+	replace suministro_agua = 3 if  s4q5__3==1
+	replace suministro_agua = 4 if  s4q5__4==1
+	replace suministro_agua = 5 if  s4q5__5==1
+	replace suministro_agua = 6 if  s4q5__6==1	
+	label def suministro_agua 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Pozo con bomba" 5 "Pozo protegido" 6 "Otros medios"
+	label value suministro_agua suministro_agua
+
+	* Comparable across all years
+	recode suministro_agua (5 6=4), g(suministro_agua_comp)
+	label def suministro_agua_comp 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Otros medios"
+	label value suministro_agua_comp suministro_agua_comp
+
+* Other, specify
+gen sum_agua_otro_esp = s4q5_os
+label var sum_agua_otro_esp "Últimos 3 meses: suministro de agua de otras fuentes, especificar" 
 
 *** Frequency of water supply
 /* FRECUENCIA_AGUA (s4q6): Con que frecuencia ha llegado el agua del acueducto a esta vivienda?
@@ -553,6 +570,7 @@ label def frecuencia_agua 1 "Todos los dias" 2 "Algunos dias de la semana" ///
 		4 "Una vez cada 15 dias" ///
 		5 "Nunca"
 label val frecuencia_agua frecuencia_agua
+
 *** Electricity
 /* SERVICIO_ELECTRICO : En los ultimos 3 meses, el servicio electrico ha sido suministrado por?
             s4q7_1 = La red publica
@@ -560,16 +578,20 @@ label val frecuencia_agua frecuencia_agua
 			s4q7_3 = Otra forma
 			s4q7_4 = No tiene servicio electrico
 */
-clonevar serv_elect_red_pub=s4q7__1 if s4q7__1!=. & s4q7__1!=.a
-clonevar serv_elect_planta_priv=s4q7__2 if s4q7__2!=. & s4q7__2!=.a
-clonevar serv_elect_otro=s4q7__3 if s4q7__3!=. & s4q7__3!=.a
-gen electricidad= (s4q7__1==1 | s4q7__2==1 | s4q7__3==1)  if (s4q7__1!=. & s4q7__1!=.a & s4q7__2!=. & s4q7__2!=.a & s4q7__3!=. & s4q7__3!=.a)
-* tab s4q7__4
+clonevar serv_elect_red_pub =		s4q7__1 if s4q7__1!=. & s4q7__1!=.a
+clonevar serv_elect_planta_priv =	s4q7__2 if s4q7__2!=. & s4q7__2!=.a
+clonevar serv_elect_otro =			s4q7__3 if s4q7__3!=. & s4q7__3!=.a			
 
-tab serv_elect_red_pub
-tab serv_elect_planta_priv
-tab serv_elect_otro
-tab electricidad
+gen electricidad = 	(s4q7__1==1 | s4q7__2==1 | s4q7__3==1) if (s4q7__1!=. & s4q7__1!=.a & s4q7__2!=. & s4q7__2!=.a & s4q7__3!=. & s4q7__3!=.a)
+* tab s4q7__4 // By april 20, no one who had answered 1, 2 or 3 to s4q7__1 s4q7__2 or s4q7__3==1 had answered they did not have electricity
+
+gen serv_elect_otro_esp =	s4q7_os
+label var serv_elect_otro_esp "Otro servicio eléctrico, especifique" 
+
+	tab serv_elect_red_pub
+	tab serv_elect_planta_priv
+	tab serv_elect_otro
+	tab electricidad
 
 *** Electric power interruptions
 /* interrumpe_elect (s4q8): En esta vivienda el servicio electrico se interrumpe
@@ -579,7 +601,8 @@ tab electricidad
 			4 = Nunca se interrumpe			
 */
 clonevar interrumpe_elect = s4q8 if (s4q8!=. & s4q8!=.a)
-tab interrumpe_elect 
+	tab interrumpe_elect 
+
 *** Type of toilet
 /* TIPO_SANITARIO (s4q9): esta vivienda tiene 
 		1 = Poceta a cloaca
@@ -591,9 +614,11 @@ tab interrumpe_elect
 */
 clonevar tipo_sanitario = s4q9 if (s4q9!=. & s4q9!=.a)
 * comparable across all years
-recode tipo_sanitario (2=1) (3=2)(4=3) (5=4), g(tipo_sanitario_comp)
+recode tipo_sanitario (2=1)(3=2)(4=3)(5=4), g(tipo_sanitario_comp)
 label def tipo_sanitario_comp 1 "Poceta a cloaca/Pozo septico" 2 "Poceta sin conexion" 3 "Excusado de hoyo o letrina" 4 "No tiene poseta o excusado"
 label value tipo_sanitario_comp tipo_sanitario_comp
+
+* HOUSEHOLD 
 
 *** Number of rooms used exclusively to sleep
 * NDORMITORIOS (s5q1): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
@@ -602,15 +627,13 @@ replace ndormi=. if s5q1>20
 
 *** Bath with shower 
 * BANIO (s5q2): Su hogar tiene uso exclusivo de bano con ducha o regadera?
-clonevar banio_con_ducha = s5q2 if (s5q2!=. & s5q2!=.a)
-replace banio_con_ducha = 1 if (s5q2==1) 
-replace banio_con_ducha = 0 if (s5q2==2)
-label def banio_con_ducha 1 "Si" 0 "No"
-label val banio_con_ducha banio_con_ducha
+clonevar banio_con_ducha = (s5q2==1) if (s5q2!=. & s5q2!=.a)
 
 *** Number of bathrooms with shower
 * NBANIOS (s5q3): cuantos banos con ducha o regadera?
-clonevar nbanios = s5q3 if banio_con_ducha==1 
+clonevar nbanios = s5q3 if s5q2==1 
+
+* Note: s5q4, s5q5, s5q6 in next dofile section
 
 *** Housing tenure
 /* TENENCIA_VIVIENDA (s5q7): régimen de  de la vivienda  
@@ -626,6 +649,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1
 		10 = Otra
 */
 clonevar tenencia_vivienda = s5q7 if (s5q7!=. & s5q7!=.a)
+
 gen tenencia_vivienda_comp=1 if tenencia_vivienda==1
 replace tenencia_vivienda_comp=2 if tenencia_vivienda==2
 replace tenencia_vivienda_comp=3 if tenencia_vivienda==3 | tenencia_vivienda==4
@@ -637,35 +661,44 @@ label define tenencia_vivienda_comp 1 "Propia pagada" 2 "Propia pagandose" 3 "Al
 label value tenencia_vivienda_comp tenencia_vivienda_comp
 
 *** How much did you pay for rent or mortgage the last month?
-clonevar pago_alq_mutuo=s5q8a if s5q8a!=. & s5q8a!=.a
+* Cuánto pagó por concepto de alquiler o credito hipotecario el mes pasado o la ultima vez que pago?
+clonevar pago_alq_mutuo		=s5q8a if s5q8a!=. & s5q8a!=.a
 
 *** In which currency did you make the payment?
-clonevar pago_alq_mutuo_mon=s5q8b if s5q8b!=. & s5q8b!=.a
+* En qué moneda realizó el pago?
+clonevar pago_alq_mutuo_mon	=s5q8b if s5q8b!=. & s5q8b!=.a
 
 *** In which month did you make the payment?
-clonevar pago_alq_mutuo_m=s5q8c if s5q8c!=. & s5q8c!=.a
+* En qué mes realizó el pago?
+clonevar pago_alq_mutuo_m	=s5q8c if s5q8c!=. & s5q8c!=.a
 
 *** During the last year, have you had arrears in payments?
-clonevar atrasos_alq_mutuo=s5q9 if s5q9!=. & s5q9!=.a
-replace atrasos_alq_mutuo=1 if s5q9==1
-replace atrasos_alq_mutuo=0 if s5q9==2
-*Label values
-label def sino 1 "Si" 0 "No"
-label val atrasos_alq_mutuo sino
+*En el último año ha tenido atrasos en los pagos de alquiler o hipoteca?
+clonevar atrasos_alq_mutuo	= (s5q9==1) if s5q9!=. & s5q9!=.a
 
 *** What consequences did the arrears in payments had?
+*Qué implicaciones ha tenido la falta de pagos?
 clonevar implicancias_nopago=s5q10 if s5q10!=. & s5q10!=.a
 
+*** Others, specify
+* Otras, especifique
+gen implicancias_nopago_o=s5q10_os
+label var implicancias_nopago_o "Otras implicancias del no pago"
+
 *** If you had to rent similar dwelling, how much did you think you should pay?
+*Si usted tuviera que vivir en una vivienda como esta, cuanto cree que deberia pagar?
 clonevar renta_imp_en=s5q11 if s5q11!=. & s5q11!=.a
 
-*** In which currency ?
+*** In which currency?
+*En qué moneda?
 clonevar renta_imp_mon=s5q11a if s5q11a!=. & s5q11a!=.a
 
 *** What type of property title do you have?
+*Qué tipo de documento de titulación sobre la vivienda tienen su hogar?
 clonevar titulo_propiedad=s5q12 if s5q12!=. & s5q12!=.a
 
 *** What are the main sources of drinking water in your household?
+*Cuáles son las fuentes principales de agua para beber de los miembros de su hogar? 
 * Acueducto
 clonevar fagua_acueduc=s5q13__1 if s5q13__1!=. & s5q13__1!=.a
 * Pila o estanque
@@ -693,103 +726,94 @@ label val fagua_manantial aqua
 label val fagua_botella aqua
 label val fagua_otro aqua
 
-*** In your household, is the water treated to make it drinkable
-clonevar tratamiento_agua= s5q14 if s5q14!=. & s5q14!=.a
-replace tratamiento_agua= 1 if s5q14==1
-replace tratamiento_agua= 0 if s5q14==2
-* Label values
-label def tratamiento_agua 1 "Si" 0 "No"
-label val tratamiento_agua tratamiento_agua
+*** In your household, is the water treated to make it drinkable?
+*En su hogar el agua es tratada de alguna forma para hacerla más segura para beber?
+clonevar tratamiento_agua = (s5q14==1) if s5q14!=. & s5q14!=.a
 
-
-*** How do you treat the water to make it more safe for drinking
+*** How do you treat the water to make it more safe for drinking?
+*Usualmente, qué tratamiento le hacen al agua para hacerla mas segura?
 clonevar tipo_tratamiento=s5q15 if s5q15!=. & s5q15!=.a
 
 *** Which type of fuel do you use for cooking?
 clonevar comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
 
 *** Did you pay for the following utilities?
-* Water
-clonevar pagua=s5q17__1 if s5q17__1!=. & s5q17__1!=.a 
-* Electricity
-clonevar pelect=s5q17__2 if s5q17__2!=. & s5q17__2!=.a
-replace pelect=1 if s5q17__2==1 
-replace pelect=0 if s5q17__2==2
+	* Water
+	clonevar pagua=s5q17__1 if s5q17__1!=. & s5q17__1!=.a 
+	
+	* Electricity
+	clonevar pelect=s5q17__2 if s5q17__2!=. & s5q17__2!=.a
 
-* Gas
-clonevar pgas=s5q17__3 if s5q17__3!=. & s5q17__3!=.a
-replace pgas=1 if s5q17__3==1
-replace pgas=0 if s5q17__3==2
+	* Gas
+	clonevar pgas=s5q17__3 if s5q17__3!=. & s5q17__3!=.a
 
-* Carbon, wood
-clonevar pcarbon=s5q17__4 if s5q17__4!=. & s5q17__4!=.a
-replace pcarbon=1 if s5q17__4==1
-replace pcarbon=0 if s5q17__4==2
+	* Carbon, wood
+	clonevar pcarbon=s5q17__4 if s5q17__4!=. & s5q17__4!=.a
 
-* Paraffin
-clonevar pparafina=s5q17__5 if s5q17__5!=. & s5q17__5!=.a
-replace pparafina=1 if s5q17__5==1
-replace pparafina=0 if s5q17__5==2
+	* Paraffin
+	clonevar pparafina=s5q17__5 if s5q17__5!=. & s5q17__5!=.a
 
-* Landline, internet and tv cable
-gen ptelefono=(s5q17__7==1) if s5q17__7!=. & s5q17__7!=.a
+	* Landline, internet and tv cable
+	gen ptelefono=s5q17__7 if s5q17__7!=. & s5q17__7!=.a
 
 *** How much did you pay for the following utilities?
-clonevar pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
-* Electricity
-clonevar pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
-* Gas
-clonevar pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
-* Carbon, wood
-clonevar pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
-* Paraffin
-clonevar pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
-* Landline, internet and tv cable
-clonevar ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
+	* Water
+	clonevar pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
+	* Electricity
+	clonevar pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
+	* Gas
+	clonevar pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
+	* Carbon, wood
+	clonevar pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
+	* Paraffin
+	clonevar pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
 
 *** In which currency did you pay for the following utilities?
-clonevar pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
-* Electricity
-clonevar pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
-* Gas
-clonevar pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
-* Carbon, wood
-clonevar pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
-* Paraffin
-clonevar pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
-* Landline, internet and tv cable
-clonevar ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
+	* Water
+	clonevar pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
+	* Electricity
+	clonevar pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
+	* Gas
+	clonevar pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
+	* Carbon, wood
+	clonevar pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
+	* Paraffin
+	clonevar pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
 
 *** In which month did you pay for the following utilities?
-clonevar pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
-* Electricity
-clonevar pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
-* Gas
-clonevar pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
-* Carbon, wood
-clonevar pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
-* Paraffin
-clonevar pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
-* Landline, internet and tv cable
-clonevar ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
+	clonevar pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
+	* Electricity
+	clonevar pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
+	* Gas
+	clonevar pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
+	* Carbon, wood
+	clonevar pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
+	* Paraffin
+	clonevar pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
 
 *** In your household, have any home appliences damaged due to blackouts or voltage inestability?
-clonevar danio_electrodom=s5q20 if s5q20!=. & s5q20!=.a
-replace danio_electrodom=1 if s5q20==1
-replace danio_electrodom=0 if s5q20==2
+*En su hogar se ha dañado algún electrodomestico a causa de los apagones o por inestabilidad del voltaje?
+clonevar danio_electrodom=(s5q20==1) if s5q20!=. & s5q20!=.a
 
-foreach x in $dwell_ENCOVI {
-replace `x'=. if relacion_en!=1
-}
+*** Following "SEDLAC methodology"
+	foreach x in $dwell_ENCOVI {
+	replace `x'=. if relacion_en!=1
+	}
 
 /*(************************************************************************************************************************************************* 
-*----------------------------------------------- 1.5: Durables goods  / Bienes durables --------------------------------------------------------
+*-------------------------------- V. More of Household: Durable goods  / Más de hogar: Bienes durables --------------------------------------------
 *************************************************************************************************************************************************)*/
 global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas telefono_fijo
 
 *** Dummy household owns cars
 *  AUTO (s5q4): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
-gen     auto = s5q4==1		if  s5q4!=. & s5q4!=.a
+gen     auto = s5q4==1	if  s5q4!=. & s5q4!=.a
 replace auto = .		if  relacion_en!=1 
 
 *** Number of functioning cars in the household

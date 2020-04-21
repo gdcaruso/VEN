@@ -270,40 +270,40 @@ label values relab relab
 *label define relab_o 1 "Empleador" 2 "Asalariado" 3 "Cuentapropista" 4 "Sin Salario" 5 "Desocupado"
 *label values relab_o relab_o
 
-label var    asal             "Dummy de asalariado en la ocupación principal" 
+label var    asal   "Dummy de asalariado en la ocupación principal" 
 label define asal 0 "No asalariado" 1 "Asalariado" 
 label values asal asal
 
-label var    empresa          "Tipo de empresa en la que trabaja"
-label define empresa 1 "Grande" 2 "Chica" 3 "Pública"
+label var    empresa 	"Tipo de empresa en la que trabaja"
+label define empresa 1 	"Grande" 2 "Chica" 3 "Pública"
 label values empresa empresa
 
-label var    grupo_lab        "Grupo laboral" 
+label var    grupo_lab  "Grupo laboral" 
 
-label var    categ_lab         "Categoría laboral - Informalidad Productiva"
+label var    categ_lab   "Categoría laboral - Informalidad Productiva"
 label define categ_lab 1 "No informal" 2 "Informal" 
 label values categ_lab categ_lab
 
-label var    sector1d            "Sector de actividad a 1 digito CIIU" 
+label var    sector1d   "Sector de actividad a 1 digito CIIU" 
 label define sector1d 1 "Agricultura, Ganadería, Caza y Silvicultura" 2 "Pesca" 3 "Explotación de Minas y Canteras" 4 "Industrias Manufactureras" 5 "Suministro de Electricidad, Gas y Agua" 6 "Construcción" 7 "Comercio" 8 "Hoteles y Restaurantes" 9 "Transporte, Almacenamiento y Comunicaciones" 10 "Intermediación Financiera" 11 "Actividades Inmobiliarias, Empresariales y de Alquiler" 12 "Administración Pública y Defensa" 13 "Enseñanza" 14 "Servicios Sociales y de Salud" 15 "Otras Actividades de Servicios Comunitarios, Sociales y Personales" 16 "Hogares Privados con Servicio Doméstico" 17 "Organizaciones y Órganos Extraterritoriales" 
 label values sector1d sector1d
 
-label var    sector            "Sector de actividad - Clasificación propia"
-label var    tarea             "Tarea que realiza en la ocupación principal"
+label var    sector    	"Sector de actividad - Clasificación propia"
+label var    tarea      "Tarea que realiza en la ocupación principal"
 
-label var    contrato          "Tiene contrato laboral firmado?"
+label var    contrato   "Tiene contrato laboral firmado?"
 label define contrato 0 "No tiene" 1 "Tiene"
 label values contrato contrato
 
-label var    ocuperma          "Es su ocupación permanente o temporaria?"
+label var    ocuperma   "Es su ocupación permanente o temporaria?"
 label define ocuperma 0 "Temporaria" 1 "Permanente"
 label values ocuperma ocuperma
 
-label var    djubila           "Tiene derecho a jubilación en su empleo?"
+label var    djubila   "Tiene derecho a jubilación en su empleo?"
 label define djubila 0 "No" 1 "Si"
 label values djubila djubila
 
-label var    dsegsale          "Tiene derecho a seguro de salud en su empleo?"
+label var    dsegsale   "Tiene derecho a seguro de salud en su empleo?"
 label define dsegsale 0 "No" 1 "Si"
 label values dsegsale dsegsale
 

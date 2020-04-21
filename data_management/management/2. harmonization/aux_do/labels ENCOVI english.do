@@ -206,9 +206,8 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		4 = Pozo con bomba
 		5 = Pozo protegido
 		6 = Otros medios
-		
-		VAR: suministro_agua =  s4q5__1
 */
+		/*
 		*-- Label variable
 		label var suministro_agua "Last 3 months: Water supply (this survey)"		
 
@@ -217,13 +216,32 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		3 "Distributed by water tanker truck"	4 "Connected to water pump"	5 "Connected but no water pump" ///
 		6 "Other"
 		label value suministro_agua suministro_agua_en
+		*/
 		
+		*Label variables
+		label var sum_agua_acueduct "Last 3 months: Water supply from pipeline"
+		label var sum_agua_pilaoest "Last 3 months: Water supply from pile or pond"
+		label var sum_agua_cisterna "Last 3 months: Water supply from water tanker truck"
+		label var sum_agua_pozobomb "Last 3 months: Water supply from water pump"
+		label var sum_agua_pozoprot "Last 3 months: Water supply from connected but no water pump"
+		label var sum_agua_otro 	"Last 3 months: Water supply from other sources"
+		label def sum_agua 1 "Most utilized" 2 "Second most utilized" 3 "Third most utilized"
+		
+		label val sum_agua_acueduct sum_agua
+		label val sum_agua_pilaoest sum_agua
+		label val sum_agua_cisterna sum_agua
+		label val sum_agua_pozobomb sum_agua
+		label val sum_agua_pozoprot sum_agua
+		label val sum_agua_otro sum agua
+		
+		label var sum_agua_otro_esp	"Last 3 months: Water supply from other sources, specify"
+
 		*-- Label variable
 		label var suministro_agua_comp "Last 3 months: Water supply (harmonized)"
 		*-- Label values
-		label def suministro_agua_comp_en 1 "From pipeline" 2 "Pile or pond" ///
+		label def suministro_agua_comp_eng 1 "From pipeline" 2 "Pile or pond" ///
 		3 "Distributed by water tanker truck" 4 "Other"
-		label value suministro_agua_comp suministro_agua_comp_en
+		label value suministro_agua_comp suministro_agua_comp_eng
 
 *** Frequency of water supply
 /* FRECUENCIA_AGUA (s4q6): Con que frecuencia ha llegado el agua del acueducto a esta vivienda?
@@ -250,7 +268,6 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 			s4q7_3 = Otra forma
 			s4q7_4 = No tiene servicio electrico
 */
-
 		*-- Label variable
 		label var serv_elect_red_pub "Last 3 months, electricity supply: public"
 		*-- Label variable
@@ -260,10 +277,13 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		*-- Label variable
 		label var  electricidad "Last 3 months, had access to electricity"
 		label def elec 1 "Yes" 0 "No"
+		
 		label val serv_elect_red_pub elec
 		label val serv_elect_planta_priv elec
 		label val serv_elect_otro elec
 		label val electricidad elec
+		
+		label var serv_elect_otro_esp "Last 3 months, another electric service, specify" 
 		
 *** Electric power interruptions
 /* interrumpe_elect (s4q8): En esta vivienda el servicio electrico se interrumpe
@@ -276,10 +296,10 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		*-- Label variable
 		label var interrumpe_elect "Electric power interruptions"
 		*-- Label values
-		label def interrumpe_elect_en 1 "Daily for long hours" ///
+		label def interrumpe_elect_eng 1 "Daily for long hours" ///
 		2 "Once a week for long hours" ///
 		3 "Once a month" 4 "Never" 
-		label value interrumpe_elect interrumpe_elect_en
+		label value interrumpe_elect interrumpe_elect_eng
 
 *** Type of toilet
 /* TIPO_SANITARIO (s4q9): esta vivienda tiene 
@@ -310,10 +330,9 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		*-- Label variable
 		label var tipo_sanitario_comp "Type of toilet (harmonized)"
 		*-- Label values
-		label def tipo_sanitario_comp_en 1 "Toilet with flush (connected to public sewerage system of cesspit)" ///
-		2 "Toilet but not connected" 3 "Toilet without flush" ///
-		4 "Without toilet"
-		label value tipo_sanitario_comp tipo_sanitario_comp_en
+		label def tipo_sanitario_comp_eng 1 "Toilet with flush (connected to public sewerage system of cesspit)" ///
+		2 "Toilet but not connected" 3 "Toilet without flush" 4 "Without toilet"
+		label value tipo_sanitario_comp tipo_sanitario_comp_eng
 
 *** Number of rooms used exclusively to sleep
 /* NDORMITORIOS (s5q1): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
@@ -403,7 +422,10 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 									  4 "Looked for a second job" ///
                                       5 "Other"
 		label val implicancias_nopago implicancias_nopago
+
 		
+		label var implicancias_nopago_o "Others, specify"
+
 		*** If you had to rent similar dwelling, how much did you think you should pay?
 		*-- Label variable
 		label var renta_imp_en "If you had to rent similar dwelling, how much did you think you should pay?"
@@ -425,28 +447,28 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 *** What are the main sources of drinking water in your household?
 		* Acueducto
 		*-- Label variable
-		label var fagua_acueduc "Main sources of drinking water in your household? Pipeline"
+		label var fagua_acueduc "Main drinking water source in your household? Pipeline"
 		* Pila o estanque
 		*-- Label variable
-		label var fagua_estanq "Main sources of drinking water in your household? Pile or pond"
+		label var fagua_estanq "Main drinking water source in your household? Pile or pond"
 		* Camión cisterna
 		*-- Label variable
-		label var fagua_cisterna "Main sources of drinking water in your household? Water tanker truck"
+		label var fagua_cisterna "Main drinking water source in your household? Water tanker truck"
 		* Pozo con bomba
 		*-- Label variable
-		label var fagua_bomba "Main sources of drinking water in your household? Water pump"
+		label var fagua_bomba "Main drinking water source in your household? Water pump"
 		* Pozo protegido
 		*-- Label variable
-		label var fagua_pozo "Main sources of drinking water in your household? Well water"
+		label var fagua_pozo "Main drinking water source in your household? Well water"
 		* Aguas superficiales (manantial,río, lago, canal de irrigación)
 		*-- Label variable
-		label var fagua_manantial "Main sources of drinking water in your household? Spring, river, lake, irrigation canal"
+		label var fagua_manantial "Main drinking water source in your household? Spring, river, lake, irrigation canal"
 		* Agua embotellada
 		*-- Label variable
-		label var fagua_botella "Main sources of drinking water in your household? Bottled water"
+		label var fagua_botella "Main drinking water source in your household? Bottled water"
 		* Otros
 		*-- Label variable
-		label var fagua_otro "Main sources of drinking water in your household? Other"
+		label var fagua_otro "Main drinking water source in your household? Other"
 
 		*-- Label values
 		label def aqua_en 0 "Other" 1 "First (1)" 2 "Second (2)" 3 "Third (3)" 

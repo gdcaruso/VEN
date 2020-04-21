@@ -29,8 +29,6 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 	* FROM IMPUTATION
 	***********************
 	
-*---- Auxiliary variables from imputation
-
 *----Auxiliary variables to identify missing values 
 	global	vars_aux			quintil perc_ilaenitf perc_inlaenitf perc_rentimpenitf ///
 								perc_ijubi_meninla perc_icap_meninla perc_remeninla perc_itranp_o_meninla perc_itranp_nseninla ///
@@ -43,9 +41,7 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 								recibe_ingresopenjub ila_dummy norta_sirecibeila ///
 								ocup_norta_sirecibeila jubi_pens ijubpen_dummy jubi_norta_sirecibejubi ///
 								aimputar_ila_mon aimputar_jubipen ocup_o_rtarecibenilamon jubi_o_rtarecibejubi ///
-								jubpen ijubi_aux djubpen ijubpen_dummy bene /*ingresoslab_bene*/ inlanojub inla_aux
-
-
+								jubpen ijubi_aux djubpen ijubpen_dummy bene /*ingresoslab_bene*/ inlanojub
 
 *---- Dummy identifying missings for imputation
 	global vars_ident			dila_m_miss1 djubpen_miss1 dbene_miss1 dinlanojub_miss1 ///
@@ -88,30 +84,34 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 	global checks 				ila_nuestro dummy_nocoincideila inla_nuestro dummy_nocoincideinla
 
 *---- Drop globales	
-drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks						
+drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
+						
 ********************************************************************************
 	* KEEP VARIABLES 
 ********************************************************************************	
-* To keep (but different from encovi 2019)
-*---- From CEDLAS (auxiliary)
-	   global cedlas relab 
+
 *---- II. Interview Control / Control de la entrevista
 		global control_ent entidad region_est1 municipio nombmun parroquia nombpar 
+		
 *----III Household determination / Determinacion de hogares
 		global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
+
 *----1.1: Identification Variables / Variables de identificación
-		global id_ENCOVI pais ano encuesta id com psu
+		global id_ENCOVI pais ano encuesta id com pondera psu
+
 *----1.2: Demographic variables  / Variables demográficas
 		global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi razon_cambio_resi_o pert_2014 razon_incorp_hh razon_incorp_hh_o ///
-	certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
+				certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
+
 *----1.4: Dwelling characteristics / Caracteristicas de la vivienda
 		global  dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda suministro_agua suministro_agua_comp frecuencia_agua ///
-							serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
-							pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago renta_imp_en renta_imp_mon titulo_propiedad ///
-							fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
-							comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
-							pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
+				serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
+				pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago renta_imp_en renta_imp_mon titulo_propiedad ///
+				fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
+				comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
+				pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
 		global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas telefono_fijo
+
 *----VII. EDUCATION / EDUCACIÓN 
 		global educ_ENCOVI contesta_ind_e quien_contesta_e asistio_educ razon_noasis asiste nivel_educ_act g_educ_act regimen_act a_educ_act s_educ_act t_educ_act edu_pub ///
 				fallas_agua fallas_elect huelga_docente falta_transporte falta_comida_hogar falta_comida_centro inasis_docente protesta nunca_deja_asistir ///
@@ -143,6 +143,8 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 			im_patron im_patron_cant im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone i_indep_mes i_indep_mes_cant i_indep_mes_mone ///
 			g_indep_mes_cant g_indep_mes_mone razon_menoshs razon_menoshs_o deseamashs buscamashs razon_nobusca razon_nobusca_o cambiotr razon_cambiotr razon_cambiotr_o ///
 			aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension 
+*---- From CEDLAS (auxiliary)
+	   global cedlas relab 
 
 *----XVI: BANKING / BANCARIZACIÓN
 		global bank_ENCOVI contesta_ind_b quien_contesta_b cuenta_corr cuenta_aho tcredito tdebito no_banco ///
@@ -176,6 +178,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 				hnofalleciomes10 hnofalleciomes11 hnofalleciomes12 hnofalleciomes13 hnofalleciomes14 hnofalleciomes15 hnofalleciomes16 hnofalleciomes17 hnofalleciomes18 hnofalleciomes19 ///
 				hnoedadfallecio1 hnoedadfallecio2 hnoedadfallecio3 hnoedadfallecio4 hnoedadfallecio5 hnoedadfallecio6 hnoedadfallecio7 hnoedadfallecio8 hnoedadfallecio9 hnoedadfallecio10 ///
 				hnoedadfallecio11 hnoedadfallecio12 hnoedadfallecio13 hnoedadfallecio14 hnoedadfallecio15 hnoedadfallecio16 hnoedadfallecio17 hnoedadfallecio18 hnoedadfallecio19
+
 *----XII: FOOD CONSUMPTION / CONSUMO DE ALIMENTO 
 		global foodcons_ENCOVI clap clap_cuando
 		
@@ -189,23 +192,30 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 *----XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES 
 		global shocks_ENCOVI informant_shock evento_* evento_ot imp_evento_* veces_evento_* ano_evento_* ///
 				reaccion_evento_* reaccionot_evento*
+				
 *----1.9: Income Variables 
-		global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro
+		rename ingresoslab_bene ila_nm
+		rename ingresoslab_mon_local ila_m_local
+		rename ingresoslab_mon_afuera ila_m_ext
+		
+		*global ingreso_ENCOVI ila_m ila_nm ila_m_local ila_m_ext ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro
+			*Mixed below with CEDLAS ones so that the order makes sense
 
 *----Más variables de ingreso CEDLAS 
-		global from_cedlas pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-				interview_month interview__id interview__key quest  // additional
+		global from_cedlas iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ///
+		ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm rem cct itrane_o_m itrane_o_nm itranp_o_m itranp_o_nm itranp_ns ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ///
+		ila ila_m ila_m_local ila_m_ext ila_nm ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_ns itrane_m itran itran_m inla_extraord inla_otro inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
+		interview_month interview__id interview__key quest  // additional
+				
 *----Pobreza
-		/* rename pobre_19 pobre_19usd
-		rename pobre_32 pobre_32usd
-		rename pobre_55 pobre_55usd */
 		rename lp_19 lp_19usd
 		rename lp_32 lp_32usd
 		rename lp_55 lp_55usd
-		global pobreza pobre /*pobre_19usd pobre_32usd pobre_55usd*/ lp_19usd lp_32usd lp_55usd lp_moderada lp_extrema pobre_extremo 
+		global pobreza pobre lp_19usd lp_32usd lp_55usd lp_moderada lp_extrema pobre_extremo 
 		
-*---- Keep 		
-keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $ingreso_ENCOVI $from_cedlas $pobreza
+*---- Keep 
+orden $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
+keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
 
 *---- Drop de las que teniamos dudas
 cap drop quest 
@@ -221,6 +231,8 @@ cap drop id_str
 cap drop statut 
 cap drop sector_urb 
 cap drop d_renta_imp_b
+cap drop ingresoslab_mon // Ahora es ila_m
+
 
 compress
 

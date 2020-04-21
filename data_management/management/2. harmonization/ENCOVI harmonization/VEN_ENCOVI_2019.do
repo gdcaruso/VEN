@@ -480,6 +480,15 @@ fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial
 comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
 pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
 
+global dwell_ENCOVI_sinstring material_piso material_pared_exterior material_techo tipo_vivienda ///
+sum_agua_acueduct sum_agua_pilaoest sum_agua_cisterna sum_agua_pozobomb sum_agua_pozoprot sum_agua_otro suministro_agua_comp frecuencia_agua ///
+serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
+pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago renta_imp_en renta_imp_mon titulo_propiedad ///
+fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
+comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
+pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
+
+
 * VIVIENDA
 
 *** Type of flooring material
@@ -632,7 +641,10 @@ replace ndormi=. if s5q1>20
 
 *** Bath with shower 
 * BANIO (s5q2): Su hogar tiene uso exclusivo de bano con ducha o regadera?
-clonevar banio_con_ducha = (s5q2==1) if (s5q2!=. & s5q2!=.a)
+clonevar banio_con_ducha = s5q2 if (s5q2!=. & s5q2!=.a)
+replace banio_con_ducha = 0 if (s5q2==2)
+	label def sino 1 "Si" 0 "No"
+	label val banio_con_ducha sino
 
 *** Number of bathrooms with shower
 * NBANIOS (s5q3): cuantos banos con ducha o regadera?
@@ -679,7 +691,9 @@ clonevar pago_alq_mutuo_m	=s5q8c if s5q8c!=. & s5q8c!=.a
 
 *** During the last year, have you had arrears in payments?
 *En el último año ha tenido atrasos en los pagos de alquiler o hipoteca?
-clonevar atrasos_alq_mutuo	= (s5q9==1) if s5q9!=. & s5q9!=.a
+clonevar atrasos_alq_mutuo=s5q9 if s5q9!=. & s5q9!=.a
+replace atrasos_alq_mutuo=0 if s5q9==2
+	label val atrasos_alq_mutuo sino
 
 *** What consequences did the arrears in payments had?
 *Qué implicaciones ha tenido la falta de pagos?
@@ -733,7 +747,9 @@ label val fagua_otro aqua
 
 *** In your household, is the water treated to make it drinkable?
 *En su hogar el agua es tratada de alguna forma para hacerla más segura para beber?
-clonevar tratamiento_agua = (s5q14==1) if s5q14!=. & s5q14!=.a
+clonevar tratamiento_agua = s5q14 if s5q14!=. & s5q14!=.a
+replace tratamiento_agua = 0 if s5q14==2
+	label val tratamiento_agua sino
 
 *** How do you treat the water to make it more safe for drinking?
 *Usualmente, qué tratamiento le hacen al agua para hacerla mas segura?
@@ -804,10 +820,12 @@ clonevar comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
 
 *** In your household, have any home appliences damaged due to blackouts or voltage inestability?
 *En su hogar se ha dañado algún electrodomestico a causa de los apagones o por inestabilidad del voltaje?
-clonevar danio_electrodom=(s5q20==1) if s5q20!=. & s5q20!=.a
+clonevar danio_electrodom=s5q20 if s5q20!=. & s5q20!=.a
+replace danio_electrodom=0 if s5q20==2
+	label val danio_electrodom sino
 
 *** Following "SEDLAC methodology"
-	foreach x in $dwell_ENCOVI {
+	foreach x in $dwell_ENCOVI_sinstring {
 	replace `x'=. if relacion_en!=1
 	}
 
@@ -819,78 +837,68 @@ global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computador
 *** Dummy household owns cars
 *  AUTO (s5q4): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
 gen     auto = s5q4==1	if  s5q4!=. & s5q4!=.a
-replace auto = .		if  relacion_en!=1 
 
 *** Number of functioning cars in the household
 * NCARROS (s5q4a) : ¿De cuantos carros dispone este hogar que esten en funcionamiento?
 gen     ncarros = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
-replace ncarros = .		if  relacion_en!=1 
 
 *** Year of the most recent car
 * Fix missing values 
 replace s5q5 = . if s5q5==0 & s5q4==1
 gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
-replace anio_auto = . if relacion_en==1
 
 *** Does the household have fridge?
 * Heladera (s5q6__1): ¿Posee este hogar nevera?
 gen     heladera = s5q6__1==1 if (s5q6__1!=. & s5q6__1!=.a)
-replace heladera = .		if  relacion_en!=1 
 
 *** Does the household have washing machine?
 * Lavarropas (s5q6__2): ¿Posee este hogar lavadora?
 gen     lavarropas = s5q6__2==1 if (s5q6__2!=. & s5q6__2!=.a)
-replace lavarropas = .		if  relacion_en!=1 
 
 *** Does the household have dryer
 * Secadora (s5q6__3): ¿Posee este hogar secadora? 
 gen     secadora = s5q6__3==1 if (s5q6__3!=. & s5q6__3!=.a)
-replace secadora = .		if  relacion_en!=1 
 
 *** Does the household have computer?
 * Computadora (s5q6__4): ¿Posee este hogar computadora?
 gen computadora = s5q6__4==1 if (s5q6__4!=. & s5q6__4!=.a)
-replace computadora = .		if  relacion_en!=1 
 
 *** Does the household have internet?
 * Internet (s5q6__5): ¿Posee este hogar internet?
 gen     internet = s5q6__5==1 if (s5q6__5!=. & s5q6__5!=.a)
-replace internet = .	if  relacion_en!=1 
 
 *** Does the household have tv?
 * Televisor (s5q6__6): ¿Posee este hogar televisor?
 gen     televisor = s5q6__6==1 if (s5q6__6!=. & s5q6__6!=.a)
-replace televisor = .	if  relacion_en!=1 
 
 *** Does the household have radio?
 * Radio (s5q6__7): ¿Posee este hogar radio? 
 gen     radio = s5q6__7==1 if (s5q6__7!=. & s5q6__7!=.a)
-replace radio = .		if  relacion_en!=1 
 
 *** Does the household have heater?
 * Calentador (s5q6__8): ¿Posee este hogar calentador? //NO COMPARABLE CON CALEFACCION FIJA
 gen     calentador = s5q6__8==1 if (s5q6__8!=. & s5q6__8!=.a)
-replace calentador = .		if  relacion_en!=1 
 
 *** Does the household have air conditioner?
 * Aire acondicionado (s5q6__9): ¿Posee este hogar aire acondicionado?
 gen     aire = s5q6__9==1 if (s5q6__9!=. & s5q6__9!=.a)
-replace aire = .		    if  relacion_en!=1 
 
 *** Does the household have cable tv?
 * TV por cable o satelital (s5q6__10): ¿Posee este hogar TV por cable?
 gen     tv_cable = s5q6__10==1 if (s5q6__10!=. & s5q6__10!=.a)
-replace tv_cable = .		if  relacion_en!=1
 
 *** Does the household have microwave oven?
 * Horno microonada (s5q6__11): ¿Posee este hogar horno microonda?
 gen     microondas = s5q6__11==1 if (s5q6__11!=. & s5q6__11!=.a)
-replace microondas = .		if  relacion_en!=1
 
 *** Does the household have landline telephone?
 * Teléfono fijo (s5q6__12): telefono_fijo
 gen     telefono_fijo = s5q6__12==1 if (s5q6__12!=. & s5q6__12!=.a)
-replace telefono_fijo = .		    if  relacion_en!=1 
+
+*** Following "SEDLAC methodology"
+	foreach x in $dur_ENCOVI {
+	replace `x'=. if relacion_en!=1
+	}
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------ VII. EDUCATION / EDUCACIÓN -----------------------------------------------------------

@@ -18,8 +18,8 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// // Define rootpath according to user
-//
+// Define rootpath according to user
+
 // 	    * User 1: Trini
 // 		global trini 0
 //		
@@ -47,9 +47,10 @@ Note:
 // 				global dopath "C:\Users\wb550905\Github\VEN"
 // 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 // }		
-//
-// // set raw data path
+// //
+// // set path for dofiles
 // global input "$datapath\data_management\input\latest"
+// global merging "$dopath\data_management\management\1. merging"
 // global output "$datapath\data_management\output\merged"
 
 ********************************************************************************
@@ -196,5 +197,7 @@ foreach dtafile in $dtalist{
 	label values quest quest_label
 
 compress
+gsort interview__id interview__key quest -s6q5 s6q3 s6q1
+
 	
 save "$output\individual.dta", replace

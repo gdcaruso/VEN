@@ -276,7 +276,7 @@ foreach file in `com_data' {
 	
 	*Incorporate the values labels to the variable 		  
 	label values quest quest_label
-
+    gsort interview__id interview__key
 	compress
 *-------- Save 
 

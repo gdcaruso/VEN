@@ -548,7 +548,7 @@ local bname: value label bien
 }
 drop s12aq1*_os
 
-
+gsort interview__id interview__key quest bien
 
 
 // save the product-household dataset

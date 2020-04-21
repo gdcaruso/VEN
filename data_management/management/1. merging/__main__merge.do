@@ -18,36 +18,37 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user // This is silenced now because it is established in the main master
-/*
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta   1
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global rootpath "C:\Users\wb563583\GitHub\VEN"
-		}
-	    if $lauta {
-				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
-		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-		}
-		if $male   {
-				global dopath "C:\Users\wb550905\Github\VEN"
-				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// Define rootpath according to user
 
-		}
-*/
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta  1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+// 	    if $lauta {
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
+// 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// }		
+
+
 ********************************************************************************
 
 
@@ -71,6 +72,7 @@ Construction of aproved surveys
 
 //merge individual datasets
 run "$merging/individual_append_n_merge.do"
+
 //merge hh datasets
 run "$merging/Merge_Hogares_JL.do"
 //merge products datasets

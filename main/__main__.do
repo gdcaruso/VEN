@@ -81,11 +81,11 @@ global pathaux "$harmonization\aux_do"
 global merging "$dopath\data_management\management\1. merging"
 global input "$datapath\data_management\input\latest"
 global output "$datapath\data_management\output\merged"
-/*
+
 * run merge
-run "$merging\__main__merge.do"
+do "$merging\__main__merge.do"
 
-
+stop
 /*==============================================================================
 Inflation
 ==============================================================================*/
@@ -116,7 +116,7 @@ run "$pathaux\cuantiles.do"
 
 //run ENCOVI harmonization
 run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
-*/
+
 
 *Specific inputs: imputation do's and auxiliary SEDLAC do's 
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
@@ -129,7 +129,7 @@ global pathoutexcel "$dopath\data_management\management\4. income imputation\out
 
 //run ENCOVI imputation
 run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
-stop
+
 
 /*==============================================================================
 poverty estimation

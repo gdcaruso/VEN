@@ -4270,7 +4270,8 @@ include "$pathaux\do_file_1_variables_MA.do"
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
 	sort id, stable
-	by id: egen propieta_no_paga = max(aux_propieta_no_paga)
+	by id: egen propieta_no_paga = max(aux_propieta_no_paga) 
+	replace propieta_no_paga=. if hogarsec==1
 
 	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 		gen     renta_imp = .
@@ -4289,19 +4290,20 @@ include "$pathaux\do_file_1_variables_MA.do"
 			}
 		}
 		
+		sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace renta_imp=renta_imp[1] if relacion_en!=13 // We add to all the other household members (who are not domestic service) the imputed rent of the head
 		
-		* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated   
-		gen renta_imp_b = itf_sin_ri*0.1
+			* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated 
 		
-		gen d_renta_imp_b = .
-		replace d_renta_imp_b = 1 if renta_imp_en==. & propieta_no_paga == 1 // Dummy for other calculations
+		gen renta_imp_b = itf_sin_ri*0.1 if propieta_no_paga == 1
+		
+			gen d_renta_imp_b = .
+			replace d_renta_imp_b = 1 if renta_imp==. & propieta_no_paga == 1 // Dummy for other calculations: who will have the 10%
 
-		* twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny)
-		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //complete with 10% in cases where no guess is provided by hh.
-
-		*replace renta_imp = renta_imp / p_reg
-		*replace renta_imp = renta_imp / ipc_rel 
- 
+			* twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny)
+			
+		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with 10% in cases where no guess is provided by hh.
+		
 include "$pathaux\do_file_2_variables.do"
 
 * include "$pathaux\Labels_ENCOVI.do" // This will get done in the Master do, in English and Spanish, at the end

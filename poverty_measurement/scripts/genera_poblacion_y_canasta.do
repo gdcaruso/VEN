@@ -21,41 +21,54 @@ Note:
 
 // Define rootpath according to user
 
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
-// 		}
-// 	    if $lauta {
-// 		global dopath "C:\Users\wb563365\GitHub\VEN"
-// 		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-// 		if $trini   {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-// 		}
-// 		if $male   {
-// 				global rootpath "C:\Users\wb550905\GitHub\VEN"
-// 		}
-//
-// //
-// // set path of data
-// global encovifilename "ENCOVI_2019.dta"
-// global cleaned "$datapath\data_management\output\cleaned"
-// global merged "$datapath\data_management\output\merged"
-// global input "$datapath\poverty_measurement\input"
-// global output "$datapath\poverty_measurement\output"
-// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+	    * User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   0
+		
+		* User 3: Lautaro
+		global lauta  1
+		
+		* User 4: Malena
+		global male   0
+			
+		if $juli {
+				global dopath "C:\Users\wb563583\GitHub\VEN"
+				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}
+	    if $lauta {
+				global dopath "C:\Users\wb563365\GitHub\VEN"
+				global datapath "C:\Users\wb563365\DataEncovi\"
+		}
+		if $trini   {
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+		}
+		if $male   {
+				global dopath "C:\Users\wb550905\Github\VEN"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+}		
+
+
+//set universal datapaths
+global merged "$datapath\data_management\output\merged"
+global cleaned "$datapath\data_management\output\cleaned"
+global forinflation "$datapath\data_management\output\for inflation"
+
+//set universal dopath
+global harmonization "$dopath\data_management\management\2. harmonization"
+global inflado "$dopath\data_management\management\5. inflation"
+
+//Exchange rate inputs and auxiliaries
+
+global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+global pathaux "$harmonization\aux_do"
+
+
+// set path of data
+global povmeasure "$dopath\poverty_measurement\scripts"
+global input "$datapath\poverty_measurement\input"
+global output "$datapath\poverty_measurement\output"
 ********************************************************************************
 
 
@@ -74,19 +87,18 @@ global calreq = 2000
 *************************************************************************************************************************************************)*/
 
 // merges with income data
+
 use "$cleaned/ENCOVI_2019_pre pobreza.dta", replace
-keep if interview_month==2
-//bys interview__id interview__key quest: egen miembros = max(com)
-
-collapse (max)ipcf_max=ipcf (max) miembros (max) entidad, by (interview__key interview__id quest)
-
-
-rename ipcf_max ipcf
+keep if interview_month==2 // keep feb observations
+keep if relacion_en == 1 //keep households
 
 
 // generate quantiles
-sort ipcf
-xtile quant = ipcf, nquantiles($binsize)
+include "$pathaux/cuantiles.do"
+set seed 4859276
+sort ipcf, stable
+cuantiles ipc [fw=pondera], n($binsize) gen(quant)
+tab quant
 
 /*(************************************************************************************************************************************************* 
 * Remove households eating outside
@@ -99,12 +111,14 @@ tempfile comeafuera
 preserve
 use "$merged/product-hh.dta", replace
 keep if bien>199 & bien<299
-collapse (count) bien, by (interview__id interview__key quest)
-drop bien
+keep interview__id interview__key quest
+duplicates drop
 save `comeafuera'
 restore
 
+
 // keep only hh that does not have lunch out of home
+cap drop _merge
 merge 1:1 interview__key interview__id quest using `comeafuera'
 keep if _merge==1
 drop _merge
@@ -134,7 +148,7 @@ merge 1:m interview__id interview__key quest using `baskets'
 keep if _merge == 3
 drop _merge
 
-keep interview__key interview__id quest ipcf miembros entidad quant bien cantidad_h Energia_kcal_m Proteina_m
+keep interview__key interview__id quest ipcf miembros entidad quant bien cantidad_h Energia_kcal_m Proteina_m pondera
 
 
 // identify very large outliars (testing, now we replace outliars with the mean)
@@ -147,20 +161,31 @@ replace cantidad_h = cantidad_media_pc*miembros if cantidad_pc>=outliars
 // changes from weekly consumption to diary
 replace cantidad_h = cantidad_h/7
 
-// calculate caloric intake per capita for food and hh
+// calculate caloric intake per food
 rename (Energia_kcal_m Proteina_m) (cal prot)
-gen cal_intake = (((cantidad_h*cal)/100))
-gen prot_intake = (((cantidad_h*prot)/100))
+gen cal_int = (((cantidad_h*cal)/100))
+gen prot_int = (((cantidad_h*prot)/100))
 
 
-keep bien cantidad_h cal_intake prot_intake interview__key interview__id quest ipcf miembros quant entidad cal prot
+keep bien cantidad_h cal_int prot_int interview__key interview__id quest ipcf miembros quant entidad cal prot pondera
+
 tempfile basketnoout
 save `basketnoout'
 
-collapse (sum) cal_intake prot_intake, by (interview__key interview__id quest ipcf miembros quant entidad)
+// calculate caloric intake per hh
+bys interview__key interview__id quest ipcf miembros quant: egen cal_intake = total(cal_int)
+
+bys interview__key interview__id quest ipcf miembros quant: egen prot_intake = total(prot_int)
+
+keep interview__key interview__id quest ipcf miembros quant cal_intake prot_intake pondera
+duplicates drop
+
 rename (cal_intake prot_intake) (cal_intake_hh prot_intake_hh)
+
+// calculate caloric intake per capita
 gen cal_intake_pc = cal_intake_hh/miembros
 gen overcal = cal_intake_pc>$calreq
+
 preserve
 keep overcal cal_intake_pc interview__id interview__key quest
 save "$output/pob_cal_intake.dta", replace
@@ -174,8 +199,19 @@ restore
 
 // plot cal intake average, median and requirement
 preserve
-collapse (median) median_cal = cal_intake_pc (mean) av_cal  = cal_intake_pc, by (quant)
+gen median_cal =.
+gen av_cal =.
+levelsof quant, local(q_levels)
+quietly foreach i in `q_levels' { 
+   summarize cal_intake_pc [fw=pondera] if quant == `i', detail 
+   replace median_cal = r(p50) if quant == `i'
+   replace av_cal = r(mean) if quant == `i'
+} 
+
+
+keep quant median_cal av_cal ipcf
 gen cal_req = $calreq
+sort ipcf
 
 twoway line av_cal quant if quant<99 ///
 || line median_cal quant if quant<99 ///
@@ -216,6 +252,7 @@ twoway line av_cal mobquant if mobquant<81 ///
 || line median_cal mobquant if mobquant<81 ///
 || line cal_req mobquant if mobquant<81
 
+
 // select where mobile quant matchs requirements
 keep if cal_req <= median_cal & mobquant!=1 // we exclude mobile quant=1 because there are 0 income hh that report sustancial consumption
 local ref = mobquant[1]
@@ -233,11 +270,17 @@ save "$output/pob_referencia.dta", replace
 * 1: generates basket
 *************************************************************************************************************************************************)*/
 
+
+
+keep interview__id interview__key quest miembros pondera ipcf quant 
+
 // recover product dimension
 merge 1:m interview__id interview__key quest using `basketnoout'
 sort quant _merge
 keep if _merge==3 
 drop _merge
+
+
 
 // first we need to complete the panel, replacing with 0 in any food undeclared
 // complete with 0s in quantities where goods have no obs
@@ -252,17 +295,22 @@ tsset, clear
 bysort newid (interview__key): replace interview__key=interview__key[_N]
 bysort newid (interview__id): replace interview__id=interview__id[_N]
 
-
 // to replace missing in numeric variables 
 bysort newid (quest): replace quest=quest[1]
 bysort newid (quant): replace quant=quant[1]
 bysort newid (miembros): replace miembros=miembros[1]
 bysort newid (ipcf): replace ipcf=ipcf[1]
 bysort newid (entidad): replace entidad=entidad[1]
+bysort newid (pondera): replace pondera=pondera[1]
 
-// creates food "popularity" across hh
-bysort bien: egen popularity = count(cantidad_h) if cantidad_h>0 & cantidad_h!=. 
-egen totalhh = max(newid)
+
+// creates food "popularity" across hh using weights
+bysort bien: egen popularity = total(pondera) if cantidad_h>0 & cantidad_h!=. 
+bysort interview__id interview__key quest (bien): gen first = 1 if _n==1
+egen totalhh =  total(pondera) if first ==1
+bysort newid (totalhh): replace totalhh=totalhh[1]
+
+
 replace popularity = popularity/totalhh
 sort bien popularity
 // this is just to complete observations
@@ -271,11 +319,18 @@ replace popularity = 0 if popularity==.
 
 
 // creates caloric share across hh
-replace cal_intake = 0 if cal_intake ==.
-egen tot_intake = total(cal_intake)
-bysort bien: egen food_cal_intake = total(cal_intake)
-gen share_intake = food_cal_intake/tot_intake
 
+
+
+bys interview__id interview__key quest: egen cal_int_hh = total(cal_int) // calories per hh not weighted
+
+gen tot_intake_temp = cal_int_hh*pondera //calories of weighted hh
+egen tot_intake = total(tot_intake_temp) if first ==1 // total calories of weighted hh
+bysort newid (tot_intake): replace tot_intake=tot_intake[1] //complete observations
+
+gen food_intake_temp = cal_int*pondera //calories of food weighted
+bysort bien: egen food_cal_intake = total(food_intake_temp)
+gen share_intake = food_cal_intake/tot_intake
 
 // filters of food
 keep if share_intake>0.01 | popularity>0.3
@@ -294,30 +349,47 @@ drop if bien == 79
 gen cal_req = $calreq
 
 // generate population
-bysort newid: gen first = 1 if _n == 1 
-egen pop = total(miembros) if first==1
-egen population = max(pop)
+gen pop = miembros*pondera if first==1
+egen population = total(pop)
+
 drop pop
 
 // gen total intake after filters
-egen tot_intake_after_filters = total(cal_intake)
-
+gen tot_intake_after_filters_temp = cal_int_hh*pondera
+egen intake_af = total(tot_intake_after_filters_temp) if first ==1
+egen tot_intake_af = max(intake_af)
+replace intake_af = tot_intake_af
 
 //compare requirement to actual calories to adjust basket
-gen tot_intake_pc = tot_intake_after_filters/population
+gen tot_intake_pc = tot_intake_af/population
 gen ajuste_calorico = cal_req/tot_intake_pc
 gen cantidad_ajustada = cantidad_h*ajuste_calorico
 
-
+stop
 // output canasta ajustada
-preserve 
-collapse (sum) cantidad_h cantidad_ajustada (max) population (max) cal, by(bien) 
+//preserve 
+drop if cal ==.
+
+gen cantidad_h_temp = cantidad_h*pondera 
+by bien: egen cantidad_h_tot = total(cantidad_h_temp) 
+gen cantidad_ajustada_temp = cantidad_ajustada*pondera 
+by bien: egen cantidad_ajustada_tot = total(cantidad_ajustada_temp) 
+
+//collapse (sum) cantidad_h cantidad_ajustada (max) population (max) cal, by(bien) 
+
+keep bien cantidad_h_tot cantidad_ajustada_tot population cal
+duplicates drop
+
+
+rename cantidad_h_tot cantidad_h
+rename cantidad_ajustada_tot cantidad_ajustada
+
 replace cantidad_ajustada = cantidad_ajustada/population
 replace cantidad_h = cantidad_h/population
 gen cal_intake = cantidad_ajustada*cal/100
-gsort -cal_intake
+gsort -cal_intake, stable
 
-save "$output/canasta_diaria.dta", replace
-export excel using "$output/canasta_diaria.xlsx", firstrow(var) replace
+save "$output/canasta_diaria2.dta", replace
+export excel using "$output/canasta_diaria2.xlsx", firstrow(var) replace
 
 

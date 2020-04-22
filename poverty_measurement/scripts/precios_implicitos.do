@@ -126,8 +126,9 @@ drop if unidad_medida==.
 // merge with sedlac to get hh size
 preserve
 use  "$cleaned/ENCOVI_2019_pre pobreza.dta", clear
-collapse (max) com, by (interview__id interview__key quest)
-rename com miembros
+
+keep interview__id interview__key quest miembros pondera
+
 tempfile hhsize
 save `hhsize'
 restore
@@ -191,7 +192,10 @@ drop if gasto_bol ==0 | comprado ==.
 
 // look for popularity among "presentations" (bien unidad_medida tamano cantidad) and filter less popular
 preserve
-collapse (count) count=gasto_bol, by(bien unidad_medida tamano comprado)
+by bien unidad_medida tamano comprado: egen count = count(gasto_bol)
+keep bien unidad_medida tamano comprado count
+duplicates drop
+
 by bien: egen total = total(count)
 gen pop = count/total
 keep if pop>.15 //parametro clave, permite encontrar observaciones en todos los productos. revisar tab bien _merge luego del proximo merge antes de cambiar
@@ -223,8 +227,10 @@ replace comprado = comprado*250 if bien==6 & unidad_medida==40
 
 // generate implicit prices per gram
 gen pimp = gasto_bol/comprado
-
-collapse (p50) pimp, by(bien)
+rename pimp p_imp
+bysort bien: egen pimp = median(p_imp)
+keep bien pimp
+drop duplicates
 
 export excel "$output/precios_implicitos.xlsx", firstrow(variables) replace
 save "$output/precios_implicitos.dta", replace

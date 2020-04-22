@@ -274,7 +274,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		gen     renta_imp = .
 		
 		levelsof interview_month, local(rent_month)
-		foreach m in `rent_month' {
+		foreach m in `rent_month'{
 			levelsof renta_imp_mon, local(rent_currency)
 
 			foreach c in `rent_currency'{
@@ -286,10 +286,17 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 				replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
 			}
 		}
+		
+		sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace renta_imp=renta_imp[1] if relacion_en!=13 // We add to all the other household members (who are not domestic service) the imputed rent of the head
+			
+		gen renta_imp_b = itf_sin_ri*0.1 if propieta_no_paga == 1
+		
+			gen d_renta_imp_b = .
+			replace d_renta_imp_b = 1 if renta_imp==. & propieta_no_paga == 1 // Dummy for other calculations: who will have the 10%
 
-		gen renta_imp_b = itf_sin_ri*0.1
-		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & renta_imp ==. //complete with 10% in cases where no guess is provided by hh.
-
+		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with 10% in cases where no guess is provided by hh.
+		
 	*********************
 	/* Dofile CEDLAS 2 */
 	*********************

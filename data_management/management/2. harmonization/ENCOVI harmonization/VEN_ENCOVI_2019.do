@@ -16,43 +16,43 @@ Note:
 =============================================================================*/
 ********************************************************************************
 // Define rootpath according to user (silenced as this is done by main now)
-
-//  	    * User 1: Trini
-//  		global trini 0
-//		
-//  		* User 2: Julieta
-//  		global juli   0
-//		
-//  		* User 3: Lautaro
-//  		global lauta   0
-//		
-//  		* User 4: Malena
-//  		global male   1
-//			
-//  		if $juli {
-//  				global dopath "C:\Users\wb563583\GitHub\VEN"
-//  				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-//  		}
-//  	    if $lauta {
-// 				global dopath "C:\Users\wb563365\GitHub\VEN"
-// 				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-//  		if $trini   {
-//  				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-//  		}
-//  		if $male   {
-//  				global dopath "C:\Users\wb550905\Github\VEN"
-//  				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-//	
-// *Inputs
-// 		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-// 		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-// 		global merged "$datapath\data_management\output\merged"
-// 		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
-// *Outputs
-// 		global cleaned "$datapath\data_management\output\cleaned"
-
+/*
+ 	    * User 1: Trini
+ 		global trini 0
+		
+ 		* User 2: Julieta
+ 		global juli   0
+		
+ 		* User 3: Lautaro
+ 		global lauta   0
+		
+ 		* User 4: Malena
+ 		global male   1
+			
+ 		if $juli {
+ 				global dopath "C:\Users\wb563583\GitHub\VEN"
+ 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 		}
+ 	    if $lauta {
+				global dopath "C:\Users\wb563365\GitHub\VEN"
+				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}
+ 		if $trini   {
+ 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+ 		}
+ 		if $male   {
+ 				global dopath "C:\Users\wb550905\Github\VEN"
+ 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}
+	
+*Inputs
+		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+		global merged "$datapath\data_management\output\merged"
+		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
+*Outputs
+		global cleaned "$datapath\data_management\output\cleaned"
+*/
 ********************************************************************************
 
 /*==============================================================================
@@ -291,10 +291,88 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 	
 	duplicates report id com //verification
 
-* Weights: pondera
-	gen pondera=1 //round(pesoper)
-	* Cambiar con la verdadera variable de ponderadores cuando la tengamos
+** Relation to the head:
+	/* Categories of the new harmonized variable: relacion_comp
+			01 = Jefe del Hogar	
+			02 = Esposa(o) o Compañera(o)
+			03 = Hijo(a)/Hijastro(a)
+			04 = Nieto(a)		
+			05 = Yerno, nuera, suegro (a)
+			06 = Padre, madre       
+			07 = Hermano(a)
+			08 = Cunado(a)     
+			09 = Sobrino(a)
+			10 = Otro pariente 
+			11 = No pariente
+			12 = Servicio Domestico	
+	* RELACION_EN (s6q2): Variable identifying the relation to the head in the survey
+			01 = Jefe del Hogar
+			02 = Esposa(o) o Compañera(o)
+			03 = Hijo(a)
+			04 = Hijastro(a)
+			05 = Nieto(a)
+			06 = Yerno, nuera, suegro (a)
+			07 = Padre, madre
+			08 = Hermano(a)
+			09 = Cunado(a)         
+			10 = Sobrino(a)
+			11 = Otro pariente      
+			12 = No pariente
+			13 = Servicio Domestico		*/
+	clonevar relacion_en = s6q2 if s6q2!=. & s6q2!=.a
+
+	gen     reltohead = 1		if  relacion_en==1
+	replace reltohead = 2		if  relacion_en==2
+	replace reltohead = 3		if  relacion_en==3  | relacion_en==4
+	replace reltohead = 4		if  relacion_en==5  
+	replace reltohead = 5		if  relacion_en==6 
+	replace reltohead = 6		if  relacion_en==7
+	replace reltohead = 7		if  relacion_en==8  
+	replace reltohead = 8		if  relacion_en==9
+	replace reltohead = 9		if  relacion_en==10
+	replace reltohead = 10		if  relacion_en==11
+	replace reltohead = 11		if  relacion_en==12
+	replace reltohead = 12		if  relacion_en==13
+
+	label def reltohead 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
+						6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"	
+	label value reltohead reltohead
+	rename reltohead relacion_comp
+	label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
+
+*** Weights: pondera
+
+merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
+
+* Individual weights
+	gen pondera=final_pw
+	sort objectid, stable
+	by objectid: replace pondera=pondera/_N
+	replace pondera = round(pondera)
 	
+* Household weights
+		sort interview__key interview__id quest relacion_en, stable
+	by interview__key interview__id quest: gen hogar=1 if _n==1
+		sort objectid, stable
+	by objectid: egen total_hogares=sum(hogar)
+		sort interview__key interview__id quest relacion_en, stable
+	by interview__key interview__id quest: replace total_hogares=. if _n>1
+		sort interview__key interview__id quest relacion_en, stable
+	by interview__key interview__id quest: gen pondera_hh=final_w if _n==1
+		sort interview__key interview__id quest relacion_en, stable
+	by interview__key interview__id quest: replace pondera_hh=pondera_hh/total_hogares if _n==1
+	replace pondera_hh = round(pondera_hh)
+	
+	drop total_hogares hogar
+	
+* Checking population estimates
+	gen uno=1
+	*	Population
+	sum uno [w=pondera] , detail 	// 24.9 M de personas
+	*	Households
+	sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
+	drop uno
+
 * Strata: strata
 	*Old: gen strata = estrato // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 
 	**In ENCOVI 2019 there are 2 strata, geographical, by size of the segment. Check later with Daniel
@@ -302,63 +380,15 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 * Primary Sample Unit: psu  
 	gen psu = combined_id
 
-
 /*(************************************************************************************************************************************************* 
 *------------------------------------------	1.2: Demographic variables  / Variables demográficas --------------------------------------------------
 *************************************************************************************************************************************************)*/
 global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi razon_cambio_resi_o pert_2014 razon_incorp_hh razon_incorp_hh_o ///
 certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
 
-*** Relation to the head:
-/* Categories of the new harmonized variable: relacion_comp
-		01 = Jefe del Hogar	
-		02 = Esposa(o) o Compañera(o)
-		03 = Hijo(a)/Hijastro(a)
-		04 = Nieto(a)		
-		05 = Yerno, nuera, suegro (a)
-		06 = Padre, madre       
-		07 = Hermano(a)
-		08 = Cunado(a)     
-		09 = Sobrino(a)
-		10 = Otro pariente 
-		11 = No pariente
-		12 = Servicio Domestico	
-* RELACION_EN (s6q2): Variable identifying the relation to the head in the survey
-		01 = Jefe del Hogar
-		02 = Esposa(o) o Compañera(o)
-		03 = Hijo(a)
-		04 = Hijastro(a)
-		05 = Nieto(a)
-		06 = Yerno, nuera, suegro (a)
-		07 = Padre, madre
-		08 = Hermano(a)
-		09 = Cunado(a)         
-		10 = Sobrino(a)
-		11 = Otro pariente      
-		12 = No pariente
-		13 = Servicio Domestico
-*/
-clonevar relacion_en = s6q2 if s6q2!=. & s6q2!=.a
-
-gen     reltohead = 1		if  relacion_en==1
-replace reltohead = 2		if  relacion_en==2
-replace reltohead = 3		if  relacion_en==3  | relacion_en==4
-replace reltohead = 4		if  relacion_en==5  
-replace reltohead = 5		if  relacion_en==6 
-replace reltohead = 6		if  relacion_en==7
-replace reltohead = 7		if  relacion_en==8  
-replace reltohead = 8		if  relacion_en==9
-replace reltohead = 9		if  relacion_en==10
-replace reltohead = 10		if  relacion_en==11
-replace reltohead = 11		if  relacion_en==12
-replace reltohead = 12		if  relacion_en==13
-
-label def reltohead 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
-		            6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"	
-label value reltohead reltohead
-rename reltohead relacion_comp
-label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
-
+*** Relation to head
+	*Definido arriba
+	
 *** Sex 
 	* Definido arriba
 

@@ -68,12 +68,12 @@ Note:
 
 *set seed 1 // The seeds are in the do's in the end
 
-do "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
+run "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
-do "$impdos\2. Imputation 2019 - Monetary labor income.do"
-do "$impdos\3. Imputation 2019 - Pensions.do"
-do "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
-do "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
+run "$impdos\2. Imputation 2019 - Monetary labor income.do"
+run "$impdos\3. Imputation 2019 - Pensions.do"
+run "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
+run "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
 
 
 **************************************
@@ -267,7 +267,8 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
-	bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
+	sort id, stable
+	by id: egen propieta_no_paga = max(aux_propieta_no_paga)
 
 	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 		gen     renta_imp = .

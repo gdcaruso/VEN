@@ -207,7 +207,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global from_cedlas iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ///
 		ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm rem cct itrane_o_m itrane_o_nm itranp_o_m itranp_o_nm itranp_ns ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ///
 		ila ila_m ila_m_local ila_m_ext ila_nm ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_ns itrane_m itran itran_m inla_extraord inla_otro inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-		interview_month interview__id interview__key quest  // additional
+		hogarsec interview_month interview__id interview__key quest  // additional
 				
 *----Pobreza
 		rename lp_19 lp_19usd
@@ -216,11 +216,10 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global pobreza pobre lp_19usd lp_32usd lp_55usd lp_moderada lp_extrema pobre_extremo 
 		
 *---- Keep 
-orden $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
+order $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
 keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
 
 *---- Drop de las que teniamos dudas
-cap drop quest 
 cap drop informant_emig 
 cap drop informant_shock 
 cap drop centropo 

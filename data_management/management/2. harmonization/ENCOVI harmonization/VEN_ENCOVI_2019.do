@@ -16,7 +16,7 @@ Note:
 =============================================================================*/
 ********************************************************************************
 // Define rootpath according to user (silenced as this is done by main now)
-/*
+
  	    * User 1: Trini
  		global trini 0
 		
@@ -52,7 +52,7 @@ Note:
 		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
 *Outputs
 		global cleaned "$datapath\data_management\output\cleaned"
-*/
+
 ********************************************************************************
 
 /*==============================================================================
@@ -154,7 +154,8 @@ run "$pathaux\cuantiles.do"
 *Generate unique household identifier by strata
 use "$merged\household.dta", clear
 tempfile household_hhid
-bysort combined_id: gen hh_by_combined_id = _n
+sort combined_id, stable // Instead of "bysort", to make sure we keep order
+by combined_id: gen hh_by_combined_id = _n
 save `household_hhid'
 
 * Open "output" database
@@ -163,7 +164,8 @@ merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
 * I drop those who do not collaborate in the survey
 drop if colabora_entrevista==2
-*Obs: there are still 2 observations which do not merge. Maybe they are people who started to answer but then stopped answering
+
+*Obs: there is 1 obs. which does not merge. Maybe they are people who started to answer but then stopped answering
 
 *Change names to lower cases
 rename _all, lower
@@ -196,19 +198,19 @@ replace interview_month = new_interview_month if (interview_month==.a | intervie
 //drop if interview month is november
 // drop if interview_month==11
 
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   // Region Central: Aragua (5), Carabobo (8), Cojedes (9)
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos: Guarico (12), Apure (4) 
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental: Falcon (11), Lara (13), Portuguesa (18), Yaracuy (22)
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana: Zulia (23)
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes: Barinas (6), Merida (14), Tachira (20), Trujillo (21)
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental: Anzoategui (3), Monagas (16), Sucre (19)
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular: Nueva Esparta (17), Otros (25)
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana: Bolivar (7), Amazonas (2), Delta Amacuro (10)
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital: Vargas (24), Distrito Capital (1)
+gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==13					// Region Central: Aragua (5), Carabobo (8), Lara (13)
+replace region_est1 =  2 if entidad==12 | entidad==4 | entidad==6          			// Region LLanera: Guarico (12), Apure (4), Barinas (6)
+replace region_est1 =  3 if entidad==9 | entidad==11 | entidad==18 | entidad==22	// Region Occidental: Cojedes (9), Falcon (11), Portuguesa (18), Yaracuy (22)
+replace region_est1 =  4 if entidad==23												// Region Zuliana: Zulia (23)
+replace region_est1 =  5 if entidad==14 | entidad==20 | entidad==21					// Region Andina: Merida (14), Tachira (20), Trujillo (21)
+replace region_est1 =  6 if entidad==3 | entidad==7 | entidad==16 | entidad==17 | entidad==19	// Region Oriental: Bolivar (7), Anzoategui (3), Monagas (16), Nueva Esparta (17), Sucre (19)
+replace region_est1 =  7 if entidad==15 | entidad==24 | entidad==1					// Region Capital: Distrito Capital (1), Miranda (15), Vargas (24) 
 label var region_est1 "Region"
-label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
-          5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
+label def region_est1 1 "Region Central"  2 "Region Llanera" 3 "Region Occidental" 4 "Region Zuliana" ///
+          5 "Region Andina" 6 "Region Nor-Oriental" 7 "Capital"
 label value region_est1 region_est1
+* Obs: Delta Amacuro and Amazonas were not surveyed.
+
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------	III Household determination / Determinacion de hogares  -------------------------------------------------------
@@ -269,19 +271,18 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 				1 = Masculino
 				2 = Femenino
 			*/
-			clonevar sexo = s6q3 if (s6q3!=. & s6q3!=.a)
-			label define sexo 1 "Male" 2 "Female"
-			label value sexo sexo
-			gen hombre = sexo==1 if sexo!=.
+			gen hombre = (s6q3==1) if (s6q3!=. & s6q3!=.a)
+			label define hombre 1 "Masculino" 0 "Femenino"
+			label value hombre hombre
 		* Name
-			clonevar nombre = s6q1
+			gen nombre = s6q1
 		*Random var
-		gsort interview__key interview__id quest -edad hombre nombre
+		sort interview__key interview__id quest edad hombre nombre, stable
 		set seed 123
 		generate z = runiform()
-		gsort z
+		sort z, stable
 		*Sorting
-		gsort id_numeric - edad z
+		gsort id_numeric -edad z
 		egen min =  min(_n), by(id)
 		replace min = -min
 		
@@ -291,7 +292,7 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 	duplicates report id com //verification
 
 * Weights: pondera
-	gen pondera=1
+	gen pondera=1 //round(pesoper)
 	* Cambiar con la verdadera variable de ponderadores cuando la tengamos
 	
 * Strata: strata
@@ -359,7 +360,7 @@ rename reltohead relacion_comp
 label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
 *** Sex 
-* Definido arriba
+	* Definido arriba
 
 *** Age
 * EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
@@ -479,6 +480,15 @@ pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancia
 fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
 comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
 pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
+
+global dwell_ENCOVI_sinstring material_piso material_pared_exterior material_techo tipo_vivienda ///
+sum_agua_acueduct sum_agua_pilaoest sum_agua_cisterna sum_agua_pozobomb sum_agua_pozoprot sum_agua_otro suministro_agua_comp frecuencia_agua ///
+serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
+pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago renta_imp_en renta_imp_mon titulo_propiedad ///
+fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
+comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
+pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
+
 
 * VIVIENDA
 
@@ -632,7 +642,10 @@ replace ndormi=. if s5q1>20
 
 *** Bath with shower 
 * BANIO (s5q2): Su hogar tiene uso exclusivo de bano con ducha o regadera?
-clonevar banio_con_ducha = (s5q2==1) if (s5q2!=. & s5q2!=.a)
+clonevar banio_con_ducha = s5q2 if (s5q2!=. & s5q2!=.a)
+replace banio_con_ducha = 0 if (s5q2==2)
+	label def sino 1 "Si" 0 "No"
+	label val banio_con_ducha sino
 
 *** Number of bathrooms with shower
 * NBANIOS (s5q3): cuantos banos con ducha o regadera?
@@ -679,7 +692,9 @@ clonevar pago_alq_mutuo_m	=s5q8c if s5q8c!=. & s5q8c!=.a
 
 *** During the last year, have you had arrears in payments?
 *En el último año ha tenido atrasos en los pagos de alquiler o hipoteca?
-clonevar atrasos_alq_mutuo	= (s5q9==1) if s5q9!=. & s5q9!=.a
+clonevar atrasos_alq_mutuo=s5q9 if s5q9!=. & s5q9!=.a
+replace atrasos_alq_mutuo=0 if s5q9==2
+	label val atrasos_alq_mutuo sino
 
 *** What consequences did the arrears in payments had?
 *Qué implicaciones ha tenido la falta de pagos?
@@ -733,7 +748,9 @@ label val fagua_otro aqua
 
 *** In your household, is the water treated to make it drinkable?
 *En su hogar el agua es tratada de alguna forma para hacerla más segura para beber?
-clonevar tratamiento_agua = (s5q14==1) if s5q14!=. & s5q14!=.a
+clonevar tratamiento_agua = s5q14 if s5q14!=. & s5q14!=.a
+replace tratamiento_agua = 0 if s5q14==2
+	label val tratamiento_agua sino
 
 *** How do you treat the water to make it more safe for drinking?
 *Usualmente, qué tratamiento le hacen al agua para hacerla mas segura?
@@ -804,10 +821,12 @@ clonevar comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
 
 *** In your household, have any home appliences damaged due to blackouts or voltage inestability?
 *En su hogar se ha dañado algún electrodomestico a causa de los apagones o por inestabilidad del voltaje?
-clonevar danio_electrodom=(s5q20==1) if s5q20!=. & s5q20!=.a
+clonevar danio_electrodom=s5q20 if s5q20!=. & s5q20!=.a
+replace danio_electrodom=0 if s5q20==2
+	label val danio_electrodom sino
 
 *** Following "SEDLAC methodology"
-	foreach x in $dwell_ENCOVI {
+	foreach x in $dwell_ENCOVI_sinstring {
 	replace `x'=. if relacion_en!=1
 	}
 
@@ -819,78 +838,68 @@ global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computador
 *** Dummy household owns cars
 *  AUTO (s5q4): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
 gen     auto = s5q4==1	if  s5q4!=. & s5q4!=.a
-replace auto = .		if  relacion_en!=1 
 
 *** Number of functioning cars in the household
 * NCARROS (s5q4a) : ¿De cuantos carros dispone este hogar que esten en funcionamiento?
 gen     ncarros = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
-replace ncarros = .		if  relacion_en!=1 
 
 *** Year of the most recent car
 * Fix missing values 
 replace s5q5 = . if s5q5==0 & s5q4==1
 gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
-replace anio_auto = . if relacion_en==1
 
 *** Does the household have fridge?
 * Heladera (s5q6__1): ¿Posee este hogar nevera?
 gen     heladera = s5q6__1==1 if (s5q6__1!=. & s5q6__1!=.a)
-replace heladera = .		if  relacion_en!=1 
 
 *** Does the household have washing machine?
 * Lavarropas (s5q6__2): ¿Posee este hogar lavadora?
 gen     lavarropas = s5q6__2==1 if (s5q6__2!=. & s5q6__2!=.a)
-replace lavarropas = .		if  relacion_en!=1 
 
 *** Does the household have dryer
 * Secadora (s5q6__3): ¿Posee este hogar secadora? 
 gen     secadora = s5q6__3==1 if (s5q6__3!=. & s5q6__3!=.a)
-replace secadora = .		if  relacion_en!=1 
 
 *** Does the household have computer?
 * Computadora (s5q6__4): ¿Posee este hogar computadora?
 gen computadora = s5q6__4==1 if (s5q6__4!=. & s5q6__4!=.a)
-replace computadora = .		if  relacion_en!=1 
 
 *** Does the household have internet?
 * Internet (s5q6__5): ¿Posee este hogar internet?
 gen     internet = s5q6__5==1 if (s5q6__5!=. & s5q6__5!=.a)
-replace internet = .	if  relacion_en!=1 
 
 *** Does the household have tv?
 * Televisor (s5q6__6): ¿Posee este hogar televisor?
 gen     televisor = s5q6__6==1 if (s5q6__6!=. & s5q6__6!=.a)
-replace televisor = .	if  relacion_en!=1 
 
 *** Does the household have radio?
 * Radio (s5q6__7): ¿Posee este hogar radio? 
 gen     radio = s5q6__7==1 if (s5q6__7!=. & s5q6__7!=.a)
-replace radio = .		if  relacion_en!=1 
 
 *** Does the household have heater?
 * Calentador (s5q6__8): ¿Posee este hogar calentador? //NO COMPARABLE CON CALEFACCION FIJA
 gen     calentador = s5q6__8==1 if (s5q6__8!=. & s5q6__8!=.a)
-replace calentador = .		if  relacion_en!=1 
 
 *** Does the household have air conditioner?
 * Aire acondicionado (s5q6__9): ¿Posee este hogar aire acondicionado?
 gen     aire = s5q6__9==1 if (s5q6__9!=. & s5q6__9!=.a)
-replace aire = .		    if  relacion_en!=1 
 
 *** Does the household have cable tv?
 * TV por cable o satelital (s5q6__10): ¿Posee este hogar TV por cable?
 gen     tv_cable = s5q6__10==1 if (s5q6__10!=. & s5q6__10!=.a)
-replace tv_cable = .		if  relacion_en!=1
 
 *** Does the household have microwave oven?
 * Horno microonada (s5q6__11): ¿Posee este hogar horno microonda?
 gen     microondas = s5q6__11==1 if (s5q6__11!=. & s5q6__11!=.a)
-replace microondas = .		if  relacion_en!=1
 
 *** Does the household have landline telephone?
 * Teléfono fijo (s5q6__12): telefono_fijo
 gen     telefono_fijo = s5q6__12==1 if (s5q6__12!=. & s5q6__12!=.a)
-replace telefono_fijo = .		    if  relacion_en!=1 
+
+*** Following "SEDLAC methodology"
+	foreach x in $dur_ENCOVI {
+	replace `x'=. if relacion_en!=1
+	}
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------ VII. EDUCATION / EDUCACIÓN -----------------------------------------------------------
@@ -4193,7 +4202,11 @@ capture label drop nivel
 	gen hstrt= hstr_ppal 
 		replace hstrt = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
 
-	gen hogarsec=0
+	* Miembros de hogares secundarios (seleccionando personal doméstico): hogarsec 
+	gen hogarsec =.
+	replace hogarsec =1 if relacion_en==13
+	replace hogarsec =0 if inrange(relacion_en, 1,12)
+
 	gen     	relacion = 1		if  relacion_en==1
 		replace relacion = 2		if  relacion_en==2
 		replace relacion = 3		if  relacion_en==3  | relacion_en==4
@@ -4226,7 +4239,8 @@ include "$pathaux\do_file_1_variables_MA.do"
 
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
-	bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
+	sort id, stable
+	by id: egen propieta_no_paga = max(aux_propieta_no_paga)
 
 	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 		gen     renta_imp = .
@@ -4283,18 +4297,18 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
 *************************************************************************************************************************************************)*/
 
-sort id com
+sort id com, stable
 
 *Silencing para que corra más rápido (des-silenciar luego)
 /* 
 order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
+hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
 */
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
+hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
 save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace

@@ -20,38 +20,38 @@ Note:
 
 // Define rootpath according to user
 
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global dopath "C:\Users\wb563583\GitHub\VEN"
-// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-// 	    if $lauta {
-// 				global dopath "C:\Users\wb563365\GitHub\VEN"
-// 				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-// 		if $trini   {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-// 		}
-// 		if $male   {
-// 				global dopath "C:\Users\wb550905\Github\VEN"
-// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// }		
-// //
-// // set path for dofiles
-// global input "$datapath\data_management\input\latest"
-// global merging "$dopath\data_management\management\1. merging"
-// global output "$datapath\data_management\output\merged"
+ 	    * User 1: Trini
+ 		global trini 0
+		
+ 		* User 2: Julieta
+ 		global juli   0
+		
+ 		* User 3: Lautaro
+ 		global lauta  0
+		
+ 		* User 4: Malena
+ 		global male   1
+			
+ 		if $juli {
+ 				global dopath "C:\Users\wb563583\GitHub\VEN"
+ 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 		}
+ 	    if $lauta {
+ 				global dopath "C:\Users\wb563365\GitHub\VEN"
+ 				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 		}
+ 		if $trini   {
+ 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+ 		}
+ 		if $male   {
+ 				global dopath "C:\Users\wb550905\Github\VEN"
+ 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ }		
+
+// set path for dofiles
+global input "$datapath\data_management\input\latest"
+global merging "$dopath\data_management\management\1. merging"
+global output "$datapath\data_management\output\merged"
 
 ********************************************************************************
 
@@ -64,11 +64,11 @@ set more off
 
 
 /*==============================================================================
-Construction of aproved surveys
+Construction of approved surveys
 ==============================================================================*/
 // There are different "actions" during the data collection of a survey such as
 // first data input, completed, approved by supervisor, approved by HQ, rejected
-// We will keep only the approved by HQ
+// We will keep only the approved by HQ.
 
 // set the path for our 3 types of questionaires
 global new "$input\ENCOVI_3_STATA_All"
@@ -86,10 +86,12 @@ append using "$pixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
 // Keep aproved interviews by HQ
-bys quest interview__key interview__id (date time): keep if action[_N]==6 // approved by HQ (as last step)
+sort quest interview__key interview__id date time, stable
+by quest interview__key interview__id: keep if action[_N]==6 // approved by HQ (as last step)
 
 // To identify unique interviews according the last date and time entered
-bys interview__key interview__id (date time) : keep if _n==_N
+sort quest interview__key interview__id date time, stable
+by quest interview__key interview__id: keep if _n==_N
 
 //check, log and delete duplicates
 duplicates tag interview__key interview__id quest, generate(dupli)
@@ -112,7 +114,6 @@ drop date
 // test if is id
 isid interview__key interview__id quest
 
-
 // save temporary db with surveys approved
 tempfile approved_surveys
 save `approved_surveys'
@@ -129,10 +130,10 @@ use  "$old\Miembro.dta", clear
 gen quest=1
 
 append using "$new\Miembro.dta"
-replace quest=2 if quest==.
+replace quest=2 if quest==. & quest!=1
 
 append using "$pixel\Miembro.dta"
-replace quest=3 if quest==.
+replace quest=3 if quest==. & quest!=1 & quest!=2
 
 
 // Keep only approved surveys
@@ -146,7 +147,7 @@ drop _merge
 global dtalist s7q10 s9q19_monto s9q20_monto s9q21_monto s9q22_monto s9q28_monto s9q29_monto
 
 //sets the loop
-foreach dtafile in $dtalist{
+foreach dtafile in $dtalist {
 
 	preserve // the main individual level dataset
 
@@ -155,10 +156,10 @@ foreach dtafile in $dtalist{
 	gen quest=1
 
 	append using "$new/`dtafile'.dta"
-	replace quest=2 if quest==.
+	replace quest=2 if quest==. & quest!=1
 
 	append using "$pixel/`dtafile'.dta"
-	replace quest=3 if quest==.
+	replace quest=3 if quest==. & quest!=1 & quest!=2
 
 
 	// merge to keep only approved surveys
@@ -197,7 +198,7 @@ foreach dtafile in $dtalist{
 	label values quest quest_label
 
 compress
-gsort interview__id interview__key quest -s6q5 s6q3 s6q1
+sort interview__id interview__key quest s6q5 s6q3 s6q1, stable
 
 	
 save "$output\individual.dta", replace

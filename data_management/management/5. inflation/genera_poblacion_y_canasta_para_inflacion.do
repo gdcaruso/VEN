@@ -85,7 +85,7 @@ rename ipcf_max ipcf
 
 
 // generate quantiles
-sort ipcf
+sort ipcf, stable
 xtile quant = ipcf, nquantiles($binsize)
 
 /*(************************************************************************************************************************************************* 
@@ -108,7 +108,7 @@ restore
 merge 1:1 interview__key interview__id quest using `comeafuera'
 keep if _merge==1
 drop _merge
-sort ipcf
+sort ipcf, stable
 
 
 /*(************************************************************************************************************************************************* 
@@ -140,8 +140,10 @@ keep interview__key interview__id quest ipcf miembros entidad quant bien cantida
 // identify very large outliars (testing, now we replace outliars with the mean)
 gen cantidad_pc = cantidad_h/miembros
 
-bysort bien: egen outliars = pctile(cantidad_pc), p(99) 
-bysort bien: egen cantidad_media_pc = mean(cantidad_pc) if cantidad_pc<outliars 
+sort bien, stable
+by bien: egen outliars = pctile(cantidad_pc), p(99) 
+sort bien, stable
+by bien: egen cantidad_media_pc = mean(cantidad_pc) if cantidad_pc<outliars 
 replace cantidad_h = cantidad_media_pc*miembros if cantidad_pc>=outliars
 
 // changes from weekly consumption to diary
@@ -235,7 +237,7 @@ keep if quant<= `ref'+19
 
 // recover product dimension
 merge 1:m interview__id interview__key quest using `basketnoout'
-sort quant _merge
+sort quant _merge, stable
 keep if _merge==3 
 drop _merge
 
@@ -249,31 +251,41 @@ tsset, clear
 
 
 // to replace missing in string variables 
-bysort newid (interview__key): replace interview__key=interview__key[_N]
-bysort newid (interview__id): replace interview__id=interview__id[_N]
+sort newid interview__key, stable
+by newid: replace interview__key=interview__key[_N]
+sort newid interview__id, stable
+by newid: replace interview__id=interview__id[_N]
 
 
 // to replace missing in numeric variables 
-bysort newid (quest): replace quest=quest[1]
-bysort newid (quant): replace quant=quant[1]
-bysort newid (miembros): replace miembros=miembros[1]
-bysort newid (ipcf): replace ipcf=ipcf[1]
-bysort newid (entidad): replace entidad=entidad[1]
+sort newid quest, stable
+by newid: replace quest=quest[1]
+sort newid quant, stable
+by newid: replace quant=quant[1]
+sort newid miembros, stable
+by newid: replace miembros=miembros[1]
+sort newid ipcf, stable
+by newid: replace ipcf=ipcf[1]
+sort newid entidad, stable
+by newid: replace entidad=entidad[1]
 
 // creates food "popularity" across hh
-bysort bien: egen popularity = count(cantidad_h) if cantidad_h>0 & cantidad_h!=. 
+sort bien, stable
+by bien: egen popularity = count(cantidad_h) if cantidad_h>0 & cantidad_h!=. 
 egen totalhh = max(newid)
 replace popularity = popularity/totalhh
-sort bien popularity
+sort bien popularity, stable
 // this is just to complete observations
-bysort bien (popularity): replace popularity = popularity[1]
+sort bien popularity, stable
+by bien: replace popularity = popularity[1]
 replace popularity = 0 if popularity==.
 
 
 // creates caloric share across hh
 replace cal_intake = 0 if cal_intake ==.
 egen tot_intake = total(cal_intake)
-bysort bien: egen food_cal_intake = total(cal_intake)
+sort bien, stable
+by bien: egen food_cal_intake = total(cal_intake)
 gen share_intake = food_cal_intake/tot_intake
 
 
@@ -294,7 +306,8 @@ drop if bien == 79
 gen cal_req = $calreq
 
 // generate population
-bysort newid: gen first = 1 if _n == 1 
+sort newid, stable
+by newid: gen first = 1 if _n == 1 
 egen pop = total(miembros) if first==1
 egen population = max(pop)
 drop pop
@@ -319,5 +332,4 @@ gsort -cal_intake
 
 save "$forinflation/canasta_diaria_para_inflacion.dta", replace
 export excel using "$forinflation/canasta_diaria_para_inflacion.xlsx", firstrow(var) replace
-
 

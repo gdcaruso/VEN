@@ -110,7 +110,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		You will first need to install the package elasticregress, using the command line ssc install elasticregress. 
 		For the purposes of this exercise, please use as argument for the Lasso command set seed 1 and the default number of folds to be 10. */
 		
-		sort interview__id interview__key quest com
+		sort interview__id interview__key quest com, stable
 		set seed 66778899
 		lassoregress log_bene $xvar1 if log_bene>0 & recibe_ingresolab_nomon==1, numfolds(10)
 		display e(varlist_nonzero)
@@ -146,7 +146,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	
 	* The variables which leads to the maximun R2 are selected for the imputation
 	set more off
-	sort interview__id interview__key quest com
+	sort interview__id interview__key quest com, stable
 	mi set flong
 	*set seed 66778899
 	mi register imputed log_bene

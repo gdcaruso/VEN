@@ -110,10 +110,12 @@ local vsp      "01"	// version ASPIRE
     tempfile approved_surveys
 	
 	// Create identification for completed surveys
-	bys quest interview__key interview__id (date time): keep if action[_N]==6 // 6= approved by HQ (as last step)
+	sort quest interview__key interview__id date time, stable
+	by quest interview__key interview__id: keep if action[_N]==6 // 6= approved by HQ (as last step)
 	
 // To identify unique interviews according the last date and time entered
-bys interview__key interview__id (date time) : keep if _n==_N
+sort interview__key interview__id date time, stable
+by interview__key interview__id: keep if _n==_N
 	
 	
 	// Change format
@@ -276,7 +278,7 @@ foreach file in `com_data' {
 	
 	*Incorporate the values labels to the variable 		  
 	label values quest quest_label
-    gsort interview__id interview__key
+    sort interview__id interview__key quest, stable
 	compress
 *-------- Save 
 

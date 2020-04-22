@@ -64,14 +64,13 @@ global merged "$datapath\data_management\output\merged"
 global cleaned "$datapath\data_management\output\cleaned"
 global forinflation "$datapath\data_management\output\for inflation"
 
-//set universal dopath
+//set universal dopaths
 global harmonization "$dopath\data_management\management\2. harmonization"
 global inflado "$dopath\data_management\management\5. inflation"
-
-//Exchange rate inputs and auxiliaries
-
-global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 global pathaux "$harmonization\aux_do"
+
+//exchange rate input
+global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 
 /*==============================================================================
  merging data
@@ -101,32 +100,25 @@ global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_di
 
 
 /*==============================================================================
-hh-individual database and imputation
+hh-individual database
 ==============================================================================*/
-
-//set path of data
-
-*Specific inputs: imputation do's and auxiliary SEDLAC do's 
-global pathaux "$harmonization\aux_do"
-global impdos "$dopath\data_management\management\4. income imputation\dofiles"
-run "$pathaux\cuantiles.do"
 
 //run ENCOVI harmonization
 run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
 
-
-*Specific inputs: imputation do's and auxiliary SEDLAC do's 
-global impdos "$dopath\data_management\management\4. income imputation\dofiles"
-run "$pathaux\cuantiles.do"
+/*==============================================================================
+imputation
+==============================================================================*/
 
 *Specific for imputation
+global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-
 
 //run ENCOVI imputation
 run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
 
+stop
 
 /*==============================================================================
 poverty estimation

@@ -154,7 +154,8 @@ run "$pathaux\cuantiles.do"
 *Generate unique household identifier by strata
 use "$merged\household.dta", clear
 tempfile household_hhid
-bysort combined_id: gen hh_by_combined_id = _n
+sort combined_id, stable // Instead of "bysort", to make sure we keep order
+by combined_id: gen hh_by_combined_id = _n
 save `household_hhid'
 
 * Open "output" database
@@ -164,7 +165,7 @@ drop _merge
 * I drop those who do not collaborate in the survey
 drop if colabora_entrevista==2
 
-*Obs: there are 42 observations which do not merge. Maybe they are people who started to answer but then stopped answering
+*Obs: there is 1 obs. which does not merge. Maybe they are people who started to answer but then stopped answering
 
 *Change names to lower cases
 rename _all, lower
@@ -276,12 +277,12 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 		* Name
 			clonevar nombre = s6q1
 		*Random var
-		gsort interview__key interview__id quest -edad hombre nombre
+		sort interview__key interview__id quest edad hombre nombre, stable
 		set seed 123
 		generate z = runiform()
-		gsort z
+		sort z, stable
 		*Sorting
-		gsort id_numeric - edad z
+		gsort id_numeric -edad z
 		egen min =  min(_n), by(id)
 		replace min = -min
 		
@@ -289,7 +290,7 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 		drop z min
 	
 	duplicates report id com //verification
-
+stop
 * Weights: pondera
 	gen pondera=1 //round(pesoper)
 	* Cambiar con la verdadera variable de ponderadores cuando la tengamos
@@ -4238,7 +4239,8 @@ include "$pathaux\do_file_1_variables_MA.do"
 
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
-	bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
+	sort id, stable
+	by id: egen propieta_no_paga = max(aux_propieta_no_paga)
 
 	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 		gen     renta_imp = .
@@ -4295,7 +4297,7 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
 *************************************************************************************************************************************************)*/
 
-sort id com
+sort id com, stable
 
 *Silencing para que corra más rápido (des-silenciar luego)
 /* 

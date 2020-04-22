@@ -52,9 +52,9 @@ Note:
 		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
 *Outputs
 		global cleaned "$datapath\data_management\output\cleaned"
-*/
-********************************************************************************
 
+********************************************************************************
+*/
 /*==============================================================================
 0: Program set up
 ==============================================================================*/
@@ -81,26 +81,7 @@ run "$pathaux\cuantiles.do"
 *** 0.0 To take everything to bolívares of Feb 2020 (month with greatest sample) ***
 		
 		* Deflactor
-			*Source: Inflacion verdadera http://www.inflacionverdadera.com/venezuela/
-//			
-// 			*use "$rootpath\data_management\output\cleaned\inflacion\InflacionVerdadera_04-09-20.dta", clear
-// 			*use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_PARA NOMINAL.dta", clear
-// 			use "$inflation", clear
-// 			*use "$rootpath\data_management\output\cleaned\inflacion\Inflacion_Asamblea Nacional.dta", clear
-//
-//			
-// 			forvalues j = 10(1)12 {
-// 				sum indice if mes==`j' & ano==2019
-// 				local indice`j' = r(mean) 			
-// 				}
-// 			forvalues j = 1(1)4 {
-// 				sum indice if mes==`j' & ano==2020
-// 				display r(mean)
-// 				local indice`j' = r(mean)				
-// 				}
-
-				
-				
+			
 			// to measure inflation, we mute all inflationary deflaction
 						local deflactor11 1
 						local deflactor12 1
@@ -108,26 +89,8 @@ run "$pathaux\cuantiles.do"
 						local deflactor2 1
 						local deflactor3 1
 						local deflactor4 1
-						
-				
-				
-				
-			// if we consider that incomes are earned in the previous month than the month of the interview use this
-// 						local deflactor11 `indice2'/`indice10'
-// 						local deflactor12 `indice2'/`indice11'
-// 						local deflactor1 `indice2'/`indice12'
-// 						local deflactor2 `indice2'/`indice1'
-// 						local deflactor3 `indice2'/`indice2'
-// 						local deflactor4 `indice2'/`indice3'
-						
-			// if we consider that incomes are earned in the same month than the survey is collected use this
-			// 			local deflactor11 `indice2'/`indice11'
-			// 			local deflactor12 `indice2'/`indice12'
-			// 			local deflactor1 `indice2'/`indice1'
-			// 			local deflactor2 `indice2'/`indice2'
-			// 			local deflactor3 `indice2'/`indice3'
-			//			local deflactor4 `indice2'/`indice4'
 
+			
 		* Exchange Rates / Tipo de cambio
 			*Source: Banco Central Venezuela http://www.bcv.org.ve/estadisticas/tipo-de-cambio
 			
@@ -167,7 +130,8 @@ run "$pathaux\cuantiles.do"
 *Generate unique household identifier by strata
 use "$merged\household.dta", clear
 tempfile household_hhid
-bysort combined_id: gen hh_by_combined_id = _n
+sort combined_id, stable // Instead of "bysort", to make sure we keep order
+by combined_id: gen hh_by_combined_id = _n
 save `household_hhid'
 
 * Open "output" database
@@ -176,7 +140,8 @@ merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
 * I drop those who do not collaborate in the survey
 drop if colabora_entrevista==2
-*Obs: there are still 2 observations which do not merge. Maybe they are people who started to answer but then stopped answering
+
+*Obs: there is 1 obs. which does not merge. Maybe they are people who started to answer but then stopped answering
 
 *Change names to lower cases
 rename _all, lower
@@ -209,15 +174,15 @@ replace interview_month = new_interview_month if (interview_month==.a | intervie
 //drop if interview month is november
 // drop if interview_month==11
 
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   //Region Central
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital
+gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   // Region Central: Aragua (5), Carabobo (8), Cojedes (9)
+replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos: Guarico (12), Apure (4) 
+replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental: Falcon (11), Lara (13), Portuguesa (18), Yaracuy (22)
+replace region_est1 =  4 if entidad==23                                            // Region Zuliana: Zulia (23)
+replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes: Barinas (6), Merida (14), Tachira (20), Trujillo (21)
+replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental: Anzoategui (3), Monagas (16), Sucre (19)
+replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular: Nueva Esparta (17), Otros (25)
+replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana: Bolivar (7), Amazonas (2), Delta Amacuro (10)
+replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital: Vargas (24), Distrito Capital (1)
 label var region_est1 "Region"
 label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
           5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
@@ -230,17 +195,20 @@ global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
 
 * Cuántas personas residen actualmente en esta vivienda?
 clonevar npers_viv=s3q1 if s3q1!=. & s3q1!=.a
+
 * Todas las personas que viven en esta vivienda comparten gastos para la compra de comida?
 gen comparte_gasto_viv=(s3q2==1) if s3q2!=. & s3q2!=.a
+
 * Cuántos grupos de personas mantienen gastos separados para la compra de comida?
 clonevar npers_gasto_sep=s3q3 if s3q3!=. & s3q3!=.a
+
 * Cuántas personas, contándose a usted, comparten gastos para la compra de comida? Este grupo de personas conforma su HOGAR.
 clonevar npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
 
 /*(************************************************************************************************************************************************* 
 *-----------------------------------------	1.1: Identification Variables / Variables de identificación --------------------------------------------
 *************************************************************************************************************************************************)*/
-global id_ENCOVI pais ano encuesta id com psu
+global id_ENCOVI pais ano encuesta id com pondera psu
 
 * Country identifier: country
 	gen pais = "VEN"
@@ -262,7 +230,7 @@ global id_ENCOVI pais ano encuesta id com psu
 	tostring hh_by_combined_id, replace
 	*Up to 10 hh by combined_id
 	replace hh_by_combined_id = "0"+hh_by_combined_id if length(hh_by_combined_id)==1
-	gen id = combined_id + hh_by_combined_id 
+	gen id = combined_id + hh_by_combined_id
 	
 * Component identifier: com
 	** ENCOVI 2018 used "lin" (número de linea) which seems to be a created variable
@@ -272,12 +240,23 @@ global id_ENCOVI pais ano encuesta id com psu
 		gen id_numeric=id
 		destring id_numeric, replace
 		format id_numeric %14.0f
-		*Age
-		gen edad = s6q5 if (s6q5!=. & s6q5!=.a)
+		* Age
+		clonevar edad = s6q5 if (s6q5!=. & s6q5!=.a)
+		* Sex 
+			/* SEXO (s6q3): El sexo de ... es
+				1 = Masculino
+				2 = Femenino
+			*/
+			gen hombre = (s6q3==1) if (s6q3!=. & s6q3!=.a)
+			label define hombre 1 "Masculino" 0 "Femenino"
+			label value hombre hombre
+		* Name
+			clonevar nombre = s6q1
 		*Random var
+		sort interview__key interview__id quest edad hombre nombre, stable
 		set seed 123
 		generate z = runiform()
-		gsort z 
+		sort z, stable
 		*Sorting
 		gsort id_numeric -edad z
 		egen min =  min(_n), by(id)
@@ -287,17 +266,17 @@ global id_ENCOVI pais ano encuesta id com psu
 		drop z min
 	
 	duplicates report id com //verification
-
+stop
 * Weights: pondera
-	*Old: gen pondera = pesoper  //round(pesoper)
-	**Will be done later, at the end of the survey
-
+	gen pondera=1 //round(pesoper)
+	* Cambiar con la verdadera variable de ponderadores cuando la tengamos
+	
 * Strata: strata
 	*Old: gen strata = estrato // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 
 	**In ENCOVI 2019 there are 2 strata, geographical, by size of the segment. Check later with Daniel
 
 * Primary Sample Unit: psu  
-gen psu = combined_id
+	gen psu = combined_id
 
 
 /*(************************************************************************************************************************************************* 
@@ -354,16 +333,10 @@ label def reltohead 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/
 		            6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"	
 label value reltohead reltohead
 rename reltohead relacion_comp
+label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
 *** Sex 
-/* SEXO (s6q3): El sexo de ... es
-	1 = Masculino
-	2 = Femenino
-*/
-clonevar sexo = s6q3 if (s6q3!=. & s6q3!=.a)
-label define sexo 1 "Male" 2 "Female"
-label value sexo sexo
-gen hombre = sexo==1 if sexo!=.
+	* Definido arriba
 
 *** Age
 * EDAD_ENCUESTA (s6q5): Cuantos años cumplidos tiene?
@@ -420,7 +393,7 @@ clonevar razon_nocertificado = s6q12 if (s6q12!=. & s6q12!=.a) & s6q10==2
 clonevar razon_nocertificado_o = s6q12_os if (s6q12!=. & s6q12!=.a) & s6q12==7
 
 * Marital status
-/* ESTADO_CIVIL_ENCUESTA (s6q13): Cual es su situacion conyugal
+/* ESTADO_CIVIL_EN (s6q13): Cual es su situacion conyugal
        1 = casado con conyuge residente  
 	   2 = casado con conyuge no residente
        3 = unido con conyuge residente            
@@ -438,13 +411,13 @@ clonevar razon_nocertificado_o = s6q12_os if (s6q12!=. & s6q12!=.a) & s6q12==7
 	   4 = divorced/separated
 	   5 = widowed		
 */
-clonevar estado_civil_encuesta= s6q13 if (s6q13!=. & s6q13!=.a)
+clonevar estado_civil_en = s6q13 if (s6q13!=. & s6q13!=.a)
 
-gen     marital_status = 1	if  estado_civil_encuesta==1 | estado_civil_encuesta==2
-replace marital_status = 2	if  estado_civil_encuesta==8 
-replace marital_status = 3	if  estado_civil_encuesta==3 | estado_civil_encuesta==4
-replace marital_status = 4	if  estado_civil_encuesta==5 | estado_civil_encuesta==6
-replace marital_status = 5	if  estado_civil_encuesta==7
+gen     marital_status = 1	if  estado_civil_en==1 | estado_civil_en==2
+replace marital_status = 2	if  estado_civil_en==8 
+replace marital_status = 3	if  estado_civil_en==3 | estado_civil_en==4
+replace marital_status = 4	if  estado_civil_en==5 | estado_civil_en==6
+replace marital_status = 5	if  estado_civil_en==7
 label def marital_status 1 "Married" 2 "Never married" 3 "Living together" 4 "Divorced/Separated" 5 "Widowed"
 label value marital_status marital_status
 rename marital_status estado_civil
@@ -474,14 +447,26 @@ replace dia_ult_hijo = s6q16a if s6q16c>31 &  s6q16c!=. & s6q16c!=.a & s6q16c!=9
 
 
 /*(************************************************************************************************************************************************* 
-*------------------------------------------------------- 1.4: Dwelling characteristics -----------------------------------------------------------
+*------------------------------ IV. Dwelling / Vivienda & part of V. Household / hogar  ----------------------------------------------------
 *************************************************************************************************************************************************)*/
-global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda suministro_agua suministro_agua_comp frecuencia_agua ///
+global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda ///
+sum_agua_acueduct sum_agua_pilaoest sum_agua_cisterna sum_agua_pozobomb sum_agua_pozoprot sum_agua_otro sum_agua_otro_esp suministro_agua_comp frecuencia_agua ///
+serv_elect_red_pub serv_elect_planta_priv serv_elect_otro serv_elect_otro_esp electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
+pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago implicancias_nopago_o renta_imp_en renta_imp_mon titulo_propiedad ///
+fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
+comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
+pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
+
+global dwell_ENCOVI_sinstring material_piso material_pared_exterior material_techo tipo_vivienda ///
+sum_agua_acueduct sum_agua_pilaoest sum_agua_cisterna sum_agua_pozobomb sum_agua_pozoprot sum_agua_otro suministro_agua_comp frecuencia_agua ///
 serv_elect_red_pub serv_elect_planta_priv serv_elect_otro electricidad interrumpe_elect tipo_sanitario tipo_sanitario_comp ndormi banio_con_ducha nbanios tenencia_vivienda ///
 pago_alq_mutuo pago_alq_mutuo_mon pago_alq_mutuo_m atrasos_alq_mutuo implicancias_nopago renta_imp_en renta_imp_mon titulo_propiedad ///
 fagua_acueduc fagua_estanq fagua_cisterna fagua_bomba fagua_pozo fagua_manantial fagua_botella fagua_otro tratamiento_agua tipo_tratamiento ///
 comb_cocina pagua pelect pgas pcarbon pparafina ptelefono pagua_monto pelect_monto pgas_monto pcarbon_monto pparafina_monto ptelefono_monto pagua_mon ///
 pelect_mon pgas_mon pcarbon_mon pparafina_mon ptelefono_mon pagua_m pelect_m pgas_m pcarbon_m pparafina_m ptelefono_m danio_electrodom tenencia_vivienda_comp
+
+
+* VIVIENDA
 
 *** Type of flooring material
 /* MATERIAL_PISO (s4q1)
@@ -528,7 +513,7 @@ clonevar  material_techo = s4q3           if (s4q3!=. & s4q3!=.a)
 clonevar tipo_vivienda = s4q4 if (s4q4!=. & s4q4!=.a)
 
 *** Water supply
-/* SUMINISTRO_AGUA (s4q5): Cuales han sido las principales fuentes de suministro de agua en esta vivienda?
+/* SUMINISTRO_AGUA (s4q5): Cuales han sido las principales fuentes de suministro de agua en esta vivienda? (0=no, 1=opcion más utilizada, 2=segunda opcion más utilizada, 3=tercera)
 		1 = Acueducto
 		2 = Pila o estanque
 		3 = Camion Cisterna
@@ -536,18 +521,31 @@ clonevar tipo_vivienda = s4q4 if (s4q4!=. & s4q4!=.a)
 		5 = Pozo protegido
 		6 = Otros medios
 */
-gen     suministro_agua = 1 if  s4q5__1==1
-replace suministro_agua = 2 if  s4q5__2==1
-replace suministro_agua = 3 if  s4q5__3==1
-replace suministro_agua = 4 if  s4q5__4==1
-replace suministro_agua = 5 if  s4q5__5==1
-replace suministro_agua = 6 if  s4q5__6==1	
-label def suministro_agua 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Pozo con bomba" 5 "Pozo protegido" 6 "Otros medios"
-label value suministro_agua suministro_agua
-* Comparable across all years
-recode suministro_agua (5 6=4), g(suministro_agua_comp)
-label def suministro_agua_comp 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Otros medios"
-label value suministro_agua_comp suministro_agua_comp
+clonevar	sum_agua_acueduct = s4q5__1 if s4q5__1!=. & s4q5__1!=.a
+clonevar	sum_agua_pilaoest = s4q5__2	if s4q5__2!=. & s4q5__2!=.a
+clonevar	sum_agua_cisterna = s4q5__3	if s4q5__3!=. & s4q5__3!=.a
+clonevar	sum_agua_pozobomb = s4q5__4	if s4q5__4!=. & s4q5__4!=.a
+clonevar	sum_agua_pozoprot = s4q5__5	if s4q5__5!=. & s4q5__5!=.a
+clonevar	sum_agua_otro = s4q5__6 	if s4q5__6!=. & s4q5__6!=.a	
+
+	*All options
+	gen     suministro_agua = 1 if  s4q5__1==1
+	replace suministro_agua = 2 if  s4q5__2==1
+	replace suministro_agua = 3 if  s4q5__3==1
+	replace suministro_agua = 4 if  s4q5__4==1
+	replace suministro_agua = 5 if  s4q5__5==1
+	replace suministro_agua = 6 if  s4q5__6==1	
+	label def suministro_agua 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Pozo con bomba" 5 "Pozo protegido" 6 "Otros medios"
+	label value suministro_agua suministro_agua
+
+	* Comparable across all years
+	recode suministro_agua (5 6=4), g(suministro_agua_comp)
+	label def suministro_agua_comp 1 "Acueducto" 2 "Pila o estanque" 3 "Camion Cisterna" 4 "Otros medios"
+	label value suministro_agua_comp suministro_agua_comp
+
+* Other, specify
+gen sum_agua_otro_esp = s4q5_os
+label var sum_agua_otro_esp "Últimos 3 meses: suministro de agua de otras fuentes, especificar" 
 
 *** Frequency of water supply
 /* FRECUENCIA_AGUA (s4q6): Con que frecuencia ha llegado el agua del acueducto a esta vivienda?
@@ -563,6 +561,7 @@ label def frecuencia_agua 1 "Todos los dias" 2 "Algunos dias de la semana" ///
 		4 "Una vez cada 15 dias" ///
 		5 "Nunca"
 label val frecuencia_agua frecuencia_agua
+
 *** Electricity
 /* SERVICIO_ELECTRICO : En los ultimos 3 meses, el servicio electrico ha sido suministrado por?
             s4q7_1 = La red publica
@@ -570,16 +569,20 @@ label val frecuencia_agua frecuencia_agua
 			s4q7_3 = Otra forma
 			s4q7_4 = No tiene servicio electrico
 */
-clonevar serv_elect_red_pub=s4q7__1 if s4q7__1!=. & s4q7__1!=.a
-clonevar serv_elect_planta_priv=s4q7__2 if s4q7__2!=. & s4q7__2!=.a
-clonevar serv_elect_otro=s4q7__3 if s4q7__3!=. & s4q7__3!=.a
-gen electricidad= (s4q7__1==1 | s4q7__2==1 | s4q7__3==1)  if (s4q7__1!=. & s4q7__1!=.a & s4q7__2!=. & s4q7__2!=.a & s4q7__3!=. & s4q7__3!=.a)
-* tab s4q7__4
+clonevar serv_elect_red_pub =		s4q7__1 if s4q7__1!=. & s4q7__1!=.a
+clonevar serv_elect_planta_priv =	s4q7__2 if s4q7__2!=. & s4q7__2!=.a
+clonevar serv_elect_otro =			s4q7__3 if s4q7__3!=. & s4q7__3!=.a			
 
-tab serv_elect_red_pub
-tab serv_elect_planta_priv
-tab serv_elect_otro
-tab electricidad
+gen electricidad = 	(s4q7__1==1 | s4q7__2==1 | s4q7__3==1) if (s4q7__1!=. & s4q7__1!=.a & s4q7__2!=. & s4q7__2!=.a & s4q7__3!=. & s4q7__3!=.a)
+* tab s4q7__4 // By april 20, no one who had answered 1, 2 or 3 to s4q7__1 s4q7__2 or s4q7__3==1 had answered they did not have electricity
+
+gen serv_elect_otro_esp =	s4q7_os
+label var serv_elect_otro_esp "Otro servicio eléctrico, especifique" 
+
+	tab serv_elect_red_pub
+	tab serv_elect_planta_priv
+	tab serv_elect_otro
+	tab electricidad
 
 *** Electric power interruptions
 /* interrumpe_elect (s4q8): En esta vivienda el servicio electrico se interrumpe
@@ -589,7 +592,8 @@ tab electricidad
 			4 = Nunca se interrumpe			
 */
 clonevar interrumpe_elect = s4q8 if (s4q8!=. & s4q8!=.a)
-tab interrumpe_elect 
+	tab interrumpe_elect 
+
 *** Type of toilet
 /* TIPO_SANITARIO (s4q9): esta vivienda tiene 
 		1 = Poceta a cloaca
@@ -601,9 +605,11 @@ tab interrumpe_elect
 */
 clonevar tipo_sanitario = s4q9 if (s4q9!=. & s4q9!=.a)
 * comparable across all years
-recode tipo_sanitario (2=1) (3=2)(4=3) (5=4), g(tipo_sanitario_comp)
+recode tipo_sanitario (2=1)(3=2)(4=3)(5=4), g(tipo_sanitario_comp)
 label def tipo_sanitario_comp 1 "Poceta a cloaca/Pozo septico" 2 "Poceta sin conexion" 3 "Excusado de hoyo o letrina" 4 "No tiene poseta o excusado"
 label value tipo_sanitario_comp tipo_sanitario_comp
+
+* HOUSEHOLD 
 
 *** Number of rooms used exclusively to sleep
 * NDORMITORIOS (s5q1): ¿cuántos cuartos son utilizados exclusivamente para dormir por parte de las personas de este hogar? 
@@ -613,14 +619,15 @@ replace ndormi=. if s5q1>20
 *** Bath with shower 
 * BANIO (s5q2): Su hogar tiene uso exclusivo de bano con ducha o regadera?
 clonevar banio_con_ducha = s5q2 if (s5q2!=. & s5q2!=.a)
-replace banio_con_ducha = 1 if (s5q2==1) 
 replace banio_con_ducha = 0 if (s5q2==2)
-label def banio_con_ducha 1 "Si" 0 "No"
-label val banio_con_ducha banio_con_ducha
+	label def sino 1 "Si" 0 "No"
+	label val banio_con_ducha sino
 
 *** Number of bathrooms with shower
 * NBANIOS (s5q3): cuantos banos con ducha o regadera?
-clonevar nbanios = s5q3 if banio_con_ducha==1 
+clonevar nbanios = s5q3 if s5q2==1 
+
+* Note: s5q4, s5q5, s5q6 in next dofile section
 
 *** Housing tenure
 /* TENENCIA_VIVIENDA (s5q7): régimen de  de la vivienda  
@@ -636,6 +643,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1
 		10 = Otra
 */
 clonevar tenencia_vivienda = s5q7 if (s5q7!=. & s5q7!=.a)
+
 gen tenencia_vivienda_comp=1 if tenencia_vivienda==1
 replace tenencia_vivienda_comp=2 if tenencia_vivienda==2
 replace tenencia_vivienda_comp=3 if tenencia_vivienda==3 | tenencia_vivienda==4
@@ -647,35 +655,46 @@ label define tenencia_vivienda_comp 1 "Propia pagada" 2 "Propia pagandose" 3 "Al
 label value tenencia_vivienda_comp tenencia_vivienda_comp
 
 *** How much did you pay for rent or mortgage the last month?
-clonevar pago_alq_mutuo=s5q8a if s5q8a!=. & s5q8a!=.a
+* Cuánto pagó por concepto de alquiler o credito hipotecario el mes pasado o la ultima vez que pago?
+clonevar pago_alq_mutuo		=s5q8a if s5q8a!=. & s5q8a!=.a
 
 *** In which currency did you make the payment?
-clonevar pago_alq_mutuo_mon=s5q8b if s5q8b!=. & s5q8b!=.a
+* En qué moneda realizó el pago?
+clonevar pago_alq_mutuo_mon	=s5q8b if s5q8b!=. & s5q8b!=.a
 
 *** In which month did you make the payment?
-clonevar pago_alq_mutuo_m=s5q8c if s5q8c!=. & s5q8c!=.a
+* En qué mes realizó el pago?
+clonevar pago_alq_mutuo_m	=s5q8c if s5q8c!=. & s5q8c!=.a
 
 *** During the last year, have you had arrears in payments?
+*En el último año ha tenido atrasos en los pagos de alquiler o hipoteca?
 clonevar atrasos_alq_mutuo=s5q9 if s5q9!=. & s5q9!=.a
-replace atrasos_alq_mutuo=1 if s5q9==1
 replace atrasos_alq_mutuo=0 if s5q9==2
-*Label values
-label def sino 1 "Si" 0 "No"
-label val atrasos_alq_mutuo sino
+	label val atrasos_alq_mutuo sino
 
 *** What consequences did the arrears in payments had?
+*Qué implicaciones ha tenido la falta de pagos?
 clonevar implicancias_nopago=s5q10 if s5q10!=. & s5q10!=.a
 
+*** Others, specify
+* Otras, especifique
+gen implicancias_nopago_o=s5q10_os
+label var implicancias_nopago_o "Otras implicancias del no pago"
+
 *** If you had to rent similar dwelling, how much did you think you should pay?
+*Si usted tuviera que vivir en una vivienda como esta, cuanto cree que deberia pagar?
 clonevar renta_imp_en=s5q11 if s5q11!=. & s5q11!=.a
 
-*** In which currency ?
+*** In which currency?
+*En qué moneda?
 clonevar renta_imp_mon=s5q11a if s5q11a!=. & s5q11a!=.a
 
 *** What type of property title do you have?
+*Qué tipo de documento de titulación sobre la vivienda tienen su hogar?
 clonevar titulo_propiedad=s5q12 if s5q12!=. & s5q12!=.a
 
 *** What are the main sources of drinking water in your household?
+*Cuáles son las fuentes principales de agua para beber de los miembros de su hogar? 
 * Acueducto
 clonevar fagua_acueduc=s5q13__1 if s5q13__1!=. & s5q13__1!=.a
 * Pila o estanque
@@ -703,175 +722,160 @@ label val fagua_manantial aqua
 label val fagua_botella aqua
 label val fagua_otro aqua
 
-*** In your household, is the water treated to make it drinkable
-clonevar tratamiento_agua= s5q14 if s5q14!=. & s5q14!=.a
-replace tratamiento_agua= 1 if s5q14==1
-replace tratamiento_agua= 0 if s5q14==2
-* Label values
-label def tratamiento_agua 1 "Si" 0 "No"
-label val tratamiento_agua tratamiento_agua
+*** In your household, is the water treated to make it drinkable?
+*En su hogar el agua es tratada de alguna forma para hacerla más segura para beber?
+clonevar tratamiento_agua = s5q14 if s5q14!=. & s5q14!=.a
+replace tratamiento_agua = 0 if s5q14==2
+	label val tratamiento_agua sino
 
-
-*** How do you treat the water to make it more safe for drinking
+*** How do you treat the water to make it more safe for drinking?
+*Usualmente, qué tratamiento le hacen al agua para hacerla mas segura?
 clonevar tipo_tratamiento=s5q15 if s5q15!=. & s5q15!=.a
 
 *** Which type of fuel do you use for cooking?
 clonevar comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
 
 *** Did you pay for the following utilities?
-* Water
-clonevar pagua=s5q17__1 if s5q17__1!=. & s5q17__1!=.a 
-* Electricity
-clonevar pelect=s5q17__2 if s5q17__2!=. & s5q17__2!=.a
-replace pelect=1 if s5q17__2==1 
-replace pelect=0 if s5q17__2==2
+	* Water
+	clonevar pagua=s5q17__1 if s5q17__1!=. & s5q17__1!=.a 
+	
+	* Electricity
+	clonevar pelect=s5q17__2 if s5q17__2!=. & s5q17__2!=.a
 
-* Gas
-clonevar pgas=s5q17__3 if s5q17__3!=. & s5q17__3!=.a
-replace pgas=1 if s5q17__3==1
-replace pgas=0 if s5q17__3==2
+	* Gas
+	clonevar pgas=s5q17__3 if s5q17__3!=. & s5q17__3!=.a
 
-* Carbon, wood
-clonevar pcarbon=s5q17__4 if s5q17__4!=. & s5q17__4!=.a
-replace pcarbon=1 if s5q17__4==1
-replace pcarbon=0 if s5q17__4==2
+	* Carbon, wood
+	clonevar pcarbon=s5q17__4 if s5q17__4!=. & s5q17__4!=.a
 
-* Paraffin
-clonevar pparafina=s5q17__5 if s5q17__5!=. & s5q17__5!=.a
-replace pparafina=1 if s5q17__5==1
-replace pparafina=0 if s5q17__5==2
+	* Paraffin
+	clonevar pparafina=s5q17__5 if s5q17__5!=. & s5q17__5!=.a
 
-* Landline, internet and tv cable
-gen ptelefono=(s5q17__7==1) if s5q17__7!=. & s5q17__7!=.a
+	* Landline, internet and tv cable
+	gen ptelefono=s5q17__7 if s5q17__7!=. & s5q17__7!=.a
 
 *** How much did you pay for the following utilities?
-clonevar pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
-* Electricity
-clonevar pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
-* Gas
-clonevar pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
-* Carbon, wood
-clonevar pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
-* Paraffin
-clonevar pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
-* Landline, internet and tv cable
-clonevar ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
+	* Water
+	clonevar pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
+	* Electricity
+	clonevar pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
+	* Gas
+	clonevar pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
+	* Carbon, wood
+	clonevar pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
+	* Paraffin
+	clonevar pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
 
 *** In which currency did you pay for the following utilities?
-clonevar pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
-* Electricity
-clonevar pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
-* Gas
-clonevar pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
-* Carbon, wood
-clonevar pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
-* Paraffin
-clonevar pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
-* Landline, internet and tv cable
-clonevar ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
+	* Water
+	clonevar pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
+	* Electricity
+	clonevar pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
+	* Gas
+	clonevar pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
+	* Carbon, wood
+	clonevar pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
+	* Paraffin
+	clonevar pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
 
 *** In which month did you pay for the following utilities?
-clonevar pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
-* Electricity
-clonevar pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
-* Gas
-clonevar pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
-* Carbon, wood
-clonevar pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
-* Paraffin
-clonevar pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
-* Landline, internet and tv cable
-clonevar ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
+	clonevar pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
+	* Electricity
+	clonevar pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
+	* Gas
+	clonevar pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
+	* Carbon, wood
+	clonevar pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
+	* Paraffin
+	clonevar pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
 
 *** In your household, have any home appliences damaged due to blackouts or voltage inestability?
+*En su hogar se ha dañado algún electrodomestico a causa de los apagones o por inestabilidad del voltaje?
 clonevar danio_electrodom=s5q20 if s5q20!=. & s5q20!=.a
-replace danio_electrodom=1 if s5q20==1
 replace danio_electrodom=0 if s5q20==2
+	label val danio_electrodom sino
 
-foreach x in $dwell_ENCOVI {
-replace `x'=. if relacion_en!=1
-}
+*** Following "SEDLAC methodology"
+	foreach x in $dwell_ENCOVI_sinstring {
+	replace `x'=. if relacion_en!=1
+	}
 
 /*(************************************************************************************************************************************************* 
-*----------------------------------------------- 1.5: Durables goods  / Bienes durables --------------------------------------------------------
+*-------------------------------- V. More of Household: Durable goods  / Más de hogar: Bienes durables --------------------------------------------
 *************************************************************************************************************************************************)*/
 global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas telefono_fijo
 
 *** Dummy household owns cars
 *  AUTO (s5q4): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
-gen     auto = s5q4==1		if  s5q4!=. & s5q4!=.a
-replace auto = .		if  relacion_en!=1 
+gen     auto = s5q4==1	if  s5q4!=. & s5q4!=.a
 
 *** Number of functioning cars in the household
 * NCARROS (s5q4a) : ¿De cuantos carros dispone este hogar que esten en funcionamiento?
 gen     ncarros = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
-replace ncarros = .		if  relacion_en!=1 
 
 *** Year of the most recent car
 * Fix missing values 
 replace s5q5 = . if s5q5==0 & s5q4==1
 gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
-replace anio_auto = . if relacion_en==1
 
 *** Does the household have fridge?
 * Heladera (s5q6__1): ¿Posee este hogar nevera?
 gen     heladera = s5q6__1==1 if (s5q6__1!=. & s5q6__1!=.a)
-replace heladera = .		if  relacion_en!=1 
 
 *** Does the household have washing machine?
 * Lavarropas (s5q6__2): ¿Posee este hogar lavadora?
 gen     lavarropas = s5q6__2==1 if (s5q6__2!=. & s5q6__2!=.a)
-replace lavarropas = .		if  relacion_en!=1 
 
 *** Does the household have dryer
 * Secadora (s5q6__3): ¿Posee este hogar secadora? 
 gen     secadora = s5q6__3==1 if (s5q6__3!=. & s5q6__3!=.a)
-replace secadora = .		if  relacion_en!=1 
 
 *** Does the household have computer?
 * Computadora (s5q6__4): ¿Posee este hogar computadora?
 gen computadora = s5q6__4==1 if (s5q6__4!=. & s5q6__4!=.a)
-replace computadora = .		if  relacion_en!=1 
 
 *** Does the household have internet?
 * Internet (s5q6__5): ¿Posee este hogar internet?
 gen     internet = s5q6__5==1 if (s5q6__5!=. & s5q6__5!=.a)
-replace internet = .	if  relacion_en!=1 
 
 *** Does the household have tv?
 * Televisor (s5q6__6): ¿Posee este hogar televisor?
 gen     televisor = s5q6__6==1 if (s5q6__6!=. & s5q6__6!=.a)
-replace televisor = .	if  relacion_en!=1 
 
 *** Does the household have radio?
 * Radio (s5q6__7): ¿Posee este hogar radio? 
 gen     radio = s5q6__7==1 if (s5q6__7!=. & s5q6__7!=.a)
-replace radio = .		if  relacion_en!=1 
 
 *** Does the household have heater?
 * Calentador (s5q6__8): ¿Posee este hogar calentador? //NO COMPARABLE CON CALEFACCION FIJA
 gen     calentador = s5q6__8==1 if (s5q6__8!=. & s5q6__8!=.a)
-replace calentador = .		if  relacion_en!=1 
 
 *** Does the household have air conditioner?
 * Aire acondicionado (s5q6__9): ¿Posee este hogar aire acondicionado?
 gen     aire = s5q6__9==1 if (s5q6__9!=. & s5q6__9!=.a)
-replace aire = .		    if  relacion_en!=1 
 
 *** Does the household have cable tv?
 * TV por cable o satelital (s5q6__10): ¿Posee este hogar TV por cable?
 gen     tv_cable = s5q6__10==1 if (s5q6__10!=. & s5q6__10!=.a)
-replace tv_cable = .		if  relacion_en!=1
 
 *** Does the household have microwave oven?
 * Horno microonada (s5q6__11): ¿Posee este hogar horno microonda?
 gen     microondas = s5q6__11==1 if (s5q6__11!=. & s5q6__11!=.a)
-replace microondas = .		if  relacion_en!=1
 
 *** Does the household have landline telephone?
 * Teléfono fijo (s5q6__12): telefono_fijo
 gen     telefono_fijo = s5q6__12==1 if (s5q6__12!=. & s5q6__12!=.a)
-replace telefono_fijo = .		    if  relacion_en!=1 
+
+*** Following "SEDLAC methodology"
+	foreach x in $dur_ENCOVI {
+	replace `x'=. if relacion_en!=1
+	}
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------ VII. EDUCATION / EDUCACIÓN -----------------------------------------------------------
@@ -2187,7 +2191,7 @@ iext_sueldo_mone	iext_ingnet_mone	iext_indemn_mone	iext_remesa_mone	iext_penjub_
 
 	
 	*** Did you receive last month income for any of the following concepts and how much? (each one is a dummy)
-	/* s9q29a__* Con respecto a los últimos 12 meses, ¿recibió ingresos provenientes del extreior por alguno de los siguientes conceptos y cuánto?
+	/* s9q29a__* Con respecto a los últimos 12 meses, ¿recibió ingresos provenientes del exterior por alguno de los siguientes conceptos y cuánto?
 				1=Sueldos o salarios
 				2=Ingresos netos de los trabajadores independientes
 				3=Indemnizaciones por enfermedad o accidente
@@ -4174,7 +4178,11 @@ capture label drop nivel
 	gen hstrt= hstr_ppal 
 		replace hstrt = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
 
-	gen hogarsec=0
+	* Miembros de hogares secundarios (seleccionando personal doméstico): hogarsec 
+	gen hogarsec =.
+	replace hogarsec =1 if relacion_en==13
+	replace hogarsec =0 if inrange(relacion_en, 1,12)
+
 	gen     	relacion = 1		if  relacion_en==1
 		replace relacion = 2		if  relacion_en==2
 		replace relacion = 3		if  relacion_en==3  | relacion_en==4
@@ -4207,7 +4215,8 @@ include "$pathaux\do_file_1_variables_MA.do"
 
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
-	bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
+	sort id, stable
+	by id: egen propieta_no_paga = max(aux_propieta_no_paga)
 
 	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 		gen     renta_imp = .
@@ -4238,9 +4247,6 @@ include "$pathaux\do_file_1_variables_MA.do"
 
 		*replace renta_imp = renta_imp / p_reg
 		*replace renta_imp = renta_imp / ipc_rel 
-
-gen pondera=1
-* Cambiar con la verdadera variable de ponderadores cuando la tengamos
  
 include "$pathaux\do_file_2_variables.do"
 
@@ -4267,18 +4273,18 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
 *************************************************************************************************************************************************)*/
 
-sort id com
+sort id com, stable
 
 *Silencing para que corra más rápido (des-silenciar luego)
 /* 
 order $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
-/* Más variables de ingreso CEDLAS */ pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
+/* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
+hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo // additional
 */
 
-keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI  $labor_ENCOVI $otherinc_ENCOVI $ingreso_ENCOVI ///
-/* Más variables de ingreso CEDLAS */ pondera iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
+keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
+/* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
+hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 
 save "$forinflation\ENCOVI_2019_sinimputar_sindeflactar_parainflacion.dta", replace

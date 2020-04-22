@@ -267,7 +267,8 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
-	bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
+	sort id
+	by id: egen propieta_no_paga = max(aux_propieta_no_paga)
 
 	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 		gen     renta_imp = .

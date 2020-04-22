@@ -84,7 +84,8 @@ local vr       "01"     // version renta
 *Generate unique household identifier by strata
 use "$merged\household.dta", clear
 tempfile household_hhid
-bysort combined_id: gen hh_by_combined_id = _n
+sort combined_id, stable
+by combined_id: gen hh_by_combined_id = _n
 save `household_hhid'
 
 * Open "output" database
@@ -94,7 +95,7 @@ drop _merge
 * I drop those who do not collaborate in the survey
 drop if colabora_entrevista==2
 
-*Obs: there are 42 observations which do not merge. Maybe they are people who started to answer but then stopped answering
+*Obs: the is 1 observation which does not merge. Maybe they are people who started to answer but then stopped answering
 
 *Change names to lower cases
 rename _all, lower
@@ -146,10 +147,10 @@ rename _all, lower
 		* Name
 			clonevar nombre = s6q1
 		*Random var
-		gsort interview__key interview__id quest -edad hombre nombre
+		sort interview__key interview__id quest edad hombre nombre, stable
 		set seed 123
 		generate z = runiform()
-		gsort z 
+		sort z 
 		*Sorting
 		gsort id_numeric -edad z
 		egen min =  min(_n), by(id)
@@ -1533,9 +1534,9 @@ foreach i of varlist iasalp_m iasalp_nm  ictapp_m ictapp_nm  ipatrp_m ipatrp_nm 
 =================================================================================================================================================*/
 * This was done in another dofile, will be attached at the end
 
-* iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee */ ///
-* pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11 
-* renta_imp
+	* iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap  itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee */ ///
+	* pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11 
+	* renta_imp
 
 capture label drop relacion
 capture label drop hombre
@@ -1554,6 +1555,8 @@ compress
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
 *************************************************************************************************************************************************)*/
+
+sort id com, stable
 
 order pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
 region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///

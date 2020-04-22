@@ -69,9 +69,10 @@ use "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", clear
 
 
 ///*** DESCRIPTION INCOME ***///
-sort interview__id interview__key quest com	
-	xtile quintil=ipcf, n(5)
-	bys interview_month quintil: sum ipcf
+sort interview__id interview__key quest com, stable
+	cuantiles ipcf [w=pondera] if ipcf>=0, n(5) g(quintil)
+sort interview_month, stable
+	by interview_month quintil: sum ipcf
 	
 	* Percentage of each kind of income in itf
 	gen perc_ilaenitf = ilf / itf if itf!=.
@@ -409,7 +410,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 *** Labor income
 		
 	foreach x in ila_m {
-	sort interview__id interview__key quest com	
+	sort interview__id interview__key quest com, stable
 	** Real zeros:
 	gen d`x'_zero=1 if (ila==0 | recibe_ingresolab_mon==0)
 			label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive ila)"
@@ -471,7 +472,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	foreach x in jubpen {
 
 	
-	sort interview__id interview__key quest com	
+	sort interview__id interview__key quest com, stable	
 	** Real zeros:
 	gen d`x'_zero=1 if (recibe_ingresopenjub==0 | ijubi_aux==0)
 			label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive pension)"
@@ -532,7 +533,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 *** Labor benefits / Non-monetary labor income
 	local i=2
 	foreach x in bene {
-	sort interview__id interview__key quest com	
+	sort interview__id interview__key quest com, stable
 	** Zeros: answered 0 or said didn't receive non-monetary labor income
 	gen d`x'_zero=1 if (recibe_ingresolab_nomon==0 | ingresoslab_bene==0)
 		label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive non-monetary labor income)"
@@ -580,7 +581,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 *** Monetary non-labor income (all except pensions)
 	local i=3
 	foreach x in inlanojub {
-	sort interview__id interview__key quest com	
+	sort interview__id interview__key quest com, stable
 	** Zeros: answered 0 or said didn't receive monetary non-labor income
 	gen d`x'_zero=1 if recibe_ingresonolab_mes==0 | (recibe_ingresonolab_mes==1 & `x'==0)
 		label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive monetary non-labor income other than pensions)"
@@ -674,7 +675,8 @@ matrix drop aux1 aux2 a a1 a2 a3
 	*/
 	
 	foreach i of varlist tipo_vivienda material_piso tipo_sanitario_comp propieta auto anio_auto heladera lavarropas computadora internet televisor calentador aire tv_cable microondas {
-		bys id: egen `i'_hh=max(`i') // para asegurar que todos en el hogar tengan lo mismo, no solo el jefe
+		sort id, stable
+		by id: egen `i'_hh=max(`i') // para asegurar que todos en el hogar tengan lo mismo, no solo el jefe
 	}
 	
 	gen total_hrtr = hstr_ppal 

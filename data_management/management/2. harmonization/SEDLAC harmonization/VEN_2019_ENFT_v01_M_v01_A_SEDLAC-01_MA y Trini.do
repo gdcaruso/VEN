@@ -17,7 +17,7 @@ Note:
 ********************************************************************************
 
 // Define rootpath according to user (silenced as this is done by main now)
-
+/*
  	    * User 1: Trini
  		global trini 0
 		
@@ -161,51 +161,6 @@ rename _all, lower
 	
 	duplicates report id com //verification
 
-*** Weights/Factor de ponderacion: pondera
-
-merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
-
-	* Individual weights
-		gen pondera=final_pw
-		sort objectid, stable
-		by objectid: replace pondera=pondera/_N
-		replace pondera = round(pondera)
-		
-	* Household weights
-			sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: gen hogar=1 if _n==1
-			sort objectid, stable
-		by objectid: egen total_hogares=sum(hogar)
-			sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: replace total_hogares=. if _n>1
-			sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: gen pondera_hh=final_w if _n==1
-			sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: replace pondera_hh=pondera_hh/total_hogares if _n==1
-		replace pondera_hh = round(pondera_hh)
-		
-		drop total_hogares hogar
-		
-	* Checking population estimates
-		gen uno=1
-		*	Population
-		sum uno [w=pondera] , detail 	// 24.9 M de personas
-		*	Households
-		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
-		drop uno
-* Estrato: strata
-	gen strata = . // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 
-	**In ENCOVI 2019 there are 2 strata, geographical, by size of the segment. Check later with Daniel
-
-* Unidad Primaria de Muestreo: psu  
-gen psu = combined_id
-
-
-/*(************************************************************************************************************************************************* 
-*-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
-*************************************************************************************************************************************************)*/
-global demo_SEDLAC relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua
-
 * Relation to the head:	relacion
 /* Categories of the new harmonized variable:
 		1:  Jefe		
@@ -244,6 +199,55 @@ replace relacion = 8		if  relacion_en==12 | relacion_en==13
 label def relacion 1 "Jefe" 2 "Cónyuge/Pareja" 3 "Hijo(a)/Hijastro(a)" 4 "Padre/Madre" ///		
 		              5 "Hermano/Hermana"  6 "Nieto/Nieta"	7 "Otros familiares" 8 "Otros no familiares"
 label value relacion relacion
+
+*** Weights/Factor de ponderacion: pondera
+
+merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
+
+	* Individual weights
+		gen pondera=final_pw
+		sort objectid, stable
+		by objectid: replace pondera=pondera/_N
+		replace pondera = round(pondera)
+		
+	* Household weights
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: gen hogar1=1 if _n==1
+			sort objectid, stable
+		by objectid: egen total_hogares=sum(hogar1)
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace total_hogares=. if _n>1
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: gen pondera_hh=final_w if _n==1
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace pondera_hh=pondera_hh/total_hogares if _n==1
+		replace pondera_hh = round(pondera_hh)
+		
+		drop total_hogares hogar1
+		
+	* Checking population estimates
+		gen uno=1
+		*	Population
+		sum uno [w=pondera] , detail 	// 24.9 M de personas
+		*	Households
+		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
+		drop uno
+		
+* Estrato: strata
+	gen strata = . // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 
+	**In ENCOVI 2019 there are 2 strata, geographical, by size of the segment. Check later with Daniel
+
+* Unidad Primaria de Muestreo: psu  
+gen psu = combined_id
+
+
+/*(************************************************************************************************************************************************* 
+*-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
+*************************************************************************************************************************************************)*/
+global demo_SEDLAC relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua
+
+* Relation to the head:	relacion
+* Done above
 
 * Household identifier: hogar
 gen hogar = (relacion==1)	
@@ -1564,7 +1568,7 @@ compress
 sort id com, stable
 
 order pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
-region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
+region_est1 region_est2 region_est3 cen lla ceo zul and nor capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
 propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
 alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
 seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///
@@ -1576,7 +1580,7 @@ relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sect
 interview_month interview__key interview__id quest
 				
 keep pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
-region_est1 region_est2 region_est3 cen lla ceo zul and nor isu gua capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
+region_est1 region_est2 region_est3 cen lla ceo zul and nor capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
 propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
 alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
 seguro_salud tipo_seguro anticonceptivo ginecologo papanicolao mamografia /*embarazada*/ control_embarazo lugar_control_embarazo lugar_parto tiempo_pecho vacuna_bcg vacuna_hepatitis vacuna_cuadruple vacuna_triple vacuna_hemo vacuna_sabin vacuna_triple_viral ///

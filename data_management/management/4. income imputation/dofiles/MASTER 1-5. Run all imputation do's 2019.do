@@ -183,6 +183,9 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		gen inla_otro = .
 		replace inla_otro = cond(missing(inlanojub_imp1), ., inlanojub_imp1) - cond(missing(inlanojub), 0, inlanojub)
 		replace inla_otro =. if inla_otro==0
+		
+		*replace imputed rent_currency
+		cap drop d_renta_imp_b
 	
 	******************************************
 	/* OUR DOFILE: LABOR & NON-LABOR INCOME */

@@ -16,7 +16,7 @@ Note:
 =============================================================================*/
 ********************************************************************************
 // Define rootpath according to user (silenced as this is done by main now)
-/*
+
  	    * User 1: Trini
  		global trini 0
 		
@@ -52,7 +52,7 @@ Note:
 		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
 *Outputs
 		global cleaned "$datapath\data_management\output\cleaned"
-*/
+
 ********************************************************************************
 
 /*==============================================================================
@@ -4308,6 +4308,47 @@ include "$pathaux\do_file_2_variables.do"
 
 * include "$pathaux\Labels_ENCOVI.do" // This will get done in the Master do, in English and Spanish, at the end
 
+/*
+* Checking population estimates
+	gen uno=1
+		
+	*	Population
+		*National
+		sum uno [w=pondera], detail 	// 24.9 M de personas
+		*Regional
+		sort region_est1, stable
+		by region_est1: sum uno [w=pondera], detail
+		*Departments
+		sort entidad, stable
+		by entidad: sum uno [w=pondera], detail 
+		*Gender
+		tab hombre [w=pondera], mi
+		*Age
+		sum edad [w=pondera], detail
+			gen agegroup=1 if edad<=14 & edad!=.
+			replace agegroup=2 if edad>=15 & edad<=24 & edad!=.
+			replace agegroup=3 if edad>=25 & edad<=34 & edad!=.
+			replace agegroup=4 if edad>=35 & edad<=44 & edad!=.
+			replace agegroup=5 if edad>=45 & edad<=54 & edad!=.
+			replace agegroup=6 if edad>=55 & edad<=64 & edad!=.
+			replace agegroup=7 if edad>=65 & edad!=.
+			cap label def agegroup 1 "[0-14]" 2 "[15-24]" 3 "[25-34]" 4 "[35-44]" 5 "[45-54]" 6 "[55-64]" 7 "[65+]"
+			cap label value agegroup agegroup
+		tab agegroup [w=pondera], mi
+		drop agegroup
+		* Education - no tenemos años promedio, pero tenemos max nivel alcanzado
+		tab nivel_educ [w=pondera], mi
+		* Tamaño promedio del hogar
+		sum miembros, detail
+		sort region_est1, stable
+		by region_est1: sum miembros [w=pondera], detail
+		sort entidad, stable
+		by entidad: sum miembros [w=pondera], detail
+	*	Households
+		sum uno [w=pondera_hh], detail	// 6.5 M de hogares
+	
+	drop uno
+*/
 
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------------
@@ -4342,6 +4383,6 @@ keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
 hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
-
+stop
 save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

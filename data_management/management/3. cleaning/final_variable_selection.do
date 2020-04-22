@@ -131,7 +131,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 				afiliado_segsalud pagosegsalud quien_pagosegsalud /*quien_pagosegsalud_o*/ cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
 
 *----IX: LABOR / EMPLEO	
-	global labor_ENCOVI ocupado trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
+	global labor_ENCOVI ocupado relab trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
 			dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto /*dili_otro*/ ///
 			como_busco_semana razon_no_busca razon_no_busca_o actividades_inactivos tarea sector_encuesta categ_ocu hstr_ppal trabajo_secundario hstr_todos /// 
 			im_sueldo im_hsextra im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_petro ///
@@ -145,8 +145,6 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 			im_patron im_patron_cant im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone i_indep_mes i_indep_mes_cant i_indep_mes_mone ///
 			g_indep_mes_cant g_indep_mes_mone razon_menoshs razon_menoshs_o deseamashs buscamashs razon_nobusca razon_nobusca_o cambiotr razon_cambiotr razon_cambiotr_o ///
 			aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension 
-*---- From CEDLAS (auxiliary)
-	   global cedlas relab 
 
 *----XVI: BANKING / BANCARIZACIÓN
 		global bank_ENCOVI contesta_ind_b quien_contesta_b cuenta_corr cuenta_aho tcredito tdebito no_banco ///

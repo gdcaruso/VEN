@@ -55,7 +55,52 @@ label var	mes_ult_hijo 	"Mes de nacimiento último hijo"
 label var	dia_ult_hijo	"Día de nacimiento último hijo"
 
 
-** Juli **
+** Hogar
+label var 	electricidad 	"Tiene conexión a electricidad?"	
+
+foreach agua elect gas carbon parafina telefono {
+label var p
+}
+*** How much did you pay for the following utilities?
+	* Water
+	clonevar pagua_monto=s5q17a1 if s5q17a1!=. & s5q17a1!=.a 
+	* Electricity
+	clonevar pelect_monto=s5q17a2 if s5q17a2!=. & s5q17a2!=.a
+	* Gas
+	clonevar pgas_monto=s5q17a3 if s5q17a3!=. & s5q17a3!=.a
+	* Carbon, wood
+	clonevar pcarbon_monto=s5q17a4 if s5q17a4!=. & s5q17a4!=.a
+	* Paraffin
+	clonevar pparafina_monto=s5q17a5 if s5q17a5!=. & s5q17a5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_monto=s5q17a7 if s5q17a7!=. & s5q17a7!=.a
+
+*** In which currency did you pay for the following utilities?
+	* Water
+	clonevar pagua_mon=s5q17b1 if s5q17b1!=. & s5q17b1!=.a 
+	* Electricity
+	clonevar pelect_mon=s5q17b2 if s5q17b2!=. & s5q17b2!=.a
+	* Gas
+	clonevar pgas_mon=s5q17b3 if s5q17b3!=. & s5q17b3!=.a
+	* Carbon, wood
+	clonevar pcarbon_mon=s5q17b4 if s5q17b4!=. & s5q17b4!=.a
+	* Paraffin
+	clonevar pparafina_mon=s5q17b5 if s5q17b5!=. & s5q17b5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_mon=s5q17b7 if s5q17b7!=. & s5q17b7!=.a
+
+*** In which month did you pay for the following utilities?
+	clonevar pagua_m=s5q17c1 if s5q17c1!=. & s5q17c1!=.a 
+	* Electricity
+	clonevar pelect_m=s5q17c2 if s5q17c2!=. & s5q17c2!=.a
+	* Gas
+	clonevar pgas_m=s5q17c3 if s5q17c3!=. & s5q17c3!=.a
+	* Carbon, wood
+	clonevar pcarbon_m=s5q17c4 if s5q17c4!=. & s5q17c4!=.a
+	* Paraffin
+	clonevar pparafina_m=s5q17c5 if s5q17c5!=. & s5q17c5!=.a
+	* Landline, internet and tv cable
+	clonevar ptelefono_m=s5q17c7 if s5q17c7!=. & s5q17c7!=.a
 
 
 ** Health variables  / Variables de salud
@@ -169,3 +214,8 @@ label var  	aporte_pension  "¿Realiza aportes para algún fondo de pensiones? �
 label def	aporte_pension 	1 "Si, para el IVSS" 2 "Si, para otra institucion o empresa publica" ///
 							3 "Si, para institucion o empresa privada" 4 "Si, para otra" 5 "No"
 label values aporte_pension aporte_pension
+label var    relab            "Relación laboral en la ocupación principal"
+label define relab 1 "Empleador" 2 "Asalariado" 3 "Cuentapropista" 4 "Sin Salario" 5 "Desocupado"
+label values relab relab
+
+

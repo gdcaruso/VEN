@@ -232,7 +232,7 @@ clonevar npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
 /*(************************************************************************************************************************************************* 
 *-----------------------------------------	1.1: Identification Variables / Variables de identificación --------------------------------------------
 *************************************************************************************************************************************************)*/
-global id_ENCOVI pais ano encuesta id com pondera psu
+global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 
 * Country identifier: country
 	gen pais = "VEN"
@@ -806,7 +806,7 @@ clonevar comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
 	clonevar pparafina=s5q17__5 if s5q17__5!=. & s5q17__5!=.a
 
 	* Landline, internet and tv cable
-	gen ptelefono=s5q17__7 if s5q17__7!=. & s5q17__7!=.a
+	clonevar ptelefono=s5q17__7 if s5q17__7!=. & s5q17__7!=.a
 
 *** How much did you pay for the following utilities?
 	* Water

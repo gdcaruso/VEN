@@ -900,21 +900,21 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 *** During this school period, did you stop attending the educational center where you regularly study due to:
 * Water failiures
 		*-- Label variable
-		label var fallas_agua "Have you ever stopped attending the educational center where you regularly study due to: water failiures"
+		label var fallas_agua "Ever stopped attending the education center where you regularly study due to: water failiures"
 		*-- Label values
 		label def fallas_agua 0 "No" 1 "Yes"
 		label value fallas_agua fallas_agua
 
 * Electricity failures
 		*-- Label variable
-		label var fallas_elect "Have you ever stopped attending the educational center where you regularly study due to: electricity failiures"
+		label var fallas_elect "Ever stopped attending the education center where you regularly study due to: electricity failiures"
 		*-- Label values
 		label def fallas_elect 0 "No" 1 "Yes"
 		label value fallas_elect fallas_elect
 
 * Teachers' strike
 		*-- Label variable
-		label var huelga_docente "Have you ever stopped attending the educational center where you regularly study due to: teachers' strike"
+		label var huelga_docente "Ever stopped attending the education center where you regularly study due to: teachers' strike"
 		*-- Label values
 		*-- Label values
 		label def huelga_docente 0 "No" 1 "Yes"
@@ -922,48 +922,48 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 
 * Lack of means of transport
 		*-- Label variable
-		label var falta_transporte "Have you ever stopped attending the educational center where you regularly study due to: lack of means of transport"
+		label var falta_transporte "Ever stopped attending the education center where you regularly study due to: lack of means of transport"
 		label def falta_transporte 0 "No" 1 "Yes"
 		label value falta_transporte falta_transporte
 
 * Lack of food in the household
 		*-- Label variable
-		label var falta_comida_hogar "Have you ever stopped attending the educational center where you regularly study due to: lack of food in the household"
+		label var falta_comida_hogar "Ever stopped attending the education center where you regularly study due to: lack of food in the household"
 		*-- Label values
 		label def falta_comida_hogar 0 "No" 1 "Yes"
 		label value falta_comida_hogar falta_comida_hogar
 
 * Lack of food in the educational center
 		*-- Label variable
-		label var falta_comida_centro "Have you ever stopped attending the educational center where you regularly study due to: lack of food in the educational center"
+		label var falta_comida_centro "Ever stopped attending the education center where you regularly study due to: lack of food in the educational center"
 		*-- Label values
 		label def falta_comida_centro 0 "No" 1 "Yes"
 		label value falta_comida_centro falta_comida_centro
 
 * Teachers's non-attendance
 		*-- Label variable
-		label var inasis_docente "Have you ever stopped attending the educational center where you regularly study due to: teachers's non-attendance"
+		label var inasis_docente "Ever stopped attending the education center where you regularly study due to: teachers's non-attendance"
 		*-- Label values
 		label def inasis_docente 0 "No" 1 "Yes"
 		label value inasis_docente inasis_docente
 
 * Demonstrations or protests
 		*-- Label variable
-		label var protestas "Have you ever stopped attending the educational center where you regularly study due to: demonstrations or protests"
+		label var protestas 	"Ever stopped attending the education center where you regularly study due to: demonstrations or protests"
 		*-- Label values
 		label def protestas 0 "No" 1 "Yes"
 		label value protestas protestas
 
 * Never stopped attending 
 		*-- Label variable
-		label var nunca_deja_asistir "Have you ever stopped attending the educational center where you regularly study due to: never stopped attending "
+		label var nunca_deja_asistir "Ever stopped attending the education center where you regularly study due to: never stopped attending"
 		*-- Label values
 		label def nunca_deja_asistir 0 "No" 1 "Yes"
 		label value nunca_deja_asistir nunca_deja_asistir
 
 *** The educational center where you attend has PAE's schools feeding program?
 		*-- Label variable
-		label var pae "The educational center where you attend has PAE's schools feeding program?"
+		label var pae 	"The education center where you attend has PAE's schools feeding program?"
 		*-- Label values
 		label def pae 0 "No" 1 "Yes"
 		label value pae pae
@@ -974,7 +974,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		3.Hardly ever
 */
 		*-- Label variable
-		label var pae_frecuencia "In the educational center where you attend, PAE's schools feeding program is provided:"
+		label var pae_frecuencia "In the education center where you attend, PAE's schools feeding program is provided:"
 		*-- Label values
 		label def pae_frecuencia 1 "Every day" ///
 		2 "Only few days" ///
@@ -984,35 +984,35 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 *** In the educational center where you attend, PAE's schools feeding program provides:
 	* Breakfast
 		*-- Label variable
-		label var pae_desayuno "In the educational center where you attend, PAE's provides: breakfast"
+		label var pae_desayuno "In the education center where you attend, PAE's provides: breakfast"
 		*-- Label values
 		label def pae_desayuno 1 "Yes" 0 "No"
 		label value pae_desayuno pae_desayuno
 
 	* Lunch
 		*-- Label variable
-		label var pae_almuerzo "In the educational center where you attend, PAE's provides: lunch"
+		label var pae_almuerzo "In the education center where you attend, PAE's provides: lunch"
 		*-- Label values
 		label def pae_almuerzo 1 "Yes" 0 "No"
 		label value pae_almuerzo pae_almuerzo
 
 	* Snack in the morning (Merienda en la manana)
 		*-- Label variable
-		label var pae_meriman "In the educational center where you attend, PAE's provides: snack in the morning"
+		label var pae_meriman "In the education center where you attend, PAE's provides: snack in the morning"
 		*-- Label values
 		label def pae_meriman 1 "Yes" 0 "No"
 		label value pae_meriman pae_meriman
 
 	* Snack in the afternoon (Merienda en la tarde)
 		*-- Label variable
-		label var pae_meritard "In the educational center where you attend, PAE's provides: snack in the afternoon"
+		label var pae_meritard "In the education center where you attend, PAE's provides: snack in the afternoon"
 		*-- Label values
 		label def pae_meritard 1 "Yes" 0 "No"
 		label value pae_meritard pae_meritard
 
 	* Other
 		*-- Label variable
-		label var pae_otra "In the educational center where you attend, PAE's provides: other"
+		label var pae_otra "In the education center where you attend, PAE's provides: other"
 		*-- Label values
 		label def pae_otra 1 "Yes" 0 "No"
 		label value pae_otra pae_otra
@@ -1412,6 +1412,11 @@ label values mes_pagosegsalud mes_pagosegsalud
 *---------------------------------------------------------- IX: LABOR / EMPLEO ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
+label var 	ocupado				"Occupied"
+label var    relab           	"Type of employment in the main occupation (harmonized)"
+label define relab 			 	1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
+label values relab relab
+
 label var  	trabajo_semana  	"Did you work at least one hour last week?"
 label def	trabajo_semana		1 "Yes" 0 "No"
 label values trabajo_semana trabajo_semana 
@@ -1462,6 +1467,7 @@ label def	razon_no_busca 	1 "Tired of looking for a job" 2 "Doesn't find the app
 							6 "No job adapts to his/her capacities" 7 "Doesn't have someone to take care of the children" 8 "Sick/Health motives" ///
 							9 "Other motives, specify"
 label values razon_no_busca razon_no_busca
+label var razon_no_busca_o "Why aren't you currently looking for a job? (Other reasons)"
 label var  	actividades_inactivos 	"What are you doing right now? (only for those who did not work)"
 label def	actividades_inactivos 	1 "Studying" 2 "Training" 3 "Household activities or family responsibilities" 4 "Working on land for family use" ///
 									6 "Retired or pensione" 7 "Long-term illness" 8 "Disability" 9 "Voluntary work" 10 "Charity work" 11 "Cultural or leisure activities"
@@ -1499,6 +1505,7 @@ label var  	im_antiguedad 	"Received income in your job or business for antiquit
 label var  	im_transporte 	"Received income in your job or business for transportation voucher in the last month?"
 label var  	im_rendimiento 	"Received income in your job or business for performance bonus in the last month?"
 label var  	im_otro 		"Received income in your job or business for other bonuses and compensation in the last month?"
+label var 	im_petro		"Received income in your job or business for Petros in the last month?"
 
 label var  	c_sso  	"Received contributions from your employer to social security for compulsory social security?"
 label var  	c_rpv  	"Received contributions from your employer to social security for housing and habitat benefits scheme?"
@@ -1577,6 +1584,8 @@ label var  	razon_menoshs  	"Why did you work less than 35 hours a week last wee
 label def	razon_menoshs 	1 "Work part time" 2 "Labor conflict (strike, protest, unemployment)" 3 "Illness, leave, vacation" ///
 							4 "Lack of work" 5 "Shortage of materials or equipment under repair" 6 "Other (Specify)"
 label values razon_menoshs razon_menoshs
+
+label var  	razon_menoshs_o	"Why did you work less than 35 hours a week last week in all your jobs? Other, specify"
 
 label var  	deseamashs  	"Would you prefer to work more than 35 hs per week?"
 label var  	buscamashs  	"Have you done something to work more hours?"
@@ -2255,12 +2264,78 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	label var reaccionot_evento`i' "Other responses to the event"
 	}
 	
+
+/*(************************************************************************************************************************************************ 
+*------------------------------------------------------------- XVI: BANKING / BANCARIZACIÓN ---------------------------------------------------------------
+************************************************************************************************************************************************)*/
+*** Section for individuals 15+
+*** 
+label var contesta_ind_b "Is the "member" answering by himself/herself?"
+
+*** Who is answering instead of "member"?
+label var quien_contesta_b "Who is answering instead of 'member'?"
+
+*** Do you have in any bank the following?
+		* Checking account
+		label var cuenta_corr "Do you have in any bank the following? Checking account"
+		* Savings account
+		label var cuenta_aho "Do you have in any bank the following? Savings account"
+		* Credit card
+		label var tcredito "Do you have in any bank the following? Credit card"
+		* Debit card
+		label var tdebito "Do you have in any bank the following? Dedit card"
+		* None
+		label var no_banco "Do you have in any bank the following? None"
+
+*** How often do you pay with cash ?
+	label var efectivo_f "How often do you pay with cash?"
+	label def efectivo_f_eng 1 "Usually" 2 "Sometimes" 3 "Hardly ever" 4 "Never"
+	label val efectivo_f efectivo_f_eng
 	
+*** How often do you pay with credit card?
+	label var tcredito_f "How often do you pay with credit card?"
+	label def tcredito_f_eng 1 "Usually" 2 "Sometimes" 3 "Hardly ever" 4 "Never"
+	label val tcredito_f tcredito_f_eng
+
+*** How often do you pay with debit card?
+	label var tdebito_f "How often do you pay with debit card?"
+	label def tdebito_f_eng 1 "Usually" 2 "Sometimes" 3 "Hardly ever" 4 "Never"
+	label val tdebito_f tdebito_f_eng
+
+*** How often do you pay using online bank?
+	label var bancao_f "How often do you pay using online bank?"
+	label def bancao_f_eng 1 "Usually" 2 "Sometimes" 3 "Hardly ever" 4 "Never"
+	label val bancao_f bancao_f_eng
+
+*** How often do you use mobile payment?
+	label var pagomovil_f "How often do you use mobile payment?"
+	label def pagomovil_f_eng 1 "Usually" 2 "Sometimes" 3 "Hardly ever" 4 "Never"
+	label val pagomovil_f pagomovil_f_eng
+
+*** Reasons for not holding any bank account or card?
+	label var razon_nobanco "Reasons for not holding any bank account or card?"
+	
+/*(************************************************************************************************************************************************ 
+*------------------------------------------------------------- POVERTY ---------------------------------------------------------------
+************************************************************************************************************************************************)*/
+	*** International poverty line 1.9 USD	
+	label var lp_19usd "International poverty line 1.9 USD"
+
+	*** International poverty line 3.2 USD	
+	label var lp_32usd "International poverty line 3.2 USD"
+
+	*** International poverty line 5.5 USD	
+	label var lp_55usd "International poverty line 5.5 USD"
+	
+	*** Poverty identifier
+	label var pobre "Poverty identifier"
+	
+	*** Extreme poverty identifier
+	label var pobre_extremo "Extreme poverty identifier"
+
 /*(************************************************************************************************************************************************ 
 *---------------------------------------------------- INCOME VARIABLES / VARIABLES DE INGRESO ------------------------------------------------
 ************************************************************************************************************************************************)*/
-
-* FALTAN AGREGAR MÁS
 
 label	var	ijubi_m		"Monetary income for retirement benefits and pensions	"
 label	var	icap_m		"Monetary income from capital	"
@@ -2311,7 +2386,9 @@ label	var	iasal_m	"Salaried worker income in main occupation: Monetary	"
 label	var	ictap	"Self-employed labor income	"
 label	var	ictap_m	"Self-employed labor income - monetary	"
 label	var	ila		"Total labor income	"
-label	var	ila_m	"Labor income - monetary	"
+label	var	ila_m	"Labor income - monetary"
+label	var	ila_m_local	"Labor income, monetary - local"
+label	var	ila_m_ext	"Labor income, monetary - from abroad"
 label	var	ilaho	"Hourly income in all occupations	"
 label	var	ilaho_m	"Hourly income in all occupations - monetary	"
 label	var	perila	"Dummy for labor income earner: =1 if labor income earner	"
@@ -2357,6 +2434,7 @@ label	var	iee		"Equivalized income E"
 cap label var    ilea_m          "Equivalized labor income - monetary" 
 cap label var    lp_extrema	     "Official extreme poverty line"
 cap label var    lp_moderada     "Official moderate poverty line"
+cap label var 	 pobre			 "Poor"
 cap label var    ing_pob_ext     "Income used to estimate official extreme poverty"
 cap label var    ing_pob_mod     "Income used to estimate official moderate poverty"
 cap label var    ing_pob_mod_lp  "Official income / Poverty Line"
@@ -2377,3 +2455,7 @@ cap label var    ipcf_cpi05	     "Per capita household income (2005 values)"
 cap label var    ipcf_cpi11	     "Per capita household income (2011 values)"
 cap label var    ipcf_ppp05	     "Per capita household income (2005 dollars)"
 cap label var    ipcf_ppp11	     "Per capita household income (2011 dollars)"
+label var    hogarsec        	 "Member of secondary household"
+label define hogarsec 		 	 0 "No" 1 "Yes"
+label values hogarsec hogarsec
+label var 	quest 	"Questionnaire"

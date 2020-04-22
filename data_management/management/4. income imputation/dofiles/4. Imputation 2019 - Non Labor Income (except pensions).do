@@ -82,7 +82,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 	global xvar1  edad edad2 hombre npers_viv miembros /*total_hrtr_sinmis*/ ///
 		p_agegroup_sinmis1 p_agegroup_sinmis2 p_agegroup_sinmis3 p_agegroup_sinmis4 p_agegroup_sinmis5 p_agegroup_sinmis6 p_agegroup_sinmis7 p_agegroup_sinmis8 ///
 		p_relacion_comp_sinmis1 p_relacion_comp_sinmis2 p_relacion_comp_sinmis3 p_relacion_comp_sinmis4 p_relacion_comp_sinmis5 p_relacion_comp_sinmis6 p_relacion_comp_sinmis7 p_relacion_comp_sinmis8 p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_relacion_comp_sinmis11 p_relacion_comp_sinmis12 p_relacion_comp_sinmis13 ///
-		p_estado_civil_sinmis1 p_estado_civil_sinmis2 p_estado_civil_sinmis3 p_estado_civil_sinmis4 p_estado_civil_sinmis5 p_estado_civil_sinmis6 p_region_est1_sinmis1 p_region_est1_sinmis2 p_region_est1_sinmis3 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis6 p_region_est1_sinmis7 p_region_est1_sinmis8 p_region_est1_sinmis9 ///
+		p_estado_civil_sinmis1 p_estado_civil_sinmis2 p_estado_civil_sinmis3 p_estado_civil_sinmis4 p_estado_civil_sinmis5 p_estado_civil_sinmis6 p_region_est1_sinmis1 p_region_est1_sinmis2 p_region_est1_sinmis3 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis6 p_region_est1_sinmis7 ///
 		p_municipio_sinmis1 p_municipio_sinmis2 p_municipio_sinmis3 p_municipio_sinmis4 p_municipio_sinmis5 p_municipio_sinmis6 p_municipio_sinmis7 p_municipio_sinmis8 p_municipio_sinmis9 p_municipio_sinmis10 p_municipio_sinmis11 p_municipio_sinmis12 p_municipio_sinmis13 p_municipio_sinmis14 p_municipio_sinmis15 p_municipio_sinmis16 p_municipio_sinmis17 p_municipio_sinmis18 p_municipio_sinmis19 p_municipio_sinmis20 p_municipio_sinmis21 p_municipio_sinmis22 p_municipio_sinmis23 p_municipio_sinmis24 p_municipio_sinmis25 ///
 		p_tipo_vivienda_hh_sinmis1 p_tipo_vivienda_hh_sinmis2 p_tipo_vivienda_hh_sinmis3 p_tipo_vivienda_hh_sinmis4 p_tipo_vivienda_hh_sinmis5 p_tipo_vivienda_hh_sinmis6 p_tipo_vivienda_hh_sinmis7 p_tipo_vivienda_hh_sinmis8 ///
 		p_propieta_hh_sinmis1 p_propieta_hh_sinmis2 p_propieta_hh_sinmis3 ///
@@ -113,18 +113,6 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 		lassoregress log_inlanojub $xvar1 if inlist(recibe_ingresonolab,1,2,3) & log_inlanojub>0 & log_inlanojub!=., numfolds(10)
 		display e(varlist_nonzero)
 		global lassovars = e(varlist_nonzero)
-		
-		*Selected on April 20
-		/*
-		global lassovars edad hombre miembros p_agegroup_sinmis1 p_agegroup_sinmis2 p_agegroup_sinmis3 p_relacion_comp_sinmis1 p_relacion_comp_sinmis3 p_relacion_comp_sinmis4 ///
-		p_relacion_comp_sinmis5 p_relacion_comp_sinmis7 p_relacion_comp_sinmis8 p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_estado_civil_sinmis1 p_estado_civil_sinmis5 ///
-		p_region_est1_sinmis1 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis7 p_region_est1_sinmis8 p_municipio_sinmis1 p_municipio_sinmis2 p_municipio_sinmis6 ///
-		p_municipio_sinmis7 p_municipio_sinmis8 p_municipio_sinmis9 p_municipio_sinmis10 p_municipio_sinmis11 p_municipio_sinmis12 p_municipio_sinmis14 p_municipio_sinmis15 ///
-		p_municipio_sinmis16 p_municipio_sinmis17 p_municipio_sinmis18 p_municipio_sinmis20 p_municipio_sinmis22 p_municipio_sinmis23 p_tipo_vivienda_hh_sinmis1 p_tipo_vivienda_hh_sinmis2 ///
-		p_tipo_vivienda_hh_sinmis3 p_tipo_vivienda_hh_sinmis4 p_tipo_vivienda_hh_sinmis5 p_propieta_hh_sinmis1 p_auto_hh_sinmis1 p_heladera_hh_sinmis1 p_lavarropas_hh_sinmis2 ///
-		p_computadora_hh_sinmis1 p_internet_hh_sinmis1 p_televisor_hh_sinmis1 p_calentador_hh_sinmis1 p_afiliado_segsalud_comp_sinmis1 p_afiliado_segsalud_comp_sinmis3 ///
-		p_afiliado_segsalud_comp_sinmis4 p_afiliado_segsalud_comp_sinmis5 p_clap_sinmis2 p_ingsuf_comida_sinmis1 p_comida_trueque_sinmis1
-		*/
 		
 	** Vselect
 		* Se puede usar R2adjustado como criterio. Ojo, no se puede poner variable como factor variables 

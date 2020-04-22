@@ -198,7 +198,7 @@ gen pobre_extremo = ipcf<lp_extrema
 drop lp_ofi le_ofi 
 drop extremo_new extremo_ofi
 drop pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi
-
+drop obs max_obs lp_19_ready lp_32_ready lp_55_ready
 
 replace pobre =. if hogarsec ==1
 replace pobre_extremo =. if hogarsec ==1

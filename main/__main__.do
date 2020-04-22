@@ -91,7 +91,7 @@ Inflation
 ==============================================================================*/
 
 // specific path to inflation estimation
-/*
+
 global povinput "$datapath\poverty_measurement\input"
 global inflationout "$datapath\data_management\input"
 
@@ -102,14 +102,13 @@ run "$inflado/__main__inflation.do"
 // set global inflation input
 global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 
-
 /*==============================================================================
 hh-individual database
 ==============================================================================*/
 
 //run ENCOVI harmonization
 run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
-*/
+
 /*==============================================================================
 imputation
 ==============================================================================*/
@@ -135,7 +134,7 @@ global output "$datapath\poverty_measurement\output"
 
 //run poverty estimation
 do "$povmeasure\__main__pobreza.do"
-stop
+
 /*==============================================================================
 creating separate dataset for variables to merge with SEDLAC version
 ==============================================================================*/

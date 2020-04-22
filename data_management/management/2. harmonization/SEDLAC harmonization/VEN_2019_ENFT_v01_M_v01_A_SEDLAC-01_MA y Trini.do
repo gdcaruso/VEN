@@ -161,10 +161,38 @@ rename _all, lower
 	
 	duplicates report id com //verification
 
-* Factor de Ponderación:		pondera
-	gen pondera = 1  //round(pesoper)
-	* Cambiar con la verdadera variable de ponderadores cuando la tengamos
+*** Weights/Factor de ponderacion: pondera
 
+merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
+
+	* Individual weights
+		gen pondera=final_pw
+		sort objectid, stable
+		by objectid: replace pondera=pondera/_N
+		replace pondera = round(pondera)
+		
+	* Household weights
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: gen hogar=1 if _n==1
+			sort objectid, stable
+		by objectid: egen total_hogares=sum(hogar)
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace total_hogares=. if _n>1
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: gen pondera_hh=final_w if _n==1
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace pondera_hh=pondera_hh/total_hogares if _n==1
+		replace pondera_hh = round(pondera_hh)
+		
+		drop total_hogares hogar
+		
+	* Checking population estimates
+		gen uno=1
+		*	Population
+		sum uno [w=pondera] , detail 	// 24.9 M de personas
+		*	Households
+		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
+		drop uno
 * Estrato: strata
 	gen strata = . // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 
 	**In ENCOVI 2019 there are 2 strata, geographical, by size of the segment. Check later with Daniel

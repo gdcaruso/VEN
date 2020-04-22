@@ -340,38 +340,38 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 	rename reltohead relacion_comp
 	label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
-*** Weights: pondera
+*** Weights/Factor de ponderacion: pondera
 
 merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
 
-* Individual weights
-	gen pondera=final_pw
-	sort objectid, stable
-	by objectid: replace pondera=pondera/_N
-	replace pondera = round(pondera)
-	
-* Household weights
-		sort interview__key interview__id quest relacion_en, stable
-	by interview__key interview__id quest: gen hogar=1 if _n==1
+	* Individual weights
+		gen pondera=final_pw
 		sort objectid, stable
-	by objectid: egen total_hogares=sum(hogar)
-		sort interview__key interview__id quest relacion_en, stable
-	by interview__key interview__id quest: replace total_hogares=. if _n>1
-		sort interview__key interview__id quest relacion_en, stable
-	by interview__key interview__id quest: gen pondera_hh=final_w if _n==1
-		sort interview__key interview__id quest relacion_en, stable
-	by interview__key interview__id quest: replace pondera_hh=pondera_hh/total_hogares if _n==1
-	replace pondera_hh = round(pondera_hh)
-	
-	drop total_hogares hogar
-	
-* Checking population estimates
-	gen uno=1
-	*	Population
-	sum uno [w=pondera] , detail 	// 24.9 M de personas
-	*	Households
-	sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
-	drop uno
+		by objectid: replace pondera=pondera/_N
+		replace pondera = round(pondera)
+		
+	* Household weights
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: gen hogar=1 if _n==1
+			sort objectid, stable
+		by objectid: egen total_hogares=sum(hogar)
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace total_hogares=. if _n>1
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: gen pondera_hh=final_w if _n==1
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace pondera_hh=pondera_hh/total_hogares if _n==1
+		replace pondera_hh = round(pondera_hh)
+		
+		drop total_hogares hogar
+		
+	* Checking population estimates
+		gen uno=1
+		*	Population
+		sum uno [w=pondera] , detail 	// 24.9 M de personas
+		*	Households
+		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
+		drop uno
 
 * Strata: strata
 	*Old: gen strata = estrato // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 

@@ -276,8 +276,8 @@ egen totalhh = max(newid)
 replace popularity = popularity/totalhh
 sort bien popularity, stable
 // this is just to complete observations
-sort bien, stable
-by bien (popularity): replace popularity = popularity[1]
+sort bien popularity, stable
+by bien: replace popularity = popularity[1]
 replace popularity = 0 if popularity==.
 
 

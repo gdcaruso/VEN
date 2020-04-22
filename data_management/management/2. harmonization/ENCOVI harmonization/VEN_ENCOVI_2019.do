@@ -198,19 +198,19 @@ replace interview_month = new_interview_month if (interview_month==.a | intervie
 //drop if interview month is november
 // drop if interview_month==11
 
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   // Region Central: Aragua (5), Carabobo (8), Cojedes (9)
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos: Guarico (12), Apure (4) 
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental: Falcon (11), Lara (13), Portuguesa (18), Yaracuy (22)
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana: Zulia (23)
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes: Barinas (6), Merida (14), Tachira (20), Trujillo (21)
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental: Anzoategui (3), Monagas (16), Sucre (19)
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular: Nueva Esparta (17), Otros (25)
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana: Bolivar (7), Amazonas (2), Delta Amacuro (10)
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital: Vargas (24), Distrito Capital (1)
+gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==13					// Region Central: Aragua (5), Carabobo (8), Lara (13)
+replace region_est1 =  2 if entidad==12 | entidad==4 | entidad==6          			// Region LLanera: Guarico (12), Apure (4), Barinas (6)
+replace region_est1 =  3 if entidad==9 | entidad==11 | entidad==18 | entidad==22	// Region Occidental: Cojedes (9), Falcon (11), Portuguesa (18), Yaracuy (22)
+replace region_est1 =  4 if entidad==23												// Region Zuliana: Zulia (23)
+replace region_est1 =  5 if entidad==14 | entidad==20 | entidad==21					// Region Andina: Merida (14), Tachira (20), Trujillo (21)
+replace region_est1 =  6 if entidad==3 | entidad==7 | entidad==16 | entidad==17 | entidad==19	// Region Oriental: Bolivar (7), Anzoategui (3), Monagas (16), Nueva Esparta (17), Sucre (19)
+replace region_est1 =  7 if entidad==15 | entidad==24 | entidad==1					// Region Capital: Distrito Capital (1), Miranda (15), Vargas (24) 
 label var region_est1 "Region"
-label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
-          5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
+label def region_est1 1 "Region Central"  2 "Region Llanera" 3 "Region Occidental" 4 "Region Zuliana" ///
+          5 "Region Andina" 6 "Region Nor-Oriental" 7 "Capital"
 label value region_est1 region_est1
+* Obs: Delta Amacuro and Amazonas were not surveyed.
+
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------	III Household determination / Determinacion de hogares  -------------------------------------------------------
@@ -275,7 +275,7 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 			label define hombre 1 "Masculino" 0 "Femenino"
 			label value hombre hombre
 		* Name
-			clonevar nombre = s6q1
+			gen nombre = s6q1
 		*Random var
 		sort interview__key interview__id quest edad hombre nombre, stable
 		set seed 123
@@ -290,7 +290,7 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 		drop z min
 	
 	duplicates report id com //verification
-stop
+
 * Weights: pondera
 	gen pondera=1 //round(pesoper)
 	* Cambiar con la verdadera variable de ponderadores cuando la tengamos

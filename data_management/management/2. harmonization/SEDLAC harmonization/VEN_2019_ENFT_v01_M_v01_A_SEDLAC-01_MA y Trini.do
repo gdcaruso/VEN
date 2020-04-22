@@ -329,18 +329,7 @@ global regional_SEDLAC // completar
 * Creación de Variable Geográficas Desagregadas
 	
 * Desagregación 1 (Regiones politico-administrativas): region_est1
-/* Las regiones político-administrativas de Venezuela son:
-	    1. Región Central:  Aragua, Carabobo y Cojedes.
-	    2. Región de los Llanos: Guárico, Apure, con excepción del Municipio Páez.
-	    3. Región Centro-Occidental: Falcón, Lara, Portuguesa y Yaracuy.
-	    4. Región Zuliana: Zulia
-	    5. Región de los Andes: Barinas, Mérida, Táchira, Trujillo y el municipio Páez del Estado Apure
-	    6. Región Nor-Oriental: Anzoátegui, Monagas y Sucre.
-	    7. Región Insular: Nueva Esparta y las Dependencias Federales Venezolanas.
-	    8. Región Guayana:  Bolívar, Amazonas y Delta Amacuro.
-	    9. Región Capital:  Miranda, Vargas y el Distrito Capital
-    En la encuesta la variable categorica ENTI representa a los Estados, a partir de esta variable se crearan las regions politico-administrativas y las dummies regionales
-    Las  categorias de la variable original ENTI son las siguientes:
+/* Las  categorias de la variable original entidad son las siguientes:
         1 Distrito Capital
         2 Amazonas
         3 Anzoategui
@@ -369,19 +358,20 @@ global regional_SEDLAC // completar
  */
 tab entidad, nolab
 
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   // Region Central: Aragua (5), Carabobo (8), Cojedes (9)
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos: Guarico (12), Apure (4) 
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental: Falcon (11), Lara (13), Portuguesa (18), Yaracuy (22)
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana: Zulia (23)
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes: Barinas (6), Merida (14), Tachira (20), Trujillo (21)
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental: Anzoategui (3), Monagas (16), Sucre (19)
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular: Nueva Esparta (17), Otros (25)
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana: Bolivar (7), Amazonas (2), Delta Amacuro (10)
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital: Vargas (24), Distrito Capital (1)
+* Generamos las regiones, la base es representativa al nivel de region
+
+gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==13					// Region Central: Aragua (5), Carabobo (8), Lara (13)
+replace region_est1 =  2 if entidad==12 | entidad==4 | entidad==6          			// Region LLanera: Guarico (12), Apure (4), Barinas (6)
+replace region_est1 =  3 if entidad==9 | entidad==11 | entidad==18 | entidad==22	// Region Occidental: Cojedes (9), Falcon (11), Portuguesa (18), Yaracuy (22)
+replace region_est1 =  4 if entidad==23												// Region Zuliana: Zulia (23)
+replace region_est1 =  5 if entidad==14 | entidad==20 | entidad==21					// Region Andina: Merida (14), Tachira (20), Trujillo (21)
+replace region_est1 =  6 if entidad==3 | entidad==7 | entidad==16 | entidad==17 | entidad==19	// Region Oriental: Bolivar (7), Anzoategui (3), Monagas (16), Nueva Esparta (17), Sucre (19)
+replace region_est1 =  7 if entidad==15 | entidad==24 | entidad==1					// Region Capital: Distrito Capital (1), Miranda (15), Vargas (24) 
 label var region_est1 "Region"
-label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
-          5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
+label def region_est1 1 "Region Central"  2 "Region Llanera" 3 "Region Occidental" 4 "Region Zuliana" ///
+          5 "Region Andina" 6 "Region Nor-Oriental" 7 "Capital"
 label value region_est1 region_est1
+* Obs: Delta Amacuro and Amazonas were not surveyed.
 
 * Desagregación 2 (Estados): region_est2
 clonevar region_est2 = entidad
@@ -405,65 +395,52 @@ gen urbano=.
 gen       cen = .
 replace   cen = 1 if enti==5 // Aragua
 replace   cen = 1 if enti==8 // Carabobo
-replace   cen = 1 if enti==9 // Cojedes
-replace   cen = 0 if enti!=5 & enti!=8 & enti!=9 & enti!=.
+replace   cen = 1 if enti==13 // Lara
+replace   cen = 0 if enti!=5 & enti!=8 & enti!=13 & enti!=.
 label var  cen   "Region Central"
 
-*2. Región de los Llanos
+*2. Región LLanera
 gen       lla = .
 replace   lla = 1 if enti==12 // Guarico
 replace   lla = 1 if enti==4  // Apure
-replace   lla = 0 if enti!=12 & enti!=4 & enti!=.
+replace   lla = 1 if enti==6  // Barinas
+replace   lla = 0 if enti!=12 & enti!=4 & enti!=6 & enti!=.
 label var  lla   "Region Los Llanos"
 
-*3. Región Centro-Occidental
+*3. Región Centro-Occidental o Occidental
 gen       ceo = .
 replace   ceo = 1 if enti==11 // Falcon
-replace   ceo = 1 if enti==13 // Lara
+replace   ceo = 1 if enti==9  // Cojedes
 replace   ceo = 1 if enti==18 // Portuguesa
 replace   ceo = 1 if enti==22 // Yaracuy
-replace   ceo = 0 if enti!=11 & enti!=13 & enti!=18 & enti!=22 & enti!=.
-label var  ceo   "Region Centro-Occidental"
+replace   ceo = 0 if enti!=11 & enti!=9 & enti!=18 & enti!=22 & enti!=.
+label var  ceo   "Region (Centro)Occidental"
 
 *4. Región Zuliana: Zulia
 gen       zul = .
 replace   zul = 1 if enti==23 // Zulia
 replace   zul = 0 if enti!=23 & enti!=.
-label var  zul   "Region Zulia"
+label var  zul   "Region Zuliana"
 
-*5. Región de los Andes
+*5. Región Andina
 gen       and = .
-replace   and = 1 if enti==6  // Barinas
 replace   and = 1 if enti==14 // Merida
 replace   and = 1 if enti==20 // Tachira 
 replace   and = 1 if enti==21 // Trujillo
-replace   and = 0 if enti!=6 & enti!=14 & enti!=20 & enti!=21 & enti!=.
-label var  pais   "Region Los Andes"
+replace   and = 0 if enti!=14 & enti!=20 & enti!=21 & enti!=.
+label var  pais   "Region Andina"
 
 *6. Región Nor-Oriental
 gen       nor = .
 replace   nor = 1 if enti==3  // Anzoategui
+replace   nor = 1 if enti==7  // Bolivar
 replace   nor = 1 if enti==16 // Monagas
+replace   nor = 1 if enti==17 // Nueva Esparta
 replace   nor = 1 if enti==19 // Sucre
-replace   nor = 0 if enti!=3 & enti!=16 & enti!=19 & enti!=.
-label var  nor   "Region Nor-Oriental"
+replace   nor = 0 if enti!=3 & enti!=7 & enti!=16 & enti!=17 & enti!=19 & enti!=.
+label var  nor   "Region (Nor)Oriental"
 
-*7. Región Insular
-gen       isu = .
-replace   isu = 1 if enti==17 // Nueva Esparta
-replace   isu = 1 if enti==25 // Dependencias Federales
-replace   isu = 0 if enti!=17 & enti!=25 & enti!=.
-label var  isu   "Region Insular"
-
-*8. Región Guayana
-gen       gua = .
-replace   gua = 1 if enti==7  // Bolivar
-replace   gua = 1 if enti==2  // Amazonas
-replace   gua = 1 if enti==10 // Delta Amacuro
-replace   gua = 0 if enti!=7 & enti!=2 & enti!=10 & enti!=.
-label var  gua   "Region Guyana"
-
-*8. Región Capital
+*7. Región Capital
 gen       capital = .
 replace   capital = 1 if enti==15  // Miranda
 replace   capital = 1 if enti==24  // Vargas
@@ -472,8 +449,8 @@ replace   capital = 0 if enti!=15 & enti!=24 & enti!=1 & enti!=.
 label var  capital   "Region Capital"
 
 * Areas no incluidas en años previos:	nueva_region
-gen       nuevareg = .
-* Por el momento no se detectaron cambios 
+* gen       nuevareg = .
+* No hay observaciones 
 
 ***************************************************************************************************************************************************
 * Migrante:	migrante

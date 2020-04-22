@@ -116,7 +116,7 @@ global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
 
 //run ENCOVI imputation
-run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
+do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
 
 stop
 

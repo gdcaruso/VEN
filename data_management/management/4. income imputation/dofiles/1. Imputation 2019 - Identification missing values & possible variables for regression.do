@@ -20,39 +20,39 @@ Note:
 ********************************************************************************
 
 // Define rootpath according to user (silenced as this is done by main now)
-//
-// 		* User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta  0
-//		
-// 		* User 4: Malena
-// 		global male   1
-//		
-//			
-// 		if $juli {
-// 				global dopath "C:\Users\wb563583\GitHub\VEN"
-// 				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 			}
-// 	    if $lauta {
-// 		}
-// 		if $trini   {
-// 		}
-// 		if $male   {
-// 				global dopath "C:\Users\wb550905\GitHub\VEN"
-// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 					}
-//
-// *Inputs
-// 	global impdos "$dopath\data_management\management\4. income imputation\dofiles"
-// 	global cleaned "$datapath\data_management\output\cleaned"
-// *Outputs
-// 	global forimp "$datapath\data_management\output\for imputation"
-// 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
+
+ 		* User 1: Trini
+ 		global trini 0
+		
+ 		* User 2: Julieta
+ 		global juli   0
+		
+ 		* User 3: Lautaro
+ 		global lauta  0
+		
+ 		* User 4: Malena
+ 		global male   1
+		
+			
+ 		if $juli {
+ 				global dopath "C:\Users\wb563583\GitHub\VEN"
+ 				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 			}
+ 	    if $lauta {
+ 		}
+ 		if $trini   {
+ 		}
+ 		if $male   {
+ 				global dopath "C:\Users\wb550905\GitHub\VEN"
+ 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 					}
+
+*Inputs
+	global impdos "$dopath\data_management\management\4. income imputation\dofiles"
+ 	global cleaned "$datapath\data_management\output\cleaned"
+ *Outputs
+ 	global forimp "$datapath\data_management\output\for imputation"
+ 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
 
 ********************************************************************************
 
@@ -71,7 +71,7 @@ use "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", clear
 ///*** DESCRIPTION INCOME ***///
 sort interview__id interview__key quest com, stable
 	cuantiles ipcf [w=pondera] if ipcf>=0, n(5) g(quintil)
-sort interview_month, stable
+sort interview_month quintil, stable
 	by interview_month quintil: sum ipcf
 	
 	* Percentage of each kind of income in itf

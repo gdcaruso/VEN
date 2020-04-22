@@ -93,19 +93,6 @@ run "$pathaux\cuantiles.do"
 								1: Data preparation: First-Order Variables
 ==================================================================================================================================================*/
 
-*** 0.0 To take everything to bolívares of Feb 2020 (month with greatest sample) ***
-		
-		* Deflactor		
-			forvalues j = 10(1)12 {
-				sum indice if mes==`j' & ano==2019
-				local indice`j' = r(mean) 			
-				}
-			forvalues j = 1(1)4 {
-				sum indice if mes==`j' & ano==2020
-				display r(mean)
-				local indice`j' = r(mean)				
-				}
-				
 			// mute all deflaction
 						local deflactor11 1
 						local deflactor12 1

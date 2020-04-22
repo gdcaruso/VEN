@@ -336,7 +336,7 @@ codebook ingfam
 *********************************************************************************************************************)*/
 // import other expenditure data
 use "$cleaned/ENCOVI_2019_pre pobreza.dta", replace
-drop if hogasec == 1
+cap drop if hogarsec == 1
 drop ipcf
 cap drop _merge
 merge m:1 interview__id interview__key quest using `reference'

@@ -156,13 +156,13 @@ tab pobre_55 [fw=pondera], mi
 sort ipcf, stable
 gen obs = sum(pondera) //running sum
 egen max_obs = max(obs)
-local maxobs = max_obs[1]*0.995
+local maxobs = max_obs[1]*0.98
 
 preserve
 graph twoway line ipcf obs [fw=pondera]   if obs<`maxobs', lcolor("black") ///
-|| line lp_19 obs  [fw=pondera], lcolor("blue") ///
-|| line lp_32 obs [fw=pondera], lcolor("blue") ///
-|| line lp_55 obs [fw=pondera], lcolor("blue") ///
+|| line lp_19_ready obs  [fw=pondera], lcolor("blue") ///
+|| line lp_32_ready obs [fw=pondera], lcolor("blue") ///
+|| line lp_55_ready obs [fw=pondera], lcolor("blue") ///
 || line lp_new obs [fw=pondera], lcolor("red") ///
 || line le_new obs [fw=pondera], lcolor("red") ///
 || line le_ofi obs [fw=pondera], lcolor("green") ///
@@ -185,6 +185,7 @@ gen pob_75off = ipcf<lp_new*0.25
 sum pob_base pob_??off ext_base ext_??off  [fw=pondera]
 
 sum pob_base pob_??off ext_base ext_??off  [fw=pondera] if ipcf>0
+restore
 
 rename le_new lp_extrema
 rename lp_new lp_moderada
@@ -194,7 +195,10 @@ gen pobre_extremo = ipcf<lp_extrema
 
 //cleaning
 
-drop lp_ofi le_ofi extremo_new extremo_ofi pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi ext_10off ext_20off ext_50off ext_75off pob_??off obs lp_??_ready
+drop lp_ofi le_ofi 
+drop extremo_new extremo_ofi
+drop pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi
+
 
 replace pobre =. if hogarsec ==1
 replace pobre_extremo =. if hogarsec ==1

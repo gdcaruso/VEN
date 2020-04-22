@@ -19,56 +19,56 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user
-
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta  1
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global dopath "C:\Users\wb563583\GitHub\VEN"
-				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
-	    if $lauta {
-				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\DataEncovi\"
-		}
-		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-		}
-		if $male   {
-				global dopath "C:\Users\wb550905\Github\VEN"
-				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-}		
-
-
-//set universal datapaths
-global merged "$datapath\data_management\output\merged"
-global cleaned "$datapath\data_management\output\cleaned"
-global forinflation "$datapath\data_management\output\for inflation"
-
-//set universal dopath
-global harmonization "$dopath\data_management\management\2. harmonization"
-global inflado "$dopath\data_management\management\5. inflation"
-
-//Exchange rate inputs and auxiliaries
-
-global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-global pathaux "$harmonization\aux_do"
-
-
-// set path of data
-global povmeasure "$dopath\poverty_measurement\scripts"
-global input "$datapath\poverty_measurement\input"
-global output "$datapath\poverty_measurement\output"
+// // Define rootpath according to user
+//
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta  1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+// 	    if $lauta {
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
+// 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// }		
+//
+//
+// //set universal datapaths
+// global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global forinflation "$datapath\data_management\output\for inflation"
+//
+// //set universal dopath
+// global harmonization "$dopath\data_management\management\2. harmonization"
+// global inflado "$dopath\data_management\management\5. inflation"
+//
+// //Exchange rate inputs and auxiliaries
+//
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+// global pathaux "$harmonization\aux_do"
+//
+//
+// // set path of data
+// global povmeasure "$dopath\poverty_measurement\scripts"
+// global input "$datapath\poverty_measurement\input"
+// global output "$datapath\poverty_measurement\output"
 ********************************************************************************
 
 
@@ -365,7 +365,7 @@ gen tot_intake_pc = tot_intake_af/population
 gen ajuste_calorico = cal_req/tot_intake_pc
 gen cantidad_ajustada = cantidad_h*ajuste_calorico
 
-stop
+
 // output canasta ajustada
 //preserve 
 drop if cal ==.
@@ -387,9 +387,9 @@ rename cantidad_ajustada_tot cantidad_ajustada
 replace cantidad_ajustada = cantidad_ajustada/population
 replace cantidad_h = cantidad_h/population
 gen cal_intake = cantidad_ajustada*cal/100
-gsort -cal_intake, stable
+gsort -cal_intake
 
-save "$output/canasta_diaria2.dta", replace
-export excel using "$output/canasta_diaria2.xlsx", firstrow(var) replace
+save "$output/canasta_diaria.dta", replace
+export excel using "$output/canasta_diaria.xlsx", firstrow(var) replace
 
 

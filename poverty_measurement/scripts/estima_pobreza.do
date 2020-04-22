@@ -160,7 +160,7 @@ graph twoway line ipcf obs [fw=pondera]   if obs<`maxobs', lcolor("black") ///
 || line le_new obs [fw=pondera], lcolor("red") ///
 || line le_ofi obs [fw=pondera], lcolor("green") ///
 || line lp_ofi obs [fw=pondera], lcolor("green") 
-stop
+
 //sensitivity check
 
 gen pob_base = ipcf<lp_new
@@ -188,6 +188,6 @@ gen pobre_extremo = ipcf<lp_extrema
 //cleaning
 
 drop lp_ofi le_ofi extremo_new extremo_ofi pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi ext_10off ext_20off ext_50off ext_75off pob_??off obs
-stop
+
 //save
 save "$output\ENCOVI_2019_postpobreza.dta", replace

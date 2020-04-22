@@ -155,9 +155,10 @@ drop if unidad_medida==.
 
 // merge with sedlac to get hh size
 preserve
-use  "$forinflation/ENCOVI_2019_sinimputar_sindeflactar_parainflacion.dta", clear
-collapse (max) com, by (interview__id interview__key quest)
-rename com miembros
+use  "$cleaned/ENCOVI_2019_pre pobreza.dta", clear
+
+keep interview__id interview__key quest miembros pondera
+duplicates drop
 tempfile hhsize
 save `hhsize'
 restore
@@ -168,7 +169,6 @@ drop _merge
 // gen week of data
 gen week = week(date_consumption_survey)
 replace week = week+52 if week<40
-
 // gen month of data
 gen month = month(date_consumption_survey)
 
@@ -219,8 +219,11 @@ drop if gasto_bol ==0 | comprado ==.
 
 // look for popularity among "presentations" (bien unidad_medida tamano cantidad) and filter less popular
 preserve
-collapse (count) count=gasto_bol, by(bien unidad_medida tamano comprado)
-by bien: egen total = total(count)
+egen count = count(gasto_bol), by (bien unidad_medida tamano comprado) 
+keep bien unidad_medida tamano comprado count
+duplicates drop
+
+egen total = total(count), by(bien)
 gen pop = count/total
 keep if pop>.15 //parametro clave, permite encontrar observaciones en todos los productos. revisar tab bien _merge luego del proximo merge antes de cambiar
 tempfile popular
@@ -231,6 +234,8 @@ restore
 merge m:1 bien unidad_medida tamano comprado using `popular'
 tab bien _merge
 keep if _merge == 3
+
+
 
 
 /*==============================================================================
@@ -251,11 +256,13 @@ replace comprado = comprado*250 if bien==6 & unidad_medida==40
 
 // generate implicit prices per gram
 gen pimp = gasto_bol/comprado
-
-collapse (p50) pimp, by(bien month)
+rename pimp p_imp
+egen pimp = median(p_imp) by (bien month)
 drop if month ==.
+keep bien pimp
+duplicates drop
+
+
 
 save "$forinflation/precios_implicitos_nov_to_march.dta", replace
-
-
 export excel "$forinflation/precios_implicitos_nov_to_march.xlsx", firstrow(variables) replace

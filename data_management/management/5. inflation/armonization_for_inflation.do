@@ -15,43 +15,58 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-// Define rootpath according to user (silenced as this is done by main now)
-/*
- 	    * User 1: Trini
- 		global trini 0
-		
- 		* User 2: Julieta
- 		global juli   0
-		
- 		* User 3: Lautaro
- 		global lauta   0
-		
- 		* User 4: Malena
- 		global male   1
-			
- 		if $juli {
- 				global dopath "C:\Users\wb563583\GitHub\VEN"
- 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
- 		}
- 	    if $lauta {
-				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
- 		if $trini   {
- 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
- 		}
- 		if $male   {
- 				global dopath "C:\Users\wb550905\Github\VEN"
- 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
-	
-*Inputs
-		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-		global merged "$datapath\data_management\output\merged"
-		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
-*Outputs
-		global cleaned "$datapath\data_management\output\cleaned"
+// Define rootpath according to user
+
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta  1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+// 	    if $lauta {
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
+// 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+//}		
+********************************************************************************
+
+
+
+/*==============================================================================
+Program set up
+==============================================================================*/
+version 14
+drop _all
+set more off
+
+// //set universal datapaths
+// global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global forinflation "$datapath\data_management\output\for inflation"
+//
+// //set universal dopaths
+// global harmonization "$dopath\data_management\management\2. harmonization"
+// global inflado "$dopath\data_management\management\5. inflation"
+// global pathaux "$harmonization\aux_do"
+//
+// //exchange rate input
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 
 ********************************************************************************
 */
@@ -4194,6 +4209,7 @@ capture label drop nivel
 	tempvar uno
 	gen `uno' = 1
 	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
+	drop if hogarsec == 1 //solo para inflacion, no para todo!!
 
 include "$pathaux\do_file_1_variables_MA.do"
 

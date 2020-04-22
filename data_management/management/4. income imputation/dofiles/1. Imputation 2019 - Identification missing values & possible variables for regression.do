@@ -21,31 +21,31 @@ Note:
 
 // Define rootpath according to user (silenced as this is done by main now)
 
- 		* User 1: Trini
- 		global trini 0
-		
- 		* User 2: Julieta
- 		global juli   0
-		
- 		* User 3: Lautaro
- 		global lauta  0
-		
- 		* User 4: Malena
- 		global male   1
-		
-			
- 		if $juli {
- 				global dopath "C:\Users\wb563583\GitHub\VEN"
- 				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
- 			}
- 	    if $lauta {
- 		}
- 		if $trini   {
- 		}
- 		if $male   {
- 				global dopath "C:\Users\wb550905\GitHub\VEN"
- 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
- 					}
+//  		* User 1: Trini
+//  		global trini 0
+//		
+//  		* User 2: Julieta
+//  		global juli   0
+//		
+//  		* User 3: Lautaro
+//  		global lauta  0
+//		
+//  		* User 4: Malena
+//  		global male   1
+//		
+//			
+//  		if $juli {
+//  				global dopath "C:\Users\wb563583\GitHub\VEN"
+//  				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+//  			}
+//  	    if $lauta {
+//  		}
+//  		if $trini   {
+//  		}
+//  		if $male   {
+//  				global dopath "C:\Users\wb550905\GitHub\VEN"
+//  				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+//  					}
 
 *Inputs
 	global impdos "$dopath\data_management\management\4. income imputation\dofiles"
@@ -62,6 +62,8 @@ Note:
  
 program drop _all
 
+//include cuantiles
+include "$pathaux/cuantiles.do"
 
 qui: do "$impdos\outliers.do" 
 *use "$cleaned\ENCOVI_2019_Asamblea Nacional.dta", clear

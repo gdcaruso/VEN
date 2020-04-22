@@ -120,7 +120,7 @@ tempfile baskets
 preserve
 use "$merged\product_hh_homogeneous.dta", replace
 rename bien COD_GASTO
-merge m:1 COD_GASTO using "$input/Calories.dta"
+merge m:1 COD_GASTO using "$povinput/Calories.dta"
 
 keep if _merge==3
 drop _merge

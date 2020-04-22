@@ -17,8 +17,8 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user
-
+// // Define rootpath according to user
+//
 // 	    * User 1: Trini
 // 		global trini 0
 //		
@@ -26,45 +26,49 @@ Note:
 // 		global juli   0
 //		
 // 		* User 3: Lautaro
-// 		global lauta   1
+// 		global lauta  1
 //		
 // 		* User 4: Malena
 // 		global male   0
 //			
 // 		if $juli {
-// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 // 		}
 // 	    if $lauta {
-// 		global dopath "C:\Users\wb563365\GitHub\VEN"
-// 		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
 // 		}
 // 		if $trini   {
 // 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 // 		}
 // 		if $male   {
-// 				global rootpath "C:\Users\wb550905\GitHub\VEN"
-// 		}
-// *
-// ********************************************************************************
-//
-// /*==============================================================================
-// 0: Program set up
-// ==============================================================================*/
-// version 14
-// drop _all
-// set more off
-//
-//
-// // set path of data
-//
-// global cleaned "$datapath\data_management\output\cleaned"
-// global merged "$datapath\data_management\output\merged"
-// global input "$datapath\poverty_measurement\input"
-// global output "$datapath\poverty_measurement\output"
-// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-//
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+//}		
+********************************************************************************
 
+
+
+/*==============================================================================
+Program set up
+==============================================================================*/
+version 14
+drop _all
+set more off
+
+// //set universal datapaths
+// global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global forinflation "$datapath\data_management\output\for inflation"
+//
+// //set universal dopaths
+// global harmonization "$dopath\data_management\management\2. harmonization"
+// global inflado "$dopath\data_management\management\5. inflation"
+// global pathaux "$harmonization\aux_do"
+//
+// //exchange rate input
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 /*==============================================================================
 1:moves currencies to bolivares
 ==============================================================================*/
@@ -125,11 +129,6 @@ foreach i of local monedas {
 1: Data loading
 ==============================================================================*/
 
-*************************************************************************************************************
-*** COMPLETAR UNIDADES MAL IMPUTADAS (KG x GR o viceversa)
-*** COMPLETAR TAMAñOS
-*** COMPLETAR BIENES NO ESTANDARIZADOS
-****************************************************************************************************************
 
 // load food data
 use  "$merged/product-hh.dta", clear
@@ -155,10 +154,11 @@ drop if unidad_medida==.
 
 // merge with sedlac to get hh size
 preserve
-use  "$cleaned/ENCOVI_2019_pre pobreza.dta", clear
+use  "$forinflation\ENCOVI_2019_sinimputar_sindeflactar_parainflacion.dta", clear
 
 keep interview__id interview__key quest miembros pondera
 duplicates drop
+
 tempfile hhsize
 save `hhsize'
 restore
@@ -257,9 +257,9 @@ replace comprado = comprado*250 if bien==6 & unidad_medida==40
 // generate implicit prices per gram
 gen pimp = gasto_bol/comprado
 rename pimp p_imp
-egen pimp = median(p_imp) by (bien month)
+egen pimp = median(p_imp), by (bien month)
 drop if month ==.
-keep bien pimp
+keep bien pimp month
 duplicates drop
 
 

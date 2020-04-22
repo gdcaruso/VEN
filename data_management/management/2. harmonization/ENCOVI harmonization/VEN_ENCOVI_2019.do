@@ -17,41 +17,41 @@ Note:
 ********************************************************************************
 // Define rootpath according to user (silenced as this is done by main now)
 
- 	    * User 1: Trini
- 		global trini 0
-		
- 		* User 2: Julieta
- 		global juli   0
-		
- 		* User 3: Lautaro
- 		global lauta   0
-		
- 		* User 4: Malena
- 		global male   1
-			
- 		if $juli {
- 				global dopath "C:\Users\wb563583\GitHub\VEN"
- 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
- 		}
- 	    if $lauta {
-				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
- 		if $trini   {
- 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
- 		}
- 		if $male   {
- 				global dopath "C:\Users\wb550905\Github\VEN"
- 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
-	
-*Inputs
-		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-		global merged "$datapath\data_management\output\merged"
-		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
-*Outputs
-		global cleaned "$datapath\data_management\output\cleaned"
+//  	    * User 1: Trini
+//  		global trini 0
+//		
+//  		* User 2: Julieta
+//  		global juli   0
+//		
+//  		* User 3: Lautaro
+//  		global lauta   0
+//		
+//  		* User 4: Malena
+//  		global male   1
+//			
+//  		if $juli {
+//  				global dopath "C:\Users\wb563583\GitHub\VEN"
+//  				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+//  		}
+//  	    if $lauta {
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+//  		if $trini   {
+//  				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+//  		}
+//  		if $male   {
+//  				global dopath "C:\Users\wb550905\Github\VEN"
+//  				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+//	
+// *Inputs
+// 		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+// 		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+// 		global merged "$datapath\data_management\output\merged"
+// 		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
+// *Outputs
+// 		global cleaned "$datapath\data_management\output\cleaned"
 
 ********************************************************************************
 

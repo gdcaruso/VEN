@@ -72,6 +72,8 @@ global pathaux "$harmonization\aux_do"
 //exchange rate input
 global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 
+
+
 /*==============================================================================
  merging data
  ==============================================================================*/
@@ -89,7 +91,7 @@ Inflation
 ==============================================================================*/
 
 // specific path to inflation estimation
-
+/*
 global povinput "$datapath\poverty_measurement\input"
 global inflationout "$datapath\data_management\input"
 
@@ -106,8 +108,8 @@ hh-individual database
 ==============================================================================*/
 
 //run ENCOVI harmonization
-do "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
-
+run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
+*/
 /*==============================================================================
 imputation
 ==============================================================================*/

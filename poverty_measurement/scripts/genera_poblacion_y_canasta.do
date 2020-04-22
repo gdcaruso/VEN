@@ -91,7 +91,7 @@ global calreq = 2000
 use "$cleaned/ENCOVI_2019_pre pobreza.dta", replace
 keep if interview_month==2 // keep feb observations
 keep if relacion_en == 1 //keep households
-
+drop if hogarsec == 1
 
 // generate quantiles
 include "$pathaux/cuantiles.do"

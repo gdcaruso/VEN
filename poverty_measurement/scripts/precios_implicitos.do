@@ -133,7 +133,7 @@ drop if unidad_medida==.
 // merge with sedlac to get hh size
 preserve
 use  "$cleaned/ENCOVI_2019_pre pobreza.dta", clear
-
+drop if hogarsec == 1
 keep interview__id interview__key quest miembros pondera
 duplicates drop
 tempfile hhsize

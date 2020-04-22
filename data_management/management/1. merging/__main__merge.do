@@ -72,6 +72,8 @@ Construction of aproved surveys
 
 //merge individual datasets
 run "$merging/individual_append_n_merge.do"
+run "$merging/adhoc_edit.do"
+
 
 //merge hh datasets
 run "$merging/Merge_Hogares_JL.do"

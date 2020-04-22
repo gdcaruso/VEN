@@ -98,8 +98,10 @@ di $costodiario
 // import harmonized hh-individual data with incomes
 use "$cleaned/ENCOVI_2019_pre pobreza.dta" , replace
 
+
+
 // gen ipc and ppp
-drop ipc ipc11 ppp11 pobre
+cap drop ipc ipc11 ppp11 pobre
 gen ipc = 2659537979000 //feb20 CENDAS food basket
 gen ipc11 = 3558.84 //dic11 CENDAS food basket
 gen ppp11 = 2.915005297 / 100000 //bol. fuertes/ dolarppp * bol.sob / bol.fuerte
@@ -112,9 +114,14 @@ gen le_new = $costodiario * 30.42
 gen lp_new = $orsh* le_new 
 
 // gen international lines
-gen lp_19 = 1.9 *30.42 * ppp11 * ipc/ipc11
-gen lp_32 = 3.2 *30.42 * ppp11 * ipc/ipc11 
-gen lp_55 = 5.5 *30.42 * ppp11 * ipc/ipc11
+gen lp_19 = 1.9 *30.42 
+gen lp_32 = 3.2 *30.42  
+gen lp_55 = 5.5 *30.42
+
+gen lp_19_ready = lp_19 * ppp11 * ipc/ipc11
+gen lp_32_ready = lp_32 * ppp11 * ipc/ipc11 
+gen lp_55_ready = lp_55 * ppp11 * ipc/ipc11
+
 
 // gen last national oficial lines corrected by inflation
 gen le_ofi = 1600/5.2/100000 * ipc/ipc11 // 1600 is 2011 cost of official basket
@@ -187,7 +194,11 @@ gen pobre_extremo = ipcf<lp_extrema
 
 //cleaning
 
-drop lp_ofi le_ofi extremo_new extremo_ofi pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi ext_10off ext_20off ext_50off ext_75off pob_??off obs
+drop lp_ofi le_ofi extremo_new extremo_ofi pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi ext_10off ext_20off ext_50off ext_75off pob_??off obs lp_??_ready
+
+replace pobre =. if hogarsec ==1
+replace pobre_extremo =. if hogarsec ==1
+
 
 //save
 save "$output\ENCOVI_2019_postpobreza.dta", replace

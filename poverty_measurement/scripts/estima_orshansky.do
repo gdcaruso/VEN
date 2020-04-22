@@ -19,8 +19,8 @@ Note:
 ********************************************************************************
 
 
-// Define rootpath according to user
-
+// // Define rootpath according to user
+//
 // 	    * User 1: Trini
 // 		global trini 0
 //		
@@ -28,30 +28,49 @@ Note:
 // 		global juli   0
 //		
 // 		* User 3: Lautaro
-// 		global lauta   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta2   1
-//		
+// 		global lauta  1
 //		
 // 		* User 4: Malena
 // 		global male   0
 //			
 // 		if $juli {
-// 				global rootpath ""
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 // 		}
-// 	    if $lauta2 {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 	    if $lauta {
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
 // 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// }		
 //
-// // set raw data path
-// global merged "$rootpath\data_management\output\merged"
-// global cleaned "$rootpath\data_management\output\cleaned"
-// global input "$rootpath\poverty_measurement\input"
-// global output "$rootpath\poverty_measurement\output"
+//
+// //set universal datapaths
+// global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global forinflation "$datapath\data_management\output\for inflation"
+//
+// //set universal dopath
+// global harmonization "$dopath\data_management\management\2. harmonization"
+// global inflado "$dopath\data_management\management\5. inflation"
+//
+// //Exchange rate inputs and auxiliaries
+//
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+// global pathaux "$harmonization\aux_do"
 //
 //
-// *
+// // set path of data
+// global povmeasure "$dopath\poverty_measurement\scripts"
+// global input "$datapath\poverty_measurement\input"
+// global output "$datapath\poverty_measurement\output"
+//
+// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 ********************************************************************************
 
 /*==============================================================================
@@ -289,10 +308,18 @@ save `conSpending'
 /*(************************************************************************************************************************************************* 
 * // Check spending
 *********************************************************************************************************************)*/
-collapse (sum) gasto_mensual, by (interview__id interview__key quest)
+sort interview__id interview__key quest pondera, stable
+
+by interview__id interview__key quest pondera: egen tot_gasto_mensual = total(gasto_mensual)
+keep interview__id interview__key quest pondera tot_gasto_mensual
+duplicates drop
+rename tot_gasto_mensual gasto_mensual
+
 tempfile `checkingSpending'
 
 merge 1:m (interview__id interview__key quest) using `reference'
+drop _merge
+
 gen ingfam = ipcf*miembros
 
 gen superavit = ingfam > gasto_mensual
@@ -310,7 +337,7 @@ codebook ingfam
 // import other expenditure data
 use "$cleaned/ENCOVI_2019_pre pobreza.dta", replace
 drop ipcf
-drop _merge
+cap drop _merge
 merge m:1 interview__id interview__key quest using `reference'
 keep if _merge == 3
 drop _merge
@@ -328,7 +355,7 @@ global saludvar cant_pago_consulta mone_pago_consulta mes_pago_consulta pago_rem
 global jubivar d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone cant_aporta_pension mone_aporta_pension
 
 
-keep interview__id interview__key quest interview_month quest ipcf miembros entidad  ///
+keep interview__id interview__key quest interview_month quest ipcf miembros  pondera  ///
 $viviendavar ///
 $serviciosvar ///
 $educvar ///
@@ -741,13 +768,13 @@ drop q flag
 
 ***********************************end of expenditures********************************
 
-
 // adds expenditure of hh, removing individual dimension 
-collapse (sum) gasto??, by (interview__id interview__key quest ipcf miembros entidad)
+collapse (sum) gasto??, by (interview__id interview__key quest ipcf miembros  pondera)
 
 
 // now we reshape the wide data to make it long
-reshape long gasto, i(interview__id interview__key quest ipcf miembros entidad) j(bien)
+reshape long gasto, i(interview__id interview__key quest ipcf miembros  pondera) j(bien)
+
 rename gasto gasto_mensual
 replace gasto_mensual = round(gasto_mensual)
 
@@ -763,16 +790,26 @@ replace type_good = 12 if bien==94
 
 replace current_good = 0 if type_good == 12
 
+
+replace bien = 900 if bien == 90 & type_good == 8
+replace bien = 910 if bien == 91 & type_good == 9
+replace bien = 920 if bien == 92 & type_good == 10
+replace bien = 930 if bien == 93 & type_good == 11
+replace bien = 940 if bien == 94 & type_good == 12
+
+
+
 tempfile hhSpending
 save `hhSpending'
 
 // apends hh spending dataset with consumption dataset
 append using `conSpending'
 
-keep interview__id interview__key quest ipcf miembros entidad ///
-bien type_good current_good gasto_mensual
+keep interview__id interview__key quest ipcf miembros  ///
+bien type_good current_good gasto_mensual pondera
 
-order interview__id interview__key quest ipcf miembros entidad ///
+
+order interview__id interview__key quest ipcf miembros pondera  ///
 bien type_good current_good gasto_mensual
 
 // saves expenditure dta in long shape
@@ -790,30 +827,47 @@ keep if current_good==1
 
 //drop smoke and alcohol intake
 drop if type_good == 2
+keep if gasto_mensual>0 & gasto_mensual!=. 
+
+tab type_good [fw= gasto_mensual]
+
+// * to test implementation of weights
+// sort interview__id interview__key quest, stable
+// by interview__id interview__key quest: egen test_exp = total(gasto_mensual)
+// by interview__id interview__key quest: egen test_food = total(gasto_mensual) if type_good == 1
+// gen test_orsh = test_exp/test_food
+// keep test_orsh
+// duplicates drop
 
 // filter of popularity
-bysort bien: egen pop = count(gasto_mensual) if gasto_mensual>0 & gasto_mensual!=. 
-bysort bien: egen popularity_hh = max(pop)
-drop pop
+egen popularity_hh = total(pondera), by (bien) 
 
-qui tab interview__id
-gen totalhh = r(r)
+
+bysort interview__key interview__id quest (bien): gen first = 1 if _n==1
+gen hhpop = pondera if first ==1
+egen totalhh = total(hhpop)
+
 gen popularity = popularity_hh/totalhh
 sort popularity
 
 drop if popularity<.05
 
 // aggregate expenditures by group and hh
-collapse (sum) gasto_mensual, by(interview__id interview__key quest ipcf miembros entidad type_good)
+sort interview__id interview__key quest ipcf miembros  type_good, stable
+egen tot_gasto_mensual = total(gasto_mensual), by (interview__id interview__key quest type_good)
+keep interview__id interview__key quest ipcf miembros  type_good tot_gasto_mensual pondera
+
+rename tot_gasto_mensual  gasto_mensual
+duplicates drop
 
 
 tab type_good [fw=gasto_mensual]
 
 //reshapes to wide 
-reshape wide gasto_mensual, i(interview__id interview__key quest ipcf miembros entidad) j(type_good)
+reshape wide gasto_mensual, i(interview__id interview__key quest ipcf miembros  pondera) j(type_good)
 
 //sum food and non food expenditure per hh
-egen food_exp = rowtotal(gasto_mensual1)
+gen food_exp = gasto_mensual1
 egen exp = rowtotal (gasto_mensual*)
 gen non_food_exp = exp-food_exp
 
@@ -821,16 +875,16 @@ gen non_food_exp = exp-food_exp
 gen orshansky = exp/food_exp
 
 //remove outliars
-xtile ors_quant = orshansky, nq(100)
+xtile ors_quant [fw=pondera] = orshansky, nq(100)
 
 
-sort orshansky
+sort orshansky, stable
 gen obs = _n
 // twoway line orshansky obs if ors_quant<100 
 
-xtile exp_quant = exp, nq(100)
+xtile exp_quant  [fw=pondera] = exp, nq(100)
 
 //  saves orshansky
-sum orshansky, detail
+sum orshansky [fw=pondera], detail
 global orsh = r(p50)
 

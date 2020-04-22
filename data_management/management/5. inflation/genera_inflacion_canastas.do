@@ -79,10 +79,12 @@ drop _merge
 drop if month ==4
 replace month = month + 12 if month < 4
 // generate value of each products
-gen valor_canasta = pimp * cantidad_ajustada
+gen valor_producto = pimp * cantidad_ajustada
 
 //collapse by month to make the series and the index
-collapse (sum) valor_canasta, by(month)
+egen valor_canasta = total(valor_producto), by(month)
+keep valor_canasta month
+duplicates drop
 
 tsset month
 

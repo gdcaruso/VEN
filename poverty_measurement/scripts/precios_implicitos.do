@@ -18,8 +18,6 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-
-// // Define rootpath according to user
 //
 // 	    * User 1: Trini
 // 		global trini 0
@@ -28,31 +26,40 @@ Note:
 // 		global juli   0
 //		
 // 		* User 3: Lautaro
-// 		global lauta   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta2   1
-//		
+// 		global lauta  1
 //		
 // 		* User 4: Malena
 // 		global male   0
 //			
 // 		if $juli {
-// 				global rootpath ""
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 // 		}
 // 	    if $lauta {
-// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
 // 		}
-// 	    if $lauta2 {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 // 		}
+// 		if $male   {
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// }		
 //
-// // set path
-// global merged "$rootpath\data_management\output\merged"
-// global cleaned "$rootpath\data_management\output\cleaned"
-// global output "$rootpath\poverty_measurement\output"
+// //set universal datapaths
+// global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global forinflation "$datapath\data_management\output\for inflation"
+//
+// //set universal dopaths
+// global harmonization "$dopath\data_management\management\2. harmonization"
+// global inflado "$dopath\data_management\management\5. inflation"
+// global pathaux "$harmonization\aux_do"
+//
+// //exchange rate input
 // global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-*
+
 ********************************************************************************
 
 /*==============================================================================
@@ -126,8 +133,9 @@ drop if unidad_medida==.
 // merge with sedlac to get hh size
 preserve
 use  "$cleaned/ENCOVI_2019_pre pobreza.dta", clear
-collapse (max) com, by (interview__id interview__key quest)
-rename com miembros
+
+keep interview__id interview__key quest miembros pondera
+duplicates drop
 tempfile hhsize
 save `hhsize'
 restore
@@ -191,8 +199,11 @@ drop if gasto_bol ==0 | comprado ==.
 
 // look for popularity among "presentations" (bien unidad_medida tamano cantidad) and filter less popular
 preserve
-collapse (count) count=gasto_bol, by(bien unidad_medida tamano comprado)
-by bien: egen total = total(count)
+egen count = count(gasto_bol), by (bien unidad_medida tamano comprado) 
+keep bien unidad_medida tamano comprado count
+duplicates drop
+
+egen total = total(count), by(bien)
 gen pop = count/total
 keep if pop>.15 //parametro clave, permite encontrar observaciones en todos los productos. revisar tab bien _merge luego del proximo merge antes de cambiar
 tempfile popular
@@ -223,8 +234,10 @@ replace comprado = comprado*250 if bien==6 & unidad_medida==40
 
 // generate implicit prices per gram
 gen pimp = gasto_bol/comprado
-
-collapse (p50) pimp, by(bien)
+rename pimp p_imp
+bysort bien: egen pimp = median(p_imp)
+keep bien pimp
+duplicates drop
 
 export excel "$output/precios_implicitos.xlsx", firstrow(variables) replace
 save "$output/precios_implicitos.dta", replace

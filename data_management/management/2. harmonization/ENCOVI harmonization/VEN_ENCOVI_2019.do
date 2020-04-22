@@ -17,41 +17,41 @@ Note:
 ********************************************************************************
 // Define rootpath according to user (silenced as this is done by main now)
 
- 	    * User 1: Trini
- 		global trini 0
-		
- 		* User 2: Julieta
- 		global juli   0
-		
- 		* User 3: Lautaro
- 		global lauta   0
-		
- 		* User 4: Malena
- 		global male   1
-			
- 		if $juli {
- 				global dopath "C:\Users\wb563583\GitHub\VEN"
- 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
- 		}
- 	    if $lauta {
-				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
- 		if $trini   {
- 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
- 		}
- 		if $male   {
- 				global dopath "C:\Users\wb550905\Github\VEN"
- 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
-	
-*Inputs
-		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-		global merged "$datapath\data_management\output\merged"
-		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
-*Outputs
-		global cleaned "$datapath\data_management\output\cleaned"
+//  	    * User 1: Trini
+//  		global trini 0
+//		
+//  		* User 2: Julieta
+//  		global juli   0
+//		
+//  		* User 3: Lautaro
+//  		global lauta   0
+//		
+//  		* User 4: Malena
+//  		global male   1
+//			
+//  		if $juli {
+//  				global dopath "C:\Users\wb563583\GitHub\VEN"
+//  				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+//  		}
+//  	    if $lauta {
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+//  		if $trini   {
+//  				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+//  		}
+//  		if $male   {
+//  				global dopath "C:\Users\wb550905\Github\VEN"
+//  				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+//	
+// *Inputs
+// 		global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+// 		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+// 		global merged "$datapath\data_management\output\merged"
+// 		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
+// *Outputs
+// 		global cleaned "$datapath\data_management\output\cleaned"
 
 ********************************************************************************
 
@@ -154,7 +154,8 @@ run "$pathaux\cuantiles.do"
 *Generate unique household identifier by strata
 use "$merged\household.dta", clear
 tempfile household_hhid
-bysort combined_id: gen hh_by_combined_id = _n
+sort combined_id, stable // Instead of "bysort", to make sure we keep order
+by combined_id: gen hh_by_combined_id = _n
 save `household_hhid'
 
 * Open "output" database
@@ -164,7 +165,7 @@ drop _merge
 * I drop those who do not collaborate in the survey
 drop if colabora_entrevista==2
 
-*Obs: there are 42 observations which do not merge. Maybe they are people who started to answer but then stopped answering
+*Obs: there is 1 obs. which does not merge. Maybe they are people who started to answer but then stopped answering
 
 *Change names to lower cases
 rename _all, lower
@@ -197,19 +198,19 @@ replace interview_month = new_interview_month if (interview_month==.a | intervie
 //drop if interview month is november
 // drop if interview_month==11
 
-gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==9                   // Region Central: Aragua (5), Carabobo (8), Cojedes (9)
-replace region_est1 =  2 if entidad==12 | entidad==4                               // Region de los LLanos: Guarico (12), Apure (4) 
-replace region_est1 =  3 if entidad==11 | entidad==13 | entidad==18 | entidad==22  // Region Centro-Occidental: Falcon (11), Lara (13), Portuguesa (18), Yaracuy (22)
-replace region_est1 =  4 if entidad==23                                            // Region Zuliana: Zulia (23)
-replace region_est1 =  5 if entidad==6 | entidad==14 | entidad==20 | entidad==21   // Region de los Andes: Barinas (6), Merida (14), Tachira (20), Trujillo (21)
-replace region_est1 =  6 if entidad==3 | entidad==16 | entidad==19                 // Region Nor-Oriental: Anzoategui (3), Monagas (16), Sucre (19)
-replace region_est1 =  7 if entidad==17 | entidad==25                              // Region Insular: Nueva Esparta (17), Otros (25)
-replace region_est1 =  8 if entidad==7 | entidad==2 | entidad==10                  // Region Guayana: Bolivar (7), Amazonas (2), Delta Amacuro (10)
-replace region_est1 =  9 if entidad==15 | entidad==24 | entidad==1                 // Region Capital: Vargas (24), Distrito Capital (1)
+gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==13					// Region Central: Aragua (5), Carabobo (8), Lara (13)
+replace region_est1 =  2 if entidad==12 | entidad==4 | entidad==6          			// Region LLanera: Guarico (12), Apure (4), Barinas (6)
+replace region_est1 =  3 if entidad==9 | entidad==11 | entidad==18 | entidad==22	// Region Occidental: Cojedes (9), Falcon (11), Portuguesa (18), Yaracuy (22)
+replace region_est1 =  4 if entidad==23												// Region Zuliana: Zulia (23)
+replace region_est1 =  5 if entidad==14 | entidad==20 | entidad==21					// Region Andina: Merida (14), Tachira (20), Trujillo (21)
+replace region_est1 =  6 if entidad==3 | entidad==7 | entidad==16 | entidad==17 | entidad==19	// Region Oriental: Bolivar (7), Anzoategui (3), Monagas (16), Nueva Esparta (17), Sucre (19)
+replace region_est1 =  7 if entidad==15 | entidad==24 | entidad==1					// Region Capital: Distrito Capital (1), Miranda (15), Vargas (24) 
 label var region_est1 "Region"
-label def region_est1 1 "Region Central"  2 "Region de los LLanos" 3 "Region Centro-Occidental" 4 "Region Zuliana" ///
-          5 "Region de los Andes" 6 "Region Nor-Oriental" 7 "Insular" 8 "Guayana" 9 "Capital"
+label def region_est1 1 "Region Central"  2 "Region Llanera" 3 "Region Occidental" 4 "Region Zuliana" ///
+          5 "Region Andina" 6 "Region Nor-Oriental" 7 "Capital"
 label value region_est1 region_est1
+* Obs: Delta Amacuro and Amazonas were not surveyed.
+
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------	III Household determination / Determinacion de hogares  -------------------------------------------------------
@@ -274,14 +275,14 @@ global id_ENCOVI pais ano encuesta id com pondera psu
 			label define hombre 1 "Masculino" 0 "Femenino"
 			label value hombre hombre
 		* Name
-			clonevar nombre = s6q1
+			gen nombre = s6q1
 		*Random var
-		gsort interview__key interview__id quest -edad hombre nombre
+		sort interview__key interview__id quest edad hombre nombre, stable
 		set seed 123
 		generate z = runiform()
-		gsort z
+		sort z, stable
 		*Sorting
-		gsort id_numeric - edad z
+		gsort id_numeric -edad z
 		egen min =  min(_n), by(id)
 		replace min = -min
 		
@@ -4238,7 +4239,8 @@ include "$pathaux\do_file_1_variables_MA.do"
 
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
-	bysort id: egen propieta_no_paga = max(aux_propieta_no_paga)
+	sort id, stable
+	by id: egen propieta_no_paga = max(aux_propieta_no_paga)
 
 	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
 		gen     renta_imp = .
@@ -4295,7 +4297,7 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables a Documentar Base de Datos CEDLAS --------------
 *************************************************************************************************************************************************)*/
 
-sort id com
+sort id com, stable
 
 *Silencing para que corra más rápido (des-silenciar luego)
 /* 

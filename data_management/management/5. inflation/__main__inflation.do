@@ -19,38 +19,37 @@ Note:
 ********************************************************************************
 // clear all
 //
-// // Define rootpath according to user
-//
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta  1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global dopath "C:\Users\wb563583\GitHub\VEN"
-// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
-// 	    if $lauta {
-// 				global dopath "C:\Users\wb563365\GitHub\VEN"
-// 				global datapath "C:\Users\wb563365\DataEncovi"
-// 		}
-// 		if $trini   {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-// 		}
-// 		if $male   {
-// 				global dopath "C:\Users\wb550905\Github\VEN"
-// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// }		
+// Define rootpath according to user
+/*
+ 	    * User 1: Trini
+ 		global trini 0
+		
+ 		* User 2: Julieta
+ 		global juli   0
+		
+ 		* User 3: Lautaro
+ 		global lauta  0
+		
+ 		* User 4: Malena
+ 		global male   1
+			
+ 		if $juli {
+ 				global dopath "C:\Users\wb563583\GitHub\VEN"
+ 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 		}
+ 	    if $lauta {
+ 				global dopath "C:\Users\wb563365\GitHub\VEN"
+ 				global datapath "C:\Users\wb563365\DataEncovi"
+ 		}
+ 		if $trini   {
+ 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+ 		}
+ 		if $male   {
+ 				global dopath "C:\Users\wb550905\Github\VEN"
+ 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ }		
 ********************************************************************************
 
-/*
 */
 /*==============================================================================
 Program set up
@@ -86,7 +85,7 @@ harmonization without inflation
 do "$pathaux\cuantiles.do"
 
 //run ENCOVI harmonization
- do "$inflado\armonization_for_inflation.do"
+do "$inflado\armonization_for_inflation.do"
 
 // set population and basket
 do "$inflado\genera_poblacion_y_canasta_para_inflacion.do"

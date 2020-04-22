@@ -19,6 +19,8 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
+// Define rootpath according to user
+
 // 	    * User 1: Trini
 // 		global trini 0
 //		
@@ -26,35 +28,50 @@ Note:
 // 		global juli   0
 //		
 // 		* User 3: Lautaro
-// 		global lauta   1
+// 		global lauta  1
 //		
 // 		* User 4: Malena
 // 		global male   0
 //			
 // 		if $juli {
-// 				global rootpath "C:\Users\wb563583\GitHub\VEN"
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 // 		}
 // 	    if $lauta {
-// 		global dopath "C:\Users\wb563365\GitHub\VEN"
-// 		global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
 // 		}
 // 		if $trini   {
 // 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 // 		}
 // 		if $male   {
-// 				global rootpath "C:\Users\wb550905\GitHub\VEN"
-// 		}
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// }		
 //
-// //
-// // set path of data
-// global encovifilename "ENCOVI_2019.dta"
-// global cleaned "$datapath\data_management\output\cleaned"
+//
+// //set universal datapaths
 // global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global forinflation "$datapath\data_management\output\for inflation"
+//
+// //set universal dopath
+// global harmonization "$dopath\data_management\management\2. harmonization"
+// global inflado "$dopath\data_management\management\5. inflation"
+//
+// //Exchange rate inputs and auxiliaries
+//
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+// global pathaux "$harmonization\aux_do"
+//
+//
+// // set path of data
+// global povmeasure "$dopath\poverty_measurement\scripts"
 // global input "$datapath\poverty_measurement\input"
 // global output "$datapath\poverty_measurement\output"
-// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
-global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+//
+// global orsh = 1.9
 ********************************************************************************
 
 /*==============================================================================
@@ -122,24 +139,27 @@ replace pobreza_ofi = 1 if pobre_ofi == 1
 replace pobreza_ofi = 0 if extremo_ofi == 1
 
 // tabs
-tab pobreza_new, mi
-tab pobreza_ofi, mi
-tab pobre_19, mi
-tab pobre_32, mi
-tab pobre_55, mi
+tab pobreza_new  [fw=pondera], mi
+tab pobreza_ofi [fw=pondera], mi
+tab pobre_19 [fw=pondera], mi
+tab pobre_32 [fw=pondera], mi
+tab pobre_55 [fw=pondera], mi
 
 // lines and sorted ipcf plot
-sort ipcf
-gen obs = _n
+sort ipcf, stable
+gen obs = sum(pondera) //running sum
+egen max_obs = max(obs)
+local maxobs = max_obs[1]*0.995
+
 preserve
-graph twoway line ipcf obs  if obs<32000, lcolor("black") ///
-|| line lp_19 obs, lcolor("blue") ///
-|| line lp_32 obs, lcolor("blue") ///
-|| line lp_55 obs, lcolor("blue") ///
-|| line lp_new obs, lcolor("red") ///
-|| line le_new obs, lcolor("red") ///
-|| line le_ofi obs, lcolor("green") ///
-|| line lp_ofi obs, lcolor("green") 
+graph twoway line ipcf obs [fw=pondera]   if obs<`maxobs', lcolor("black") ///
+|| line lp_19 obs  [fw=pondera], lcolor("blue") ///
+|| line lp_32 obs [fw=pondera], lcolor("blue") ///
+|| line lp_55 obs [fw=pondera], lcolor("blue") ///
+|| line lp_new obs [fw=pondera], lcolor("red") ///
+|| line le_new obs [fw=pondera], lcolor("red") ///
+|| line le_ofi obs [fw=pondera], lcolor("green") ///
+|| line lp_ofi obs [fw=pondera], lcolor("green") 
 
 //sensitivity check
 
@@ -155,9 +175,9 @@ gen pob_20off = ipcf<lp_new*0.8
 gen pob_50off = ipcf<lp_new*0.5
 gen pob_75off = ipcf<lp_new*0.25
 
-sum pob_base pob_??off ext_base ext_??off
+sum pob_base pob_??off ext_base ext_??off  [fw=pondera]
 
-sum pob_base pob_??off ext_base ext_??off if ipcf>0
+sum pob_base pob_??off ext_base ext_??off  [fw=pondera] if ipcf>0
 
 rename le_new lp_extrema
 rename lp_new lp_moderada

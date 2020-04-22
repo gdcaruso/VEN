@@ -108,7 +108,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 		You will first need to install the package elasticregress, using the command line ssc install elasticregress. 
 		For the purposes of this exercise, please use as argument for the Lasso command set seed 1 and the default number of folds to be 10. */
 		
-		sort interview__id interview__key quest com
+		sort interview__id interview__key quest com, stable
 		set seed 66778899
 		lassoregress log_inlanojub $xvar1 if inlist(recibe_ingresonolab,1,2,3) & log_inlanojub>0 & log_inlanojub!=., numfolds(10)
 		display e(varlist_nonzero)
@@ -144,7 +144,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 	
 	* The variables which leads to the maximun R2 are selected for the imputation
 	set more off
-	sort interview__id interview__key quest com
+	sort interview__id interview__key quest com, stable
 	mi set flong
 	*set seed 66778899
 	mi register imputed log_inlanojub

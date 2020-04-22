@@ -88,11 +88,12 @@ append using "$pathpixel\interview__actions.dta"
 replace quest=3 if quest==. & quest!=1 & quest!=2
 
 //	Create a temporary db with surveys approved by HQ 
-
-bys quest interview__key interview__id (date time): keep if action[_N]==6 // Last condition:aprov. by HQ
+sort quest interview__key interview__id date time, stable
+by quest interview__key interview__id: keep if action[_N]==6 // Last condition:aprov. by HQ
 
 // To identify unique interviews according the last date and time entered
-bys interview__key interview__id (date time) : keep if _n==_N
+sort quest interview__key interview__id date time, stable
+by quest interview__key interview__id: keep if _n==_N
 
 // check, log and delete duplicates
 duplicates tag interview__key interview__id quest, generate(dupli)
@@ -548,7 +549,7 @@ local bname: value label bien
 }
 drop s12aq1*_os
 
-gsort interview__id interview__key quest bien
+sort interview__id interview__key quest bien, stable
 
 
 // save the product-household dataset

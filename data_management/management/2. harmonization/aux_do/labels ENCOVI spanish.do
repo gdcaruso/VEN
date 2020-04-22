@@ -19,7 +19,7 @@ label var   encuesta        "Nombre de la encuesta"
 label var   id              "Identificacion unica del hogar"
 label var   com             "Identificacion del componente"   
 label var	pondera         "Factor de ponderacion a nivel individual"
-label var 	pondera_hh		"Factor de ponderacion a nivel de los hogares"
+cap label var 	pondera_hh		"Factor de ponderacion a nivel de los hogares"
 *label var	strata          "Variable de estratificacion"   
 label var   psu	     	 	"Unidad Primaria de Muestreo"
 

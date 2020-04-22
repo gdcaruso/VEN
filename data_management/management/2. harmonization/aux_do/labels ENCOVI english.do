@@ -50,7 +50,7 @@ label var    encuesta        "Household survey name"
 label var    id              "Household unique identifier"
 label var    com             "Identifier of household member"   
 label var   pondera         "Weighting factor (individual level)"
-label var 	pondera_hh		"Weighting factor (household level)"
+cap label var 	pondera_hh		"Weighting factor (household level)"
 *label var   strata          "Stratification variable"   
 label var    psu	     	 "Primary sampling unit"
 

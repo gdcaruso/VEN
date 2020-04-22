@@ -437,8 +437,8 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	** Missing values outliers 
 	clonevar `x'_out=`x'
 	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
-	sum	`x'_out if	out_`x'==1 
-	gen d`x'_out=out_`x'==1 if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1) & `x'!=. // Lo miramos dentro del universo (antes estaba mal)
+	sum	`x'_out if out_`x'==1 
+	gen d`x'_out=out_`x'==1 if (inlist(recibe_ingresolab_mon,1,2,3) | ocupado==1) & `x'==. // Lo miramos dentro del universo (antes estaba mal)
 	sum d`x'_out
 	local a3=r(sum)
 	 
@@ -502,7 +502,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	
 	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
 	sum	`x'_out if	out_`x'==1 
-	gen d`x'_out=out_`x'==1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0  & `x'!=.
+	gen d`x'_out=out_`x'==1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0  & `x'==.
 	sum d`x'_out
 	local a3=r(sum)
 	
@@ -554,7 +554,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	clonevar `x'_out=`x'
 	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
 	sum	`x'_out if out_`x'==1 
-	gen d`x'_out=out_`x'==1 if recibe_ingresolab_nomon==1
+	gen d`x'_out=out_`x'==1 if recibe_ingresolab_nomon==1 & `x'==.
 	sum d`x'_out
 	local a2=r(sum)
 	
@@ -602,7 +602,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	//clonevar `x'_out=`x'
 	//outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
 	//sum	`x'_out if out_`x'==1 //
-	//gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3)
+	//gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3) & `x'==.
 	//sum d`x'_out
 	//local a2=(sum)
 	local a2 "."

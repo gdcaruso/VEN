@@ -78,12 +78,11 @@ use "$forinflation\ENCOVI_2019_sinimputar_sindeflactar_parainflacion.dta", repla
 keep if interview_month==2 // keep feb observations
 keep if relacion_en == 1 //keep households
 
-
 // generate quantiles
 include "$pathaux/cuantiles.do"
 set seed 4859276
 sort ipcf, stable
-cuantiles ipc [fw=pondera], n($binsize) gen(quant)
+cuantiles ipc [fw=pondera_hh], n($binsize) gen(quant)
 tab quant
 
 /*(************************************************************************************************************************************************* 
@@ -134,7 +133,7 @@ merge 1:m interview__id interview__key quest using `baskets'
 keep if _merge == 3
 drop _merge
 
-keep interview__key interview__id quest ipcf miembros entidad quant bien cantidad_h Energia_kcal_m Proteina_m pondera
+keep interview__key interview__id quest ipcf miembros entidad quant bien cantidad_h Energia_kcal_m Proteina_m pondera_hh
 
 
 // identify very large outliars (testing, now we replace outliars with the mean)
@@ -153,7 +152,7 @@ gen cal_int = (((cantidad_h*cal)/100))
 gen prot_int = (((cantidad_h*prot)/100))
 
 
-keep bien cantidad_h cal_int prot_int interview__key interview__id quest ipcf miembros quant entidad cal prot pondera
+keep bien cantidad_h cal_int prot_int interview__key interview__id quest ipcf miembros quant entidad cal prot pondera_hh
 
 tempfile basketnoout
 save `basketnoout'
@@ -163,7 +162,7 @@ bys interview__key interview__id quest ipcf miembros quant: egen cal_intake = to
 
 bys interview__key interview__id quest ipcf miembros quant: egen prot_intake = total(prot_int)
 
-keep interview__key interview__id quest ipcf miembros quant cal_intake prot_intake pondera
+keep interview__key interview__id quest ipcf miembros quant cal_intake prot_intake pondera_hh
 duplicates drop
 
 rename (cal_intake prot_intake) (cal_intake_hh prot_intake_hh)
@@ -188,7 +187,7 @@ gen median_cal =.
 gen av_cal =.
 levelsof quant, local(q_levels)
 quietly foreach i in `q_levels' { 
-   summarize cal_intake_pc [fw=pondera] if quant == `i', detail 
+   summarize cal_intake_pc [fw=pondera_hh] if quant == `i', detail 
    replace median_cal = r(p50) if quant == `i'
    replace av_cal = r(mean) if quant == `i'
 } 
@@ -255,7 +254,7 @@ keep if quant<= `ref'+19
 * 1: generates basket
 *************************************************************************************************************************************************)*/
 
-keep interview__id interview__key quest miembros pondera ipcf quant 
+keep interview__id interview__key quest miembros pondera_hh ipcf quant 
 
 // recover product dimension
 merge 1:m interview__id interview__key quest using `basketnoout'
@@ -284,13 +283,13 @@ bysort newid (quant): replace quant=quant[1]
 bysort newid (miembros): replace miembros=miembros[1]
 bysort newid (ipcf): replace ipcf=ipcf[1]
 bysort newid (entidad): replace entidad=entidad[1]
-bysort newid (pondera): replace pondera=pondera[1]
+bysort newid (pondera_hh): replace pondera_hh=pondera_hh[1]
 
 
 // creates food "popularity" across hh using weights
-bysort bien: egen popularity = total(pondera) if cantidad_h>0 & cantidad_h!=. 
+bysort bien: egen popularity = total(pondera_hh) if cantidad_h>0 & cantidad_h!=. 
 bysort interview__id interview__key quest (bien): gen first = 1 if _n==1
-egen totalhh =  total(pondera) if first ==1
+egen totalhh =  total(pondera_hh) if first ==1
 bysort newid (totalhh): replace totalhh=totalhh[1]
 
 
@@ -307,11 +306,11 @@ replace popularity = 0 if popularity==.
 
 bys interview__id interview__key quest: egen cal_int_hh = total(cal_int) // calories per hh not weighted
 
-gen tot_intake_temp = cal_int_hh*pondera //calories of weighted hh
+gen tot_intake_temp = cal_int_hh*pondera_hh //calories of weighted hh
 egen tot_intake = total(tot_intake_temp) if first ==1 // total calories of weighted hh
 bysort newid (tot_intake): replace tot_intake=tot_intake[1] //complete observations
 
-gen food_intake_temp = cal_int*pondera //calories of food weighted
+gen food_intake_temp = cal_int*pondera_hh //calories of food weighted
 bysort bien: egen food_cal_intake = total(food_intake_temp)
 gen share_intake = food_cal_intake/tot_intake
 
@@ -332,13 +331,13 @@ drop if bien == 79
 gen cal_req = $calreq
 
 // generate population
-gen pop = miembros*pondera if first==1
+gen pop = pondera_hh if first==1
 egen population = total(pop)
 
 drop pop
 
 // gen total intake after filters
-gen tot_intake_after_filters_temp = cal_int_hh*pondera
+gen tot_intake_after_filters_temp = cal_int_hh*pondera_hh
 egen intake_af = total(tot_intake_after_filters_temp) if first ==1
 egen tot_intake_af = max(intake_af)
 replace intake_af = tot_intake_af
@@ -353,9 +352,9 @@ gen cantidad_ajustada = cantidad_h*ajuste_calorico
 //preserve 
 drop if cal ==.
 
-gen cantidad_h_temp = cantidad_h*pondera 
+gen cantidad_h_temp = cantidad_h*pondera_hh 
 by bien: egen cantidad_h_tot = total(cantidad_h_temp) 
-gen cantidad_ajustada_temp = cantidad_ajustada*pondera 
+gen cantidad_ajustada_temp = cantidad_ajustada*pondera_hh 
 by bien: egen cantidad_ajustada_tot = total(cantidad_ajustada_temp) 
 
 //collapse (sum) cantidad_h cantidad_ajustada (max) population (max) cal, by(bien) 

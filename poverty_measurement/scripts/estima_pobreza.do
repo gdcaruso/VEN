@@ -132,9 +132,9 @@ gen extremo_new = ipcf<le_new
 gen pobre_new = ipcf<lp_new
 gen extremo_ofi = ipcf<le_ofi
 gen pobre_ofi = ipcf<lp_ofi
-gen pobre_19 = ipcf<lp_19
-gen pobre_32 = ipcf<lp_32
-gen pobre_55 = ipcf<lp_55
+gen pobre_19 = ipcf<lp_19_ready
+gen pobre_32 = ipcf<lp_32_ready
+gen pobre_55 = ipcf<lp_55_ready
 
 
 // just to tabulate, 0 is extreme poverty
@@ -193,12 +193,19 @@ rename lp_new lp_moderada
 gen pobre = ipcf<lp_moderada
 gen pobre_extremo = ipcf<lp_extrema
 
-//cleaning
+gen lp_extrema_ppp = lp_extrema / ppp11 / ipc*ipc11 / 30.42
+gen lp_moderada_ppp = lp_moderada_ppp / ppp11 / ipc*ipc11 / 30.42
 
-drop lp_ofi le_ofi 
-drop extremo_new extremo_ofi
-drop pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi
-drop obs max_obs lp_19_ready lp_32_ready lp_55_ready
+gen lp_extrema_ppp = le_ofi / ppp11 / ipc*ipc11 / 30.42
+gen lp_ofi_ppp = lp_ofi / ppp11 / ipc*ipc11 / 30.42
+
+
+//cleaning
+stop
+cap drop lp_ofi le_ofi 
+cap drop extremo_new extremo_ofi
+cap drop pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi
+cap drop obs max_obs lp_19_ready lp_32_ready lp_55_ready *_ppp
 
 replace pobre =. if hogarsec ==1
 replace pobre_extremo =. if hogarsec ==1

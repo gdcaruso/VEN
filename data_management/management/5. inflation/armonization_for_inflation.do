@@ -220,7 +220,7 @@ clonevar npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
 /*(************************************************************************************************************************************************* 
 *-----------------------------------------	1.1: Identification Variables / Variables de identificación --------------------------------------------
 *************************************************************************************************************************************************)*/
-global id_ENCOVI pais ano encuesta id com pondera psu
+global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 
 * Country identifier: country
 	gen pais = "VEN"

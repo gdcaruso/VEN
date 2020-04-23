@@ -115,7 +115,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computadora internet televisor radio calentador aire tv_cable microondas telefono_fijo
 
 *----VII. EDUCATION / EDUCACIÓN 
-		global educ_ENCOVI contesta_ind_e quien_contesta_e asistio_educ razon_noasis asiste nivel_educ_act g_educ_act regimen_act a_educ_act s_educ_act t_educ_act edu_pub ///
+		global educ_ENCOVI contesta_ind_e quien_contesta_e asistio_educ razon_noasis razon_noasis_o asiste nivel_educ_act g_educ_act regimen_act a_educ_act s_educ_act t_educ_act edu_pub ///
 				fallas_agua fallas_elect huelga_docente falta_transporte falta_comida_hogar falta_comida_centro inasis_docente protesta nunca_deja_asistir ///
 				pae pae_frecuencia pae_desayuno pae_almuerzo pae_meriman pae_meritard pae_otra ///
 				cuota_insc compra_utiles compra_uniforme costo_men costo_transp otros_gastos ///
@@ -148,15 +148,15 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 
 *----XVI: BANKING / BANCARIZACIÓN
 		global bank_ENCOVI contesta_ind_b quien_contesta_b cuenta_corr cuenta_aho tcredito tdebito no_banco ///
-		efectivo_f tcredito_f tdebito_f bancao_f pagomovil_f razon_nobanco
+			efectivo_f tcredito_f tdebito_f bancao_f pagomovil_f razon_nobanco
 
 *----9: Otros ingresos y pensiones / Other income and pensions	
 		global otherinc_ENCOVI inla_pens_soi	inla_pens_vss	inla_jubi_emp	inla_pens_dsa	inla_beca_pub	inla_beca_pri	inla_ayuda_pu	inla_ayuda_pr	inla_ayuda_fa	inla_asig_men	inla_otros	inla_petro ///
-		inla_pens_soi_cant	inla_pens_vss_cant	inla_jubi_emp_cant	inla_pens_dsa_cant	inla_beca_pub_cant	inla_beca_pri_cant	inla_ayuda_pu_cant	inla_ayuda_pr_cant	inla_ayuda_fa_cant	inla_asig_men_cant	inla_otros_cant	inla_petro_cant ///
-		inla_pens_soi_mone	inla_pens_vss_mone	inla_jubi_emp_mone	inla_pens_dsa_mone	inla_beca_pub_mone	inla_beca_pri_mone	inla_ayuda_pu_mone	inla_ayuda_pr_mone	inla_ayuda_fa_mone	inla_asig_men_mone	inla_otros_mone ///
-		iext_sueldo	iext_ingnet	iext_indemn	iext_remesa	iext_penjub	iext_intdiv	iext_becaes	iext_extrao iext_alquil ///
-		iext_sueldo_cant	iext_ingnet_cant	iext_indemn_cant	iext_remesa_cant	iext_penjub_cant	iext_intdiv_cant	iext_becaes_cant	iext_extrao_cant    iext_alquil_cant ///
-		iext_sueldo_mone	iext_ingnet_mone	iext_indemn_mone	iext_remesa_mone	iext_penjub_mone	iext_intdiv_mone	iext_becaes_mone	iext_extrao_mone	iext_alquil_mone
+			inla_pens_soi_cant	inla_pens_vss_cant	inla_jubi_emp_cant	inla_pens_dsa_cant	inla_beca_pub_cant	inla_beca_pri_cant	inla_ayuda_pu_cant	inla_ayuda_pr_cant	inla_ayuda_fa_cant	inla_asig_men_cant	inla_otros_cant	inla_petro_cant ///
+			inla_pens_soi_mone	inla_pens_vss_mone	inla_jubi_emp_mone	inla_pens_dsa_mone	inla_beca_pub_mone	inla_beca_pri_mone	inla_ayuda_pu_mone	inla_ayuda_pr_mone	inla_ayuda_fa_mone	inla_asig_men_mone	inla_otros_mone ///
+			iext_sueldo	iext_ingnet	iext_indemn	iext_remesa	iext_penjub	iext_intdiv	iext_becaes	iext_extrao iext_alquil ///
+			iext_sueldo_cant	iext_ingnet_cant	iext_indemn_cant	iext_remesa_cant	iext_penjub_cant	iext_intdiv_cant	iext_becaes_cant	iext_extrao_cant    iext_alquil_cant ///
+			iext_sueldo_mone	iext_ingnet_mone	iext_indemn_mone	iext_remesa_mone	iext_penjub_mone	iext_intdiv_mone	iext_becaes_mone	iext_extrao_mone	iext_alquil_mone
 
 *----10: Emigración / Emigration
 		global emigra_ENCOVI informant_emig hogar_emig numero_emig /*nombre_emig_**/ edad_emig_* sexo_emig_* relemig_* anoemig_* mesemig_* leveledu_emig_* ///
@@ -214,8 +214,8 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global pobreza pobre lp_19usd lp_32usd lp_55usd lp_moderada lp_extrema pobre_extremo 
 		
 *---- Keep 
-order $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
-keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
+order $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $antropo_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
+keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $antropo_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
 
 *---- Drop de las que teniamos dudas
 cap drop informant_emig 

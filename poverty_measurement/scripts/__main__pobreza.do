@@ -93,22 +93,23 @@ set more off
 // global povmeasure "$dopath\poverty_measurement\scripts"
 // global input "$datapath\poverty_measurement\input"
 // global output "$datapath\poverty_measurement\output"
-//
+
 
 /*==============================================================================
 run dos to estimate poverty
 ==============================================================================*/
 
 //defines poblation of references and normative basket
-do "$povmeasure/genera_poblacion_y_canasta.do"
+do "$povmeasure\genera_poblacion_y_canasta.do"
 
 //calculate prices (implicit)
-run "$povmeasure/precios_implicitos.do"
+run "$povmeasure\precios_implicitos.do"
 
 // //generate cost of basket
-run "$povmeasure/genera_costo_canasta.do"
-// //estimates orshansky
-do "$povmeasure/estima_orshansky.do"
-// //estimates poverty headcount
+run "$povmeasure\genera_costo_canasta.do"
 
-do "$povmeasure/estima_pobreza.do"
+// //estimates orshansky
+do "$povmeasure\estima_orshansky.do"
+
+// //estimates poverty headcount
+do "$povmeasure\estima_pobreza.do"

@@ -20,7 +20,7 @@ Note:
 ********************************************************************************
 
 // Define rootpath according to user
-
+/*
 	    * User 1: Trini
 		global trini 0
 		
@@ -70,7 +70,7 @@ global povmeasure "$dopath\poverty_measurement\scripts"
 global input "$datapath\poverty_measurement\input"
 global output "$datapath\poverty_measurement\output"
 ********************************************************************************
-
+*/
 
 /*==============================================================================
 0: Program set up

@@ -124,7 +124,7 @@ gen lp_55_ready = lp_55 * ppp11 * ipc/ipc11
 
 
 // gen last national oficial lines corrected by inflation
-gen le_ofi = 1600/5.2/100000 * ipc/ipc11 // 1600 is 2011 cost of official basket
+gen le_ofi = 1741.29/5.2/100000 * ipc/ipc11 // 1741.29 is dec11 cost of official basket
 gen lp_ofi = le_ofi*2 //2 is the last official orshansky of venezuela pov. estimates
 
 // clasificates population using diff lines

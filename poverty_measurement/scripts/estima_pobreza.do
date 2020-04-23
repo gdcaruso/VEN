@@ -194,9 +194,9 @@ gen pobre = ipcf<lp_moderada
 gen pobre_extremo = ipcf<lp_extrema
 
 gen lp_extrema_ppp = lp_extrema / ppp11 / ipc*ipc11 / 30.42
-gen lp_moderada_ppp = lp_moderada_ppp / ppp11 / ipc*ipc11 / 30.42
+gen lp_moderada_ppp = lp_moderada / ppp11 / ipc*ipc11 / 30.42
 
-gen lp_extrema_ppp = le_ofi / ppp11 / ipc*ipc11 / 30.42
+gen le_ofi_ppp = le_ofi / ppp11 / ipc*ipc11 / 30.42
 gen lp_ofi_ppp = lp_ofi / ppp11 / ipc*ipc11 / 30.42
 
 

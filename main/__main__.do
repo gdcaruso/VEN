@@ -28,10 +28,10 @@ clear all
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -133,7 +133,7 @@ global input "$datapath\poverty_measurement\input"
 global output "$datapath\poverty_measurement\output"
 
 //run poverty estimation
-do "$povmeasure\__main__pobreza.do"
+run "$povmeasure\__main__pobreza.do"
 
 /*==============================================================================
 creating separate dataset for variables to merge with SEDLAC version
@@ -142,6 +142,7 @@ creating separate dataset for variables to merge with SEDLAC version
 use "$output\ENCOVI_2019_postpobreza.dta", replace
 
 	keep interview__key interview__id com ///
+	pobre pobre_extremo lp_moderada lp_extrema ///
 	iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ///
 	ijubi_nm icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns ///
 	rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp ///

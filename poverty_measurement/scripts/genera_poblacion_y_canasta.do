@@ -19,62 +19,63 @@ Note:
 =============================================================================*/
 ********************************************************************************
 
-// Define rootpath according to user
-/*
-	    * User 1: Trini
-		global trini 0
-		
-		* User 2: Julieta
-		global juli   0
-		
-		* User 3: Lautaro
-		global lauta  1
-		
-		* User 4: Malena
-		global male   0
-			
-		if $juli {
-				global dopath "C:\Users\wb563583\GitHub\VEN"
-				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-		}
-	    if $lauta {
-				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\DataEncovi\"
-		}
-		if $trini   {
-				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-		}
-		if $male   {
-				global dopath "C:\Users\wb550905\Github\VEN"
-				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-}		
-
-
-//set universal datapaths
-global merged "$datapath\data_management\output\merged"
-global cleaned "$datapath\data_management\output\cleaned"
-global forinflation "$datapath\data_management\output\for inflation"
-
-//set universal dopath
-global harmonization "$dopath\data_management\management\2. harmonization"
-global inflado "$dopath\data_management\management\5. inflation"
-
-//Exchange rate inputs and auxiliaries
-
-global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
-global pathaux "$harmonization\aux_do"
-
-
-// set path of data
-global povmeasure "$dopath\poverty_measurement\scripts"
-global input "$datapath\poverty_measurement\input"
-global output "$datapath\poverty_measurement\output"
+// // Define rootpath according to user
+//
+// 	    * User 1: Trini
+// 		global trini 0
+//		
+// 		* User 2: Julieta
+// 		global juli   0
+//		
+// 		* User 3: Lautaro
+// 		global lauta  1
+//		
+// 		* User 4: Malena
+// 		global male   0
+//			
+// 		if $juli {
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// 		}
+// 	    if $lauta {
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
+// 		}
+// 		if $trini   {
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 		}
+// 		if $male   {
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// }		
+//
+//
+// //set universal datapaths
+// global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global forinflation "$datapath\data_management\output\for inflation"
+//
+// //set universal dopath
+// global harmonization "$dopath\data_management\management\2. harmonization"
+// global inflado "$dopath\data_management\management\5. inflation"
+//
+// //Exchange rate inputs and auxiliaries
+//
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+// global pathaux "$harmonization\aux_do"
+//
+//
+// // set path of data
+// global povmeasure "$dopath\poverty_measurement\scripts"
+// global input "$datapath\poverty_measurement\input"
+// global output "$datapath\poverty_measurement\output"
 ********************************************************************************
-*/
+
 
 /*==============================================================================
 0: Program set up
 ==============================================================================*/
+
 version 14
 drop _all
 set more off
@@ -86,6 +87,7 @@ global calreq = 2000
 * 1: sorts hh
 *************************************************************************************************************************************************)*/
 
+
 // merges with income data
 
 use "$cleaned/ENCOVI_2019_pre pobreza.dta", replace
@@ -93,10 +95,11 @@ keep if interview_month==2 // keep feb observations
 keep if relacion_en == 1 //keep households
 cap drop if hogarsec == 1
 
+
 // generate quantiles
 include "$pathaux/cuantiles.do"
 set seed 4859276
-sort ipcf, stable
+sort ipcf interview__key, stable
 cuantiles ipcf [fw=pondera_hh], n($binsize) gen(quant)
 tab quant
 
@@ -197,26 +200,26 @@ restore
 
 
 
-// plot cal intake average, median and requirement
-preserve
-gen median_cal =.
-gen av_cal =.
-levelsof quant, local(q_levels)
-quietly foreach i in `q_levels' { 
-   summarize cal_intake_pc [fw=pondera_hh] if quant == `i', detail 
-   replace median_cal = r(p50) if quant == `i'
-   replace av_cal = r(mean) if quant == `i'
-} 
-
-
-keep quant median_cal av_cal ipcf
-gen cal_req = $calreq
-sort ipcf
-
-twoway line av_cal quant if quant<99 ///
-|| line median_cal quant if quant<99 ///
-|| line cal_req quant if quant<99
-restore
+// // plot cal intake average, median and requirement
+// preserve
+// gen median_cal =.
+// gen av_cal =.
+// levelsof quant, local(q_levels)
+// quietly foreach i in `q_levels' { 
+//    summarize cal_intake_pc [fw=pondera_hh] if quant == `i', detail 
+//    replace median_cal = r(p50) if quant == `i'
+//    replace av_cal = r(mean) if quant == `i'
+// } 
+//
+//
+// keep quant median_cal av_cal ipcf
+// gen cal_req = $calreq
+// sort ipcf
+//
+// twoway line av_cal quant if quant<99 ///
+// || line median_cal quant if quant<99 ///
+// || line cal_req quant if quant<99
+// restore
 
 
 // generate a moving window of 20 percentiles and search the first pcentile where the mean caloric intake pc mathces with the requirements
@@ -224,30 +227,32 @@ restore
 // to save results
 matrix R=J(81, 3, .)
 matrix colnames R = mobquant av_cal median_cal
-
 // loops over each group of consecutive 20 pctiles
+qui{
 forvalues i = 1(1)81{
 preserve
 
 keep if quant>=`i'
 keep if quant<=`i'+19
 
-egen av_cal = mean(cal_intake_pc)
-egen median_cal = median(cal_intake_pc)
+qui summarize cal_intake_pc [fw=pondera_hh], detail
+gen av_cal = r(mean) //creates weigted average
+gen median_cal = r(p50) //creates weigted mean
+
 
 matrix R[`i',1] = `i' 
 matrix R[`i',2] = av_cal[1]
 matrix R[`i',3] = median_cal[1]
 restore
 }
-
+}
 // saves which has the av_cal greater that requirements
 preserve
 clear
 svmat R,  names(col)
 gen cal_req = $calreq
 
-// plot where mobile quantiles match requirements
+plot where mobile quantiles match requirements
 twoway line av_cal mobquant if mobquant<81 ///
 || line median_cal mobquant if mobquant<81 ///
 || line cal_req mobquant if mobquant<81
@@ -256,8 +261,12 @@ twoway line av_cal mobquant if mobquant<81 ///
 // select where mobile quant matchs requirements
 keep if cal_req <= median_cal & mobquant!=1 // we exclude mobile quant=1 because there are 0 income hh that report sustancial consumption
 local ref = mobquant[1]
+
+
 display "`ref'"
 restore
+
+
 
 // population of reference
 // all pcetiles from the saved one to saved+window size)
@@ -267,10 +276,8 @@ keep if quant<= `ref'+19
 save "$output/pob_referencia.dta", replace
 
 /*(************************************************************************************************************************************************* 
-* 1: generates basket
+* 1: generates representative basket from many baskets
 *************************************************************************************************************************************************)*/
-
-
 
 keep interview__id interview__key quest miembros pondera_hh ipcf quant 
 
@@ -303,30 +310,30 @@ bysort newid (ipcf): replace ipcf=ipcf[1]
 bysort newid (entidad): replace entidad=entidad[1]
 bysort newid (pondera_hh): replace pondera_hh=pondera_hh[1]
 
+//generate caloric requirement
+gen cal_req = $calreq
 
-// creates food "popularity" across hh using weights
-bysort bien: egen popularity = total(pondera_hh) if cantidad_h>0 & cantidad_h!=. 
-bysort interview__id interview__key quest (bien): gen first = 1 if _n==1 //first is one per hh
+// generate population
+gsort interview__id interview__key quest -cantidad_h
+by interview__id interview__key quest: gen first = 1 if _n==1 //first is to pick one observation per hh where are positive quantities
 egen totalhh =  total(pondera_hh) if first ==1
-bysort newid (totalhh): replace totalhh=totalhh[1]
+bysort newid (totalhh): replace totalhh=totalhh[1] // to complete obs
 
-
-replace popularity = popularity/totalhh
+//first filter, popularity of food
+// creates food "popularity" across hh using weights
+bysort bien: egen hh_consumer = total(pondera_hh) if cantidad_h>0 & cantidad_h!=. 
+gen popularity = hh_consumer/totalhh
 sort bien popularity
-// this is just to complete observations
-bysort bien (popularity): replace popularity = popularity[1]
+bysort bien (popularity): replace popularity = popularity[1] // this is just to complete observations
 replace popularity = 0 if popularity==.
 
 
-// creates caloric share across hh
-
-
-
+// creates caloric intake share of each food in total consumption
 bys interview__id interview__key quest: egen cal_int_hh = total(cal_int) // calories per hh not weighted
-
-gen tot_intake_temp = cal_int_hh*pondera_hh //calories of weighted hh
+gen tot_intake_temp = cal_int_hh*pondera_hh if first ==1 //temporal
 egen tot_intake = total(tot_intake_temp) if first ==1 // total calories of weighted hh
-bysort newid (tot_intake): replace tot_intake=tot_intake[1] //complete observations
+drop tot_intake_temp
+bysort newid (tot_intake): replace tot_intake=tot_intake[1] //complete observations of total intake
 
 gen food_intake_temp = cal_int*pondera_hh //calories of food weighted
 bysort bien: egen food_cal_intake = total(food_intake_temp)
@@ -335,59 +342,49 @@ gen share_intake = food_cal_intake/tot_intake
 // filters of food
 keep if share_intake>0.01 | popularity>0.3
 
-
 // drop condimentos (no prices collected)
 drop if bien == 79
 
 
 /*(************************************************************************************************************************************************* 
-* 1: quantity adjustment
+* 1: quantity adjustment to match caloric requirements
 *************************************************************************************************************************************************)*/
 
 
-//generate caloric requirement
-gen cal_req = $calreq
+// output: canasta ajustada
 
-// generate population
-gen pop = pondera_hh if first==1
-egen population = total(pop)
+// new population after filters
+egen population = total(pondera_hh) if first == 1
+sort population // to complete obs
+replace population=population[1] // to complete obs
 
-drop pop
-
-// gen total intake after filters
-gen tot_intake_after_filters_temp = cal_int_hh*pondera_hh
-egen intake_af = total(tot_intake_after_filters_temp) if first ==1
-egen tot_intake_af = max(intake_af)
-replace intake_af = tot_intake_af
-
-//compare requirement to actual calories to adjust basket
-gen tot_intake_pc = tot_intake_af/population
-gen ajuste_calorico = cal_req/tot_intake_pc
-gen cantidad_ajustada = cantidad_h*ajuste_calorico
+// generate quatities per capita
+gen cantidad_h_temp = cantidad_h/miembros*pondera_hh 
+bys bien: egen cantidad_h_tot = total(cantidad_h_temp) 
 
 
-// output canasta ajustada
-//preserve 
-drop if cal ==.
+//drop duplicates
+keep bien cantidad_h_tot population cal cal_req
+drop if cal ==. //remove duplicates
+duplicates drop  //remove duplicates
 
-gen cantidad_h_temp = cantidad_h*pondera_hh 
-by bien: egen cantidad_h_tot = total(cantidad_h_temp) 
-gen cantidad_ajustada_temp = cantidad_ajustada*pondera_hh 
-by bien: egen cantidad_ajustada_tot = total(cantidad_ajustada_temp) 
+//generate quantities per capita without adj
+gen cantidad_h = cantidad_h_tot/population
 
-//collapse (sum) cantidad_h cantidad_ajustada (max) population (max) cal, by(bien) 
-
-keep bien cantidad_h_tot cantidad_ajustada_tot population cal
-duplicates drop
+//generate intake pre adjustement
+gen cal_intake_pre_adj = cantidad_h*cal/100
 
 
-rename cantidad_h_tot cantidad_h
-rename cantidad_ajustada_tot cantidad_ajustada
+// generate adjustement on quantities
+egen total_cal_pre_adj = total(cal_intake_pre_adj)
+gen ajuste_calorico = cal_req/total_cal_pre_adj
 
-replace cantidad_ajustada = cantidad_ajustada/population
-replace cantidad_h = cantidad_h/population
+gen cantidad_ajustada = cantidad_h * ajuste_calorico
 gen cal_intake = cantidad_ajustada*cal/100
+
 gsort -cal_intake
+
+drop cantidad_h_tot
 
 save "$output/canasta_diaria.dta", replace
 export excel using "$output/canasta_diaria.xlsx", firstrow(var) replace

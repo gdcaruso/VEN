@@ -883,7 +883,6 @@ sort orshansky, stable
 gen obs = _n
 // twoway line orshansky obs if ors_quant<100 
 
-xtile exp_quant  [fw=pondera_hh] = exp, nq(100)
 
 //  saves orshansky
 sum orshansky [fw=pondera_hh], detail

@@ -210,7 +210,7 @@ replace gasto_bol = gasto*`tc4mes12'*`deflactor12' if moneda == 4 & month == 12
 1: filters
 ==============================================================================*/
 // keep only goods of the basket
-keep if inlist(bien, 1, 4, 5, 6, 7, 10, 14, 17, 22, 26, 28, 31, 33, 34, 37, 39, 43, 45, 46, 51, 53, 54, 55, 62, 63, 68, 74, 78)
+keep if inlist(bien, 1, 4, 5, 6, 7, 10, 14, 17, 22, 26, 28, 31, 33, 34, 37, 39, 43, 45, 46, 50, 51, 53, 54, 55, 62, 63, 68, 74, 78)
 
 
 //drop 0s or . in quantities and expenditure

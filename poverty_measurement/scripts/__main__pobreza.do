@@ -100,7 +100,7 @@ run dos to estimate poverty
 ==============================================================================*/
 
 //defines poblation of references and normative basket
-do "$povmeasure\genera_poblacion_y_canasta.do"
+run "$povmeasure\genera_poblacion_y_canasta.do"
 
 //calculate prices (implicit)
 run "$povmeasure\precios_implicitos.do"
@@ -109,7 +109,7 @@ run "$povmeasure\precios_implicitos.do"
 run "$povmeasure\genera_costo_canasta.do"
 
 // //estimates orshansky
-do "$povmeasure\estima_orshansky.do"
+run "$povmeasure\estima_orshansky.do"
 
 // //estimates poverty headcount
 do "$povmeasure\estima_pobreza.do"

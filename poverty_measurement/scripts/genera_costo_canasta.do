@@ -91,7 +91,8 @@ use "$output/precios_implicitos.dta", replace
 
 
 // impor quantities
-merge m:1 bien using "$output/canasta_diaria2.dta"
+merge m:1 bien using "$output/canasta_diaria.dta"
+keep if _merge == 3
 drop _merge
 
 
@@ -100,6 +101,6 @@ drop _merge
 gen valor = pimp * cantidad_ajustada
 
 
-export excel "$output/costo_canasta_diaria2.xlsx", firstrow(variables) replace
-save "$output/costo_canasta_diaria2.dta", replace
+export excel "$output/costo_canasta_diaria.xlsx", firstrow(variables) replace
+save "$output/costo_canasta_diaria.dta", replace
 

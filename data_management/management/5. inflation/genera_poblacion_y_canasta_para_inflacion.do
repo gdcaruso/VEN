@@ -121,7 +121,7 @@ tempfile baskets
 preserve
 use "$merged\product_hh_homogeneous.dta", replace
 rename bien COD_GASTO
-merge m:1 COD_GASTO using "$input/Calories.dta"
+merge m:1 COD_GASTO using "$povinput/Calories.dta"
 
 keep if _merge==3
 drop _merge
@@ -141,8 +141,9 @@ keep interview__key interview__id quest ipcf miembros entidad quant bien cantida
 // identify very large outliars (testing, now we replace outliars with the mean)
 gen cantidad_pc = cantidad_h/miembros
 
-bysort bien: egen outliars = pctile(cantidad_pc), p(99) 
-bysort bien: egen cantidad_media_pc = mean(cantidad_pc) if cantidad_pc<outliars 
+sort bien, stable
+by bien: egen outliars = pctile(cantidad_pc), p(99) 
+by bien: egen cantidad_media_pc = mean(cantidad_pc) if cantidad_pc<outliars 
 replace cantidad_h = cantidad_media_pc*miembros if cantidad_pc>=outliars
 
 // changes from weekly consumption to diary
@@ -235,10 +236,10 @@ clear
 svmat R,  names(col)
 gen cal_req = $calreq
 
-// plot where mobile quantiles match requirements
-// twoway line av_cal mobquant if mobquant<81 ///
-// || line median_cal mobquant if mobquant<81 ///
-// || line cal_req mobquant if mobquant<81
+//plot where mobile quantiles match requirements
+twoway line av_cal mobquant if mobquant<81 ///
+|| line median_cal mobquant if mobquant<81 ///
+|| line cal_req mobquant if mobquant<81
 
 
 // select where mobile quant matchs requirements
@@ -265,7 +266,7 @@ keep interview__id interview__key quest miembros pondera_hh ipcf quant
 
 // recover product dimension
 merge 1:m interview__id interview__key quest using `basketnoout'
-sort quant _merge
+sort quant _merge, stable
 keep if _merge==3 
 drop _merge
 
@@ -305,7 +306,7 @@ bysort newid (totalhh): replace totalhh=totalhh[1] // to complete obs
 // creates food "popularity" across hh using weights
 bysort bien: egen hh_consumer = total(pondera_hh) if cantidad_h>0 & cantidad_h!=. 
 gen popularity = hh_consumer/totalhh
-sort bien popularity
+sort bien popularity, stable
 bysort bien (popularity): replace popularity = popularity[1] // this is just to complete observations
 replace popularity = 0 if popularity==.
 
@@ -333,12 +334,15 @@ drop if bien == 79
 *************************************************************************************************************************************************)*/
 
 
-// output: canasta ajustada
+// renews first to cach all hh
+drop first
+sort interview__id interview__key quest, stable
+by interview__id interview__key quest: gen first = 1 if _n==1
 
 // new population after filters
 egen population = total(pondera_hh) if first == 1
-sort population // to complete obs
-replace population=population[1] // to complete obs
+sort population, stable
+replace population=population[1] 
 
 // generate quatities per capita
 gen cantidad_h_temp = cantidad_h/miembros*pondera_hh 

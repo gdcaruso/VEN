@@ -125,7 +125,7 @@ cap drop _merge
 merge 1:1 interview__key interview__id quest using `comeafuera'
 keep if _merge==1
 drop _merge
-sort ipcf
+sort ipcf, stable
 
 
 /*(************************************************************************************************************************************************* 
@@ -252,7 +252,7 @@ clear
 svmat R,  names(col)
 gen cal_req = $calreq
 
-plot where mobile quantiles match requirements
+//plot where mobile quantiles match requirements
 twoway line av_cal mobquant if mobquant<81 ///
 || line median_cal mobquant if mobquant<81 ///
 || line cal_req mobquant if mobquant<81
@@ -283,7 +283,7 @@ keep interview__id interview__key quest miembros pondera_hh ipcf quant
 
 // recover product dimension
 merge 1:m interview__id interview__key quest using `basketnoout'
-sort quant _merge
+sort quant _merge, stable
 keep if _merge==3 
 drop _merge
 
@@ -323,7 +323,7 @@ bysort newid (totalhh): replace totalhh=totalhh[1] // to complete obs
 // creates food "popularity" across hh using weights
 bysort bien: egen hh_consumer = total(pondera_hh) if cantidad_h>0 & cantidad_h!=. 
 gen popularity = hh_consumer/totalhh
-sort bien popularity
+sort bien popularity, stable
 bysort bien (popularity): replace popularity = popularity[1] // this is just to complete observations
 replace popularity = 0 if popularity==.
 
@@ -353,9 +353,14 @@ drop if bien == 79
 
 // output: canasta ajustada
 
+// renews first to cach all hh
+drop first
+sort interview__id interview__key quest, stable
+by interview__id interview__key quest: gen first = 1 if _n==1
+
 // new population after filters
 egen population = total(pondera_hh) if first == 1
-sort population // to complete obs
+sort population, stable // to complete obs
 replace population=population[1] // to complete obs
 
 // generate quatities per capita

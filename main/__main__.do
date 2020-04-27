@@ -39,7 +39,7 @@ clear all
 		}
 	    if $lauta {
 				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+				global datapath "C:\Users\wb563365\DataEncovi\"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
@@ -84,7 +84,7 @@ global input "$datapath\data_management\input\latest"
 global output "$datapath\data_management\output\merged"
 
 * run merge
-//run "$merging\__main__merge.do"
+run "$merging\__main__merge.do"
 
 /*==============================================================================
 Inflation
@@ -97,7 +97,7 @@ global inflationout "$datapath\data_management\input"
 
 
 // calculates inflation
-//run "$inflado/__main__inflation.do"
+run "$inflado/__main__inflation.do"
 
 // set global inflation input
 global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
@@ -107,7 +107,7 @@ hh-individual database
 ==============================================================================*/
 
 //run ENCOVI harmonization
-//run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
+run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
 
 /*==============================================================================
 imputation
@@ -119,7 +119,7 @@ global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
 
 //run ENCOVI imputation
-//run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
+run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
 
 
 /*==============================================================================

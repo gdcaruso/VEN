@@ -142,7 +142,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	mi set flong
 	*set seed 66778899
 	mi register imputed log_jubpen
-	mi impute regress log_jubpen $lassovars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, add(30) rseed(66778899) force noi 
+	mi impute regress log_jubpen $lassovars if log_jubpen>0 & jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0, add(50) rseed(66778899) force noi 
 	mi unregister log_jubpen
 
 	//clonevar dila_m_zero = dlinc_zero 

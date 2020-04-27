@@ -328,6 +328,8 @@ keep if share_intake>0.01 | popularity>0.3
 // drop condimentos (no prices collected)
 drop if bien == 79
 
+// drop alcohol and tobacco
+keep if bien < 88
 
 /*(************************************************************************************************************************************************* 
 * 1: quantity adjustment to match caloric requirements

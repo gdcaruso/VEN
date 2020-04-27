@@ -29,22 +29,22 @@ Note:
 		
 			
 		if $juli {
-				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
 				global rootpath2 "
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
 		}
 		if $trini   {
-				global rootpath1 "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
 				global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
-				global rootpath1 "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
                 global rootpath2 "C:\Users\wb550905\Github\VEN" 
 		}
 
-global dataofficial "$rootpath1\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
+global dataofficial "$rootpath\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
 global data2014 "$dataofficial\ENCOVI 2014\Data"
 global data2015 "$dataofficial\ENCOVI 2015\Data"
 global data2016 "$dataofficial\ENCOVI 2016\Data"
@@ -96,7 +96,7 @@ rename _all, lower
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Identification Variables  --------------------------------------------------
 *************************************************************************************************************************************************)*/
-
+global id_ENCOVI pais ano encuesta id com pondera strata psu
 * Country identifier: country
 gen pais = "VEN"
 

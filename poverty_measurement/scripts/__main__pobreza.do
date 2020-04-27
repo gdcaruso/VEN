@@ -20,6 +20,10 @@ Note:
 
 // Define rootpath according to user
 
+clear all
+
+// Define rootpath according to user
+
 // 	    * User 1: Trini
 // 		global trini 0
 //		
@@ -27,23 +31,50 @@ Note:
 // 		global juli   0
 //		
 // 		* User 3: Lautaro
-// 		global lauta   1
+// 		global lauta  1
 //		
 // 		* User 4: Malena
 // 		global male   0
 //			
 // 		if $juli {
-// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
+// 				global dopath "C:\Users\wb563583\GitHub\VEN"
+// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 // 		}
 // 	    if $lauta {
-// 		global rootpath "C:\Users\wb563365\GitHub\VEN"
+// 				global dopath "C:\Users\wb563365\GitHub\VEN"
+// 				global datapath "C:\Users\wb563365\DataEncovi\"
 // 		}
 // 		if $trini   {
-// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 // 		}
 // 		if $male   {
-// 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
+// 				global dopath "C:\Users\wb550905\Github\VEN"
+// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+// }		
+// ********************************************************************************
+//
+//
+//
+// /*==============================================================================
+// Program set up
+// ==============================================================================*/
+// version 14
+// drop _all
+// set more off
+//
+// //set universal datapaths
+// global merged "$datapath\data_management\output\merged"
+// global cleaned "$datapath\data_management\output\cleaned"
+// global forinflation "$datapath\data_management\output\for inflation"
+//
+// //set universal dopaths
+// global harmonization "$dopath\data_management\management\2. harmonization"
+// global inflado "$dopath\data_management\management\5. inflation"
+// global pathaux "$harmonization\aux_do"
+//
+// //exchange rate input
+// global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
+
 
 ********************************************************************************
 
@@ -56,13 +87,12 @@ version 14
 drop _all
 set more off
 
-// set path for files
+// // set global inflation input
+// global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+// // set path of data
+// global povmeasure "$dopath\poverty_measurement\scripts"
 // global input "$datapath\poverty_measurement\input"
-// global merged "$datapath\data_management\output\merged"
-// global cleaned "$datapath\data_management\output\cleaned"
 // global output "$datapath\poverty_measurement\output"
-// global scripts "$datapath\poverty_measurement\scripts"
-// global encovifilename "ENCOVI_2019_PRECIOS IMPLICITOS_lag_ingresos_IMPUTADA.dta"
 
 
 /*==============================================================================
@@ -70,13 +100,16 @@ run dos to estimate poverty
 ==============================================================================*/
 
 //defines poblation of references and normative basket
-run "$povmeasure/genera_poblacion_y_canasta.do"
+run "$povmeasure\genera_poblacion_y_canasta.do"
+
 //calculate prices (implicit)
-run "$povmeasure/precios_implicitos.do"
+run "$povmeasure\precios_implicitos.do"
 
 // //generate cost of basket
-run "$povmeasure/genera_costo_canasta.do"
+run "$povmeasure\genera_costo_canasta.do"
+
 // //estimates orshansky
-do "$povmeasure/estima_orshansky.do"
+run "$povmeasure\estima_orshansky.do"
+
 // //estimates poverty headcount
-do "$povmeasure/estima_pobreza.do"
+do "$povmeasure\estima_pobreza.do"

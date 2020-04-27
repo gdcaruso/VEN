@@ -768,7 +768,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		label val asistio_educ asistio_educ
 
 *** Reasons for never attending
-/* RAZONES_NO_ASIS (s7q2): Cual fue la principal razon por la que nunca asistio?
+/* RAZONES_NOASIS (s7q2): Cual fue la principal razon por la que nunca asistio?
 		1 = Muy joven
 		2 = Escuela distante
 		3 = Escuela cerrada
@@ -803,6 +803,8 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		16 "Other. Mention it"
 		label val razon_noasis razon_noasis
 
+		label var razon_noasis_o "Other reasons for never attending (specify)"
+		
 *** During the period 2019-2020 did you attend any educational center? //for age +3
 		*-- Label variable
 		label var asiste "During the period 2019-2020 did you attend any educational center? (for age +3)"
@@ -1632,7 +1634,44 @@ label var  	mone_aporta_pension		"Currency"
 *---------------------------------- 9: Otros ingresos y pensiones / Other income and pensions ----------------------------------------------------
 ***********************************************************************************************************************************************)*/	
 
-*COMPLETE
+label var inla_pens_soi "Received last month (1) Survivor's pension, orphanhood, disability"
+label var inla_pens_vss "Received last month (2) Old-age pension by social security"
+label var inla_jubi_emp "Received last month (3) Work retirement"
+label var inla_pens_dsa "Received last month (4) Pension for divorce, separation, food"
+label var inla_beca_pub "Received last month (5) Public scholarship or school aid"
+label var inla_beca_pri "Received last month (6) Private scholarship or school aid"
+label var inla_ayuda_pu "Received last month (7) Help from public institutions"
+label var inla_ayuda_pr "Received last month (8) Help from private institutions"
+label var inla_ayuda_fa "Received last month (9) Help from family or contributions from other households"
+label var inla_asig_men "Received last month (10) Family allowance for dependent children"
+label var inla_otros "Received last month (11) Other"
+label var inla_petro "Received last month Petro"
+
+label var  iext_sueldo "Received in the last year income from… 1. wages or salaries"
+label var  iext_ingnet "Received in the last year income from… 2. Net income of independent workers"
+label var  iext_indemn "Received in the last year income from… 3. Compensation for illness or accident"
+label var  iext_remesa "Received in the last year income from… 4. Remittances or periodic aid from other households abroad"
+label var  iext_penjub "Received in the last year income from… 5. Pension and retirement"
+label var  iext_intdiv "Received in the last year income from… 6. Interest and dividends"
+label var  iext_becaes "Received in the last year income from… 7. Scholarships and / or school aid"
+label var  iext_extrao "Received in the last year income from… 8. Extraordinary transfers (compensation for insurance, inheritance, help from other households)"
+label var  iext_alquil "Received in the last year income from… 9. Rentals (vehicles, land or land, residential property or not)? "
+
+	*s9q28
+	foreach i in pens_soi pens_vss jubi_emp pens_dsa beca_pub beca_pri ayuda_pu ayuda_pr ayuda_fa asig_men otros {
+		label var  inla_`i'_cant	"s9q28a. Amount" 
+		label var  	inla_`i'_mone	"s9q28b. Currency" 
+		label def	inla_`i'_mone	1 "Bolivares" 2 "USD" 3 "Euros" 4 "Colombian pesos"
+		label values inla_`i'_mone inla_`i'_mone
+	}
+	
+	*s9q29
+	foreach i in sueldo ingnet indemn remesa penjub intdiv becaes extrao alquil {
+		label var  iext_`i'_cant	"s9q29a. Amount" 
+		label var  	iext_`i'_mone	"s9q29b. Currency" 
+		label def	iext_`i'_mone	1 "Bolivares" 2 "USD" 3 "Euros" 4 "Colombian pesos"
+		label values iext_`i'_mone iext_`i'_mone
+	}
 
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- 10: Emigration ----------------------------------------------------------
@@ -2124,92 +2163,100 @@ label var  	mone_aporta_pension		"Currency"
 *--------- Events which affected the household
  /* Events(s15q1): 1. Cuáles de los siguientes eventos han afectado a
 su hogar desde el año 2017 ?
+		1.Muerte o discapacidad de un miembro adulto del hogar que trabajaba
+		2.Muerte de alguien que enviaba remesas al hogar
+		3.Enfermedad de la persona con el ingreso más importante del hogar
+		4.Pérdida de un contacto importante
+		5.Perdida de trabajo de la persona con el ingreso más importante del hogar
+		6.Salida del miembro del hogar que generaba ingresos debido a separación/divorcio
+		7.Salida del miembro de la familia que generaba ingresos debido al matrimonio
+		8.Salida de un miembro del hogar que generaba ingresos por emigración
+		9.Fracaso empresarial no agrícola/cierre de negocio o emprendimiento
+		10.Robo de cultivos, dinero en efectivo, ganado u otros bienes
+		11.Pérdida de cosecha por incendio/sequía/inundaciones
+		12.Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
+		13.Vivienda dañada / demolida
+		14.Pérdida de propiedad por incendio o inundación
+		15.Pérdida de tierras
+		16.Muerte de ganado por enfermedad
+		17:Incremento en el precio de los insumos
+		18:Caída en el precio de los productos
+		19:Incremento en el precio de los principales alimentos consumidos
+		20:Secuestro/robo/asalto
+		21: otro, especifique
+		
          0 = No
          1 = Si
  */
 
+ 	*-- Label variable
+	label var evento_1 "Since 2017, household faced: dead or disability of an adult memeber which worked"
+	label var evento_2 "Since 2017, household faced: dead of a person which used to send remittances"
+	label var evento_3 "Since 2017, household faced: illness of the person with the most important household income"
+	label var evento_4 "Since 2017, household faced: loss of important contact"
+	label var evento_5 "Since 2017, household faced: the member with the most important household income lost his/her job"
+	label var evento_6 "Since 2017, household faced: Exit of family member which earned income due to divorce/separation"
+	label var evento_7 "Since 2017, household faced: Exit of family member which earned income due to marriage"
+	label var evento_8 "Since 2017, household faced: Emigration of a member of the household that earned income"
+	label var evento_9 "Since 2017, household faced: Non-agricultural business failure/closing of business or venture"
+	label var evento_10 "Since 2017, household faced: theft of crops, cash, livestock or other assets"
+	label var evento_11 "Since 2017, household faced: crop loss due to fire/drought/floods"
+	label var evento_12 "Since 2017, household faced: pest invasion that caused crop failure or loss of storage"
+	label var evento_13 "Since 2017, household faced: damaged/demolished home"
+	label var evento_14 "Since 2017, household faced: loss of property due to fire or flood"
+	label var evento_15 "Since 2017, household faced: loss of land"
+	label var evento_16 "Since 2017, household faced: dead of livestock due to disease"
+	label var evento_17 "Since 2017, household faced: higher cost of supplies"
+	label var evento_18 "Since 2017, household faced: lower prices of products"
+	label var evento_19 "Since 2017, household faced: higher prices of the main sources of food"
+	label var evento_20 "Since 2017, household faced: kidnapping/robbery/assault"
+	label var evento_21 "Since 2017, household faced: other"
+	
 	forval i = 1/21{
 	*-- Label values 
-	label def evento_`i'_eng 0 "No" 1 "Yes"
+	cap label def evento_`i'_eng 0 "No" 1 "Yes"
 	label value evento_`i' evento_`i'_eng
 	}
-	
-*-- Label variable
-	*-- Label variable
-	label var evento_1 "Since 2017, the household faced: dead or disability of an adult memeber which worked"
-	label var evento_2 "Since 2017, the household faced: dead of a person which used to send remittances"
-	label var evento_3 "Since 2017, the household faced: illness of the person with the most important household income"
-	label var evento_4 "Since 2017, the household faced: loss of important contact"
-	label var evento_5 "Since 2017, the household faced: the member with the most important household income lost his/her job"
-	label var evento_6 "Since 2017, the household faced: Exit of family member which earned income due to divorce/separation"
-	label var evento_7 "Since 2017, the household faced: Exit of family member which earned income due to marriage"
-	label var evento_8 "Since 2017, the household faced: Emigration of a member of the household that earned income"
-	label var evento_9 "Since 2017, the household faced: Non-agricultural business failure/closing of business or venture"
-	label var evento_10 "Since 2017, the household faced: theft of crops, cash, livestock or other assets"
-	label var evento_11 "Since 2017, the household faced: crop loss due to fire/drought/floods"
-	label var evento_12 "Since 2017, the household faced: pest invasion that caused crop failure or loss of storage"
-	label var evento_13 "Since 2017, the household faced: damaged/demolished home"
-	label var evento_14 "Since 2017, the household faced: loss of property due to fire or flood"
-	label var evento_15 "Since 2017, the household faced: loss of land"
-	label var evento_16 "Since 2017, the household faced: dead of livestock due to disease"
-	label var evento_17 "Since 2017, the household faced: higher cost of supplies"
-	label var evento_18 "Since 2017, the household faced: lower prices of products"
-	label var evento_19 "Since 2017, the household faced: higher prices of the main sources of food"
-	label var evento_20 "Since 2017, the household faced: kidnapping/robbery/assault"
-	label var evento_21 "Since 2017, the household faced: other"
-	
+
 	*-- Label variable
 	label var evento_ot "Mention other shocks which affected your household"
 	
  *--------- Most important events
  /* s15q2: 2. De la lista de eventos acontecidos en su hogar desde el año 2017, 
  señale cuáles han sido los 3 más significativos?
-Categories: 
-			1:Muerte o discapacidad de un miembro adulto del hogar que trabajaba
-			2:Muerte de alguien que enviaba remesas al hogar 
-			3:Enfermedad de la persona con el ingreso más importante del hogar
-			4:Pérdida de un contacto importante, 
-			5:Perdida de trabajo de la persona con el ingreso más importante del hogar
-			6:Salida del miembro del hogar que generaba ingresos debido a separación/divorcio
-			7:Salida del miembro de la familia que generaba ingresos debido al matrimonio
-			8:Salida de un miembro del hogar que generaba ingresos por emigración
-			9:Fracaso empresarial no agrícola/cierre de negocio o emprendimiento
-			10:Robo de cultivos, dinero en efectivo, ganado u otros bienes
-			11:Pérdida de cosecha por incendio/sequía/inundaciones
-			12:Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
-			13:Vivienda dañada / demolida
-			14:Pérdida de propiedad por incendio o inundación
-			15:Pérdida de tierras, 16:Muerte de ganado por enfermedad
-			17:Incremento en el precio de los insumos
-			18:Caída en el precio de los productos
-			19:Incremento en el precio de los principales alimentos consumidos
-			20:Secuestro/robo/asalto
-			21:Otro
-        
+1= most important, 2=2nd most, 3=third most, 0=not important 
  */
-	
+
 	*-- Label variable
-	label var imp_evento_1 "Importance: dead or disability of an adult memeber which worked"
-	label var imp_evento_2 "Importance: dead of a person which used to send remittances"
-	label var imp_evento_3 "Importance: illness of the person with the most important household income"
-	label var imp_evento_4 "Importance: loss of important contact"
-	label var imp_evento_5 "Importance: the member with the most important household income lost his/her job"
-	label var imp_evento_6 "Importance: exit of family member which earned income due to divorce/separation"
-	label var imp_evento_7 "Importance: exit of family member which earned income due to marriage"
-	label var imp_evento_8 "Importance: emigration of a member of the household that earned income"
-	label var imp_evento_9 "Importance: non-agricultural business failure/closing of business or venture"
-	label var imp_evento_10 "Importance: theft of crops, cash, livestock or other assets"
-	label var imp_evento_11 "Importance: crop loss due to fire/drought/floods"
-	label var imp_evento_12 "Importance: pest invasion that caused crop failure or loss of storage"
-	label var imp_evento_13 "Importance: damaged/demolished home"
-	label var imp_evento_14 "Importance: loss of property due to fire or flood"
-	label var imp_evento_15 "Importance: loss of land"
-	label var imp_evento_16 "Importance: dead of livestock due to disease"
-	label var imp_evento_17 "Importance: higher cost of supplies"
-	label var imp_evento_18 "Importance: lower prices of products"
-	label var imp_evento_19 "Importance: higher prices of the main sources of food"
-	label var imp_evento_20 "Importance: kidnapping/robbery/assault"
-	label var imp_evento_21 "Importance: other"
+	label var imp_evento_1 "Top 3 events: 1. Death or disability of a working adult household member"
+	label var imp_evento_2 "Top 3 events: 2. Death of someone who sends remittances home"
+	label var imp_evento_3 "Top 3 events: 3. Illness of the person with the highest household income"
+	label var imp_evento_4 "Top 3 events: 4. Loss of important contact"
+	label var imp_evento_5 "Top 3 events: 5. Loss of work"
+	label var imp_evento_6 "Top 3 events: 6. Departure of family member generating income due to separation or divorce"
+	label var imp_evento_7 "Top 3 events: 7. Exit of family member generating income due to marriage"
+	label var imp_evento_8 "Top 3 events: 8. Non-agricultural business failure"
+	label var imp_evento_9 "Top 3 events: 9. Theft of crops, cash, livestock or other property"
+	label var imp_evento_10 "Top 3 events: 10. Crop destruction by fire"
+	label var imp_evento_11 "Top 3 events: 11. Damaged / demolished home"
+	label var imp_evento_12 "Top 3 events: 12. Few rains that caused the failure of the harvest"
+	label var imp_evento_13 "Top 3 events: 13. Floods that caused the failure of the harvest"
+	label var imp_evento_14 "Top 3 events: 14. Invasion of pests that caused crop failure or loss of storage"
+	label var imp_evento_15 "Top 3 events: 15. Loss of property due to fire or flood"
+	label var imp_evento_16 "Top 3 events: 16. Loss of land"
+	label var imp_evento_17 "Top 3 events: 17: Death of cattle due to disease,"
+	label var imp_evento_18 "Top 3 events: 18: Increase in the price of inputs,"
+	label var imp_evento_19 "Top 3 events: 19: Fall in the price of products,"
+	label var imp_evento_20 "Top 3 events: 20: Increase in the price of the main foods consumed,"
+	label var imp_evento_21 "Top 3 events: 21: Kidnapping / robbery / assault,"
+	label var imp_evento_22 "Top 3 events: 22: Other specify"
+
+	cap label define imp_evento_eng 0 "Not between top 3" 1 "Most significant" ///
+	2 "2º most significant" 3 "3º most significant"
+	
+	forval i = 1/22 {
+	label value imp_evento_`i' imp_evento_eng
+}
 
  *--------- How many times have the shock occurred since 2017
  /* (s15q2a)2a. Cuántas veces ocurrió %rostertitle% desde 2017?
@@ -2217,14 +2264,13 @@ Categories:
 
 	forval i = 1/21 {
 		*-- Label variable
-		label var veces_evento_`i' "How many times have the shock occurred since 2017"
+		label var veces_evento_`i' "How many times has the shock occurred since 2017"
 		}
 		
 	
  /*
  *--------- Year of the event
- (s15q2b) 2b. En qué año ocurrió ?
-        
+ (s15q2b) 2b. En qué año ocurrió ?  
  */ 
 
 	forval i = 1/21 {
@@ -2233,7 +2279,7 @@ Categories:
 	}
 	
 
- *--------- How the houselhold coped with the shock
+ *--------- How did the houselhold cope with the shock
  /* (s15q2c): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
  
 local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
@@ -2241,7 +2287,7 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 		forval k = 1/21 {
 	label var reaccion_evento_`i'_`k' "Response to event"
 	*-- Label values
-	label def reaccion_evento_`i'_`k'_eng 0 "Non code" 1 "Selling livestock" 2 "Selling land" 3 "Selling property" ///
+	label def reaccion_evento_`i'_`k'_eng 1 "Selling livestock" 2 "Selling land" 3 "Selling property" ///
 	4 "Sending the children to live with friends" 5 "Stopped sending children to school" ///
 	6 "Working in other income generating activities" ///
 	8 "Received assiatnce from friends and relatives" 9 "Loans from friends and family" ///
@@ -2257,35 +2303,518 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 		}
 	}
 	
+	
+	label var reaccion_evento_1_1 "2c. Your home sold livestock due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_2_1 "2c. Your home sold land due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_3_1 "2c. Your home sold property due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_4_1 "2c. Your home sent children to live with friends due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_5_1 "2c. Your home stopped sending children to school due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_6_1 "2c. Your home worked in other income generating activities due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_8_1 "2c. Your home received assistance from friends/relatives due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_9_1 "2c. Your home received loans from friends/relatives due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_10_1 "2c. Your home took loans from financial institutions due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_12_1 "2c. Your home had members who emigrated for work due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_13_1 "2c. Your home did credit purchases due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_14_1 "2c. Your home delayed payment obligations due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_15_1 "2c. Your home sold harvest in advance due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_16_1 "2c. Your home reduced the consumption of food due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_17_1 "2c. Your home reduced the consumption of non-food due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_18_1 "2c. Your home used savings due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_19_1 "2c. Your home received assistance from NGO due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_20_1 "2c. Your home took payments in advance from employer due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_21_1 "2c. Your home received assistance from the government due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_22_1 "2c. Your home was covered by an insurance due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_23_1 "2c. Your home did nothing due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_24_1 "2c. Your home did other things due to the recent shock  1. Death or disability of an adult household member who works"
+	label var reaccion_evento_1_2 "2c. Your home sold livestock due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_2_2 "2c. Your home sold land due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_3_2 "2c. Your home sold property due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_4_2 "2c. Your home sent children to live with friends due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_5_2 "2c. Your home stopped sending children to school due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_6_2 "2c. Your home worked in other income generating activities due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_8_2 "2c. Your home received assistance from friends/relatives due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_9_2 "2c. Your home received loans from friends/relatives due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_10_2 "2c. Your home took loans from financial institutions due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_12_2 "2c. Your home had members who emigrated for work due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_13_2 "2c. Your home did credit purchases due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_14_2 "2c. Your home delayed payment obligations due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_15_2 "2c. Your home sold harvest in advance due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_16_2 "2c. Your home reduced the consumption of food due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_17_2 "2c. Your home reduced the consumption of non-food due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_18_2 "2c. Your home used savings due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_19_2 "2c. Your home received assistance from NGO due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_20_2 "2c. Your home took payments in advance from employer due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_21_2 "2c. Your home received assistance from the government due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_22_2 "2c. Your home was covered by an insurance due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_23_2 "2c. Your home did nothing due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_24_2 "2c. Your home did other things due to the recent shock  2. Death of someone who sends remittances home"
+	label var reaccion_evento_1_3 "2c. Your home sold livestock due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_2_3 "2c. Your home sold land due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_3_3 "2c. Your home sold property due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_4_3 "2c. Your home sent children to live with friends due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_5_3 "2c. Your home stopped sending children to school due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_6_3 "2c. Your home worked in other income generating activities due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_8_3 "2c. Your home received assistance from friends/relatives due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_9_3 "2c. Your home received loans from friends/relatives due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_10_3 "2c. Your home took loans from financial institutions due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_12_3 "2c. Your home had members who emigrated for work due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_13_3 "2c. Your home did credit purchases due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_14_3 "2c. Your home delayed payment obligations due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_15_3 "2c. Your home sold harvest in advance due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_16_3 "2c. Your home reduced the consumption of food due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_17_3 "2c. Your home reduced the consumption of non-food due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_18_3 "2c. Your home used savings due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_19_3 "2c. Your home received assistance from NGO due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_20_3 "2c. Your home took payments in advance from employer due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_21_3 "2c. Your home received assistance from the government due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_22_3 "2c. Your home was covered by an insurance due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_23_3 "2c. Your home did nothing due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_24_3 "2c. Your home did other things due to the recent shock  3. Illness of the person with the highest income in the household"
+	label var reaccion_evento_1_4 "2c. Your home sold livestock due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_2_4 "2c. Your home sold land due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_3_4 "2c. Your home sold property due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_4_4 "2c. Your home sent children to live with friends due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_5_4 "2c. Your home stopped sending children to school due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_6_4 "2c. Your home worked in other income generating activities due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_8_4 "2c. Your home received assistance from friends/relatives due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_9_4 "2c. Your home received loans from friends/relatives due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_10_4 "2c. Your home took loans from financial institutions due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_12_4 "2c. Your home had members who emigrated for work due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_13_4 "2c. Your home did credit purchases due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_14_4 "2c. Your home delayed payment obligations due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_15_4 "2c. Your home sold harvest in advance due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_16_4 "2c. Your home reduced the consumption of food due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_17_4 "2c. Your home reduced the consumption of non-food due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_18_4 "2c. Your home used savings due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_19_4 "2c. Your home received assistance from NGO due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_20_4 "2c. Your home took payments in advance from employer due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_21_4 "2c. Your home received assistance from the government due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_22_4 "2c. Your home was covered by an insurance due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_23_4 "2c. Your home did nothing due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_24_4 "2c. Your home did other things due to the recent shock  4. Loss of major contact"
+	label var reaccion_evento_1_5 "2c. Your home sold livestock due to the recent shock  5. Job loss"
+	label var reaccion_evento_2_5 "2c. Your home sold land due to the recent shock  5. Job loss"
+	label var reaccion_evento_3_5 "2c. Your home sold property due to the recent shock  5. Job loss"
+	label var reaccion_evento_4_5 "2c. Your home sent children to live with friends due to the recent shock  5. Job loss"
+	label var reaccion_evento_5_5 "2c. Your home stopped sending children to school due to the recent shock  5. Job loss"
+	label var reaccion_evento_6_5 "2c. Your home worked in other income generating activities due to the recent shock  5. Job loss"
+	label var reaccion_evento_8_5 "2c. Your home received assistance from friends/relatives due to the recent shock  5. Job loss"
+	label var reaccion_evento_9_5 "2c. Your home received loans from friends/relatives due to the recent shock  5. Job loss"
+	label var reaccion_evento_10_5 "2c. Your home took loans from financial institutions due to the recent shock  5. Job loss"
+	label var reaccion_evento_12_5 "2c. Your home had members who emigrated for work due to the recent shock  5. Job loss"
+	label var reaccion_evento_13_5 "2c. Your home did credit purchases due to the recent shock  5. Job loss"
+	label var reaccion_evento_14_5 "2c. Your home delayed payment obligations due to the recent shock  5. Job loss"
+	label var reaccion_evento_15_5 "2c. Your home sold harvest in advance due to the recent shock  5. Job loss"
+	label var reaccion_evento_16_5 "2c. Your home reduced the consumption of food due to the recent shock  5. Job loss"
+	label var reaccion_evento_17_5 "2c. Your home reduced the consumption of non-food due to the recent shock  5. Job loss"
+	label var reaccion_evento_18_5 "2c. Your home used savings due to the recent shock  5. Job loss"
+	label var reaccion_evento_19_5 "2c. Your home received assistance from NGO due to the recent shock  5. Job loss"
+	label var reaccion_evento_20_5 "2c. Your home took payments in advance from employer due to the recent shock  5. Job loss"
+	label var reaccion_evento_21_5 "2c. Your home received assistance from the government due to the recent shock  5. Job loss"
+	label var reaccion_evento_22_5 "2c. Your home was covered by an insurance due to the recent shock  5. Job loss"
+	label var reaccion_evento_23_5 "2c. Your home did nothing due to the recent shock  5. Job loss"
+	label var reaccion_evento_24_5 "2c. Your home did other things due to the recent shock  5. Job loss"
+	label var reaccion_evento_1_6 "2c. Your home sold livestock due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_2_6 "2c. Your home sold land due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_3_6 "2c. Your home sold property due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_4_6 "2c. Your home sent children to live with friends due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_5_6 "2c. Your home stopped sending children to school due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_6_6 "2c. Your home worked in other income generating activities due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_8_6 "2c. Your home received assistance from friends/relatives due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_9_6 "2c. Your home received loans from friends/relatives due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_10_6 "2c. Your home took loans from financial institutions due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_12_6 "2c. Your home had members who emigrated for work due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_13_6 "2c. Your home did credit purchases due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_14_6 "2c. Your home delayed payment obligations due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_15_6 "2c. Your home sold harvest in advance due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_16_6 "2c. Your home reduced the consumption of food due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_17_6 "2c. Your home reduced the consumption of non-food due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_18_6 "2c. Your home used savings due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_19_6 "2c. Your home received assistance from NGO due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_20_6 "2c. Your home took payments in advance from employer due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_21_6 "2c. Your home received assistance from the government due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_22_6 "2c. Your home was covered by an insurance due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_23_6 "2c. Your home did nothing due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_24_6 "2c. Your home did other things due to the recent shock  6. Exit of family member generating income due to separation or divorce"
+	label var reaccion_evento_1_7 "2c. Your home sold livestock due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_2_7 "2c. Your home sold land due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_3_7 "2c. Your home sold property due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_4_7 "2c. Your home sent children to live with friends due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_5_7 "2c. Your home stopped sending children to school due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_6_7 "2c. Your home worked in other income generating activities due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_8_7 "2c. Your home received assistance from friends/relatives due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_9_7 "2c. Your home received loans from friends/relatives due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_10_7 "2c. Your home took loans from financial institutions due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_12_7 "2c. Your home had members who emigrated for work due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_13_7 "2c. Your home did credit purchases due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_14_7 "2c. Your home delayed payment obligations due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_15_7 "2c. Your home sold harvest in advance due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_16_7 "2c. Your home reduced the consumption of food due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_17_7 "2c. Your home reduced the consumption of non-food due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_18_7 "2c. Your home used savings due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_19_7 "2c. Your home received assistance from NGO due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_20_7 "2c. Your home took payments in advance from employer due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_21_7 "2c. Your home received assistance from the government due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_22_7 "2c. Your home was covered by an insurance due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_23_7 "2c. Your home did nothing due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_24_7 "2c. Your home did other things due to the recent shock  7. Exit of family member generating income due to marriage"
+	label var reaccion_evento_1_8 "2c. Your home sold livestock due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_2_8 "2c. Your home sold land due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_3_8 "2c. Your home sold property due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_4_8 "2c. Your home sent children to live with friends due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_5_8 "2c. Your home stopped sending children to school due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_6_8 "2c. Your home worked in other income generating activities due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_8_8 "2c. Your home received assistance from friends/relatives due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_9_8 "2c. Your home received loans from friends/relatives due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_10_8 "2c. Your home took loans from financial institutions due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_12_8 "2c. Your home had members who emigrated for work due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_13_8 "2c. Your home did credit purchases due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_14_8 "2c. Your home delayed payment obligations due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_15_8 "2c. Your home sold harvest in advance due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_16_8 "2c. Your home reduced the consumption of food due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_17_8 "2c. Your home reduced the consumption of non-food due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_18_8 "2c. Your home used savings due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_19_8 "2c. Your home received assistance from NGO due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_20_8 "2c. Your home took payments in advance from employer due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_21_8 "2c. Your home received assistance from the government due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_22_8 "2c. Your home was covered by an insurance due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_23_8 "2c. Your home did nothing due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_24_8 "2c. Your home did other things due to the recent shock  8. Non-farm business failure"
+	label var reaccion_evento_1_9 "2c. Your home sold livestock due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_2_9 "2c. Your home sold land due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_3_9 "2c. Your home sold property due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_4_9 "2c. Your home sent children to live with friends due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_5_9 "2c. Your home stopped sending children to school due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_6_9 "2c. Your home worked in other income generating activities due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_8_9 "2c. Your home received assistance from friends/relatives due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_9_9 "2c. Your home received loans from friends/relatives due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_10_9 "2c. Your home took loans from financial institutions due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_12_9 "2c. Your home had members who emigrated for work due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_13_9 "2c. Your home did credit purchases due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_14_9 "2c. Your home delayed payment obligations due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_15_9 "2c. Your home sold harvest in advance due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_16_9 "2c. Your home reduced the consumption of food due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_17_9 "2c. Your home reduced the consumption of non-food due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_18_9 "2c. Your home used savings due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_19_9 "2c. Your home received assistance from NGO due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_20_9 "2c. Your home took payments in advance from employer due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_21_9 "2c. Your home received assistance from the government due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_22_9 "2c. Your home was covered by an insurance due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_23_9 "2c. Your home did nothing due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_24_9 "2c. Your home did other things due to the recent shock  9. Theft of crops, cash, livestock or other goods"
+	label var reaccion_evento_1_10 "2c. Your home sold livestock due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_2_10 "2c. Your home sold land due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_3_10 "2c. Your home sold property due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_4_10 "2c. Your home sent children to live with friends due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_5_10 "2c. Your home stopped sending children to school due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_6_10 "2c. Your home worked in other income generating activities due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_8_10 "2c. Your home received assistance from friends/relatives due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_9_10 "2c. Your home received loans from friends/relatives due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_10_10 "2c. Your home took loans from financial institutions due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_12_10 "2c. Your home had members who emigrated for work due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_13_10 "2c. Your home did credit purchases due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_14_10 "2c. Your home delayed payment obligations due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_15_10 "2c. Your home sold harvest in advance due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_16_10 "2c. Your home reduced the consumption of food due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_17_10 "2c. Your home reduced the consumption of non-food due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_18_10 "2c. Your home used savings due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_19_10 "2c. Your home received assistance from NGO due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_20_10 "2c. Your home took payments in advance from employer due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_21_10 "2c. Your home received assistance from the government due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_22_10 "2c. Your home was covered by an insurance due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_23_10 "2c. Your home did nothing due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_24_10 "2c. Your home did other things due to the recent shock  10. Crop destruction by fire"
+	label var reaccion_evento_1_11 "2c. Your home sold livestock due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_2_11 "2c. Your home sold land due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_3_11 "2c. Your home sold property due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_4_11 "2c. Your home sent children to live with friends due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_5_11 "2c. Your home stopped sending children to school due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_6_11 "2c. Your home worked in other income generating activities due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_8_11 "2c. Your home received assistance from friends/relatives due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_9_11 "2c. Your home received loans from friends/relatives due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_10_11 "2c. Your home took loans from financial institutions due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_12_11 "2c. Your home had members who emigrated for work due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_13_11 "2c. Your home did credit purchases due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_14_11 "2c. Your home delayed payment obligations due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_15_11 "2c. Your home sold harvest in advance due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_16_11 "2c. Your home reduced the consumption of food due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_17_11 "2c. Your home reduced the consumption of non-food due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_18_11 "2c. Your home used savings due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_19_11 "2c. Your home received assistance from NGO due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_20_11 "2c. Your home took payments in advance from employer due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_21_11 "2c. Your home received assistance from the government due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_22_11 "2c. Your home was covered by an insurance due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_23_11 "2c. Your home did nothing due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_24_11 "2c. Your home did other things due to the recent shock  11. Damaged / demolished home"
+	label var reaccion_evento_1_12 "2c. Your home sold livestock due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_2_12 "2c. Your home sold land due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_3_12 "2c. Your home sold property due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_4_12 "2c. Your home sent children to live with friends due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_5_12 "2c. Your home stopped sending children to school due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_6_12 "2c. Your home worked in other income generating activities due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_8_12 "2c. Your home received assistance from friends/relatives due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_9_12 "2c. Your home received loans from friends/relatives due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_10_12 "2c. Your home took loans from financial institutions due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_12_12 "2c. Your home had members who emigrated for work due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_13_12 "2c. Your home did credit purchases due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_14_12 "2c. Your home delayed payment obligations due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_15_12 "2c. Your home sold harvest in advance due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_16_12 "2c. Your home reduced the consumption of food due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_17_12 "2c. Your home reduced the consumption of non-food due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_18_12 "2c. Your home used savings due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_19_12 "2c. Your home received assistance from NGO due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_20_12 "2c. Your home took payments in advance from employer due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_21_12 "2c. Your home received assistance from the government due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_22_12 "2c. Your home was covered by an insurance due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_23_12 "2c. Your home did nothing due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_24_12 "2c. Your home did other things due to the recent shock  12. Few rains that caused the failure of the harvest"
+	label var reaccion_evento_1_13 "2c. Your home sold livestock due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_2_13 "2c. Your home sold land due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_3_13 "2c. Your home sold property due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_4_13 "2c. Your home sent children to live with friends due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_5_13 "2c. Your home stopped sending children to school due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_6_13 "2c. Your home worked in other income generating activities due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_8_13 "2c. Your home received assistance from friends/relatives due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_9_13 "2c. Your home received loans from friends/relatives due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_10_13 "2c. Your home took loans from financial institutions due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_12_13 "2c. Your home had members who emigrated for work due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_13_13 "2c. Your home did credit purchases due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_14_13 "2c. Your home delayed payment obligations due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_15_13 "2c. Your home sold harvest in advance due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_16_13 "2c. Your home reduced the consumption of food due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_17_13 "2c. Your home reduced the consumption of non-food due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_18_13 "2c. Your home used savings due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_19_13 "2c. Your home received assistance from NGO due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_20_13 "2c. Your home took payments in advance from employer due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_21_13 "2c. Your home received assistance from the government due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_22_13 "2c. Your home was covered by an insurance due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_23_13 "2c. Your home did nothing due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_24_13 "2c. Your home did other things due to the recent shock  13. Floods that caused the failure of the harvest"
+	label var reaccion_evento_1_14 "2c. Your home sold livestock due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_2_14 "2c. Your home sold land due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_3_14 "2c. Your home sold property due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_4_14 "2c. Your home sent children to live with friends due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_5_14 "2c. Your home stopped sending children to school due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_6_14 "2c. Your home worked in other income generating activities due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_8_14 "2c. Your home received assistance from friends/relatives due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_9_14 "2c. Your home received loans from friends/relatives due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_10_14 "2c. Your home took loans from financial institutions due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_12_14 "2c. Your home had members who emigrated for work due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_13_14 "2c. Your home did credit purchases due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_14_14 "2c. Your home delayed payment obligations due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_15_14 "2c. Your home sold harvest in advance due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_16_14 "2c. Your home reduced the consumption of food due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_17_14 "2c. Your home reduced the consumption of non-food due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_18_14 "2c. Your home used savings due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_19_14 "2c. Your home received assistance from NGO due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_20_14 "2c. Your home took payments in advance from employer due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_21_14 "2c. Your home received assistance from the government due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_22_14 "2c. Your home was covered by an insurance due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_23_14 "2c. Your home did nothing due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_24_14 "2c. Your home did other things due to the recent shock  14. Invasion of pests that caused crop failure or loss of storage"
+	label var reaccion_evento_1_15 "2c. Your home sold livestock due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_2_15 "2c. Your home sold land due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_3_15 "2c. Your home sold property due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_4_15 "2c. Your home sent children to live with friends due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_5_15 "2c. Your home stopped sending children to school due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_6_15 "2c. Your home worked in other income generating activities due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_8_15 "2c. Your home received assistance from friends/relatives due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_9_15 "2c. Your home received loans from friends/relatives due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_10_15 "2c. Your home took loans from financial institutions due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_12_15 "2c. Your home had members who emigrated for work due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_13_15 "2c. Your home did credit purchases due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_14_15 "2c. Your home delayed payment obligations due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_15_15 "2c. Your home sold harvest in advance due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_16_15 "2c. Your home reduced the consumption of food due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_17_15 "2c. Your home reduced the consumption of non-food due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_18_15 "2c. Your home used savings due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_19_15 "2c. Your home received assistance from NGO due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_20_15 "2c. Your home took payments in advance from employer due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_21_15 "2c. Your home received assistance from the government due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_22_15 "2c. Your home was covered by an insurance due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_23_15 "2c. Your home did nothing due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_24_15 "2c. Your home did other things due to the recent shock  15. Loss of property due to fire or flood"
+	label var reaccion_evento_1_16 "2c. Your home sold livestock due to the recent shock  16. Loss of land"
+	label var reaccion_evento_2_16 "2c. Your home sold land due to the recent shock  16. Loss of land"
+	label var reaccion_evento_3_16 "2c. Your home sold property due to the recent shock  16. Loss of land"
+	label var reaccion_evento_4_16 "2c. Your home sent children to live with friends due to the recent shock  16. Loss of land"
+	label var reaccion_evento_5_16 "2c. Your home stopped sending children to school due to the recent shock  16. Loss of land"
+	label var reaccion_evento_6_16 "2c. Your home worked in other income generating activities due to the recent shock  16. Loss of land"
+	label var reaccion_evento_8_16 "2c. Your home received assistance from friends/relatives due to the recent shock  16. Loss of land"
+	label var reaccion_evento_9_16 "2c. Your home received loans from friends/relatives due to the recent shock  16. Loss of land"
+	label var reaccion_evento_10_16 "2c. Your home took loans from financial institutions due to the recent shock  16. Loss of land"
+	label var reaccion_evento_12_16 "2c. Your home had members who emigrated for work due to the recent shock  16. Loss of land"
+	label var reaccion_evento_13_16 "2c. Your home did credit purchases due to the recent shock  16. Loss of land"
+	label var reaccion_evento_14_16 "2c. Your home delayed payment obligations due to the recent shock  16. Loss of land"
+	label var reaccion_evento_15_16 "2c. Your home sold harvest in advance due to the recent shock  16. Loss of land"
+	label var reaccion_evento_16_16 "2c. Your home reduced the consumption of food due to the recent shock  16. Loss of land"
+	label var reaccion_evento_17_16 "2c. Your home reduced the consumption of non-food due to the recent shock  16. Loss of land"
+	label var reaccion_evento_18_16 "2c. Your home used savings due to the recent shock  16. Loss of land"
+	label var reaccion_evento_19_16 "2c. Your home received assistance from NGO due to the recent shock  16. Loss of land"
+	label var reaccion_evento_20_16 "2c. Your home took payments in advance from employer due to the recent shock  16. Loss of land"
+	label var reaccion_evento_21_16 "2c. Your home received assistance from the government due to the recent shock  16. Loss of land"
+	label var reaccion_evento_22_16 "2c. Your home was covered by an insurance due to the recent shock  16. Loss of land"
+	label var reaccion_evento_23_16 "2c. Your home did nothing due to the recent shock  16. Loss of land"
+	label var reaccion_evento_24_16 "2c. Your home did other things due to the recent shock  16. Loss of land"
+	label var reaccion_evento_1_17 "2c. Your home sold livestock due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_2_17 "2c. Your home sold land due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_3_17 "2c. Your home sold property due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_4_17 "2c. Your home sent children to live with friends due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_5_17 "2c. Your home stopped sending children to school due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_6_17 "2c. Your home worked in other income generating activities due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_8_17 "2c. Your home received assistance from friends/relatives due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_9_17 "2c. Your home received loans from friends/relatives due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_10_17 "2c. Your home took loans from financial institutions due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_12_17 "2c. Your home had members who emigrated for work due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_13_17 "2c. Your home did credit purchases due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_14_17 "2c. Your home delayed payment obligations due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_15_17 "2c. Your home sold harvest in advance due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_16_17 "2c. Your home reduced the consumption of food due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_17_17 "2c. Your home reduced the consumption of non-food due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_18_17 "2c. Your home used savings due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_19_17 "2c. Your home received assistance from NGO due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_20_17 "2c. Your home took payments in advance from employer due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_21_17 "2c. Your home received assistance from the government due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_22_17 "2c. Your home was covered by an insurance due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_23_17 "2c. Your home did nothing due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_24_17 "2c. Your home did other things due to the recent shock  17: Death of cattle from disease"
+	label var reaccion_evento_1_18 "2c. Your home sold livestock due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_2_18 "2c. Your home sold land due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_3_18 "2c. Your home sold property due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_4_18 "2c. Your home sent children to live with friends due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_5_18 "2c. Your home stopped sending children to school due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_6_18 "2c. Your home worked in other income generating activities due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_8_18 "2c. Your home received assistance from friends/relatives due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_9_18 "2c. Your home received loans from friends/relatives due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_10_18 "2c. Your home took loans from financial institutions due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_12_18 "2c. Your home had members who emigrated for work due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_13_18 "2c. Your home did credit purchases due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_14_18 "2c. Your home delayed payment obligations due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_15_18 "2c. Your home sold harvest in advance due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_16_18 "2c. Your home reduced the consumption of food due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_17_18 "2c. Your home reduced the consumption of non-food due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_18_18 "2c. Your home used savings due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_19_18 "2c. Your home received assistance from NGO due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_20_18 "2c. Your home took payments in advance from employer due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_21_18 "2c. Your home received assistance from the government due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_22_18 "2c. Your home was covered by an insurance due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_23_18 "2c. Your home did nothing due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_24_18 "2c. Your home did other things due to the recent shock  18: Increase in the price of supplies"
+	label var reaccion_evento_1_19 "2c. Your home sold livestock due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_2_19 "2c. Your home sold land due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_3_19 "2c. Your home sold property due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_4_19 "2c. Your home sent children to live with friends due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_5_19 "2c. Your home stopped sending children to school due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_6_19 "2c. Your home worked in other income generating activities due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_8_19 "2c. Your home received assistance from friends/relatives due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_9_19 "2c. Your home received loans from friends/relatives due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_10_19 "2c. Your home took loans from financial institutions due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_12_19 "2c. Your home had members who emigrated for work due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_13_19 "2c. Your home did credit purchases due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_14_19 "2c. Your home delayed payment obligations due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_15_19 "2c. Your home sold harvest in advance due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_16_19 "2c. Your home reduced the consumption of food due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_17_19 "2c. Your home reduced the consumption of non-food due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_18_19 "2c. Your home used savings due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_19_19 "2c. Your home received assistance from NGO due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_20_19 "2c. Your home took payments in advance from employer due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_21_19 "2c. Your home received assistance from the government due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_22_19 "2c. Your home was covered by an insurance due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_23_19 "2c. Your home did nothing due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_24_19 "2c. Your home did other things due to the recent shock  19: Fall in the price of products"
+	label var reaccion_evento_1_20 "2c. Your home sold livestock due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_2_20 "2c. Your home sold land due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_3_20 "2c. Your home sold property due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_4_20 "2c. Your home sent children to live with friends due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_5_20 "2c. Your home stopped sending children to school due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_6_20 "2c. Your home worked in other income generating activities due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_8_20 "2c. Your home received assistance from friends/relatives due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_9_20 "2c. Your home received loans from friends/relatives due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_10_20 "2c. Your home took loans from financial institutions due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_12_20 "2c. Your home had members who emigrated for work due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_13_20 "2c. Your home did credit purchases due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_14_20 "2c. Your home delayed payment obligations due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_15_20 "2c. Your home sold harvest in advance due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_16_20 "2c. Your home reduced the consumption of food due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_17_20 "2c. Your home reduced the consumption of non-food due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_18_20 "2c. Your home used savings due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_19_20 "2c. Your home received assistance from NGO due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_20_20 "2c. Your home took payments in advance from employer due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_21_20 "2c. Your home received assistance from the government due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_22_20 "2c. Your home was covered by an insurance due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_23_20 "2c. Your home did nothing due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_24_20 "2c. Your home did other things due to the recent shock  20: Increase in the price of the main food consumed"
+	label var reaccion_evento_1_21 "2c. Your home sold livestock due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_2_21 "2c. Your home sold land due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_3_21 "2c. Your home sold property due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_4_21 "2c. Your home sent children to live with friends due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_5_21 "2c. Your home stopped sending children to school due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_6_21 "2c. Your home worked in other income generating activities due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_8_21 "2c. Your home received assistance from friends/relatives due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_9_21 "2c. Your home received loans from friends/relatives due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_10_21 "2c. Your home took loans from financial institutions due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_12_21 "2c. Your home had members who emigrated for work due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_13_21 "2c. Your home did credit purchases due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_14_21 "2c. Your home delayed payment obligations due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_15_21 "2c. Your home sold harvest in advance due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_16_21 "2c. Your home reduced the consumption of food due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_17_21 "2c. Your home reduced the consumption of non-food due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_18_21 "2c. Your home used savings due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_19_21 "2c. Your home received assistance from NGO due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_20_21 "2c. Your home took payments in advance from employer due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_21_21 "2c. Your home received assistance from the government due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_22_21 "2c. Your home was covered by an insurance due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_23_21 "2c. Your home did nothing due to the recent shock  21: Kidnapping / robbery / assault"
+	label var reaccion_evento_24_21 "2c. Your home did other things due to the recent shock  21: Kidnapping / robbery / assault"
+
+	
  *--------- Other responses to the event
  /* (s15q2d): 2d. Otro arreglo, especifique */	
-	forval i = 1/21 {
-	*-- Label variable
-	label var reaccionot_evento`i' "Other responses to the event"
-	}
-	
+	label var reaccionot_evento1 "2d. Other responses to the event 1. Death or disability of an adult household member who works"
+	label var reaccionot_evento2 "2d. Other responses to the event 2. Death of someone who sends remittances home"
+	label var reaccionot_evento3 "2d. Other responses to the event 3. Illness of the person with the highest income in the home"
+	label var reaccionot_evento4 "2d. Other responses to the event 4. Loss of a major contact"
+	label var reaccionot_evento5 "2d. Other responses to the event 5. Loss of work"
+	label var reaccionot_evento6 "2d. Other responses to the event 6. Exit of the family member that generates income due to separation or divorce"
+	label var reaccionot_evento7 "2d. Other responses to the event 7. Exit of the family member generating income due to marriage"
+	label var reaccionot_evento8 "2d. Other responses to the event 8. Non-farm business failure"
+	label var reaccionot_evento9 "2d. Other responses to the event 9. Theft of crops, cash, livestock or other property"
+	label var reaccionot_evento10 "2d. Other responses to the event 10. Crop destruction by fire"
+	label var reaccionot_evento11 "2d. Other responses to the event 11. Dwelling damaged / demolished"
+	label var reaccionot_evento12 "2d. Other responses to the event  12. Few rains that caused the failure of the harvest"
+	label var reaccionot_evento13 "2d. Other responses to the event 13. Floods that caused the failure of the harvest"
+	label var reaccionot_evento14 "2d. Other responses to the event 14. Invasion of pests that caused the failure of the harvest or loss of storage"
+	label var reaccionot_evento15 "2d. Other responses to the event 15. Loss of property due to fire or flood"
+	label var reaccionot_evento16 "2d. Other responses to the event 16. Loss of land"
+	label var reaccionot_evento17 "2d. Other responses to the event 17: Death of cattle due to disease,"
+	label var reaccionot_evento18 "2d. Other responses to the event  18: Increase in the price of supplies,"
+	label var reaccionot_evento19 "2d. Other responses to the event 19: Fall in the price of products,"
+	label var reaccionot_evento20 "2d. Other responses to the event 20: Increase in the price of the main food consumed,"
+	label var reaccionot_evento21 "2d. Other responses to the event 21: Kidnapping / robbery / assault,"
+			
 
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- XVI: BANKING / BANCARIZACIÓN ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
+
 *** Section for individuals 15+
-*** 
-label var contesta_ind_b "Is the "member" answering by himself/herself?"
+
+label var contesta_ind_b "Is the 'member' answering by himself/herself?"
 
 *** Who is answering instead of "member"?
 label var quien_contesta_b "Who is answering instead of 'member'?"
 
 *** Do you have in any bank the following?
 		* Checking account
-		label var cuenta_corr "Do you have in any bank the following? Checking account"
+		label var cuenta_corr "Do you have in any bank... Checking account?"
 		* Savings account
-		label var cuenta_aho "Do you have in any bank the following? Savings account"
+		label var cuenta_aho "Do you have in any bank... Savings account?"
 		* Credit card
-		label var tcredito "Do you have in any bank the following? Credit card"
+		label var tcredito "Do you have in any bank... Credit card?"
 		* Debit card
-		label var tdebito "Do you have in any bank the following? Dedit card"
+		label var tdebito "Do you have in any bank... Dedit card?"
 		* None
-		label var no_banco "Do you have in any bank the following? None"
+		label var no_banco "Do you have in any bank... None of these?"
 
 *** How often do you pay with cash ?
 	label var efectivo_f "How often do you pay with cash?"
@@ -2314,18 +2843,238 @@ label var quien_contesta_b "Who is answering instead of 'member'?"
 
 *** Reasons for not holding any bank account or card?
 	label var razon_nobanco "Reasons for not holding any bank account or card?"
+
+/*(************************************************************************************************************************************************* 
+*---------------------------------------------------------- XI: MORTALITY / MORTALIDAD ---------------------------------------------------------------
+*************************************************************************************************************************************************)*/
+*** How many sons or daughters did your biological mother have, including you?
+	* s11q1 Cuántos hijos o hijas tuvo su madre biológica incluyéndolo usted?
+	label var ctoshnosyud "How many sons or daughters did your biological mother have, including you?"
+
+*** How many of these sons or daughters were born before you?
+	label var ctoshnosme "How many of these sons or daughters were born before you?"
 	
+* SIBLINGS / HERMANOS
+
+*** Whats the sex of your siblings?
+	/*s11q4* Cuál es el sexo de cada uno de sus hermanos/as?
+		1= Masculino
+		2= Femenino
+	*/
+	forvalues i = 1(1)19 {
+	label var hnohombre`i' "Sex of your siblings? (Male?)"
+	}
+	
+*** Are they still alive? (one variable for each)
+	/*s11q5* Continúa vivo?
+		1=Si
+		2=No
+		3=No sabe
+	*/
+	forvalues i = 1(1)19 {
+	label var hnovivo`i' "Is your sibling still alive?"
+	}
+		
+*** How old are they? (one variable for each)
+	*s11q6* Qué edad tiene?
+	forvalues i = 1(1)19 {
+	label var hnoedad`i' "How old is your sibling?"
+}
+		
+*** In which year did you last have contact with them? (one variable for each - for those who they don't know if alive)
+	*s11q7a* En qué año fue la última vez que tuvo contacto con ...? (para aquellos que no sabe si están vivos)
+	forvalues i = 1(1)19 {
+	label var hnocontactoano`i' "In which year did you last have contact with your sibling? (one variable for each - for those who they don't know if alive)"
+	}
+	
+*** In which month did you last have contact with them? (one variable for each - for those who they don't know if alive)
+	*s11q7b* En qué mes fue la última vez que tuvo contacto con ...? (para aquellos que no sabe si están vivos)
+	forvalues i = 1(1)19 {
+	label var hnocontactomes`i' "In which month did you last have contact with your sibling? (one variable for each - for those who they don't know if alive)"
+	}
+	
+*** In which year did they die? (one variable for each who passed away)
+	*s11q8a* En qué año falleció ...? (para aquellos que fallecieron)
+	forvalues i = 1(1)19 {
+	label var hnofallecioano`i' "In which year did your sibling die? (one variable for each who passed away)"
+		}
+	
+*** In which month did they die? (one variable for each who passed away)
+	*s11q8b* En qué mes falleció ...?
+	forvalues i = 1(1)19 {
+	label var hnofalleciomes`i' "In which month did your sibling die?"
+		}
+	
+*** How old was him/her when she/he passed away? (one variable for each who passed away)
+	*s11q8c* Qué edad tenía ... cuando falleció?
+	forvalues i = 1(1)19 {
+	label var hnoedadfallecio`i' "How old was your sibling when she/he passed away?"
+		}
+
+
+/*(************************************************************************************************************************************************* 
+*----------------------------------- XII: FOOD CONSUMPTION / CONSUMO DE ALIMENTO --------------------------------------------------------
+*************************************************************************************************************************************************)*/
+
+label var clap "This household is/has been beneficiary of the 'Bolsa-Caja' CLAP?"
+label var clap_cuando "When was the last time that the 'Bolsa-Caja' CLAP arrived to the household?"
+
+/*(************************************************************************************************************************************************ 
+*----------------------------------------------------- XIII: FOOD SAFETY / SEGURIDAD ALIMENTARIA --------------------------------------------------
+************************************************************************************************************************************************)*/
+
+*** Do you believe that the income of the household is sufficient for buying groceries/food to consume inside and outside the household?
+	/*s13q1 Considera usted que el ingreso del hogar es suficiente para la compra de alimentos/comida para consumir dentro y fuera del hogar?
+			1=Si
+			2=No 
+	*/
+	label var ingsuf_comida "Do you believe that the income of the household is sufficient for buying groceries/food to consume inside and outside the household?"
+	
+
+*** During the last month, due to lack of money or other resources, did...
+	*DURANTE EL ÚLTIMO MES, POR FALTA DE DINERO U OTROS RECURSOS, ¿ALGUNA VEZ…
+		/* 	1=Si
+			2=No */
+	
+	* ...you worry about food running out in your household?
+		*s13q2_1 ...usted se preocupó porque los alimentos se acabaran en su hogar? 
+		label var preocucomida_norecursos "Due to lack of money or resources, did you worry about food running out in your household?"
+
+	* ...your household run out of food? 
+		* s13q2_2 ...en su hogar se quedaron sin alimentos?
+		label var faltacomida_norecursos "Due to lack of money or resources, did your household run out of food? "
+		
+	* ...your household stop having a healthy diet? (meat, fish, vegetables, fruits, cereals)
+		* s13q2_3 ...en su hogar dejaron de tener una alimentación saludable (contiene carnes, pescados, verduras, hortalizas, frutas, cereales)?
+		label var nosaludable_norecursos "Due to lack of money or resources, did your household stop having a healthy diet?"
+		
+	* ...you or any adult in your household fed based on a low variety of food types? (always eat the same)
+		* s13q2_4 ...usted o algún adulto en su hogar tuvo una alimentación basada en poca variedad de alimentos (siempre come lo mismo)?
+		label var pocovariado_norecursos "Due to lack of money or resources, did you or any adult in your household fed based on a low variety of food types? (always eat the same)"
+		
+	* ...you or an adult in your house stopped eating breakfast, lunch or dinner?
+		* s13q2_5 ...usted o algún adulto en su hogar dejó de desayunar, almorzar o cenar?
+		label var salteacomida_norecursos "Due to lack of money or resources, did you or an adult in your house stopped eating breakfast, lunch or dinner?"
+		
+	* ...you or an adult in your household ate less than what he/she should eat?
+		* s13q2_6 ...usted o algún adulto en su hogar comió menos de lo que debía comer?
+		label var comepoco_norecursos "Due to lack of money or resources, did you or an adult in your household ate less than what he/she should eat?"
+		
+	* ...you or an adult in your household felt hunger but didn't eat?
+		* s13q2_7 ...usted o algún adulto en su hogar sintió hambre pero no comió?
+		label var hambre_norecursos "Due to lack of money or resources, did you or an adult in your household felt hunger but didn't eat?"
+		
+	* ...you or an adult in your household only ate once a day, or stopped eating during a whole day?
+		* s13q2_8 ...usted o algún adulto en su hogar sólo comió una vez al día, o dejó de comer durante todo un día?
+		label var nocomedia_norecursos "Due to lack of money or resources, did you or an adult in your household only ate once a day, or stopped eating during a whole day?"
+		
+	* ...any person younger than 18 years old in your household fed based on a low variety of food types? 
+		* s13q2_9 ...algún menor de 18 años en su hogar tuvo una alimentación basada en poca variedad de alimentos?
+		label var pocovariado_me18_norecursos "Due to lack of money or resources, did any person younger than 18 years old in your household fed based on a low variety of food types?"
+		
+	* ...any person younger than 18 years old in your household stopped eating breakfast, lunch or dinner?
+		* s13q2_10 ...algún menor de 18 años en su hogar dejó de desayunar, almorzar o cenar?
+		label var salteacomida_me18_norecursos "Due to lack of money or resources, did any person younger than 18 years old in your household stopped eating breakfast, lunch or dinner?"
+		
+	* ...you ever had to dimish the portions served to any person younger than 18 years old?
+		* s13q2_11 ...tuvieron que disminuir la cantidad servida en las comidas a algún menor de 18 años en su hogar?
+		label var comepoco_me18_norecursos "Due to lack of money or resources, did you ever had to dimish the portions served to any person younger than 18 years old?"
+		
+	* ...any person younger than 18 years old in your household only ate once a day, or stopped eating during a whole day?
+		* s13q2_12 ...algún menor de 18 años en su hogar solo comió una vez al día, o dejó de comer durante todo un día?
+		label var nocomedia_me18_norecursos "Due to lack of money or resources, did any person younger than 18 years old in your household only ate once a day, or stopped eating during a whole day?"
+		
+* During the last month, due to lack of money, did you or an adult in your household had to make in-kind payments or barter to consume food?
+	/* s13q3 Durante el último mes, por falta de dinero, ¿alguna vez usted o algún adulto en su hogar tuvo que hacer pagos en especie o trueque para consumir alimentos?
+			1=Si
+			2=No 
+	*/
+	label var comida_trueque "Due to lack of money, did you or an adult in your household had to make in-kind payments or barter to consume food last month?"
+	
+
+/*(************************************************************************************************************************************************ 
+*----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
+************************************************************************************************************************************************)*/
+
+* For children younger than 5 years old
+
+*** Was the child measured?
+	/*s14q1 Fue medido?
+			1=Si
+			2=No 
+	*/
+	label var medido "Was the child measured? (for children younger than 5 years old)"
+	
+*** Why wasn't the child measured?
+	/*s14q2 Por qué no fue medido?
+			1=No estaba en casa al momento de hacer la entrevista
+			2=Estaba enfermo
+			3=No está disponible
+			4=Otra razón 
+	*/
+	label var razon_nomedido "Why wasn't the child measured?"
+	
+*** Confirm child's reported age (in months)
+	/*s14q3 Confirmar la edad (en meses) reportada del niño
+			1=Si, es correcto
+			2=No, no es correcto
+	*/
+	label var confirma_edad "Confirm child's reported age (in months)"
+	
+*** Was the child able to be alone in the measurement instrument?
+	/*s14q14 Fue capaz de permanecer solo en el instrumento de medición?
+			1=Si
+			2=No 
+	*/
+	label var solo_medicion " Was the child able to be alone in the measurement instrument?"
+		
+*** Weight (in kg) calculated by the survey
+	*weight Peso en kilogramos calculado por la encuesta
+	label var 	peso "Weight of the child (in kg)"
+	
+***Height (in cm) calculated by the survey
+	*height Altura en centímetros calculada por la encuesta 
+	label var	altura "Height (in cm)"
+
+*** Was the child measured standing or lying down?
+	/* posicion Entrevistador: El menor fue medido de pie o acostado?
+			1=De pie
+			2=Acostado
+	*/
+	label var posicion "Was the child measured standing (1) or lying down (2)?"
+	
+*** When weighting, was there why you couldn't weight (ex. heavy clothes that the child didn't take out)?
+	/*weight_comments Al pesar, existía algo por lo que pudiera pesar más (por ejemplo ropa pesada que no se le quitó) ?
+			1=Si
+			2=No 
+	*/
+	label var 	problema_pesar "When weighting, was there why you couldn't weight (ex. heavy clothes that the child didn't take out)?"
+
+*** When measuring, was there something why you could not measure more (ex. thick shoes or accesories)?
+	/*height_comments Al medir, había algo por lo que pudiera medir más (por ejemplo zapatos gruesos o accesorios) ?
+			1=Si
+			2=No 
+	*/
+	label var 	problema_medir "When measuring, was there something why you could not measure more (ex. thick shoes or accesories)?"
+
+*** When measuring, was there irregularities in the surface of the floor where you placed the stadiometer?
+	/*height_comments2 Al medir, había irregularidad en la superficie del piso donde se colocó el tallímetro ?
+			1=Si
+			2=No 
+	*/
+	label var 	problema_medir2 "When measuring, was there irregularities in the surface of the floor where you placed the stadiometer?"
+
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- POVERTY ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
 	*** International poverty line 1.9 USD	
-	label var lp_19usd "International poverty line 1.9 USD"
+	label var lp_19usd "International poverty line 1.9 USD (in monthly USD PPP)"
 
 	*** International poverty line 3.2 USD	
-	label var lp_32usd "International poverty line 3.2 USD"
+	label var lp_32usd "International poverty line 3.2 USD (in monthly USD PPP)"
 
 	*** International poverty line 5.5 USD	
-	label var lp_55usd "International poverty line 5.5 USD"
+	label var lp_55usd "International poverty line 5.5 USD (in monthly USD PPP)"
 	
 	*** Poverty identifier
 	label var pobre "Poverty identifier"
@@ -2344,7 +3093,8 @@ label	var	itranp_o_m	"Income from other private transfers in the country - monet
 label	var	itranp_ns	"Income from non-specified private transfers	"
 label	var	itrane_o_m	"Income from public transfers other than CCTs - monetary	"
 label	var	itrane_ns	"Income from unspecified public transfers	"
-label	var	inla_extraord	"Extraordinary non-labor income	"
+label	var	inla_extraord	"Extraordinary non-labor income"
+label	var	inla_otro	"Other non-labor income	"
 label	var	iasalp_m	"Labor income from main occupation - monetary	"
 label	var	iasalp_nm	"Labor income from main occupation - non-monetary	"
 label	var	ictapp_m	"Self-employed income from main occupation - monetary	"
@@ -2434,7 +3184,6 @@ label	var	iee		"Equivalized income E"
 cap label var    ilea_m          "Equivalized labor income - monetary" 
 cap label var    lp_extrema	     "Official extreme poverty line"
 cap label var    lp_moderada     "Official moderate poverty line"
-cap label var 	 pobre			 "Poor"
 cap label var    ing_pob_ext     "Income used to estimate official extreme poverty"
 cap label var    ing_pob_mod     "Income used to estimate official moderate poverty"
 cap label var    ing_pob_mod_lp  "Official income / Poverty Line"
@@ -2455,7 +3204,11 @@ cap label var    ipcf_cpi05	     "Per capita household income (2005 values)"
 cap label var    ipcf_cpi11	     "Per capita household income (2011 values)"
 cap label var    ipcf_ppp05	     "Per capita household income (2005 dollars)"
 cap label var    ipcf_ppp11	     "Per capita household income (2011 dollars)"
-label var    hogarsec        	 "Member of secondary household"
-label define hogarsec 		 	 0 "No" 1 "Yes"
-label values hogarsec hogarsec
-label var 	quest 	"Questionnaire"
+
+*** Random
+
+	label var    hogarsec        	 "Member of secondary household"
+	label define hogarsec 		 	 0 "No" 1 "Yes"
+	label values hogarsec hogarsec
+
+	label var 	quest 	"Questionnaire (ENCOVI admin use)"

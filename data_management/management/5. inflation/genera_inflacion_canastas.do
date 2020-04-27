@@ -75,11 +75,22 @@ Note:
 // import prices
 use "$forinflation/precios_implicitos_nov_to_march.dta", replace
 merge m:1 bien using "$forinflation/canasta_diaria_para_inflacion.dta"
+keep if _merge == 3
 drop _merge
-drop if month ==4
-replace month = month + 12 if month < 4
+
+
+drop if (month >=4 & month <11) | month ==.
+
+// check if there are 4 observations per good 
+bys bien: egen count = count(bien)
+drop if count <5
+
+
+replace month = month + 12 if month <= 4
+
 // generate value of each products
 gen valor_producto = pimp * cantidad_ajustada
+
 
 //collapse by month to make the series and the index
 egen valor_canasta = total(valor_producto), by(month)

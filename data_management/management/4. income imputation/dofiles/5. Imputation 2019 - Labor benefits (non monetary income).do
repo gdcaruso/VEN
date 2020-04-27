@@ -141,7 +141,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	mi set flong
 	*set seed 66778899
 	mi register imputed log_bene
-	mi impute regress log_bene $lassovars if log_bene>0 & recibe_ingresolab_nomon==1, add(2) rseed(66778899) force noi 
+	mi impute regress log_bene $lassovars if log_bene>0 & recibe_ingresolab_nomon==1, add(30) rseed(66778899) force noi 
 	mi unregister log_bene
 
 	//clonevar dila_m_zero = dlinc_zero 

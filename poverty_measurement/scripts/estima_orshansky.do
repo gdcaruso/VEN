@@ -308,10 +308,10 @@ save `conSpending'
 /*(************************************************************************************************************************************************* 
 * // Check spending
 *********************************************************************************************************************)*/
-sort interview__id interview__key quest pondera, stable
+sort interview__id interview__key quest pondera_hh, stable
 
-by interview__id interview__key quest pondera: egen tot_gasto_mensual = total(gasto_mensual)
-keep interview__id interview__key quest pondera tot_gasto_mensual
+by interview__id interview__key quest pondera_hh: egen tot_gasto_mensual = total(gasto_mensual)
+keep interview__id interview__key quest pondera_hh tot_gasto_mensual
 duplicates drop
 rename tot_gasto_mensual gasto_mensual
 
@@ -356,7 +356,7 @@ global saludvar cant_pago_consulta mone_pago_consulta mes_pago_consulta pago_rem
 global jubivar d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone cant_aporta_pension mone_aporta_pension
 
 
-keep interview__id interview__key quest interview_month quest ipcf miembros  pondera  ///
+keep interview__id interview__key quest interview_month quest ipcf miembros  pondera_hh  ///
 $viviendavar ///
 $serviciosvar ///
 $educvar ///
@@ -770,11 +770,11 @@ drop q flag
 ***********************************end of expenditures********************************
 
 // adds expenditure of hh, removing individual dimension 
-collapse (sum) gasto??, by (interview__id interview__key quest ipcf miembros  pondera)
+collapse (sum) gasto??, by (interview__id interview__key quest ipcf miembros  pondera_hh)
 
 
 // now we reshape the wide data to make it long
-reshape long gasto, i(interview__id interview__key quest ipcf miembros  pondera) j(bien)
+reshape long gasto, i(interview__id interview__key quest ipcf miembros  pondera_hh) j(bien)
 
 rename gasto gasto_mensual
 replace gasto_mensual = round(gasto_mensual)
@@ -807,10 +807,10 @@ save `hhSpending'
 append using `conSpending'
 
 keep interview__id interview__key quest ipcf miembros  ///
-bien type_good current_good gasto_mensual pondera
+bien type_good current_good gasto_mensual pondera_hh
 
 
-order interview__id interview__key quest ipcf miembros pondera  ///
+order interview__id interview__key quest ipcf miembros pondera_hh  ///
 bien type_good current_good gasto_mensual
 
 // saves expenditure dta in long shape
@@ -841,11 +841,11 @@ tab type_good [fw= gasto_mensual]
 // duplicates drop
 
 // filter of popularity
-egen popularity_hh = total(pondera), by (bien) 
+egen popularity_hh = total(pondera_hh), by (bien) 
 
 
 bysort interview__key interview__id quest (bien): gen first = 1 if _n==1
-gen hhpop = pondera if first ==1
+gen hhpop = pondera_hh if first ==1
 egen totalhh = total(hhpop)
 
 gen popularity = popularity_hh/totalhh
@@ -856,7 +856,7 @@ drop if popularity<.05
 // aggregate expenditures by group and hh
 sort interview__id interview__key quest ipcf miembros  type_good, stable
 egen tot_gasto_mensual = total(gasto_mensual), by (interview__id interview__key quest type_good)
-keep interview__id interview__key quest ipcf miembros  type_good tot_gasto_mensual pondera
+keep interview__id interview__key quest ipcf miembros  type_good tot_gasto_mensual pondera_hh
 
 rename tot_gasto_mensual  gasto_mensual
 duplicates drop
@@ -865,7 +865,7 @@ duplicates drop
 tab type_good [fw=gasto_mensual]
 
 //reshapes to wide 
-reshape wide gasto_mensual, i(interview__id interview__key quest ipcf miembros  pondera) j(type_good)
+reshape wide gasto_mensual, i(interview__id interview__key quest ipcf miembros  pondera_hh) j(type_good)
 
 //sum food and non food expenditure per hh
 gen food_exp = gasto_mensual1
@@ -876,16 +876,15 @@ gen non_food_exp = exp-food_exp
 gen orshansky = exp/food_exp
 
 //remove outliars
-xtile ors_quant [fw=pondera] = orshansky, nq(100)
+xtile ors_quant [fw=pondera_hh] = orshansky, nq(100)
 
 
 sort orshansky, stable
 gen obs = _n
 // twoway line orshansky obs if ors_quant<100 
 
-xtile exp_quant  [fw=pondera] = exp, nq(100)
 
 //  saves orshansky
-sum orshansky [fw=pondera], detail
+sum orshansky [fw=pondera_hh], detail
 global orsh = r(p50)
 

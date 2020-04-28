@@ -142,6 +142,7 @@ merge m:1 COD_GASTO using "$input/Calories.dta"
 keep if _merge==3
 drop _merge
 rename COD_GASTO bien
+
 compress
 save `baskets'
 restore
@@ -344,6 +345,8 @@ keep if share_intake>0.01 | popularity>0.3
 
 // drop condimentos (no prices collected)
 drop if bien == 79
+// drop alcohol and tobacco
+keep if bien < 88
 
 
 /*(************************************************************************************************************************************************* 

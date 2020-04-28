@@ -16,20 +16,21 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
 		global male   0
-		
 			
 		if $juli {
-				global rootpath ""
+				global rootpath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global roothpath2 "C:\Users\wb563583\GitHub\VEN" 
+				global pathdo "C:\Users\wb563583\GitHub\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
 		}
 	    if $lauta {
 				global rootpath ""
@@ -78,7 +79,8 @@ append using "$pathout\ENCOVI_`i'_COMP.dta"
 }
 sort ano id com
 
-gen weight=1
+gen weight=pondera if ano!=2019
+replace weight=1 if ano==2019
 gen all=1
 clonevar year=ano
 

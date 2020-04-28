@@ -4357,11 +4357,16 @@ include "$pathaux\do_file_1_variables_MA.do"
 				di "////"
 				di `m'
 				di `c'
-				di  `tc`c'mes`m''
+				di `tc`c'mes`m''
 				di `deflactor`m''
 				replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
 			}
 		}
+		
+		*tab propieta_no_paga, mi
+		*gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+		*sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
+		* Problem: there are people who answer they would spend too much if they paid rent. The 50% percentile answers 66%. The 99% percentile even 687 times their income before imputed rent!
 		
 		sort interview__key interview__id quest relacion_en, stable
 		by interview__key interview__id quest: replace renta_imp=renta_imp[1] if relacion_en!=13 // We add to all the other household members (who are not domestic service) the imputed rent of the head

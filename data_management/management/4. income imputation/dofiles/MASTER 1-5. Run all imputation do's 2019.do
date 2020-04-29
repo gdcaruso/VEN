@@ -268,19 +268,19 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 			cap drop `i'  	
 		}
 	
-	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
-	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
+	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8 | tenencia_vivienda==9 | tenencia_vivienda==10 
+	replace aux_propieta_no_paga = 0 if tenencia_vivienda==2 | tenencia_vivienda==3 | tenencia_vivienda==4 | tenencia_vivienda==5 | tenencia_vivienda==. 
 	sort id, stable
-	by id: egen propieta_no_paga = max(aux_propieta_no_paga)
-
-	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
+	by id: egen propieta_no_paga = max(aux_propieta_no_paga) 
+	replace propieta_no_paga=. if hogarsec==1
+	
+	// Creating implicit rent from hh guess of its housing costs if they had to pay rent of their dwelling
 		gen     renta_imp = .
 		
 		levelsof interview_month, local(rent_month)
-		foreach m in `rent_month'{
-			levelsof renta_imp_mon, local(rent_currency)
-
-			foreach c in `rent_currency'{
+		foreach m in `rent_month' {
+			*local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
+			foreach c in `monedas'{
 				di "////"
 				di `m'
 				di `c'
@@ -290,16 +290,37 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 			}
 		}
 		
+	// Taking care of people who need to have rent imputated but didn't answer what would be their housing costs if they had to pay
+		* Assumption: Para los pocos que no contestaron, el ingreso total familiar (pre-renta imputada) por la media de la participación de la renta imputada reportada en el ingreso total familiar (antes de renta imputada), entre aquellos que sí la contestaron.
+	
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
+			* Problem: there are people who answer they would spend too much if they paid rent. The 50% percentile answers 66%. The 99% percentile even 687 times their income before imputed rent!
+			* Note: imputation dofile will take care of outliers.
+			tab renta_imp_mon if renta_imp_en!=. & renta_imp_en!=0, mi
+			drop part_rentaimp
+			
+			* Changing outliers to missing	
+			program drop _all
+			qui: do "$impdos\outliers.do" 			
+			clonevar renta_imp_out=renta_imp
+			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing
+			sum	renta_imp_out if out_renta_imp==1 
+	
+			* Now without outliers
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
+			local partrentaimp = r(p50)
+			
 		sort interview__key interview__id quest relacion_en, stable
 		by interview__key interview__id quest: replace renta_imp=renta_imp[1] if relacion_en!=13 // We add to all the other household members (who are not domestic service) the imputed rent of the head
+		
+			* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated 
+		
+		replace renta_imp = `partrentaimp'*itf_sin_ri  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
+		drop part_rentaimp
+		
 			
-		gen renta_imp_b = itf_sin_ri*0.1 if propieta_no_paga == 1
-		
-			gen d_renta_imp_b = .
-			replace d_renta_imp_b = 1 if renta_imp==. & propieta_no_paga == 1 // Dummy for other calculations: who will have the 10%
-
-		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with 10% in cases where no guess is provided by hh.
-		
 	*********************
 	/* Dofile CEDLAS 2 */
 	*********************

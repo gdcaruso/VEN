@@ -21,32 +21,32 @@ Note:
 
 // Define rootpath according to user (silenced as this is done by main now)
 
-//  		* User 1: Trini
-//  		global trini 0
-//		
-//  		* User 2: Julieta
-//  		global juli   0
-//		
-//  		* User 3: Lautaro
-//  		global lauta  0
-//		
-//  		* User 4: Malena
-//  		global male   1
-//		
-//			
-//  		if $juli {
-//  				global dopath "C:\Users\wb563583\GitHub\VEN"
-//  				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-//  			}
-//  	    if $lauta {
-//  		}
-//  		if $trini   {
-//  		}
-//  		if $male   {
-//  				global dopath "C:\Users\wb550905\GitHub\VEN"
-//  				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-//  					}
-
+/*  		* User 1: Trini
+  		global trini 0
+		
+  		* User 2: Julieta
+  		global juli   0
+		
+  		* User 3: Lautaro
+  		global lauta  0
+		
+  		* User 4: Malena
+		global male   1
+		
+			
+  		if $juli {
+  				global dopath "C:\Users\wb563583\GitHub\VEN"
+  				global datapath "C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+  			}
+  	    if $lauta {
+  		}
+  		if $trini   {
+  		}
+  		if $male   {
+  				global dopath "C:\Users\wb550905\GitHub\VEN"
+  				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+  					}
+*/
 *Inputs
 	global impdos "$dopath\data_management\management\4. income imputation\dofiles"
  	global cleaned "$datapath\data_management\output\cleaned"
@@ -413,6 +413,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 		
 	foreach x in ila_m {
 	sort interview__id interview__key quest com, stable
+	
 	** Real zeros:
 	gen d`x'_zero=1 if (ila==0 | recibe_ingresolab_mon==0)
 			label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive ila)"
@@ -463,7 +464,7 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 
 	*Creating matrix
 		matrix aux1=( `a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' \ `a6')
-		*Percentage
+		*Percentages
 		matrix aux2=((`a0'/`a6')\(`a1'/`a6')\(`a2'/`a6')\(`a3'/`a6')\(`a4'/`a6')\(`a5'/`a6')\(`a6'/`a6'))*100
 		matrix a=nullmat(a), aux1, aux2
 	}
@@ -472,9 +473,8 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 
 	local i=1
 	foreach x in jubpen {
-
-	
 	sort interview__id interview__key quest com, stable	
+	
 	** Real zeros:
 	gen d`x'_zero=1 if (recibe_ingresopenjub==0 | ijubi_aux==0)
 			label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive pension)"
@@ -498,8 +498,6 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	
 	** Outliers 
 	clonevar `x'_out=`x'
-
-	
 	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
 	sum	`x'_out if	out_`x'==1 
 	gen d`x'_out=out_`x'==1 if jubi_o_rtarecibejubi==1 & recibe_ingresopenjub!=0  & `x'==.
@@ -527,15 +525,17 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 
 	*Creating matrix
 		matrix aux1=(`a0' \ `a1' \ `a2' \ `a3' \ `a4' \ `a5' \ `a6')
-		*Percentage
+		*Percentages
 		matrix aux2=((`a0'/`a6')\(`a1'/`a6')\(`a2'/`a6')\(`a3'/`a6')\(`a4'/`a6')\(`a5'/`a6')\(`a6'/`a6'))*100
 		matrix a`i'=nullmat(a`i'), aux1, aux2
 	}
 
 *** Labor benefits / Non-monetary labor income
+
 	local i=2
 	foreach x in bene {
 	sort interview__id interview__key quest com, stable
+	
 	** Zeros: answered 0 or said didn't receive non-monetary labor income
 	gen d`x'_zero=1 if (recibe_ingresolab_nomon==0 | ingresoslab_bene==0)
 		label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive non-monetary labor income)"
@@ -581,9 +581,11 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	}
 
 *** Monetary non-labor income (all except pensions)
+
 	local i=3
 	foreach x in inlanojub {
 	sort interview__id interview__key quest com, stable
+	
 	** Zeros: answered 0 or said didn't receive monetary non-labor income
 	gen d`x'_zero=1 if recibe_ingresonolab_mes==0 | (recibe_ingresonolab_mes==1 & `x'==0)
 		label def d`x'_zero 1 "Real zeros (answered 0 or said didn't receive monetary non-labor income other than pensions)"
@@ -599,13 +601,13 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	local a1=r(sum)
 	
 	** Missing values: Outliers
-	//clonevar `x'_out=`x'
-	//outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
-	//sum	`x'_out if out_`x'==1 //
-	//gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3) & `x'==.
-	//sum d`x'_out
-	//local a2=(sum)
-	local a2 "."
+	clonevar `x'_out=`x'
+	outliers `x' 10 90 5 5 // Ya cambia los outliers a missing
+	sum	`x'_out if out_`x'==1
+	gen d`x'_out=out_`x'==1 if inlist(recibe_ingresonolab,1,2,3) & `x'==.
+	sum d`x'_out
+	local a2=r(sum)
+	*local a2 "." // Before we had decided not to get rid of outliers but after inla became too high we decided we will
 	
 	** Missing values: sum of both
 	gen d`x'_miss2=1 if (report_ingnolab_nocuanto==1) /*| d`x'_out==1*/

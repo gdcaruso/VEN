@@ -28,10 +28,10 @@ clear all
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  1
+		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -63,6 +63,7 @@ set more off
 global merged "$datapath\data_management\output\merged"
 global cleaned "$datapath\data_management\output\cleaned"
 global forinflation "$datapath\data_management\output\for inflation"
+global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 
 //set universal dopaths
 global harmonization "$dopath\data_management\management\2. harmonization"

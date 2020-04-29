@@ -156,7 +156,7 @@ clear all
 	mi set flong
 	*set seed 66778899
 	mi register imputed log_ila_m
-	mi impute regress log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, add(50) rseed(66778899) force noi 
+	mi impute regress log_ila_m `lassovars' if log_ila_m>0 & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, add(2) rseed(66778899) force noi 
 	mi unregister log_ila_m
 	* Obs.: _mi_m es la variable que crea Stata luego de la imputacion e identifica cada base
 		*Ej. si haces 20 imputaciones _mi_m tendra valores de 0 a 20, donde 0 corresponde a la variable sin imputar e 1 a 20 a las bases con un posible valor para los missing values

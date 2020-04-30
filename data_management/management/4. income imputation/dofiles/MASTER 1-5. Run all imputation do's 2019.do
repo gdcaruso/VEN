@@ -317,6 +317,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		
 			* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated 
 		
+		*sum itf_sin_ri if relacion_en==1 & propieta_no_paga==1 & (renta_imp==. | renta_imp==.a | renta_imp==0)
 		replace renta_imp = `partrentaimp'*itf_sin_ri  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
 		drop part_rentaimp
 		

@@ -202,29 +202,29 @@ label value relacion relacion
 
 *** Weights/Factor de ponderacion: pondera
 
-merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
+merge m:1 interview__key interview__id using "$merged\final_encovi_weights.dta" // Sent by Michael and modified by Daniel on April 30th
+drop _merge
 
 	* Individual weights
-		gen pondera=final_pw
-		sort objectid, stable
-		by objectid: replace pondera=pondera/_N
-		replace pondera = round(pondera)
+		gen pondera = encovi_pw
+		replace pondera = round(pondera) // some commands later cannot work with non-integer weights
 		
 	* Household weights
-			sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: gen hogar1=1 if _n==1
-			sort objectid, stable
-		by objectid: egen total_hogares=sum(hogar1)
-			sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: replace total_hogares=. if _n>1
-			sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: gen pondera_hh=final_w if _n==1
-			sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: replace pondera_hh=pondera_hh/total_hogares if _n==1
-		replace pondera_hh = round(pondera_hh)
-		
-		drop total_hogares hogar1
-		
+		sort interview__key interview__id quest relacion_en, stable
+		bys interview__key interview__id quest: replace encovi_w=. if _n!=1
+			*Obs: we did it in this way instead of:
+				*gen pondera_hh = encovi_w if relacion_en==1
+			*Because there was one household which did not have "jefe de hogar" - one we have fixed it though. check for the fix:
+				/*Check:
+				gen primeroqueaparece=.
+				sort id relacion_en, stable
+				by id: replace primeroqueaparece = relacion_en[1]
+				tab primeroqueaparece if relacion_en!=1
+				*Its okay!
+				*/
+		gen pondera_hh=encovi_w 
+		replace pondera_hh = round(pondera_hh) // some commands later cannot work with non-integer weights
+	
 	* Checking population estimates
 		gen uno=1
 		*	Population

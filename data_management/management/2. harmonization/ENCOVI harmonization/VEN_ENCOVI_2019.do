@@ -322,23 +322,22 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 			13 = Servicio Domestico		*/
 	clonevar relacion_en = s6q2 if s6q2!=. & s6q2!=.a
 
-	gen     reltohead = 1		if  relacion_en==1
-	replace reltohead = 2		if  relacion_en==2
-	replace reltohead = 3		if  relacion_en==3  | relacion_en==4
-	replace reltohead = 4		if  relacion_en==5  
-	replace reltohead = 5		if  relacion_en==6 
-	replace reltohead = 6		if  relacion_en==7
-	replace reltohead = 7		if  relacion_en==8  
-	replace reltohead = 8		if  relacion_en==9
-	replace reltohead = 9		if  relacion_en==10
-	replace reltohead = 10		if  relacion_en==11
-	replace reltohead = 11		if  relacion_en==12
-	replace reltohead = 12		if  relacion_en==13
+	gen     relacion_comp = 1		if  relacion_en==1
+	replace relacion_comp = 2		if  relacion_en==2
+	replace relacion_comp = 3		if  relacion_en==3  | relacion_en==4
+	replace relacion_comp = 4		if  relacion_en==5  
+	replace relacion_comp = 5		if  relacion_en==6 
+	replace relacion_comp = 6		if  relacion_en==7
+	replace relacion_comp = 7		if  relacion_en==8  
+	replace relacion_comp = 8		if  relacion_en==9
+	replace relacion_comp = 9		if  relacion_en==10
+	replace relacion_comp = 10		if  relacion_en==11
+	replace relacion_comp = 11		if  relacion_en==12
+	replace relacion_comp = 12		if  relacion_en==13
 
-	label def reltohead 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
+	label def relacion_comp 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
 						6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"	
-	label value reltohead reltohead
-	rename reltohead relacion_comp
+	label value relacion_comp relacion_comp
 	label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
 *** Weights/Factor de ponderacion: pondera
@@ -368,25 +367,36 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 */
 
 merge m:1 interview__key interview__id using "$merged\final_encovi_weights.dta" // Sent by Michael and modified by Daniel on April 30th
+drop _merge
 
 	* Individual weights
 		gen pondera = encovi_pw
-		replace pondera = round(pondera)
+		replace pondera = round(pondera) // some commands later cannot work with non-integer weights
 		
 	* Household weights
-		gen pondera_hh = encovi_w if relacion_en==1
-		replace pondera_hh = round(pondera_hh)
+		sort interview__key interview__id quest relacion_en, stable
+		bys interview__key interview__id quest: replace encovi_w=. if _n!=1
+			*Obs: we did it in this way instead of:
+				*gen pondera_hh = encovi_w if relacion_en==1
+			*Because there was one household which did not have "jefe de hogar" - one we have fixed it though. check for the fix:
+				/*Check:
+				gen primeroqueaparece=.
+				sort id relacion_en, stable
+				by id: replace primeroqueaparece = relacion_en[1]
+				tab primeroqueaparece if relacion_en!=1
+				*Its okay!
+				*/
+		gen pondera_hh=encovi_w 
+		replace pondera_hh = round(pondera_hh) // some commands later cannot work with non-integer weights
 	
-	* Checking population estimates
+	* Checking population & hh estimates
 		gen uno=1
 		*	Population
 		sum uno [w=pondera] , detail 	// 24.9 M de personas
 		*	Households
 		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
 		drop uno
-	
-	*They don't match the ones we have - have to do the weights again
-stop
+		* 171 individuals and 53 households do not have weights assigned as they were in the "Listado Remoto"
 
 * Strata: strata
 	*Old: gen strata = estrato // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 

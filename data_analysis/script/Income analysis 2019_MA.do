@@ -86,7 +86,6 @@ use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 			replace hhrecibeinla = 1 if aux_hhrecibeinla>0 & aux_hhrecibeinla!=.
 			tab hhrecibeinla [w=pondera] if relacion_en==1, mi
 
-			stop
 			
 * Qué % del ingreso individual es cada componente del inla?
 
@@ -105,9 +104,11 @@ use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 	}
 	
 	gen part_eninla = part_ijubi_m_eninla + part_icap_m_eninla + part_rem_eninla + part_itranp_o_m_eninla + part_itranp_ns_eninla + part_itrane_o_m_eninla + part_itrane_ns_eninla + part_inla_extraord_eninla + part_inla_otro_eninla
-	br inla ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro if inla!=. & (part_eninla>1.05 | part_eninla<0.95)
+	*br inla ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro if inla!=. & (part_eninla>1.05 | part_eninla<0.95)
 
 /// Poverty analysis ///
+
+* One side
 
 	*Todos
 	tablecol pobre_extremo [w=pondera] if ocupado==1, rowpct nofreq mi
@@ -134,6 +135,17 @@ use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 	tablecol hombre pobre_extremo [w=pondera], rowpct nofreq mi
 	
 	*Nivel educativo del jefe
-	bys nivel_educ: sum pobre_extremo [w=pondera],
-
+	sort id relacion_en, stable
+	gen nivel_educ_jefe=.
+	by id: replace nivel_educ_jefe = nivel_educ[1] if relacion_en!=13 // Les pongo a todos los de la casa el valor del jefe
+	
+	bys nivel_educ: sum pobre_extremo [w=pondera]
+	
+* The other side
+	tablecol sector pobre_extremo [w=pondera] if ocupado==1, colpct nofreq mi
+	tablecol region_est1 pobre_extremo [w=pondera], colpct nofreq mi
+	tablecol agegroup pobre_extremo [w=pondera], colpct nofreq mi
+	tablecol hombre pobre_extremo [w=pondera], colpct nofreq mi
+	tablecol nivel_educ_jefe pobre_extremo [w=pondera], rowpct nofreq mi
+	
 stop

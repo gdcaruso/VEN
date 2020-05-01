@@ -162,6 +162,8 @@ save "$pathaux\Variables to merge with SEDLAC.dta", replace
 final variable selection
 ==============================================================================*/
 
+global output "$datapath\poverty_measurement\output"
+
 //run cleaning of variables
 run "$dopath\data_management\management\3. cleaning\final_variable_selection.do"
 

@@ -16,7 +16,7 @@ Note:
 =============================================================================*/
 ********************************************************************************
 // Define rootpath according to user (silenced as this is done by main now)
-/*
+
  	    * User 1: Trini
  		global trini 0
 		
@@ -53,7 +53,7 @@ Note:
 		global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 *Outputs
 		global cleaned "$datapath\data_management\output\cleaned"
-*/
+
 ********************************************************************************
 
 /*==============================================================================
@@ -343,7 +343,7 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 
 *** Weights/Factor de ponderacion: pondera
 
-merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
+/*merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
 
 	* Individual weights
 		gen pondera=final_pw
@@ -365,7 +365,18 @@ merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by M
 		replace pondera_hh = round(pondera_hh)
 		
 		drop total_hogares hogar
+*/
+
+merge m:1 interview__key interview__id using "$merged\final_encovi_weights.dta" // Sent by Michael and modified by Daniel on April 30th
+
+	* Individual weights
+		gen pondera = encovi_pw
+		replace pondera = round(pondera)
 		
+	* Household weights
+		gen pondera_hh = encovi_w if relacion_en==1
+		replace pondera_hh = round(pondera_hh)
+	
 	* Checking population estimates
 		gen uno=1
 		*	Population
@@ -373,6 +384,9 @@ merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by M
 		*	Households
 		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
 		drop uno
+	
+	*They don't match the ones we have - have to do the weights again
+stop
 
 * Strata: strata
 	*Old: gen strata = estrato // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 

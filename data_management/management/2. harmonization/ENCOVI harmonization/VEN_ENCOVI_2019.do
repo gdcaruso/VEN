@@ -1,16 +1,16 @@
 /*===========================================================================
 Country name:	Venezuela
 Year:			2019/2020
-Survey:			ECNFT
+Survey:			ENCOVI
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
 Authors:			Malena Acuña, Trinidad Saavedra, Lautaro Chittaro, Julieta Ladronis
 
-Dependencies:		CEDLAS/UNLP -- The World Bank
+Dependencies:		The World Bank
 Creation Date:		March/April, 2020
 Modification Date:  
-Output:			sedlac do-file template
+Output:				
 
 Note: 
 =============================================================================*/
@@ -163,10 +163,10 @@ save `household_hhid'
 use "$merged\individual.dta", clear
 merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
-* I drop those who do not collaborate in the survey
+* Dropping those who do not collaborate in the survey
 drop if colabora_entrevista==2
 
-*Obs: there is 1 obs. which does not merge. Maybe they are people who started to answer but then stopped answering
+*Obs: there was 1 obs. which does not merge (should not have been approved by headquarters as it was an empty interview. We deleted it in the "ad-hoc" cleaning part)
 
 *Change names to lower cases
 rename _all, lower
@@ -195,9 +195,9 @@ gen string_interview_month = substr(s4_start,6,2)
 gen new_interview_month = real(string_interview_month)
 replace interview_month = new_interview_month if (interview_month==.a | interview_month==.)
 
-// this is only to test wha
-//drop if interview month is november
-// drop if interview_month==11
+	// Testing:
+	// drop if interview month is november
+	// drop if interview_month==11
 
 gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==13					// Region Central: Aragua (5), Carabobo (8), Lara (13)
 replace region_est1 =  2 if entidad==12 | entidad==4 | entidad==6          			// Region LLanera: Guarico (12), Apure (4), Barinas (6)

@@ -30,7 +30,7 @@ Note:
 			
 		if $juli {
 				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 
+				global rootpath2 "C:\Users\WB563583\Github\VEN" 
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
@@ -138,11 +138,18 @@ save `house'
 
 
 rename _all, lower
+/*(************************************************************************************************************************************************* 
+*----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
+*************************************************************************************************************************************************)*/
+global control_ent entidad 
+
+* Entidad (State)
+clonevar entidad=enti
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Identification Variables  --------------------------------------------------
 *************************************************************************************************************************************************)*/
-
+global id_ENCOVI pais ano encuesta id com pondera strata psu
 * Country identifier: country
 gen pais = "VEN"
 
@@ -2026,8 +2033,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables  --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI /*$shocks_ENCOVI*/ $emigra_ENCOVI
-keep  $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI /*$shocks_ENCOVI*/ $emigra_ENCOVI
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI /*$shocks_ENCOVI*/ $emigra_ENCOVI
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI /*$shocks_ENCOVI*/ $emigra_ENCOVI
 
 save "$pathout\ENCOVI_2018_COMP.dta", replace
 

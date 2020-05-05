@@ -126,10 +126,16 @@ rename _all, lower
 	use `house', clear
 	merge m:1 ennumc using `emigracion' 
 	drop _merge
+/*(************************************************************************************************************************************************* 
+*----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
+*************************************************************************************************************************************************)*/
+global control_ent entidad 
+
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Identification Variables  --------------------------------------------------
 *************************************************************************************************************************************************)*/
+global id_ENCOVI pais ano encuesta id com pondera strata psu
 
 * Country identifier: country
 gen pais = "VEN"
@@ -1848,8 +1854,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order  $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI
-keep   $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI
+order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI
+keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI
 
 save "$pathout\ENCOVI_2017_COMP.dta", replace
 

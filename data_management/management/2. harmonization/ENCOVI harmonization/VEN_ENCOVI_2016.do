@@ -16,10 +16,10 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
@@ -30,7 +30,7 @@ Note:
 			
 		if $juli {
 				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 "
+				global rootpath2 "C:\Users\wb563583\Github\VEN" 
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
@@ -92,10 +92,19 @@ sort CONTROL LIN
 merge m:1 CONTROL LIN using "$data2016\region_2016.dta"
 drop _merge  
 rename _all, lower
+/*(************************************************************************************************************************************************* 
+*----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
+*************************************************************************************************************************************************)*/
+global control_ent entidad 
+
+* Entidad (State)
+clonevar entidad=enti
+
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Identification Variables  --------------------------------------------------
 *************************************************************************************************************************************************)*/
+global id_ENCOVI pais ano encuesta id com pondera strata psu
 
 * Country identifier: country
 gen pais = "VEN"
@@ -1510,7 +1519,7 @@ bro id relacion ipcf tp39 tp45 tp46 tp47 tp47m tp48m pp61*m relab ipatrp_m iasal
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
-keep  $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
 
 save "$pathout\ENCOVI_2016_COMP.dta", replace

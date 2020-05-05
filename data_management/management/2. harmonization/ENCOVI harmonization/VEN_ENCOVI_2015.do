@@ -16,10 +16,10 @@ Note:
 =============================================================================*/
 ********************************************************************************
 	    * User 1: Trini
-		global trini 1
+		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
@@ -30,7 +30,7 @@ Note:
 			
 		if $juli {
 				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 "
+				global rootpath2 "C:\Users\wb563583\Github\VEN" 
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
@@ -136,6 +136,7 @@ drop pov
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.1: Identification Variables  --------------------------------------------------
 *************************************************************************************************************************************************)*/
+global id_ENCOVI pais ano encuesta id com pondera strata psu
 
 * Country identifier: country
 gen pais = "VEN"
@@ -166,6 +167,13 @@ gen strata = .
 
 * Primary Sample Unit: psu 
 gen psu = .
+
+/*(************************************************************************************************************************************************* 
+*----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
+*************************************************************************************************************************************************)*/
+global control_ent entidad 
+
+clonevar entidad=enti
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
@@ -593,6 +601,7 @@ label def razon_dejo_est_comp 1 "Terminó los estudios" 2 "Escuela distante" 3 "
 7 "Enfermedad/discapacidad" 8 "Tiene que trabajar" 9 "No quiso seguir estudiando" 10 "Inseguridad al asistir al centro educativo" 11 "Discriminación o violencia" ///
 12 "Por embarazo/cuidar a los hijos" 13 "Tiene que ayudar en tareas del hogar" 14 "No lo considera importante" 15 "Otra"
 label value razon_dejo_est_comp razon_dejo_est_comp
+
 
 /*
 /*(************************************************************************************************************************************************ 
@@ -1398,8 +1407,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI
-keep  $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
 
 save "$pathout\ENCOVI_2015_COMP.dta", replace
 

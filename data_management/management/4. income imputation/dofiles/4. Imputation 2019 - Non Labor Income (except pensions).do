@@ -136,7 +136,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 	mi set flong
 	*set seed 66778899
 	mi register imputed log_inlanojub
-	mi impute regress log_inlanojub $lassoregress if log_inlanojub>0 & inlist(recibe_ingresonolab,1,2,3) , add(50) rseed(66778899) force noi 
+	mi impute regress log_inlanojub $lassoregress if log_inlanojub>0 & inlist(recibe_ingresonolab,1,2,3) , add(30) rseed(66778899) force noi 
 	mi unregister log_inlanojub
 
 ///*** REPLACING MISSINGS BY IMPUTED VALUES ***///

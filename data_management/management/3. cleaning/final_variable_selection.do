@@ -97,11 +97,11 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
 
 *----1.1: Identification Variables / Variables de identificación
-		global id_ENCOVI pais ano encuesta id com pondera psu
+		global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 
 *----1.2: Demographic variables  / Variables demográficas
 		global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi razon_cambio_resi_o pert_2014 razon_incorp_hh razon_incorp_hh_o ///
-				certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo
+				certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo miembros
 
 *----1.4: Dwelling characteristics / Caracteristicas de la vivienda
 		global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda ///

@@ -19,7 +19,7 @@ Note:
 ********************************************************************************
 
 // Define rootpath according to user (silenced as this is done by main now)
-/*
+
  	    * User 1: Trini
  		global trini 0
 		
@@ -50,7 +50,7 @@ Note:
 	
 		global merged "$datapath\data_management\output\merged"
 		global cleaned "$datapath\data_management\output\cleaned"
-*/	
+
 ********************************************************************************
 
 /*==============================================================================
@@ -84,6 +84,13 @@ Only one household has no head: it is a 1-person home
 ==============================================================================*/
 
 replace s6q2=1 if interview__id=="41c2e46694f245bd8face23c459ae18e" & interview__key=="16-35-68-66"
+
+/*==============================================================================
+Total missing observation 
+==============================================================================*/
+
+*Only one that should have not passed the HQ filter but did)
+drop if interview__key=="16-35-68-66"
 
 /*==============================================================================
 replace data

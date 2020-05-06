@@ -55,6 +55,7 @@ use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 	sum part_inlaf [w=pondera] if hogarsec==0 & part_inlaf!=.
 	sum part_rentaimp [w=pondera] if hogarsec==0 & part_rentaimp!=.
 
+	
 * Cuántas hh reciben/responden cada inla?
 	
 	global recibeninlalocal pens_soi pens_vss jubi_emp pens_dsa beca_pub beca_pri ayuda_pu ayuda_pr ayuda_fa asig_men otros
@@ -106,17 +107,22 @@ use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 	gen part_eninla = part_ijubi_m_eninla + part_icap_m_eninla + part_rem_eninla + part_itranp_o_m_eninla + part_itranp_ns_eninla + part_itrane_o_m_eninla + part_itrane_ns_eninla + part_inla_extraord_eninla + part_inla_otro_eninla
 	*br inla ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro if inla!=. & (part_eninla>1.05 | part_eninla<0.95)
 
+/// Tenencia vivienda ///
+
+tab tenencia_vivienda if relacion_en==1, mi
+
+
 /// Poverty analysis ///
 
 * One side
 
 	*Todos
-	tablecol pobre_extremo [w=pondera] if ocupado==1, rowpct nofreq mi
+	tab pobre_extremo [w=pondera] if ocupado==1, mi
 	
 	*Sector
 	tablecol sector pobre_extremo [w=pondera] if ocupado==1, rowpct nofreq mi
 			
-	*Departamento
+	*Región
 	tablecol region_est1 pobre_extremo [w=pondera], rowpct nofreq mi
 			
 	*Grupos de edad
@@ -146,6 +152,6 @@ use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 	tablecol region_est1 pobre_extremo [w=pondera], colpct nofreq mi
 	tablecol agegroup pobre_extremo [w=pondera], colpct nofreq mi
 	tablecol hombre pobre_extremo [w=pondera], colpct nofreq mi
-	tablecol nivel_educ_jefe pobre_extremo [w=pondera], rowpct nofreq mi
+	tablecol nivel_educ_jefe pobre_extremo [w=pondera], colpct nofreq mi
 	
 stop

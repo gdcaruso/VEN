@@ -171,6 +171,7 @@ drop if colabora_entrevista==2
 *Change names to lower cases
 rename _all, lower
 
+
 /*(************************************************************************************************************************************************* 
 *----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -250,12 +251,14 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 	
 	*combined_id concatenates 5 variables: entidad, municipio, parroquia, centro poblado, segmento
 	*It has 11 or 12 characters, we add 0 to the ones which have 11 so they are all the same length
-	replace combined_id = "0"+combined_id if substr(combined_id, 1,1)==string(entidad) & length(combined_id)==11 
-	*Obs: when uploading the data, ENSURE ANNONIMITY (because combined_id makes families identifiable) 
+	*replace combined_id = "0"+combined_id if substr(combined_id, 1,1)==string(entidad) & length(combined_id)==11 
+		// Note: we stopped doing this because some 11-numbered combined_id's became the same as other 12-numbered combined-id's when adding the 0 in front of them
+		
 	tostring hh_by_combined_id, replace
 	*Up to 10 hh by combined_id
 	replace hh_by_combined_id = "0"+hh_by_combined_id if length(hh_by_combined_id)==1
 	gen id = combined_id + hh_by_combined_id
+	*Obs: when uploading the data, ensure annonimity (however, we concluded that "id" does not make families identifiable) 
 	
 * Component identifier: com
 	** ENCOVI 2018 used "lin" (número de linea) which seems to be a created variable
@@ -428,6 +431,12 @@ drop _merge
 * Primary Sample Unit: psu  
 	gen psu = combined_id
 
+	/* Checking there are no problem in the identification of households using "id"
+	sort id, stable
+	by id: egen dosjefes = total(relacion_en) if relacion_en==1
+	br if dosjefes==2
+	*/
+	
 /*(************************************************************************************************************************************************* 
 *------------------------------------------	1.2: Demographic variables  / Variables demográficas --------------------------------------------------
 *************************************************************************************************************************************************)*/

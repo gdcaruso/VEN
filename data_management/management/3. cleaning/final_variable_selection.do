@@ -91,7 +91,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 ********************************************************************************	
 
 *---- II. Interview Control / Control de la entrevista
-		global control_ent entidad region_est1 municipio nombmun parroquia nombpar 
+		global control_ent entidad region_est1 municipio nombmun parroquia nombpar interview_month 
 		
 *----III Household determination / Determinacion de hogares
 		global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
@@ -205,7 +205,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global from_cedlas iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ///
 		ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm rem cct itrane_o_m itrane_o_nm itranp_o_m itranp_o_nm itranp_ns ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ///
 		ila ila_m ila_m_local ila_m_ext ila_nm ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_ns itrane_m itran itran_m inla_extraord inla_otro inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-		hogarsec interview_month interview__id interview__key quest  // additional
+		hogarsec  // additional
 				
 *----Pobreza
 		rename lp_19 lp_19usd
@@ -231,6 +231,9 @@ cap drop statut
 cap drop sector_urb 
 cap drop d_renta_imp_b
 cap drop ingresoslab_mon // Ahora es ila_m
+cap drop interview__id 
+cap drop interview__key 
+cap drop quest
 
 
 compress

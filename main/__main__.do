@@ -47,7 +47,9 @@ clear all
 		if $male   {
 				global dopath "C:\Users\wb550905\Github\VEN"
 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-}		
+				global outSEDLAC "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_SEDLAC_DATA_2014_2019\"
+				global outENCOVI "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018\"
+		}		
 ********************************************************************************
 
 
@@ -174,12 +176,12 @@ labeling and saving final full databases
 //run spanish labeling
 preserve
 run "$pathaux\labels ENCOVI spanish.do"
-save "$datapath\ENCOVI_2019_Spanish labels.dta", replace
+save "$outENCOVI\ENCOVI_2019_Spanish labels.dta", replace
 restore
 
 //run english labeling
 run "$pathaux\labels ENCOVI english.do"
-save "$datapath\ENCOVI_2019_English labels.dta", replace
+save "$outENCOVI\ENCOVI_2019_English labels.dta", replace
 
 /*==============================================================================
 run sedlac and adding variables of income, prices and poverty
@@ -195,11 +197,11 @@ sedlac-format labeling and saving final full dataset
 //run spanish labeling
 preserve
 run "$pathaux\labels SEDLAC spanish.do"
-save "$datapath\VEN_2019_ENFT_v01_M_v01_A_SEDLAC-01_Spanish labels.dta", replace
+save "$outSEDLAC\VEN_2019_ENCOVI_SEDLAC-01_Spanish labels.dta", replace
 restore
 
 //run english labeling
 run "$pathaux\labels SEDLAC english.do"
-save "$datapath\VEN_2019_ENFT_v01_M_v01_A_SEDLAC-01_English labels.dta", replace
+save "$outSEDLAC\VEN_2019_ENCOVI_SEDLAC-01_English labels.dta", replace
 
 clear all

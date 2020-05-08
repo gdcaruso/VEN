@@ -91,7 +91,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 ********************************************************************************	
 
 *---- II. Interview Control / Control de la entrevista
-		global control_ent entidad region_est1 municipio nombmun parroquia nombpar interview_month 
+		global control_ent entidad region_est1 municipio nombmun parroquia nombpar interview_month interview__id interview__key 
 		
 *----III Household determination / Determinacion de hogares
 		global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
@@ -231,8 +231,6 @@ cap drop statut
 cap drop sector_urb 
 cap drop d_renta_imp_b
 cap drop ingresoslab_mon // Ahora es ila_m
-cap drop interview__id 
-cap drop interview__key 
 cap drop quest
 
 

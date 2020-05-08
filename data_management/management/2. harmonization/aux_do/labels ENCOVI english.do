@@ -2167,8 +2167,7 @@ label var  iext_alquil "Received in the last year income from… 9. Rentals (veh
 
 
 *--------- Events which affected the household
- /* Events(s15q1): 1. Cuáles de los siguientes eventos han afectado a
-su hogar desde el año 2017 ?
+ /* Events(s15q1): 1. Cuáles de los siguientes eventos han afectado a su hogar desde el año 2017?
 		1.Muerte o discapacidad de un miembro adulto del hogar que trabajaba
 		2.Muerte de alguien que enviaba remesas al hogar
 		3.Enfermedad de la persona con el ingreso más importante del hogar
@@ -2285,30 +2284,8 @@ su hogar desde el año 2017 ?
 	}
 	
 
- *--------- How did the houselhold cope with the shock
+ *--------- How did the houselhold cope with the most recent shock
  /* (s15q2c): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
- 
-local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
-	foreach i of local x {
-		forval k = 1/21 {
-	label var reaccion_evento_`i'_`k' "Response to event"
-	*-- Label values
-	label def reaccion_evento_`i'_`k'_eng 1 "Selling livestock" 2 "Selling land" 3 "Selling property" ///
-	4 "Sending the children to live with friends" 5 "Stopped sending children to school" ///
-	6 "Working in other income generating activities" ///
-	8 "Received assiatnce from friends and relatives" 9 "Loans from friends and family" ///
-	10 "Loans from financial institution" ///
-	12 "Members of the household emigrated looking for a job" ///
-	13 "Credit purchases" 14 "Delayed payment of obligations" ///
-	15 "Sold the harvest in advance" 16 "Reduced the consumption of food" /// 
-	17 "Reduced consumption of non-food item" 18 "Used savings" ///
-	19 "Received assiatnce from a NGO" 20 "Advance payment from employer" ///
-	21 "Received assiatence from the government" 22 "The insurance covered the costs" ///
-	23 "Nothing" 24 "Other"
-	label val reaccion_evento_`i'_`k' reaccion_evento_`i'_`k'_eng
-		}
-	}
-	
 	
 	label var reaccion_evento_1_1 "2c. Your home sold livestock due to the recent shock  1. Death or disability of an adult household member who works"
 	label var reaccion_evento_2_1 "2c. Your home sold land due to the recent shock  1. Death or disability of an adult household member who works"
@@ -3217,4 +3194,4 @@ cap label var    ipcf_ppp11	     "Per capita household income (2011 dollars)"
 	label define hogarsec 		 	 0 "No" 1 "Yes"
 	label values hogarsec hogarsec
 
-	label var 	quest 	"Questionnaire (ENCOVI admin use)"
+	cap label var 	quest 	"Questionnaire (ENCOVI admin use)"

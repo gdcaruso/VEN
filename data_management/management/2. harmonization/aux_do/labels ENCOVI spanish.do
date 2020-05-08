@@ -25,7 +25,7 @@ label var	pondera         "Factor de ponderacion a nivel individual"
 cap label var 	pondera_hh		"Factor de ponderacion a nivel de los hogares"
 *label var	strata          "Variable de estratificacion"   
 label var   psu	     	 	"Unidad Primaria de Muestreo"
-label var 	quest 			"Cuestionario (para uso admin ENCOVI)"
+cap label var 	quest 			"Cuestionario (para uso admin ENCOVI)"
 label def 	entidad		1 "Distrito Capital" 2 "Amazonas" 3 "Anzoategui" 4 "Apure" ///
 						5 "Aragua" 6 "Barinas" 7 "Bolivar" 8 "Carabobo" 9 "Cojedes" ///
 						10 "Delta Amacuro" 11 "Falcon" 12 "Guarico" 13 "Lara" 14 "Merida" ///
@@ -800,6 +800,7 @@ label values relab relab
 		
 ** Shocks
 
+	*Cuáles de los siguientes eventos han afectado a su hogar desde el año 2017?
 	* s15q15__* or evento_*
 	label var evento_1 "Desde 2017, el hogar se vio afectado por: 1.Muerte o discapacidad de un miembro adulto del hogar que trabajaba"
 	label var evento_2 "Desde 2017, el hogar se vio afectado por: 2.Muerte de alguien que enviaba remesas al hogar"
@@ -847,6 +848,7 @@ label values relab relab
 	label var imp_evento_21 "Top 3 eventos: 21:Secuestro / robo / asalto, "
 	label var imp_evento_22 "Top 3 eventos: 22:Otra especificar"
 
+	* Cómo se las arregló su hogar con el choque más reciente?
 	* reaccion_evento_*_* or 15q2c__
 	
 	label var reaccion_evento_1_1 "2c. Su hogar vendió ganado por la reciente 1. Muerte o discapacidad de un miembro adulto del hogar que trabaja"

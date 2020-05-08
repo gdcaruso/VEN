@@ -3560,7 +3560,7 @@ Obs: las categorías no coinciden con las de la pregunta anterior.
 	}
 	
 
- *--------- How did the houselhold cope with the shock
+ *--------- How did the household cope with the most recent shock
  /* (s15q2c_*): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
 
 local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24

@@ -170,8 +170,6 @@ drop if colabora_entrevista==2
 *Change names to lower cases
 rename _all, lower
 
-stop
-
 /*(************************************************************************************************************************************************* 
 *----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -2193,7 +2191,18 @@ relab ocupado desocupa pea
 
 	* Employed:	ocupado
 	gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
-
+	*Another exact way of doing it:
+			*replace ocupado = 1 if trabajo_semana==1 | trabajo_semana_2==1 | trabajo_semana_2==2 | trabajo_independiente==1 | sueldo_semana==1 // Trabajando? 
+			*(Redundant) Assumption: if received a wage or benefits last week (s9q5/sueldo_semana==1), the survey considers them as ocupados (although they answered no to having worked). However, This question is only asked to those who trabajo_independiente==1 so they were already included
+	
+			/*Checks missings
+			gen edad9 = (inlist(edad,0,1,2,3,4,5,6,7,8,9)) if edad!=. & edad!=.a
+			tab ocupado edad9, mi
+			* 5342 de 33081 son niños de 9 o menos
+			br if ocupado==. & edad>9 // May 12: No one
+			drop edad9
+			*/
+			
 	* Unemployed: desocupa
 	gen     desocupa = (labor_status==3)  //buscando trabajo
 			
@@ -2203,6 +2212,7 @@ relab ocupado desocupa pea
 	* Economically active population: pea	
 	gen     pea = (ocupado==1 | desocupa ==1)
 
+	* Note: ocupado, desocupa and pea should be defined for all the population, according to SEDLAC
 	
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- XVI: BANKING / BANCARIZACIÓN ---------------------------------------------------------------
@@ -4602,6 +4612,6 @@ hogarsec interview_month interview__id interview__key quest labor_status miembro
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
 hogarsec interview_month interview__id interview__key quest miembros s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
-
+stop
 save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

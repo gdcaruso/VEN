@@ -74,7 +74,9 @@ global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 global merged "$datapath\data_management\output\merged"
 global cleaned "$datapath\data_management\output\cleaned"
-global output "$datapath\poverty_measurement\output"
+global output "$datapath\expenditure\output"
+
+
 ********************************************************************************
 
 /*==============================================================================
@@ -89,13 +91,13 @@ set more off
 * 1: generate deflators and ex rate conversion
 *************************************************************************************************************************************************)*/
 
-
+qui{
 	*** 0.0 To take everything to bolívares of Feb 2020 (month with greatest sample) ***
 		
 		* Deflactor
 
 
-use "$inflation", clear
+use "$inflation", clear //( MALE ACA )
 			
 			forvalues j = 10(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -127,7 +129,7 @@ use "$inflation", clear
 			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses 1 2 3 4 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$exrate", clear
+			use "$exrate", clear //( MALE ACA )
 			
 			destring mes, replace
 			foreach i of local monedas {
@@ -137,7 +139,7 @@ use "$inflation", clear
 					di `tc`i'mes`j''
 				}
 			}
-//aprils exchange rates temporary
+//aprils exchange rates temporary equal as march
 local tc1mes4 = `tc1mes3'
 local tc2mes4 = `tc2mes3'
 local tc3mes4 = `tc3mes3'
@@ -158,7 +160,7 @@ di `deflactor12'
 di `deflactor1'
 di `deflactor2'
 di `deflactor3'
-di `deflactor4' //falta!
+di `deflactor4' //temporary same as march
 
 
 
@@ -168,21 +170,21 @@ di `deflactor4' //falta!
 
 // import main encovi for basic hh data
 // import other expenditure data
-use "$datapath/ENCOVI_2019_Spanish labels.dta", replace //"$output/pob_referencia.dta" for the pop of reference // "$datapath/ENCOVI_2019_Spanish.dta"
+use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanish labels.dta", replace //MALE ACA
 cap drop if hogarsec == 1
 cap drop _merge
 cap egen miembros = count(com), by (interview__key interview__id)
-cap gen pondera_hh = 1
 
-keep interview__id interview__key quest ipcf miembros pondera_hh
-duplicates drop
+drop if pondera_hh ==.
+keep interview__id interview__key ipcf miembros pondera_hh
+isid interview__id interview__key
 tempfile hh
 save `hh'
 
 
 // import feb2020 product data
-use "$merged/product-hh.dta", replace //use merged because we need expenditure, not homogenized units of cleaned dataset
-merge m:1 interview__id interview__key quest using `hh', keep(matched) 
+use "$merged/product-hh.dta", replace //use merged because we need expenditure, not homogenized units of cleaned dataset ( MALE ACA )
+merge m:1 interview__id interview__key using `hh', keep(matched) 
 
 // // generate month of the survey
 gen month = month(date_consumption_survey) // its another variable in harmonization
@@ -256,7 +258,7 @@ replace gasto_mensual = gasto_feb20* 30.42/7 if type_good==6 //eatingout weekly
 replace gasto_mensual = gasto_feb20* 30.42/30.42 if type_good==7 // monthly for enterainment
 replace gasto_mensual = round(gasto_mensual)
 
-keep interview__id interview__key quest bien gasto_mensual type_good current_good month miembros ipcf pondera_hh
+keep interview__id interview__key bien gasto_mensual type_good current_good month miembros ipcf pondera_hh
 
 tempfile conSpending
 save `conSpending'
@@ -265,9 +267,9 @@ save `conSpending'
 * // HH section  (wide shape) 
 *********************************************************************************************************************)*/
 // import other expenditure data
-use "$datapath/ENCOVI_2019_Spanish labels.dta", replace
+use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanish labels.dta", replace // (MALE ACA)
 cap drop _merge
-merge m:1 interview__id interview__key quest using `hh', keep(matched) 
+merge m:1 interview__id interview__key using `hh', keep(matched) 
 
 
 //select relevant variables
@@ -285,12 +287,16 @@ global jubivar d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant
 
 
 
-keep interview__id interview__key quest interview_month quest ipcf miembros pondera_hh  ///
+keep interview__id interview__key interview_month ipcf miembros pondera_hh  ///
 $viviendavar ///
 $serviciosvar ///
 $educvar ///
 $saludvar ///
 $jubivar
+
+sort interview__id interview__key pondera_hh, stable
+by interview__id interview__key: replace pondera_hh= pondera_hh[1] 
+
 
 ////////////////////
 // CLASIFICACION //
@@ -326,10 +332,7 @@ foreach m in `month'{
 
 ******************inputed rent by analyst
 // data in bolivares feb2020
-gen gasto903 = renta_imp //assumed everything was moved in the income module to feb 2020
-
-gen gasto90 = renta_imp // uses imputed rent or
-replace gasto90 = gasto901 if gasto901 !=. // reported rent. If there are both, reported rent prevails
+gen gasto902 = renta_imp //assumed everything was moved in the income module to feb 2020
 
 
 **********************************************services
@@ -337,12 +340,12 @@ replace gasto90 = gasto901 if gasto901 !=. // reported rent. If there are both, 
 *******************agua
 
 
-gen gasto911 =.
-gen gasto912 =.
-gen gasto913 =.
-gen gasto914 =.
-gen gasto915 =.
-gen gasto916 =.
+gen gasto911 =. //pagua_monto 
+gen gasto912 =. //pelect_monto 
+gen gasto913 =. //pgas_monto 
+gen gasto914 =. //pcarbon_monto 
+gen gasto915 =. //pparafina_monto 
+gen gasto916 =. //ptelefono_monto 
 
 
 // gasto en agua
@@ -368,9 +371,6 @@ levelsof `v'_m, local(month)
 	}
 
 
-egen gasto91 = rowtotal(gasto91*)
-
-
 
 ****************************************educacion
 //
@@ -380,15 +380,15 @@ egen gasto91 = rowtotal(gasto91*)
 
 
 
-gen gasto921 =.
-gen gasto922 =.
-gen gasto923 =.
-gen gasto924 =.
-gen gasto925 =.
-gen gasto926 =.
+gen gasto921 =. //cuota_insc_monto 
+gen gasto922 =. //compra_utiles_monto 
+gen gasto923 =. //compra_uniforme_monto 
+gen gasto924 =. //costo_men_monto 
+gen gasto925 =. //costo_transp_monto 
+gen gasto926 =. //otros_gastos_monto
 
 
-// gasto en agua
+// gasto en educ
 local educ cuota_insc compra_utiles compra_uniforme costo_men costo_transp otros_gastos
 local n=920
 
@@ -411,8 +411,6 @@ levelsof `v'_m, local(month)
 	}
 
 
-egen gasto92 = rowtotal(gasto92*)
-
 
 *******************************************salud
 
@@ -420,11 +418,11 @@ egen gasto92 = rowtotal(gasto92*)
 
 ********************pago consulta (assumed mensual)
 
-gen gasto931 =.
-gen gasto932 =.
-gen gasto933 =.
-gen gasto934 =.
-gen gasto935 =.
+gen gasto931 =. //pago_consulta
+gen gasto932 =. //pago_remedio
+gen gasto933 =. //pago_examen
+gen gasto934 =. // remedio_tresmeses
+gen gasto935 =. //pagosegsalud
 
 
 rename pago_remedio cant_pago_remedio
@@ -454,8 +452,6 @@ levelsof mes_`v', local(month)
 
 
 
-egen gasto93 = rowtotal(gasto93*)
-
 ******************************************** jubilacion
 
 // global jubivar d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone cant_aporta_pension mone_aporta_pension
@@ -463,13 +459,13 @@ egen gasto93 = rowtotal(gasto93*)
 *************** descuentos ? incorporamos ? (assumed mensual)
 ********* descuento seg social obligatorio
 
-gen gasto941 =.
-gen gasto942 =.
-gen gasto943 =.
-gen gasto944 =.
-gen gasto945 =.
-gen gasto946 =.
-gen gasto947 =.
+gen gasto941 =. //d_sso
+gen gasto942 =. //d_spf
+gen gasto943 =. //d_isr
+gen gasto944 =. //d_cah
+gen gasto945 =. //d_cpr
+gen gasto946 =. //d_rpv
+gen gasto947 =. //d_otro
 
 
 
@@ -498,7 +494,7 @@ levelsof interview_month, local(month)
 
 // gasto en aportapension
 
-gen gasto948=.
+gen gasto948=. //aporta_pension
 levelsof interview_month, local(month)
 	foreach m in `month'{
 	levelsof mone_aporta_pension, local(currency)
@@ -512,19 +508,20 @@ levelsof interview_month, local(month)
 		}
 		}
 		}
-		
-egen gasto94 = rowtotal(gasto94*)
+
 
 		
-
+} //end of quietly
 ***********************************end of expenditures********************************
 
+
 // adds expenditure of hh, removing individual dimension 
-collapse (sum) gasto??, by (interview__id interview__key quest ipcf miembros pondera_hh)
+collapse (sum) gasto*, by (interview__id interview__key ipcf miembros pondera_hh)
 
 
 // now we reshape the wide data to make it long
-reshape long gasto, i(interview__id interview__key quest ipcf miembros pondera_hh) j(bien)
+reshape long gasto, i(interview__id interview__key ipcf miembros pondera_hh) j(bien)
+
 
 rename gasto gasto_mensual
 replace gasto_mensual = round(gasto_mensual)
@@ -533,20 +530,14 @@ replace gasto_mensual = round(gasto_mensual)
 gen current_good = 1
 
 // generate types of goods
-gen type_good = 8 if bien==90
-replace type_good = 9 if bien==91
-replace type_good = 10 if bien==92
-replace type_good = 11 if bien==93
-replace type_good = 12 if bien==94
+gen type_good = 8 if bien>=900 & bien<=909  //housing
+replace type_good = 9 if bien>=910 & bien<=919  //services
+replace type_good = 10 if bien>=920 & bien<=929  //educ
+replace type_good = 11 if bien>=930 & bien<=939  //health
+replace type_good = 12 if bien>=940 & bien<=949  //ss
 
 replace current_good = 0 if type_good == 12
 
-
-replace bien = 900 if bien == 90 & type_good == 8
-replace bien = 910 if bien == 91 & type_good == 9
-replace bien = 920 if bien == 92 & type_good == 10
-replace bien = 930 if bien == 93 & type_good == 11
-replace bien = 940 if bien == 94 & type_good == 12
 
 
 
@@ -556,11 +547,11 @@ save `hhSpending'
 // apends hh spending dataset with consumption dataset
 append using `conSpending'
 
-keep interview__id interview__key quest ipcf miembros  ///
+keep interview__id interview__key ipcf miembros  ///
 bien type_good current_good gasto_mensual pondera_hh
 
 
-order interview__id interview__key quest ipcf miembros pondera_hh  ///
+order interview__id interview__key ipcf miembros pondera_hh  ///
 bien type_good current_good gasto_mensual
 
 
@@ -579,17 +570,15 @@ replace gasto_mensual = 0 if gasto_mensual ==.
 sort interview__id interview__key, stable
 by interview__id: replace interview__key= interview__key[_N]
 
-sort interview__id interview__key quest, stable
-by interview__id interview__key: replace quest= quest[1]
 
-sort interview__id interview__key quest miembros, stable
-by interview__id interview__key quest: replace miembros= miembros[1]
+sort interview__id interview__key miembros, stable
+by interview__id interview__key: replace miembros= miembros[1]
 
-sort interview__id interview__key quest ipcf, stable
-by interview__id interview__key quest: replace ipcf= ipcf[1]
+sort interview__id interview__key ipcf, stable
+by interview__id interview__key: replace ipcf= ipcf[1]
 
-sort interview__id interview__key quest pondera_hh, stable
-by interview__id interview__key quest: replace pondera_hh= pondera_hh[1]
+sort interview__id interview__key pondera_hh, stable
+by interview__id interview__key: replace pondera_hh= pondera_hh[1]
 
 sort bien type_good, stable
 by bien: replace type_good= type_good[1]
@@ -600,39 +589,213 @@ by bien: replace current_good = current_good[1]
 gen gasto_men_pc = gasto_mensual/miembros
 
 
+save "$output/unwinsored_expenditure.dta", replace
+
 
 /*(************************************************************************************************************************************************* 
 * 1:detect outliars
 *************************************************************************************************************************************************)*/
+use "$output/unwinsored_expenditure.dta", replace
+
+// need to correct by outliears!
+egen total = total(gasto_men_pc), by(interview__id)
+gen share = gasto_men_pc/total
+
+
 levelsof bien, local (good_list)
 gen gasto_men_pc_winsored = .
-
+gen winsored = 0
 
 foreach b in `good_list'{
  
 di "----------------"
 di `b'
-summarize gasto_men_pc if bien == `b', detail
-replace gasto_men_pc_winsored =r(p99) if gasto_men_pc>r(p99) & bien == `b'
-replace gasto_men_pc_winsored =r(p1) if gasto_men_pc<r(p1) & bien == `b'
+qui summarize gasto_men_pc if bien == `b' & gasto_men_pc>0, detail
+		replace gasto_men_pc_winsored = gasto_men_pc if bien == `b'
+		replace gasto_men_pc_winsored =r(p99) if gasto_men_pc>r(p99) & bien == `b' & gasto_men_pc>0 //replace values over p99
+		replace gasto_men_pc_winsored =r(p1) if gasto_men_pc<r(p1) & bien == `b' & gasto_men_pc>0 //replace values under p1 (no answer excluded)
+		replace winsored = 1 if (gasto_men_pc<r(p1) | gasto_men_pc>r(p99)) & bien == `b' & gasto_men_pc>0 //flag
 }
 
+egen total_winsored = total(gasto_men_pc_winsored), by(interview__id)
+gen share_winsored = gasto_men_pc_winsored/total_winsored
+
+
 //generate expenditure aggregates per hh
-sort interview__id interview__key quest, stable
-egen gpcf = total(gasto_men_pc), by (interview__id interview__key quest)
-egen gpcf_food = total(gasto_men_pc) if inrange(bien,1,87), by (interview__id interview__key quest)
-egen gpcf_nonfood = total(gasto_men_pc) if !inrange(bien,1,87) & current_good==1, by (interview__id interview__key quest)
+sort interview__id interview__key, stable
+egen gpcf = total(gasto_men_pc_winsored), by (interview__id interview__key)
+egen gpcf_food = total(gasto_men_pc_winsored) if inrange(bien,1,87) & current_good==1, by (interview__id interview__key)
+egen gpcf_nonfood = total(gasto_men_pc_winsored) if !inrange(bien,1,87) & current_good==1, by (interview__id interview__key)
+egen gpcf_housing = total(gasto_men_pc_winsored) if inrange(bien,901,902), by (interview__id interview__key)
+egen gpcf_other = total(gasto_men_pc_winsored) if !inrange(bien,901,902) & !inrange(bien,1,87) & current_good==1, by (interview__id interview__key)
+
+
+// // agregate winsor
+// summarize gpcf, detail
+// replace gpcf = r(p99) if gpcf>r(p99)
+// replace gpcf =r(p1) if gpcf<r(p1)
+
 
 //complete observations
-sort interview__id interview__key quest gpcf_food, stable
-by interview__id interview__key quest: replace gpcf_food = gpcf_food[1] 
-sort interview__id interview__key quest gpcf_nonfood, stable
-by interview__id interview__key quest: replace gpcf_nonfood = gpcf_nonfood[1]
+sort interview__id interview__key gpcf_food, stable
+by interview__id interview__key: replace gpcf_food = gpcf_food[1] 
+sort interview__id interview__key gpcf_nonfood, stable
+by interview__id interview__key: replace gpcf_nonfood = gpcf_nonfood[1]
+sort interview__id interview__key gpcf_housing, stable
+by interview__id interview__key: replace gpcf_housing = gpcf_housing[1]
+sort interview__id interview__key gpcf_other, stable
+by interview__id interview__key: replace gpcf_other = gpcf_other[1]
 
 
-gen orsh = gpcf/gpcf_food  
+
+// check orshanskys
+gen orsh = gpcf/gpcf_food 
+gen share_food = gpcf_food/gpcf
+gen share_housing = gpcf_housing/gpcf
+gen share_other = gpcf_other/gpcf
+
+save "$output/winsored_expenditure_product_level.dta", replace
+
+
 // 17 hh do not answer consumption
-collapse (max) orsh (max) pondera_hh, by(interview__key interview__id quest)
+preserve
+collapse (max) orsh (max) pondera_hh, by(interview__key interview__id)
 summ orsh [w=pondera_hh], detail
+restore
 
-stop
+preserve
+keep gpcf share* interview__id interview__key
+duplicates drop
+tempfile expenditure
+save `expenditure'
+restore
+
+collapse (max) gpcf gpcf_* share*, by(interview__key interview__id)
+
+
+
+save "$output/winsored_expenditure_hh_level.dta", replace
+
+
+/*(************************************************************************************************************************************************* 
+* 1:compare against lines
+*************************************************************************************************************************************************)*/
+
+
+use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanish labels.dta", replace // (MALE ACA)
+
+
+
+merge m:1 interview__id interview__key using "$output/winsored_expenditure_hh_level.dta"
+drop _merge
+save "ENCOVI_2019_with_expenditures_Spanish labels.dta", replace //(MALE ACA)
+
+// drop lp_* pobre pobre_extremo
+//
+// cap drop if hogarsec == 1
+//
+// //generates lines
+// gen lp_moderada = 5450207
+// gen lp_extrema = 2217069
+// gen le_ofi = 2502450
+// gen lp_ofi = 5004901
+// gen lp_19_ready = 1259070
+// gen lp_32_ready = 2120539
+// gen lp_55_ready = 3644676
+//
+// // lines and sorted gpcf plot
+// sort gpcf, stable
+// gen personas = sum(pondera) //running sum
+// egen max_obs = max(personas)
+// local maxobs = max_obs[1]*0.95
+//
+//
+// graph twoway line gpcf personas [fw=pondera]   if personas<`maxobs', lcolor("black") lw(thick) ///
+// || line lp_19_ready personas  [fw=pondera], lcolor("blue") ///
+// || line lp_32_ready personas [fw=pondera], lcolor("blue") ///
+// || line lp_55_ready personas [fw=pondera], lcolor("blue") ///
+// || line lp_moderada personas [fw=pondera], lcolor("red") lw(thick) ///
+// || line lp_extrema personas [fw=pondera], lcolor("red") lw(thick) ///
+// || line le_ofi personas [fw=pondera], lcolor("green") ///
+// || line lp_ofi personas [fw=pondera], lcolor("green")  ///
+//  legend(off) ytitle("")  ytitle("") graphregion(color(gs15)) ylabel(, nogrid format(%12.0f)) xlabel(,format(%12.0f))
+//  
+//  // clasificates population using diff lines
+// gen pobre = gpcf<lp_moderada
+// gen pobre_extremo = gpcf<lp_extrema
+// gen pobre_extremo_ofi = gpcf<le_ofi
+// gen pobre_ofi = gpcf<lp_ofi
+// gen pobre_19 = gpcf<lp_19_ready
+// gen pobre_32 = gpcf<lp_32_ready
+// gen pobre_55 = gpcf<lp_55_ready
+//
+// // generate matrix of results
+//
+// sum pobre [fw=pondera]
+// mat A1 = r(mean)
+//
+// sum pobre_extremo [fw=pondera]
+// mat A2 = r(mean)
+//
+// sum pobre_ofi [fw=pondera]
+// mat A3 = r(mean)
+//
+// sum pobre_extremo_ofi [fw=pondera]
+// mat A4 = r(mean)
+//
+// sum pobre_19 [fw=pondera]
+// mat A5 = r(mean)
+//
+// sum pobre_32 [fw=pondera]
+// mat A6 = r(mean)
+//
+// sum pobre_55 [fw=pondera]
+// mat A7 = r(mean)
+//
+// local names "Pobreza" "Pobreza extrema" "Pobreza oficial" "Pobreza extrema oficial" "Pobreza 1.9" "Pobreza 3.2" "Pobreza 5.5"
+//
+// mat R1 = A1\A2\A3\A4\A5\A6\A7
+// matrix rownames R1 = `names'
+//
+//
+// // generate matrix of results
+//
+// sum lp_moderada
+// mat B1 = r(mean)
+//
+// sum lp_extrema
+// mat B2 = r(mean)
+//
+// sum lp_ofi
+// mat B3 = r(mean)
+//
+// sum le_ofi
+// mat B4 = r(mean)
+//
+// sum lp_19_ready
+// mat B5 = r(mean)
+//
+// sum lp_32_ready
+// mat B6 = r(mean)
+//
+// sum lp_55_ready
+// mat B7 = r(mean)
+//
+//
+// mat R2 = B1\B2\B3\B4\B5\B6\B7
+// matrix rownames R2 = `names'
+// mat R3 = (B1\B2\B3\B4\B5\B6\B7) / ppp11[1] / ipc[1]*ipc11[1] /30.42
+// matrix rownames R3 = `names'
+//
+// matlist R1
+// matlist R2
+// matlist R3
+//
+// /*(************************************************************************************************************************************************* 
+// * 1:compare expenditure against income
+// *************************************************************************************************************************************************)*/
+//
+// gen g_to_y = gpcf/ipcf
+//
+//
+// summ g_to_y [w=pondera], detail

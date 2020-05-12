@@ -96,22 +96,21 @@ sort interview_month quintil, stable
 	sum perc_`i'eninla if inla!=.
 	}
 
-	* Generate variable ocupado / "occupied"
-		gen ocupado = .
-		replace ocupado = 1 if inlist(labor_status,1,2)
-			*Another exact way of doing it:
-			*replace ocupado = 1 if trabajo_semana==1 | trabajo_semana_2==1 | trabajo_semana_2==2 | trabajo_independiente==1 | sueldo_semana==1 // Trabajando? 
-		*(Redundant) Assumption: if received a wage or benefits last week (s9q5/sueldo_semana==1), the survey considers them as ocupados (although they answered no to having worked). However, This question is only asked to those who trabajo_independiente==1 so they were already included
-		replace ocupado = 0 if trabajo_semana==0 & trabajo_semana_2==3 & trabajo_independiente==0
-		label def ocupado 		1 "Ocupado" 0 "No ocupado"
-		label values ocupado ocupado
+	*We ended up generating this variable in VEN_ENCOVI_2019
+		/* Generate variable ocupado / "occupied"
+			gen ocupado = .
+			replace ocupado = 1 if inlist(labor_status,1,2)
+				*Another exact way of doing it:
+				*replace ocupado = 1 if trabajo_semana==1 | trabajo_semana_2==1 | trabajo_semana_2==2 | trabajo_independiente==1 | sueldo_semana==1 // Trabajando? 
+			*(Redundant) Assumption: if received a wage or benefits last week (s9q5/sueldo_semana==1), the survey considers them as ocupados (although they answered no to having worked). However, This question is only asked to those who trabajo_independiente==1 so they were already included
+			replace ocupado = 0 if trabajo_semana==0 & trabajo_semana_2==3 & trabajo_independiente==0
 			*Checks missings
-			gen edad9 = (inlist(edad,0,1,2,3,4,5,6,7,8,9)) if edad!=. & edad!=.a
-			tab ocupado edad9, mi
-			* 4979 de los 4991 missing en ocupados son niños de 9 o menos
-			*br if ocupado==. & edad>9
-			* Los 12 restantes son encuestas incompletas 
-	
+				gen edad9 = (inlist(edad,0,1,2,3,4,5,6,7,8,9)) if edad!=. & edad!=.a
+				tab ocupado edad9, mi
+				* 4979 de los 4991 missing en ocupados son niños de 9 o menos
+				*br if ocupado==. & edad>9
+				* Los 12 restantes son encuestas incompletas 
+		*/
 	
 /// *** CASES TO BE IMPUTED *** ///
 

@@ -91,6 +91,9 @@ label define matpreca 0 "Materiales no Precarios" 1 "Materiales Precarios"
 label values matpreca matpreca
 
 label var    region_est1     "Region geografica desagregacion menor (estandarizada)" 
+label def region_est1 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
+          5 "Andina" 6 "Nor-Oriental" 7 "Capital"
+label value region_est1 region_est1
 label var    region_est2     "Region geografica desagregacion intermedia (estandarizada)" 
 label var    region_est3     "Region geografica desagregacion mayor (estandarizada)" 
 

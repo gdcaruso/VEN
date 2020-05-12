@@ -1,7 +1,7 @@
 /*===========================================================================
 Country name:	Venezuela
 Year:			2019/2020
-Survey:			ECNFT
+Survey:			ENCOVI
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
@@ -24,10 +24,10 @@ Note:
 // 		global juli   0
 //		
 // 		* User 3: Lautaro
-// 		global lauta  1
+// 		global lauta  0
 //		
 // 		* User 4: Malena
-// 		global male   0
+// 		global male   1
 //			
 // 		if $juli {
 // 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -44,16 +44,6 @@ Note:
 // 				global dopath "C:\Users\wb550905\Github\VEN"
 // 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 //}		
-********************************************************************************
-
-
-
-/*==============================================================================
-Program set up
-==============================================================================*/
-version 14
-drop _all
-set more off
 
 // //set universal datapaths
 // global merged "$datapath\data_management\output\merged"
@@ -150,10 +140,10 @@ save `household_hhid'
 use "$merged\individual.dta", clear
 merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
-* I drop those who do not collaborate in the survey
+* Dropping those who do not collaborate in the survey
 drop if colabora_entrevista==2
 
-*Obs: there is 1 obs. which does not merge. Maybe they are people who started to answer but then stopped answering
+*Obs: there was 1 obs. which does not merge (should not have been approved by headquarters as it was an empty interview. We deleted it in the "ad-hoc" cleaning part)
 
 *Change names to lower cases
 rename _all, lower
@@ -182,7 +172,7 @@ gen string_interview_month = substr(s4_start,6,2)
 gen new_interview_month = real(string_interview_month)
 replace interview_month = new_interview_month if (interview_month==.a | interview_month==.)
 
-// this is only to test wha
+// Testing
 //drop if interview month is november
 // drop if interview_month==11
 
@@ -194,9 +184,6 @@ replace region_est1 =  5 if entidad==14 | entidad==20 | entidad==21					// Regio
 replace region_est1 =  6 if entidad==3 | entidad==7 | entidad==16 | entidad==17 | entidad==19	// Region Oriental: Bolivar (7), Anzoategui (3), Monagas (16), Nueva Esparta (17), Sucre (19)
 replace region_est1 =  7 if entidad==15 | entidad==24 | entidad==1					// Region Capital: Distrito Capital (1), Miranda (15), Vargas (24) 
 label var region_est1 "Region"
-label def region_est1 1 "Region Central"  2 "Region Llanera" 3 "Region Occidental" 4 "Region Zuliana" ///
-          5 "Region Andina" 6 "Region Nor-Oriental" 7 "Capital"
-label value region_est1 region_est1
 * Obs: Delta Amacuro and Amazonas were not surveyed.
 
 
@@ -236,14 +223,17 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 	**Variables id_hh, hhid, id_str were generated for the listing, we shouldn't use them to generate id
 	
 	*combined_id concatenates 5 variables: entidad, municipio, parroquia, centro poblado, segmento
+	
 	*It has 11 or 12 characters, we add 0 to the ones which have 11 so they are all the same length
-	replace combined_id = "0"+combined_id if substr(combined_id, 1,1)==string(entidad) & length(combined_id)==11 
-	*Obs: when uploading the data, ENSURE ANNONIMITY (because combined_id makes families identifiable) 
+	*replace combined_id = "0"+combined_id if substr(combined_id, 1,1)==string(entidad) & length(combined_id)==11 
+		// Note: we stopped doing this because some 11-numbered combined_id's became the same as other 12-numbered combined-id's when adding the 0 in front of them
+	
 	tostring hh_by_combined_id, replace
 	*Up to 10 hh by combined_id
 	replace hh_by_combined_id = "0"+hh_by_combined_id if length(hh_by_combined_id)==1
 	gen id = combined_id + hh_by_combined_id
-	
+		*Obs: when uploading the data, ensure annonimity (however, we concluded that "id" does not make families identifiable)
+		
 * Component identifier: com
 	** ENCOVI 2018 used "lin" (número de linea) which seems to be a created variable
 	
@@ -277,7 +267,7 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 	gen com  = _n + min + 1
 		drop z min
 	
-	duplicates report id com //verification
+	duplicates report id com //verification: ok, no surplus
 
 ** Relation to the head:
 	/* Categories of the new harmonized variable: relacion_comp
@@ -327,6 +317,17 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 	label value relacion_comp relacion_comp
 	label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
+	/*Check
+		sort id, stable
+		by id: egen versihayjefe=min(relacion_en)
+		br if versihayjefe!=1
+		
+		drop if relacion_en!=1
+		cap isid id
+		br if id[_n]==id[_n-1]
+		*solves why there where 3 houses with problems
+	*/
+
 *** Weights/Factor de ponderacion: pondera
 
 merge m:1 interview__key interview__id using "$merged\final_encovi_weights.dta" // Sent by Michael and modified by Daniel on April 30th
@@ -338,24 +339,27 @@ drop _merge
 		
 	* Household weights
 		sort interview__key interview__id quest relacion_en, stable
-		bys interview__key interview__id quest: replace encovi_w=. if _n!=1
+		by interview__key interview__id quest: replace encovi_w=. if _n!=1
 			*Obs: we did it in this way instead of:
 				*gen pondera_hh = encovi_w if relacion_en==1
 			*Because there was one household which did not have "jefe de hogar" - one we have fixed it though. check for the fix:
-			gen primeroqueaparece=.
-			sort id relacion_en, stable
-			by id: replace primeroqueaparece = relacion_en[1]
-			tab primeroqueaparece if relacion_en!=1
+				/*Check:
+				gen primeroqueaparece=.
+				sort id relacion_en, stable
+				by id: replace primeroqueaparece = relacion_en[1]
+				tab primeroqueaparece if relacion_en!=1
+				*Its okay!
+				*/
 		gen pondera_hh=encovi_w 
 		replace pondera_hh = round(pondera_hh) // some commands later cannot work with non-integer weights
 	
-* Checking population estimates
-	gen uno=1
-	*	Population
-	sum uno [w=pondera] , detail 	// 24.9 M de personas
-	*	Households
-	sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
-	drop uno
+	* Checking population & hh estimates
+		gen uno=1
+		*	Population
+		sum uno [w=pondera] , detail 	// 24.9 M de personas
+		*	Households
+		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
+		drop uno
 
 * Strata: strata
 	*Old: gen strata = estrato // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 
@@ -668,7 +672,7 @@ clonevar nbanios = s5q3 if s5q2==1
 * Note: s5q4, s5q5, s5q6 in next dofile section
 
 *** Housing tenure
-/* TENENCIA_VIVIENDA (s5q7): régimen de  de la vivienda  
+/* TENENCIA_VIVIENDA (s5q7): régimen de la vivienda  
 		1 = Propia pagada		
 		2 = Propia pagandose
 		3 = Alquilada
@@ -720,7 +724,7 @@ gen implicancias_nopago_o=s5q10_os
 label var implicancias_nopago_o "Otras implicancias del no pago"
 
 *** If you had to rent similar dwelling, how much did you think you should pay?
-*Si usted tuviera que vivir en alquiler en una vivienda como esta, cuanto cree que deberia pagar?
+*Si usted tuviera que vivir en alquiler en una vivienda como ésta, cuánto cree que debería pagar?
 clonevar renta_imp_en=s5q11 if s5q11!=. & s5q11!=.a
 
 *** In which currency?
@@ -790,7 +794,7 @@ clonevar comb_cocina=s5q16 if s5q16!=. & s5q16!=.a
 	clonevar pparafina=s5q17__5 if s5q17__5!=. & s5q17__5!=.a
 
 	* Landline, internet and tv cable
-	gen ptelefono=s5q17__7 if s5q17__7!=. & s5q17__7!=.a
+	clonevar ptelefono=s5q17__7 if s5q17__7!=. & s5q17__7!=.a
 
 *** How much did you pay for the following utilities?
 	* Water
@@ -851,69 +855,71 @@ global dur_ENCOVI auto ncarros anio_auto heladera lavarropas secadora computador
 
 *** Dummy household owns cars
 *  AUTO (s5q4): Dispone su hogar de carros de uso familiar que estan en funcionamiento?
-gen     auto = s5q4==1	if  s5q4!=. & s5q4!=.a
+clonevar     auto = s5q4	if  s5q4!=. & s5q4!=.a
+replace auto = 0 if s5q4==2
 
 *** Number of functioning cars in the household
 * NCARROS (s5q4a) : ¿De cuantos carros dispone este hogar que esten en funcionamiento?
-gen     ncarros = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
+clonevar     ncarros = s5q4a if s5q4==1 & (s5q4a!=. & s5q4a!=.a)
 
 *** Year of the most recent car
 * Fix missing values 
 replace s5q5 = . if s5q5==0 & s5q4==1
-gen anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
+clonevar anio_auto= s5q5 if s5q4==1 & (s5q5!=. & s5q5!=.a)
 
 *** Does the household have fridge?
 * Heladera (s5q6__1): ¿Posee este hogar nevera?
-gen     heladera = s5q6__1==1 if (s5q6__1!=. & s5q6__1!=.a)
+clonevar     heladera = s5q6__1 if (s5q6__1!=. & s5q6__1!=.a)
 
 *** Does the household have washing machine?
 * Lavarropas (s5q6__2): ¿Posee este hogar lavadora?
-gen     lavarropas = s5q6__2==1 if (s5q6__2!=. & s5q6__2!=.a)
+clonevar     lavarropas = s5q6__2 if (s5q6__2!=. & s5q6__2!=.a)
 
 *** Does the household have dryer
 * Secadora (s5q6__3): ¿Posee este hogar secadora? 
-gen     secadora = s5q6__3==1 if (s5q6__3!=. & s5q6__3!=.a)
+clonevar     secadora = s5q6__3 if (s5q6__3!=. & s5q6__3!=.a)
 
 *** Does the household have computer?
 * Computadora (s5q6__4): ¿Posee este hogar computadora?
-gen computadora = s5q6__4==1 if (s5q6__4!=. & s5q6__4!=.a)
+clonevar 	computadora = s5q6__4 if (s5q6__4!=. & s5q6__4!=.a)
 
 *** Does the household have internet?
 * Internet (s5q6__5): ¿Posee este hogar internet?
-gen     internet = s5q6__5==1 if (s5q6__5!=. & s5q6__5!=.a)
+clonevar     internet = s5q6__5 if (s5q6__5!=. & s5q6__5!=.a)
 
 *** Does the household have tv?
 * Televisor (s5q6__6): ¿Posee este hogar televisor?
-gen     televisor = s5q6__6==1 if (s5q6__6!=. & s5q6__6!=.a)
+clonevar     televisor = s5q6__6 if (s5q6__6!=. & s5q6__6!=.a)
 
 *** Does the household have radio?
 * Radio (s5q6__7): ¿Posee este hogar radio? 
-gen     radio = s5q6__7==1 if (s5q6__7!=. & s5q6__7!=.a)
+clonevar     radio = s5q6__7 if (s5q6__7!=. & s5q6__7!=.a)
 
 *** Does the household have heater?
 * Calentador (s5q6__8): ¿Posee este hogar calentador? //NO COMPARABLE CON CALEFACCION FIJA
-gen     calentador = s5q6__8==1 if (s5q6__8!=. & s5q6__8!=.a)
+clonevar     calentador = s5q6__8 if (s5q6__8!=. & s5q6__8!=.a)
 
 *** Does the household have air conditioner?
 * Aire acondicionado (s5q6__9): ¿Posee este hogar aire acondicionado?
-gen     aire = s5q6__9==1 if (s5q6__9!=. & s5q6__9!=.a)
+clonevar     aire = s5q6__9 if (s5q6__9!=. & s5q6__9!=.a)
 
 *** Does the household have cable tv?
 * TV por cable o satelital (s5q6__10): ¿Posee este hogar TV por cable?
-gen     tv_cable = s5q6__10==1 if (s5q6__10!=. & s5q6__10!=.a)
+clonevar     tv_cable = s5q6__10 if (s5q6__10!=. & s5q6__10!=.a)
 
 *** Does the household have microwave oven?
 * Horno microonada (s5q6__11): ¿Posee este hogar horno microonda?
-gen     microondas = s5q6__11==1 if (s5q6__11!=. & s5q6__11!=.a)
+clonevar     microondas = s5q6__11 if (s5q6__11!=. & s5q6__11!=.a)
 
 *** Does the household have landline telephone?
 * Teléfono fijo (s5q6__12): telefono_fijo
-gen     telefono_fijo = s5q6__12==1 if (s5q6__12!=. & s5q6__12!=.a)
+clonevar     telefono_fijo = s5q6__12 if (s5q6__12!=. & s5q6__12!=.a)
 
 *** Following "SEDLAC methodology"
 	foreach x in $dur_ENCOVI {
 	replace `x'=. if relacion_en!=1
 	}
+
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------ VII. EDUCATION / EDUCACIÓN -----------------------------------------------------------
@@ -955,6 +961,8 @@ gen asistio_educ = s7q1==1 if (s7q1!=. & s7q1!=.a) & edad>=3
 		16 = Otra, especifique
 */
 clonevar razon_noasis = s7q2 if s7q1==2 & (s7q2!=. & s7q2!=.a)
+
+clonevar razon_noasis_o = s7q2_os if s7q2==16
 
 *** During the period 2019-2020 did you attend any educational center? //for age +3
 gen asiste= s7q3==1 if (s7q3!=. & s7q3!=.a) & edad>=3
@@ -1018,7 +1026,7 @@ gen t_educ_act = s7q4e    if s7q3==1 & (s7q4==7 | s7q4==8 | s7q4==9) & s7q4b==3 
 		.
 		.a
 */
-gen tipo_centro_educ = s7q5 if s7q3==1 & (s7q5!=. & s7q5!=.a)
+clonevar tipo_centro_educ = s7q5 if s7q3==1 & (s7q5!=. & s7q5!=.a)
 gen     edu_pub = 1	if  tipo_centro_educ==2  
 replace edu_pub = 0	if  tipo_centro_educ==1
 replace edu_pub = . if  edad<3
@@ -1488,7 +1496,8 @@ inm_comida_mone inm_productos_mone inm_transporte_mone inm_vehiculo_mone inm_est
 d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone ///
 im_patron im_patron_cant im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone i_indep_mes i_indep_mes_cant i_indep_mes_mone ///
 g_indep_mes_cant g_indep_mes_mone razon_menoshs razon_menoshs_o deseamashs buscamashs razon_nobusca razon_nobusca_o cambiotr razon_cambiotr razon_cambiotr_o ///
-aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension 
+aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension ///
+relab ocupado desocupa pea
 
 *Notes: interviews done if age>9
 
@@ -1524,8 +1533,8 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 			7 = No quiere trabajar
 			8 = Falta de trabajo, clientes o pedidos
 			9 = Impedimento de autoridades municipales o nacionales
-			10 = Nuevo empleo a empezar en 30 días
-			11 = Factores estacionales
+			11 = Nuevo empleo a empezar en 30 días
+			12 = Factores estacionales
 			16 = Otro 	*/
 	clonevar	razon_no_trabajo = s9q4 if s9q3==1 & (s9q2!=. & s9q2!=.a) 
 		
@@ -1557,7 +1566,7 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 			2 = En los últimos 12 meses
 			3 = Hace más de un año
 			4 = No ha hecho diligencias	*/
-	gen     cuando_buscotr = s9q8 if (s9q7==2 & s9q6==2 & s9q3==2 & s9q1==2 & s9q2==3) & (s9q8!=. & s9q8!=.a) 
+	clonevar     cuando_buscotr = s9q8 if (s9q7==2 & s9q6==2 & s9q3==2 & s9q1==2 & s9q2==3) & (s9q8!=. & s9q8!=.a) 
 
 	*** Have you carried out any of these proceedings in that period? (4 weeks)
 	/* s9q9__* Ha realizado alguna de estas diligencias en ese período? (4 semanas): dili_*
@@ -1663,7 +1672,8 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 	*** How many hours did you work last week in your main occupation?
 	/* s9q16 ¿Cuántas horas trabajó durante la semana pasada en su ocupación principal?: hstr_ppal	*/
 	clonevar	hstr_ppal = s9q16 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q16!=. & s9q16!=.a) 
-
+	replace hstr_ppal = 60 if hstr_ppal>60 & hstr_ppal!=.
+		
 	*** Besides your main occupation, did you do any other activity through which you received income, such as selling things, contracted work, etc?
 	/* s9q17 Además de su trabajo principal, ¿realizó la semana pasada alguna otra actividad por la que percibió ingresos tales como, venta de artículos, trabajos contratados, etc?: trabajo_secundario
 			1 = si
@@ -2107,8 +2117,8 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 	* Unemployed: desocupa
 	gen     desocupa = (labor_status==3)  //buscando trabajo
 			
-	* Inactive: inactivos	
-	gen     inactivo= inrange(labor_status,5,9) 
+	* Inactive: inactivos		(no la incluímos porque es el espejo de PEA)	
+	*gen     inactivo= inrange(labor_status,5,9) 
 
 	* Economically active population: pea	
 	gen     pea = (ocupado==1 | desocupa ==1)
@@ -2122,40 +2132,41 @@ efectivo_f tcredito_f tdebito_f bancao_f pagomovil_f razon_nobanco
 
 *** Section for individuals 15+
 *** Is the "member" answering by himself/herself?
-gen contesta_ind_b=s16q0 if (s16q0!=. & s16q0!=.a)
+clonevar contesta_ind_b=s16q0 if (s16q0!=. & s16q0!=.a)
+replace contesta_ind_b=0 if contesta_ind_b==2
 
 *** Who is answering instead of "member"?
-gen quien_contesta_b=s16q00 if (s16q00!=. & s16q00!=.a)
+clonevar quien_contesta_b=s16q00 if (s16q00!=. & s16q00!=.a)
 
 *** Do you have in any bank the following?
-* Checking account
-gen cuenta_corr=s16q1__1 if (s16q1__1!=. & s16q1__1!=.a)
-* Saving account
-gen cuenta_aho=s16q1__2 if (s16q1__2!=. & s16q1__2!=.a)
-* Credit card
-gen tcredito=s16q1__3 if (s16q1__3!=. & s16q1__3!=.a)
-* Debit card
-gen tdebito=s16q1__4 if (s16q1__4!=. & s16q1__4!=.a)
-* None
-gen no_banco=s16q1__5 if (s16q1__5!=. & s16q1__5!=.a)
+	* Checking account
+	clonevar cuenta_corr=s16q1__1 if (s16q1__1!=. & s16q1__1!=.a)
+	* Saving account
+	clonevar cuenta_aho=s16q1__2 if (s16q1__2!=. & s16q1__2!=.a)
+	* Credit card
+	clonevar tcredito=s16q1__3 if (s16q1__3!=. & s16q1__3!=.a)
+	* Debit card
+	clonevar tdebito=s16q1__4 if (s16q1__4!=. & s16q1__4!=.a)
+	* None
+	clonevar no_banco=s16q1__5 if (s16q1__5!=. & s16q1__5!=.a)
 
-*** How often do you pay with cash ?
-gen efectivo_f=s16q2 if (s16q2!=. & s16q2!=.a)
+*** How often do you pay with cash?
+clonevar efectivo_f=s16q2 if (s16q2!=. & s16q2!=.a)
 
-*** How often do you pay with credit card ?
-gen tcredito_f=s16q3 if (s16q3!=. & s16q3!=.a)
+*** How often do you pay with credit card?
+clonevar tcredito_f=s16q3 if (s16q3!=. & s16q3!=.a)
 
-*** How often do you pay with debit card ?
-gen tdebito_f=s16q4 if (s16q4!=. & s16q4!=.a)
+*** How often do you pay with debit card?
+clonevar tdebito_f=s16q4 if (s16q4!=. & s16q4!=.a)
 
 *** How often do you pay using online bank?
-gen bancao_f=s16q5 if (s16q5!=. & s16q5!=.a)
+clonevar bancao_f=s16q5 if (s16q5!=. & s16q5!=.a)
 
 *** How often do you use mobile payment?
-gen pagomovil_f=s16q7 if (s16q7!=. & s16q7!=.a)
+clonevar pagomovil_f=s16q6 if (s16q6!=. & s16q6!=.a)
 
 *** Reasons for not holding any bank account or card?
-gen razon_nobanco=s16q7 if (s16q7!=. & s16q7!=.a)
+clonevar razon_nobanco=s16q7 if (s16q7!=. & s16q7!=.a)
 
 /*(*********************************************************************************************************************************************** 
 *---------------------------------- 9: Otros ingresos y pensiones / Other income and pensions ----------------------------------------------------
@@ -2998,17 +3009,19 @@ hnoedadfallecio11 hnoedadfallecio12 hnoedadfallecio13 hnoedadfallecio14 hnoedadf
 
 *** How many sons or daughters did your biological mother have, including you?
 	* s11q1 Cuántos hijos o hijas tuvo su madre biológica incluyéndolo usted?
-	gen		ctoshnosyud = s11q1 if s11q1>=1 & (s11q1!=. & s11q1!=.a)
+	clonevar		ctoshnosyud = s11q1 if s11q1>=1 & (s11q1!=. & s11q1!=.a)
+	label var ctoshnosyud "Cuántos hijos o hijas tuvo su madre biológica incluyéndolo usted?"
 
 *** How many of these sons or daughters were born before you?
 	* s11q2 Cuántos de estos hijos o hijas nacieron antes de usted?
-	gen 	ctoshnosme = s11q2 if (s11q2!=. & s11q2!=.a)
+	clonevar 	ctoshnosme = s11q2 if (s11q2!=. & s11q2!=.a)
 	*Ok nadie contesta que tiene hermanos menores si son hijos únicos
+	label var ctoshnosme "Cuántos de estos hijos o hijas nacieron antes de usted?"
 	
 *** You can mention the name of your siblings from the same biological mother, starting from the oldest
 	* s11q3__* A continuación, puede mencionar el nombre de cada uno de sus hermanos o hermanas nacidos de su madre biológica comenzando por el de mayor edad
 	*forvalues i = 0(1)19 {
-	*gen 	nombrehno`i' = s11q3__`i' if s11q1>=2 & (s11q3__`i'!=. & s11q3__`i'!=.a)
+	*clonevar 	nombrehno`i' = s11q3__`i' if s11q1>=2 & (s11q3__`i'!=. & s11q3__`i'!=.a)
 	*}
 
 * SIBLINGS / HERMANOS
@@ -3018,9 +3031,10 @@ hnoedadfallecio11 hnoedadfallecio12 hnoedadfallecio13 hnoedadfallecio14 hnoedadf
 		1= Masculino
 		2= Femenino
 	*/
-	forvalues i = 1(1)19 {
+	forvalues i = 1(1)20 {
 	gen 	hnohombre`i' = 1 if s11q4`i'==1 & s11q1>=2 & (s11q4`i'!=. & s11q4`i'!=.a)
 	replace 	hnohombre`i' = 0 if s11q4`i'==2 & s11q1>=2 & (s11q4`i'!=. & s11q4`i'!=.a)
+	label var 	hnohombre`i' "Cuál es el sexo de cada uno de sus hermanos/as?"
 	}
 	
 *** Are they still alive? (one variable for each)
@@ -3029,46 +3043,53 @@ hnoedadfallecio11 hnoedadfallecio12 hnoedadfallecio13 hnoedadfallecio14 hnoedadf
 		2=No
 		3=No sabe
 	*/
-	forvalues i = 1(1)19 {
+	forvalues i = 1(1)20 {
 	gen 	hnovivo`i' = s11q5`i' if s11q1>=2 & (s11q5`i'!=. & s11q5`i'!=.a)
+	label var 	hnovivo`i' "Continúa vivo su hermana/o?"
 	}
-
+		
 *** How old are they? (one variable for each)
 	*s11q6* Qué edad tiene?
-	forvalues i = 1(1)19 {
+	forvalues i = 1(1)20 {
 	gen 	hnoedad`i' = s11q6`i' if s11q5`i'==1 & s11q1>=2 & (s11q6`i'!=. & s11q6`i'!=.a)
-	}
-
+	label var 	hnoedad`i' "Qué edad tiene su hermana/o?"
+}
+		
 *** In which year did you last have contact with them? (one variable for each - for those who they don't know if alive)
 	*s11q7a* En qué año fue la última vez que tuvo contacto con ...? (para aquellos que no sabe si están vivos)
 	forvalues i = 1(1)19 {
 	gen 	hnocontactoano`i' = s11q7a`i' if s11q5`i'==3 & s11q1>=2 & (s11q7a`i'!=. & s11q7a`i'!=.a)
+	label var 	hnocontactoano`i' "En qué año fue la última vez que tuvo contacto con su hermana/o? (para aquellos que no sabe si están vivos)"
 	}
 	
 *** In which month did you last have contact with them? (one variable for each - for those who they don't know if alive)
 	*s11q7b* En qué mes fue la última vez que tuvo contacto con ...? (para aquellos que no sabe si están vivos)
 	forvalues i = 1(1)19 {
-	gen 	hnocontactomes`i' = s11q7b`i' if s11q5`i'==3 & s11q1>=2 & (s11q7b`i'!=. & s11q7b`i'!=.a)
+	gen		 	hnocontactomes`i' = s11q7b`i' if s11q5`i'==3 & s11q1>=2 & (s11q7b`i'!=. & s11q7b`i'!=.a)
+	label var 	hnocontactomes`i' "En qué mes fue la última vez que tuvo contacto con su hermano/a? (para aquellos que no sabe si están vivos)"
 	}
 	
 *** In which year did they die? (one variable for each who passed away)
 	*s11q8a* En qué año falleció ...? (para aquellos que fallecieron)
-	forvalues i = 1(1)19 {
-		gen 	hnofallecioano`i' = s11q8a`i' if s11q5`i'==2 & s11q1>=2 & (s11q8a`i'!=. & s11q8a`i'!=.a)
+	forvalues i = 1(1)20 {
+	gen		 	hnofallecioano`i' = s11q8a`i' if s11q5`i'==2 & s11q1>=2 & (s11q8a`i'!=. & s11q8a`i'!=.a)
+	label var 	hnofallecioano`i' "En qué año falleció su hermana/o? (para aquellos que fallecieron)"
 		}
-		
+	
 *** In which month did they die? (one variable for each who passed away)
 	*s11q8b* En qué mes falleció ...?
-	forvalues i = 1(1)19 {
-		gen 	hnofalleciomes`i' = s11q8b`i' if s11q5`i'==2 & s11q1>=2 & (s11q8b`i'!=. & s11q8b`i'!=.a)
+	forvalues i = 1(1)20 {
+	gen		 	hnofalleciomes`i' = s11q8b`i' if s11q5`i'==2 & s11q1>=2 & (s11q8b`i'!=. & s11q8b`i'!=.a)
+	label var 	hnofalleciomes`i' "En qué mes falleció su hermano/a?"
 		}
-
+	
 *** How old was him/her when she/he passed away? (one variable for each who passed away)
 	*s11q8c* Qué edad tenía ... cuando falleció?
-	forvalues i = 1(1)19 {
-		gen 	hnoedadfallecio`i' = s11q8c`i' if s11q5`i'==2 & s11q1>=2 & (s11q8c`i'!=. & s11q8c`i'!=.a)
+	forvalues i = 1(1)20 {
+	gen		 	hnoedadfallecio`i' = s11q8c`i' if s11q5`i'==2 & s11q1>=2 & (s11q8c`i'!=. & s11q8c`i'!=.a)
+	label var 	hnoedadfallecio`i' "Qué edad tenía su hermana/o cuando falleció?"
 		}
-
+		
 /*(************************************************************************************************************************************************* 
 *----------------------------------- XII: FOOD CONSUMPTION / CONSUMO DE ALIMENTO --------------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -3089,7 +3110,7 @@ global foodcons_ENCOVI clap clap_cuando
 				1 = Últimos 7 días
 				2 = Últimos 15 días
 				3 = Más de 15 días	*/
-	gen 	clap_cuando = s12aq10_a if s12aq10==1 & (s12aq10_a!=. & s12aq10_a!=.a)
+	clonevar clap_cuando = s12aq10_a if s12aq10==1 & (s12aq10_a!=. & s12aq10_a!=.a)
 
 
 /*(************************************************************************************************************************************************ 
@@ -3105,6 +3126,8 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 			2=No 
 	*/
 	gen 	ingsuf_comida = s13q1==1 if (s13q1!=. & s13q1!=.a)
+	label var ingsuf_comida "Considera que el ingreso del hogar es suficiente para comprar alimentos/comida para consumir dentro y fuera del hogar?"
+	
 
 *** During the last month, due to lack of money or other resources, did...
 	*DURANTE EL ÚLTIMO MES, POR FALTA DE DINERO U OTROS RECURSOS, ¿ALGUNA VEZ…
@@ -3114,50 +3137,62 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 	* ...you worry about food running out in your household?
 		*s13q2_1 ...usted se preocupó porque los alimentos se acabaran en su hogar? 
 		gen 	preocucomida_norecursos = s13q2_1==1 	if (s13q2_1!=. & s13q2_1!=.a)
+		label var preocucomida_norecursos "Se preocupó porque los alimentos se acabaran en su hogar en el último més?"
 
 	* ...your household run out of food? 
 		* s13q2_2 ...en su hogar se quedaron sin alimentos?
 		gen 	faltacomida_norecursos = s13q2_2==1 	if (s13q2_2!=. & s13q2_2!=.a)
-
+		label var faltacomida_norecursos "En su hogar se quedaron sin alimentos en el último mes?"
+		
 	* ...your household stop having a healthy diet? (meat, fish, vegetables, fruits, cereals)
 		* s13q2_3 ...en su hogar dejaron de tener una alimentación saludable (contiene carnes, pescados, verduras, hortalizas, frutas, cereales)?
 		gen 	nosaludable_norecursos = s13q2_3==1 	if (s13q2_3!=. & s13q2_3!=.a)
-
+		label var nosaludable_norecursos "En su hogar dejaron de tener una alimentación saludable en el último mes?"
+		
 	* ...you or any adult in your household fed based on a low variety of food types? (always eat the same)
 		* s13q2_4 ...usted o algún adulto en su hogar tuvo una alimentación basada en poca variedad de alimentos (siempre come lo mismo)?
 		gen 	pocovariado_norecursos = s13q2_4==1 	if (s13q2_4!=. & s13q2_4!=.a)
-
+		label var pocovariado_norecursos "Usted o algún adulto en su hogar tuvo una alimentación basada en poca variedad de alimentos en el último mes?"
+		
 	* ...you or an adult in your house stopped eating breakfast, lunch or dinner?
 		* s13q2_5 ...usted o algún adulto en su hogar dejó de desayunar, almorzar o cenar?
 		gen 	salteacomida_norecursos = s13q2_5==1 	if (s13q2_5!=. & s13q2_5!=.a)
-
+		label var salteacomida_norecursos "Usted o algún adulto en su hogar dejó de desayunar, almorzar o cenar en el último mes?"
+		
 	* ...you or an adult in your household ate less than what he/she should eat?
 		* s13q2_6 ...usted o algún adulto en su hogar comió menos de lo que debía comer?
 		gen 	comepoco_norecursos = s13q2_6==1 		if (s13q2_6!=. & s13q2_6!=.a)
-	
+		label var comepoco_norecursos "Usted o algún adulto en su hogar comió menos de lo que debía comer en el último mes?"
+		
 	* ...you or an adult in your household felt hunger but didn't eat?
 		* s13q2_7 ...usted o algún adulto en su hogar sintió hambre pero no comió?
 		gen 	hambre_norecursos = s13q2_7==1 			if (s13q2_7!=. & s13q2_7!=.a)
-	
+		label var hambre_norecursos "Usted o algún adulto en su hogar sintió hambre pero no comió en el último mes?"
+		
 	* ...you or an adult in your household only ate once a day, or stopped eating during a whole day?
 		* s13q2_8 ...usted o algún adulto en su hogar sólo comió una vez al día, o dejó de comer durante todo un día?
 		gen 	nocomedia_norecursos = s13q2_8==1 		if (s13q2_8!=. & s13q2_8!=.a)
-	
+		label var nocomedia_norecursos "Usted o algún adulto en su hogar sólo comió una vez al día, o dejó de comer durante todo un día, en el último mes?"
+		
 	* ...any person younger than 18 years old in your household fed based on a low variety of food types? 
 		* s13q2_9 ...algún menor de 18 años en su hogar tuvo una alimentación basada en poca variedad de alimentos?
 		gen 	pocovariado_me18_norecursos = s13q2_9==1 if (s13q2_9!=. & s13q2_9!=.a)
+		label var pocovariado_me18_norecursos "Algún menor de 18 años en su hogar tuvo una alimentación basada en poca variedad de alimentos en el último mes?"
 		
 	* ...any person younger than 18 years old in your household stopped eating breakfast, lunch or dinner?
 		* s13q2_10 ...algún menor de 18 años en su hogar dejó de desayunar, almorzar o cenar?
 		gen 	salteacomida_me18_norecursos = s13q2_10==1 if (s13q2_10!=. & s13q2_10!=.a)
-	
+		label var salteacomida_me18_norecursos "Algún menor de 18 años en su hogar dejó de desayunar, almorzar o cenar en el último mes?"
+		
 	* ...you ever had to dimish the portions served to any person younger than 18 years old?
 		* s13q2_11 ...tuvieron que disminuir la cantidad servida en las comidas a algún menor de 18 años en su hogar?
 		gen 	comepoco_me18_norecursos = s13q2_11==1 	if (s13q2_11!=. & s13q2_11!=.a)
-	
+		label var comepoco_me18_norecursos "Tuvieron que disminuir la cantidad servida en las comidas a algún menor de 18 años en su hogar en el último mes?"
+		
 	* ...any person younger than 18 years old in your household only ate once a day, or stopped eating during a whole day?
 		* s13q2_12 ...algún menor de 18 años en su hogar solo comió una vez al día, o dejó de comer durante todo un día?
 		gen 	nocomedia_me18_norecursos = s13q2_12==1 if (s13q2_12!=. & s13q2_12!=.a)
+		label var nocomedia_me18_norecursos "Algún menor de 18 años en su hogar solo comió una vez al día, o dejó de comer durante todo un día en el último mes?"
 		
 *** During the last month, due to lack of money, did you or an adult in your household had to make in-kind payments or barter to consume food?
 	/* s13q3 Durante el último mes, por falta de dinero, ¿alguna vez usted o algún adulto en su hogar tuvo que hacer pagos en especie o trueque para consumir alimentos?
@@ -3165,7 +3200,8 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 			2=No 
 	*/
 	gen 	comida_trueque = s13q3==1 if (s13q3!=. & s13q3!=.a)
-
+	label var comida_trueque "Por falta de dinero, ¿usted o algún adulto en su hogar tuvo que hacer pagos en especie o trueque para consumir alimentos en el último mes?"
+	
 /*(************************************************************************************************************************************************ 
 *----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
 ************************************************************************************************************************************************)*/
@@ -3180,7 +3216,8 @@ global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso alt
 			2=No 
 	*/
 	gen 	medido = s14q1==1 if age_months<=120 & (s14q1!=. & s14q1!=.a)
-
+	label var medido "Fue medido? (para niños menores de 5 años)"
+	
 *** Why wasn't the child measured?
 	/*s14q2 Por qué no fue medido?
 			1=No estaba en casa al momento de hacer la entrevista
@@ -3188,14 +3225,15 @@ global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso alt
 			3=No está disponible
 			4=Otra razón 
 	*/
-	gen 	razon_nomedido = s14q2==1 if s14q1==2 & age_months<=120 & (s14q2!=. & s14q2!=.a)
-
+	clonevar 	razon_nomedido = s14q2 if s14q1==2 & age_months<=120 & (s14q2!=. & s14q2!=.a)
+	
 *** Confirm child's reported age (in months)
 	/*s14q3 Confirmar la edad (en meses) reportada del niño
 			1=Si, es correcto
 			2=No, no es correcto
 	*/
 	gen 	confirma_edad = person_confirm==1 if s14q1==1 & (person_confirm!=. & person_confirm!=.a)
+	label var confirma_edad "Confirmar la edad (en meses) reportada del niño"
 	
 *** Was the child able to be alone in the measurement instrument?
 	/*s14q14 Fue capaz de permanecer solo en el instrumento de medición?
@@ -3203,31 +3241,34 @@ global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso alt
 			2=No 
 	*/
 	gen 	solo_medicion = s14q14==1 if s14q1==1 & age_months<=120 & (s14q14!=. & s14q14!=.a)
-
+	label var solo_medicion "Fue capaz de permanecer solo en el instrumento de medición?"
+		
 *** Register the weight in kilograms (twice, third if too much difference between first two)
 	*weight_1 Registre el peso en kilogramos
 	*weight_2 Segundo registro del peso 
 	*weight_3 Tercer registro (si mucha diferencia en los 2 primeros)
-	gen		peso1 = weight_1 if s14q1==1 & age_months<=120 & (weight_1!=. & weight_1!=.a)
-	gen		peso2 = weight_2 if s14q1==1 & age_months<=120 & (weight_2!=. & weight_2!=.a)
-	gen		peso3 = weight_3 if weight_diff12>0.1 & s14q1==1 & age_months<=120 & (weight_3!=. & weight_3!=.a)
-
+	clonevar		peso1 = weight_1 if s14q1==1 & age_months<=120 & (weight_1!=. & weight_1!=.a)
+	clonevar		peso2 = weight_2 if s14q1==1 & age_months<=120 & (weight_2!=. & weight_2!=.a)
+	clonevar		peso3 = weight_3 if weight_diff12>0.1 & s14q1==1 & age_months<=120 & (weight_3!=. & weight_3!=.a)
+	
 *** Weight (in kg) calculated by the survey
 	*weight Peso en kilogramos calculado por la encuesta
-	gen 	peso = weight if s14q1==1 & age_months<=120 & (weight!=. & weight!=.a)
+	clonevar 	peso = weight if s14q1==1 & age_months<=120 & (weight!=. & weight!=.a)
+	label var peso "Peso en kilogramos"
 	
 *** Register the altitude/longitude in centimeters (twice)
 	*height_1 Registre la altura/longitud en centímetros
 	*height_2 Segundo registro de la altura/longitud
 	*height_3 Tercer registro (si mucha diferencia en los 2 primeros)
-	gen		altura1 = height_1 if s14q1==1 & age_months<=120 & (height_1!=. & height_1!=.a)
-	gen		altura2 = height_2 if s14q1==1 & age_months<=120 & (height_2!=. & height_2!=.a)
-	gen		altura3 = height_3 if height_diff12>0.5 & s14q1==1 & age_months<=120 & (height_3!=. & height_3!=.a)
-
+	clonevar		altura1 = height_1 if s14q1==1 & age_months<=120 & (height_1!=. & height_1!=.a)
+	clonevar		altura2 = height_2 if s14q1==1 & age_months<=120 & (height_2!=. & height_2!=.a)
+	clonevar		altura3 = height_3 if height_diff12>0.5 & s14q1==1 & age_months<=120 & (height_3!=. & height_3!=.a)
+	
 ***Height (in cm) calculated by the survey
 	*height Altura en centímetros calculada por la encuesta 
-	gen		altura = height if s14q1==1 & age_months<=120 & (height!=. & height!=.a)
-
+	clonevar		altura = height if s14q1==1 & age_months<=120 & (height!=. & height!=.a)
+	label var altura "Altura en centímetros"
+	
 *** Was the child measured standing or lying down?
 	/* posicion Entrevistador: El menor fue medido de pie o acostado?
 			1=De pie
@@ -3235,39 +3276,47 @@ global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso alt
 	*/
 	*replace	posicion=. if age_months=<120 
 	replace posicion=. if posicion!=.a
+	label var posicion "El niño/a fue medido de pie o acostado?"
 	
 *** When weighting, was there why you couldn't weight (ex. heavy clothes that the child didn't take out)?
-	/*weight_comments Al pesar, existía algo por lo que pudiera pesar más (por ejemplo ropa pesada que no se le quitó) ?
+	/*weight_comments Al pesar, existía algo por lo que pudiera pesar más (por ejemplo ropa pesada que no se le quitó)?
 			1=Si
 			2=No 
 	*/
-	gen 	problema_pesar = weight_comments if age_months<=120 & (weight_comments!=. & weight_comments!=.a)
-
+	clonevar 	problema_pesar = weight_comments if age_months<=120 & (weight_comments!=. & weight_comments!=.a)
+	label var 	problema_pesar "Al pesar, existía algo por lo que pudiera pesar más (por ejemplo ropa pesada que no se le quitó)?"
+	
 *** When measuring, was there something why you could not measure more (ex. thick shoes or accesories)?
-	/*height_comments Al medir, había algo por lo que pudiera medir más (por ejemplo zapatos gruesos o accesorios) ?
+	/*height_comments Al medir, había algo por lo que pudiera medir más (por ejemplo zapatos gruesos o accesorios)?
 			1=Si
 			2=No 
 	*/
-	gen 	problema_medir = height_comments if age_months<=120 & (height_comments!=. & height_comments!=.a)
-
+	clonevar 	problema_medir = height_comments if age_months<=120 & (height_comments!=. & height_comments!=.a)
+	label var 	problema_medir "Al medir, había algo por lo que pudiera medir más (por ejemplo zapatos gruesos o accesorios)?"
+	
 *** When measuring, was there irregularities in the surface of the floor where you placed the stadiometer?
-	/*height_comments2 Al medir, había irregularidad en la superficie del piso donde se colocó el tallímetro ?
+	/*height_comments2 Al medir, había irregularidad en la superficie del piso donde se colocó el tallímetro?
 			1=Si
 			2=No 
 	*/
-	gen 	problema_medir2 = height_comments2 if age_months<=120 & (height_comments2!=. & height_comments2!=.a)
-
+	clonevar 	problema_medir2 = height_comments2 if age_months<=120 & (height_comments2!=. & height_comments2!=.a)
+	label var problema_medir2 "Al medir, había irregularidad en la superficie del piso donde se colocó el tallímetro ?"
+	
 *** Height for age index, calculated by the survey
 	* hfa Índice de altura para la edad
 	replace hfa =. if age_months<=120 & (hfa!=. & hfa!=.a)
+	label var hfa "Height For Age index - Índice de altura para la edad"
 	
 *** Weight for age index, calculated by the survey
 	* wfa Índice de peso para la edad
 	replace wfa =. if age_months<=120 & (wfa!=. & wfa!=.a)
+	label var wfa "Weight For Age index - Índice de peso para la edad"
 	
 *** Weight for height index, calculated by the survey
 	* wfh Índice de peso para la altura
 	replace wfh =. if age_months<=120 & (wfh!=. & wfh!=.a)
+	label var wfh "Weight For Height index - Índice de peso para la altura"
+	
 
 /*(************************************************************************************************************************************************ 
 *---------------------------------------- XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES -------------------------------------
@@ -3322,11 +3371,31 @@ reaccion_evento_* reaccionot_evento*
 
 
 *--------- Events which affected the household
- /* Events(s15q1): 1. Cuáles de los siguientes eventos han afectado a
-su hogar desde el año 2017 ?
-         0 = No
-         1 = Si
- */
+ /* Events(s15q1__*): 1. Cuáles de los siguientes eventos han afectado a su hogar desde el año 2017?
+		1.Muerte o discapacidad de un miembro adulto del hogar que trabajaba
+		2.Muerte de alguien que enviaba remesas al hogar
+		3.Enfermedad de la persona con el ingreso más importante del hogar
+		4.Pérdida de un contacto importante
+		5.Perdida de trabajo de la persona con el ingreso más importante del hogar
+		6.Salida del miembro del hogar que generaba ingresos debido a separación/divorcio
+		7.Salida del miembro de la familia que generaba ingresos debido al matrimonio
+		8.Salida de un miembro del hogar que generaba ingresos por emigración
+		9.Fracaso empresarial no agrícola/cierre de negocio o emprendimiento
+		10.Robo de cultivos, dinero en efectivo, ganado u otros bienes
+		11.Pérdida de cosecha por incendio/sequía/inundaciones
+		12.Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
+		13.Vivienda dañada / demolida
+		14.Pérdida de propiedad por incendio o inundación
+		15.Pérdida de tierras
+		16.Muerte de ganado por enfermedad
+		17:Incremento en el precio de los insumos
+		18:Caída en el precio de los productos
+		19:Incremento en el precio de los principales alimentos consumidos
+		20:Secuestro/robo/asalto
+		21: otro, especifique
+		
+		0 = No
+        1 = Si */
 
 	forval i = 1/21{
 	*-- Standarization of missing values
@@ -3336,58 +3405,62 @@ su hogar desde el año 2017 ?
 	label def s15q1__`i' 0 "No" 1 "Si"
 	label value s15q1__`i' s15q1__`i'
 	*-- Generate variable
-	gen evento_`i' = s15q1__`i'
+	clonevar evento_`i' = s15q1__`i'
 	}
 
 	*-- Other events
-	*-- Check
-	tab s15q1_os, mi
-	*-- Standarization of missing values
-	replace s15q1_os="." if s15q1_os==".a"
-	gen evento_ot = s15q1_os
-	*-- Label variable
-	label var evento_ot "1a.Especifique otro choque"
+		*-- Check
+		tab s15q1_os, mi
+		*-- Standarization of missing values
+		replace s15q1_os="." if s15q1_os==".a"
+		gen evento_ot = s15q1_os
+		*-- Label variable
+		label var evento_ot "1a.Especifique otro choque"
 	
  *--------- Most important events
- /* s15q2: 2. De la lista de eventos acontecidos en su hogar desde el año 2017, 
+ /* s15q2__*: 2. De la lista de eventos acontecidos en su hogar desde el año 2017, 
  señale cuáles han sido los 3 más significativos?
-Categories: 
-			1:Muerte o discapacidad de un miembro adulto del hogar que trabajaba
-			2:Muerte de alguien que enviaba remesas al hogar 
-			3:Enfermedad de la persona con el ingreso más importante del hogar
-			4:Pérdida de un contacto importante, 
-			5:Perdida de trabajo de la persona con el ingreso más importante del hogar
-			6:Salida del miembro del hogar que generaba ingresos debido a separación/divorcio
-			7:Salida del miembro de la familia que generaba ingresos debido al matrimonio
-			8:Salida de un miembro del hogar que generaba ingresos por emigración
-			9:Fracaso empresarial no agrícola/cierre de negocio o emprendimiento
-			10:Robo de cultivos, dinero en efectivo, ganado u otros bienes
-			11:Pérdida de cosecha por incendio/sequía/inundaciones
-			12:Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
-			13:Vivienda dañada / demolida
-			14:Pérdida de propiedad por incendio o inundación
-			15:Pérdida de tierras, 16:Muerte de ganado por enfermedad
-			17:Incremento en el precio de los insumos
-			18:Caída en el precio de los productos
-			19:Incremento en el precio de los principales alimentos consumidos
-			20:Secuestro/robo/asalto
-			21:Otro
-        
+Obs: las categorías no coinciden con las de la pregunta anterior.
+		
+			1. Muerte o discapacidad de un miembro adulto del hogar que trabaja
+			2. Muerte de alguien que envía remesas a la casa
+			3. Enfermedad de la persona con el ingreso más importante del hogar
+			4. Pérdida de un contacto importante
+			5. Perdida de trabajo
+			6. Salida del miembro de la familia que genera ingresos debido a la separación o el divorcio
+			7. Salida del miembro de la familia que genera ingresos debido al matrimonio
+			8. Fracaso empresarial no agrícola
+			9. Robo de cultivos, dinero en efectivo, ganado u otros bienes
+			10. Destrucción de cosecha por fuego
+			11. Vivienda dañada / demolida
+			12. Pocas lluvias que causaron el fracaso de la cosecha
+			13. Inundaciones que causaron el fracaso de la cosecha
+			14. Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento
+			15. Pérdida de propiedad por incendio o inundación
+			16. Pérdida de tierra
+			17. Muerte de ganado por enfermedad
+			18. Incremento en el precio de los insumos 
+			19. Caída en el precio de los productos
+			20. Incremento en el precio de los principales alimentos consumidos, 
+			21. Secuestro / robo / asalto
+			22. Otra especificar
+			
+	0=no entre los 3 más significativos, 1= más significativo, 2=segundo más significativo, 3=tercero más significativo
  */
-// Pasa algo raro que no corre cuando se corre de cero pero que se si corre solo este loop anda
-// Aunque se rompe el loop crea las variables, asi que no se 
 	forval i = 1/22 {
 	*rename s15q2__`i' s15q2_`i'
 	*-- Standarization of missing values
 	replace s15q2__`i'=. if s15q2__`i'==.a
 	*-- Generate variable
 	clonevar imp_evento_`i'=s15q2__`i'
+	*Categories labels
+	cap label define imp_evento 0 "No entre los 3 más significativos" 1 "Más significativo" ///
+	2 "2º más significativo" 3 "3º más significativo"
+	label values imp_evento_`i' imp_evento
 	}
 	
-	
  *--------- How many times have the shock occurred since 2017
- /* (s15q2a)2a. Cuántas veces ocurrió %rostertitle% desde 2017?
- */
+ * (s15q2a_*)2a. Cuántas veces ocurrió %rostertitle% desde 2017?
 
 	forval i = 1/21 {
 	*-- Label original variable
@@ -3397,15 +3470,12 @@ Categories:
 		*-- Generate variable
 		clonevar veces_evento_`i' = s15q2a_`i'
 		*-- Label variable
-		//label var veces_evento_`i' "How many times have the shock occurred since 2017"
-		}
+		//label var veces_evento_`i' "How many times has the shock occurred since 2017"
+	}
 		
 	
- /*
  *--------- Year of the event
- (s15q2b) 2b. En qué año ocurrió ?
-        
- */ 
+ * (s15q2b_*) 2b. En qué año ocurrió ?
 
 	forval i = 1/21 {
 	*-- Label original variable
@@ -3416,39 +3486,27 @@ Categories:
 	clonevar ano_evento_`i'  = s15q2b_`i'
 	*-- Label variable
 	label var ano_evento_`i' "2b.Año en que ocurrió el evento"
+	*Defining categories
+	cap label define ano_evento 1 "2017" 2 "2018" 3 "2019"
+	label values ano_evento_`i' ano_evento
+	
 	}
 	
 
- *--------- How the houselhold coped with the shock
- /* (s15q2c): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
- 
+ *--------- How did the household cope with the most recent shock
+ /* (s15q2c_*): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
+
 local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	foreach i of local x {
 		forval k = 1/21 {
 	*-- Rename original variable 
-	rename (s15q2c__`i'_`k') (s15q2c_`i'_`k')
+	cap rename (s15q2c__`i'_`k') (s15q2c_`i'_`k')
 	*-- Label original variable
 	label var s15q2c_`i'_`k' "2c.Cómo se las arregló su hogar con el choque más reciente?"
 	*-- Standarization of missing values
 	replace s15q2c_`i'_`k'=. if s15q2c_`i'_`k'==.a
 	*-- Generate variable
 	clonevar reaccion_evento_`i'_`k' = s15q2c_`i'_`k'
-	*-- Label variable
-	label var reaccion_evento_`i'_`k' "2c.Cómo se las arregló su hogar con el choque más reciente?"
-	*-- Label values
-	label def reaccion_evento_`i'_`k' 0 "No codificado" 1 "Venta de ganado" 2 "Venta de terreno" 3 "Venta de propiedad" ///
-	4 "Envían niños a vivir con amigos" 5 "Se retiraron los niños de escuela" ///
-	6 "Trabajando en otras actividades generadoras de ingreso" ///
-	8 "Asistencia recibida de amigos y familia" 9 "Préstamos de amigos y familia" ///
-	10 "Tomó un préstamo de una institución financiera" ///
-	12 "Miembros del hogar migraron por trabajo" ///
-	13 "Compras al crédito" 14 "Pago retrasado de obligaciones" ///
-	15 "Vendió la cosecha por adelantado" 16 "Reducción del consumo de alimentos" /// 
-	17 "Reducción de consumo de no alimentos" 18 "Usando ahorros" ///
-	19 "Asistencia recibida de ONG" 20 "Tomó pago por adelantado de empleador" ///
-	21 "Asistencia recibida del gobierno" 22 "Cubierto por un seguro" ///
-	23 "No hizo nada" 24 "Otro"
-	label val reaccion_evento_`i'_`k' reaccion_evento_`i'_`k'
 		}
 	}
 	
@@ -3461,13 +3519,33 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	replace s15q2d_`i'="." if s15q2d_`i'==".a"
 	*-- Generate variable
 	clonevar reaccionot_evento`i' = s15q2d_`i'
-	*-- Label variable
-	label var reaccionot_evento`i' "2d.Otro arreglo, especifique"
 	*-- Cross check
 	tab reaccionot_evento`i'
 	}
+*-- Label variables
+	label var reaccionot_evento1 "2d. Especifique otro arreglo de su hogar con el reciente 1. Muerte o discapacidad de un miembro adulto del hogar que trabaja"
+	label var reaccionot_evento2 "2d. Especifique otro arreglo de su hogar con el reciente 2. Muerte de alguien que envía remesas a la casa"
+	label var reaccionot_evento3 "2d. Especifique otro arreglo de su hogar con el reciente 3. Enfermedad de la persona con el ingreso más importante del hogar"
+	label var reaccionot_evento4 "2d. Especifique otro arreglo de su hogar con el reciente 4. Pérdida de un contacto importante"
+	label var reaccionot_evento5 "2d. Especifique otro arreglo de su hogar con el reciente 5. Perdida de trabajo"
+	label var reaccionot_evento6 "2d. Especifique otro arreglo de su hogar con el reciente 6. Salida del miembro de la familia que genera ingresos debido a la separación o el divorcio"
+	label var reaccionot_evento7 "2d. Especifique otro arreglo de su hogar con el reciente 7. Salida del miembro de la familia que genera ingresos debido al matrimonio"
+	label var reaccionot_evento8 "2d. Especifique otro arreglo de su hogar con el reciente 8. Fracaso empresarial no agrícola"
+	label var reaccionot_evento9 "2d. Especifique otro arreglo de su hogar con el reciente 9. Robo de cultivos, dinero en efectivo, ganado u otros bienes"
+	label var reaccionot_evento10 "2d. Especifique otro arreglo de su hogar con el reciente 10. Destrucción de cosecha por fuego"
+	label var reaccionot_evento11 "2d. Especifique otro arreglo de su hogar con el reciente 11. Vivienda dañada / demolida"
+	label var reaccionot_evento12 "2d. Especifique otro arreglo de su hogar con el reciente 12. Pocas lluvias que causaron el fracaso de la cosecha"
+	label var reaccionot_evento13 "2d. Especifique otro arreglo de su hogar con el reciente 13. Inundaciones que causaron el fracaso de la cosecha"
+	label var reaccionot_evento14 "2d. Especifique otro arreglo de su hogar con el reciente 14. Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento"
+	label var reaccionot_evento15 "2d. Especifique otro arreglo de su hogar con el reciente 15. Pérdida de propiedad por incendio o inundación"
+	label var reaccionot_evento16 "2d. Especifique otro arreglo de su hogar con el reciente 16. Pérdida de tierra"
+	label var reaccionot_evento17 "2d. Especifique otro arreglo de su hogar con el reciente 17: Muerte de ganado por enfermedad,"
+	label var reaccionot_evento18 "2d. Especifique otro arreglo de su hogar con el reciente 18: Incremento en el precio de los insumos,"
+	label var reaccionot_evento19 "2d. Especifique otro arreglo de su hogar con el reciente 19: Caída en el precio de los productos,"
+	label var reaccionot_evento20 "2d. Especifique otro arreglo de su hogar con el reciente 20: Incremento en el precio de los principales alimentos consumidos,"
+	label var reaccionot_evento21 "2d. Especifique otro arreglo de su hogar con el reciente 21: Secuestro / robo / asalto,"
 
-	
+
 /*(*****************************************************************************************************************************************
 *---------------------------------------------------------- 1.9: Income Variables ----------------------------------------------------------
 *****************************************************************************************************************************************)*/
@@ -4234,6 +4312,7 @@ capture label drop nivel
 	gen `uno' = 1
 	egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
 	drop if hogarsec == 1 //solo para inflacion, no para todo!!
+	
 include "$pathaux\do_file_1_variables_MA.do"
 
 /// RENTA IMPUTADA ///
@@ -4254,6 +4333,8 @@ include "$pathaux\do_file_1_variables_MA.do"
 
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8 | tenencia_vivienda==9 | tenencia_vivienda==10 
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==2 | tenencia_vivienda==3 | tenencia_vivienda==4 | tenencia_vivienda==5 | tenencia_vivienda==. 
+		* Follows the division already determined in the survey itself
+	
 	sort id, stable
 	by id: egen propieta_no_paga = max(aux_propieta_no_paga) 
 	replace propieta_no_paga=. if hogarsec==1
@@ -4268,7 +4349,7 @@ include "$pathaux\do_file_1_variables_MA.do"
 				di "////"
 				di `m'
 				di `c'
-				di  `tc`c'mes`m''
+				di `tc`c'mes`m''
 				di `deflactor`m''
 				replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
 			}

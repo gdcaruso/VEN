@@ -33,7 +33,7 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 	global	vars_aux			quintil perc_ilaenitf perc_inlaenitf perc_rentimpenitf ///
 								perc_ijubi_meninla perc_icap_meninla perc_remeninla perc_itranp_o_meninla perc_itranp_nseninla ///
 								perc_itrane_o_meninla perc_itrane_nseninla perc_inla_extraordeninla ///
-								/*ocupado*/ edad9 recibe_ingresolab_mon_mes recibe_ingresolab_mon_ano recibe_ingresolab_mon report_inglabmon_nocuanto ///
+								edad9 recibe_ingresolab_mon_mes recibe_ingresolab_mon_ano recibe_ingresolab_mon report_inglabmon_nocuanto ///
 								recibe_ingresolab_nomon report_inglabnomon_nocuanto ///
 								cuantasinlarecibe recibe_ingresonolab_mes ///
 								recibe_ingresonolab_ano recibe_ingresonolab ///
@@ -91,7 +91,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 ********************************************************************************	
 
 *---- II. Interview Control / Control de la entrevista
-		global control_ent entidad region_est1 municipio nombmun parroquia nombpar 
+		global control_ent entidad region_est1 municipio nombmun parroquia nombpar interview_month interview__id interview__key 
 		
 *----III Household determination / Determinacion de hogares
 		global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
@@ -131,7 +131,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 				afiliado_segsalud pagosegsalud quien_pagosegsalud /*quien_pagosegsalud_o*/ cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
 
 *----IX: LABOR / EMPLEO	
-	global labor_ENCOVI ocupado relab trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
+	global labor_ENCOVI relab ocupado desocupa pea trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
 			dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto /*dili_otro*/ ///
 			como_busco_semana razon_no_busca razon_no_busca_o actividades_inactivos tarea sector_encuesta categ_ocu hstr_ppal trabajo_secundario hstr_todos /// 
 			im_sueldo im_hsextra im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_petro ///
@@ -205,7 +205,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global from_cedlas iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ///
 		ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm rem cct itrane_o_m itrane_o_nm itranp_o_m itranp_o_nm itranp_ns ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ///
 		ila ila_m ila_m_local ila_m_ext ila_nm ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_ns itrane_m itran itran_m inla_extraord inla_otro inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-		hogarsec interview_month interview__id interview__key quest  // additional
+		hogarsec  // additional
 				
 *----Pobreza
 		rename lp_19 lp_19usd
@@ -231,6 +231,7 @@ cap drop statut
 cap drop sector_urb 
 cap drop d_renta_imp_b
 cap drop ingresoslab_mon // Ahora es ila_m
+cap drop quest
 
 
 compress

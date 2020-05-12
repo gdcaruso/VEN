@@ -4,7 +4,7 @@ level and integrates into a unique dataset at product level
 ===========================================================================
 Country name:	Venezuela
 Year:			2019
-Survey:			ECOVI
+Survey:			ENCOVI
 Vintage:		
 Project:	
 ---------------------------------------------------------------------------
@@ -20,39 +20,39 @@ Note:
 ********************************************************************************
 
 // Define rootpath according to user
+/*
+	    * User 1: Trini
+		global trini 0
+		
+		* User 2: Julieta
+		global juli   0
+		
+		* User 3: Lautaro
+		global lauta  0
+		
+		* User 4: Malena
+		global male   1
+			
+		if $juli {
+				global dopath "C:\Users\wb563583\GitHub\VEN"
+				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}
+	    if $lauta {
+				global dopath "C:\Users\wb563365\GitHub\VEN"
+				global datapath "C:\Users\wb563365\DataEncovi\"
+		}
+		if $trini   {
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+		}
+		if $male   {
+				global dopath "C:\Users\wb550905\Github\VEN"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}	
 
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta  1
-//		
-//
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global rootpath ""
-// 		}
-// 	    if $lauta {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN\"
-//
-// 		}
-// 		if $trini   {
-// 				global rootpath ""
-// 		}
-//		
-// 		if $male   {
-// 				global rootpath ""
-// 		}
-//
-// // // set raw data path
-// global input "$datapath\data_management\input\latest"
-// global output "$datapath\data_management\output"
-
+// set raw data path
+ global input "$datapath\data_management\input\latest"
+ global output "$datapath\data_management\output"
+*/
 ********************************************************************************
 
 /*==============================================================================
@@ -99,7 +99,7 @@ by quest interview__key interview__id: keep if _n==_N
 duplicates tag interview__key interview__id quest, generate(dupli)
 preserve
 keep if dupli >= 1
-save "$output\duplicates-prod.dta", replace
+save "$merged\duplicates-prod.dta", replace
 restore	
 
 drop if dupli >= 1
@@ -511,7 +511,7 @@ label values unidad_medida measure
 // also pick dates when data collection started
 
 preserve
-use "$output\household", replace
+use "$merged\household", replace
 keep interview__key interview__id quest s12aq1*os s12a_star
 
 //date formt
@@ -553,9 +553,5 @@ sort interview__id interview__key quest bien, stable
 
 
 // save the product-household dataset
-save "$output\product-hh.dta", replace
+save "$merged\product-hh.dta", replace
 
-
-
-
- 

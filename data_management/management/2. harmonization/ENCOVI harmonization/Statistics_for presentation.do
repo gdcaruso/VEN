@@ -169,8 +169,9 @@ local n2 "age group"
 local n3 "marital status"
 local n4 "household size"
 local n5 "household size"
+local n6 "entidad"
 local i=1
-foreach x in hombre agegroup estado_civil miembros hhsize{
+foreach x in hombre agegroup estado_civil miembros hhsize entidad {
 tabby weight all `x' year demo 
 putexcel A`row'="Distribution of the population by `n`i'', years `ti'-`tf'"
 local row=`row'+2

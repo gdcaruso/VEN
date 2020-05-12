@@ -25,7 +25,7 @@ label var	pondera         "Factor de ponderacion a nivel individual"
 cap label var 	pondera_hh		"Factor de ponderacion a nivel de los hogares"
 *label var	strata          "Variable de estratificacion"   
 label var   psu	     	 	"Unidad Primaria de Muestreo"
-label var 	quest 			"Cuestionario (para uso admin ENCOVI)"
+cap label var 	quest 			"Cuestionario (para uso admin ENCOVI)"
 label def 	entidad		1 "Distrito Capital" 2 "Amazonas" 3 "Anzoategui" 4 "Apure" ///
 						5 "Aragua" 6 "Barinas" 7 "Bolivar" 8 "Carabobo" 9 "Cojedes" ///
 						10 "Delta Amacuro" 11 "Falcon" 12 "Guarico" 13 "Lara" 14 "Merida" ///
@@ -33,8 +33,18 @@ label def 	entidad		1 "Distrito Capital" 2 "Amazonas" 3 "Anzoategui" 4 "Apure" /
 						19 "Sucre" 20 "Tachira" 21 "Trujillo" 22 "Yaracuy" 23 "Zulia" 24 "Vargas"
 label value entidad entidad
 
+label var region_est1 "Region"
+label def region_est1 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
+          5 "Andina" 6 "Nor-Oriental" 7 "Capital"
+label value region_est1 region_est1
+
 ** Demographic variables  / Variables demográficas
 
+label def 	relacion_en 	1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)" 4 "Hijastro(a)" ///
+							5 "Nieto(a)" 6 "Yerno, nuera, suegro (a)" 7 "Padre, madre", 8 "Hermano(a)" ///
+							9 "Cunado(a)" 10 "Sobrino(a)" 11 "Otro pariente" 12 "No pariente" 13 "Servicio Domestico"
+label values relacion_en relacion_en					
+			
 label def 	relacion_comp 	1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
 							6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"
 label values relacion_comp relacion_comp
@@ -692,9 +702,18 @@ label values pagosegsalud pagosegsalud
 
 *** Labor / Empleo
 
+label var    pea            "Dummy de condicion de actividad: economicamente activo"
+label define pea 			0 "Inactivo" 1 "Activo"
+label values pea pea
+
 label var    ocupado         "Dummy de condicion de actividad: ocupado"
-label define ocupado 0 "No ocupado" 1 "Ocupado"
+label define ocupado 		0 "No ocupado" 1 "Ocupado"
 label values ocupado ocupado
+
+label var    desocupa        "Dummy de condicion de actividad: desocupado"
+label define desocupa 		0 "No desocupado" 1 "Desocupado"
+label values desocupa desocupa 
+
 
 label var  	trabajo_semana  	"¿La semana pasada trabajó al menos una hora? "
 label def	trabajo_semana		1 "Si" 0 "No"
@@ -800,6 +819,7 @@ label values relab relab
 		
 ** Shocks
 
+	*Cuáles de los siguientes eventos han afectado a su hogar desde el año 2017?
 	* s15q15__* or evento_*
 	label var evento_1 "Desde 2017, el hogar se vio afectado por: 1.Muerte o discapacidad de un miembro adulto del hogar que trabajaba"
 	label var evento_2 "Desde 2017, el hogar se vio afectado por: 2.Muerte de alguien que enviaba remesas al hogar"
@@ -847,6 +867,7 @@ label values relab relab
 	label var imp_evento_21 "Top 3 eventos: 21:Secuestro / robo / asalto, "
 	label var imp_evento_22 "Top 3 eventos: 22:Otra especificar"
 
+	* Cómo se las arregló su hogar con el choque más reciente?
 	* reaccion_evento_*_* or 15q2c__
 	
 	label var reaccion_evento_1_1 "2c. Su hogar vendió ganado por la reciente 1. Muerte o discapacidad de un miembro adulto del hogar que trabaja"

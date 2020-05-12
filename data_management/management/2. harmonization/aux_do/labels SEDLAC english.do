@@ -85,6 +85,10 @@ label define matpreca 		 0 "Non-precarious materials" 1 "Precarious materials"
 label values matpreca matpreca
 
 label var    region_est1     "Geographic region lowest disaggregation (standardized)" 
+label def region_est1 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
+          5 "Andina" 6 "Nor-Oriental" 7 "Capital"
+label value region_est1 region_est1
+
 label var    region_est2     "Geographic region intermediate disaggregation  (standardized)" 
 label var    region_est3     "Geographic region highest disaggregation  (standardized)" 
 

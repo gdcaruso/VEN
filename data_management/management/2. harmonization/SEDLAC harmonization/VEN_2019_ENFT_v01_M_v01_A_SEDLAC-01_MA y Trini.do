@@ -211,7 +211,7 @@ drop _merge
 		
 	* Household weights
 		sort interview__key interview__id quest relacion_en, stable
-		bys interview__key interview__id quest: replace encovi_w=. if _n!=1
+		by interview__key interview__id quest: replace encovi_w=. if _n!=1
 			*Obs: we did it in this way instead of:
 				*gen pondera_hh = encovi_w if relacion_en==1
 			*Because there was one household which did not have "jefe de hogar" - one we have fixed it though. check for the fix:
@@ -1449,8 +1449,8 @@ gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero ti
 * Unemployed: desocupa
 gen     desocupa = (labor_status==3)  //buscando trabajo
 		
-* Inactive: inactivos	
-gen     inactivo= inrange(labor_status,5,9) 
+* Inactive: inactivos	(we don't include it as it mirrors pea)
+*gen     inactivo= inrange(labor_status,5,9) 
 
 * Economically active population: pea	
 gen     pea = (ocupado==1 | desocupa ==1)

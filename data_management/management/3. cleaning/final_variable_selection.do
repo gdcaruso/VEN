@@ -33,7 +33,7 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 	global	vars_aux			quintil perc_ilaenitf perc_inlaenitf perc_rentimpenitf ///
 								perc_ijubi_meninla perc_icap_meninla perc_remeninla perc_itranp_o_meninla perc_itranp_nseninla ///
 								perc_itrane_o_meninla perc_itrane_nseninla perc_inla_extraordeninla ///
-								/*ocupado*/ edad9 recibe_ingresolab_mon_mes recibe_ingresolab_mon_ano recibe_ingresolab_mon report_inglabmon_nocuanto ///
+								edad9 recibe_ingresolab_mon_mes recibe_ingresolab_mon_ano recibe_ingresolab_mon report_inglabmon_nocuanto ///
 								recibe_ingresolab_nomon report_inglabnomon_nocuanto ///
 								cuantasinlarecibe recibe_ingresonolab_mes ///
 								recibe_ingresonolab_ano recibe_ingresonolab ///
@@ -131,7 +131,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 				afiliado_segsalud pagosegsalud quien_pagosegsalud /*quien_pagosegsalud_o*/ cant_pagosegsalud mone_pagosegsalud mes_pagosegsalud
 
 *----IX: LABOR / EMPLEO	
-	global labor_ENCOVI ocupado relab trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
+	global labor_ENCOVI relab ocupado desocupa pea trabajo_semana trabajo_semana_2 trabajo_independiente razon_no_trabajo razon_no_trabajo_o sueldo_semana busco_trabajo empezo_negocio cuando_buscotr ///
 			dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto /*dili_otro*/ ///
 			como_busco_semana razon_no_busca razon_no_busca_o actividades_inactivos tarea sector_encuesta categ_ocu hstr_ppal trabajo_secundario hstr_todos /// 
 			im_sueldo im_hsextra im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_petro ///

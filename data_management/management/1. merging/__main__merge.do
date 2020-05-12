@@ -27,26 +27,35 @@ Note:
  		global juli   0
 		
  		* User 3: Lautaro
- 		global lauta  1
+ 		global lauta  0
 		
  		* User 4: Malena
- 		global male   0
+ 		global male   1
 			
- 		if $juli {
- 				global dopath "C:\Users\wb563583\GitHub\VEN"
- 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
- 		}
- 	    if $lauta {
- 				global dopath "C:\Users\wb563365\GitHub\VEN"
- 				global datapath "C:\Users\wb563365\DataEncovi\"
- 		}
- 		if $trini   {
- 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
- 		}
- 		if $male   {
- 				global dopath "C:\Users\wb550905\Github\VEN"
- 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
- }		
+		if $juli {
+				global dopath "C:\Users\wb563583\GitHub\VEN"
+				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}
+	    if $lauta {
+				global dopath "C:\Users\wb563365\GitHub\VEN"
+				global datapath "C:\Users\wb563365\DataEncovi\"
+		}
+		if $trini   {
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+		}
+		if $male   {
+				global dopath "C:\Users\wb550905\Github\VEN"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+				global outSEDLAC "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_SEDLAC_DATA_2014_2019\"
+				global outENCOVI "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018\"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}		
+
+// set path for dofiles
+global input "$datapath\data_management\input\latest"
+global merging "$dopath\data_management\management\1. merging"
+global merged "$datapath\data_management\output\merged"
+
 */
 
 ********************************************************************************
@@ -60,23 +69,18 @@ version 14
 drop _all
 set more off
 
-// set path for dofiles
-global input "$datapath\data_management\input\latest"
-global merging "$dopath\data_management\management\1. merging"
-global output "$datapath\data_management\output\merged"
-
-
 /*==============================================================================
 Construction of aproved surveys
 ==============================================================================*/
 
 //merge individual datasets
 run "$merging/individual_append_n_merge.do"
-run "$merging/adhoc_edit.do"
-
 
 //merge hh datasets
 run "$merging/Merge_Hogares_JL.do"
+
+//ad-hoc edits
+run "$merging/adhoc_edit.do"
 
 //merge products datasets
 run "$merging/products_append_n_merge.do"

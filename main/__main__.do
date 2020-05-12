@@ -84,7 +84,6 @@ global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 *set path of data
 global merging "$dopath\data_management\management\1. merging"
 global input "$datapath\data_management\input\latest"
-global output "$datapath\data_management\output\merged"
 
 * run merge
 run "$merging\__main__merge.do"

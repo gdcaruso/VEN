@@ -44,7 +44,7 @@ Note:
 //
 // // set raw data path
 
-// global output "$rootpath\data_management\output\merged"
+// global merged "$rootpath\data_management\output\merged"
 *
 ********************************************************************************
 
@@ -56,9 +56,9 @@ drop _all
 set more off
 
 // set paths to dta
-global productdta "$output\product-hh.dta"
-global householddta  "$output\household.dta"
-global individualdta  "$output\individual.dta"
+global productdta "$merged\product-hh.dta"
+global householddta  "$merged\household.dta"
+global individualdta  "$merged\individual.dta"
 
 /*==============================================================================
 1: Measurement unit homogeneization of food
@@ -597,5 +597,5 @@ compress
 *************************************************************************************************************************************************)*/
 	
 // now, mostly of the products are expressed in grams
-save "$output\product_hh_homogeneous.dta", replace
+save "$merged\product_hh_homogeneous.dta", replace
 

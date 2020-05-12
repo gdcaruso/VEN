@@ -59,6 +59,10 @@ label var   pondera         "Weighting factor (individual level)"
 cap label var 	pondera_hh		"Weighting factor (household level)"
 *label var   strata          "Stratification variable"   
 label var    psu	     	 "Primary sampling unit"
+label var region_est1 "Region"
+label def region_est1 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
+          5 "Andina" 6 "Nor-Oriental" 7 "Capital"
+label value region_est1 region_est1
 
 
 /*(************************************************************************************************************************************************* 
@@ -1420,7 +1424,18 @@ label values mes_pagosegsalud mes_pagosegsalud
 *---------------------------------------------------------- IX: LABOR / EMPLEO ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-label var 	ocupado				"Occupied"
+label var    pea             "Dummy for activity status: economically active"
+label define pea 			 0 "Inactive" 1 "Active"
+label values pea pea
+
+label var    ocupado         "Dummy for activity status: employed"
+label define ocupado 		 0 "Not employed" 1 "Employed"
+label values ocupado ocupado
+
+label var    desocupa        "Dummy for activity status: unemployed"
+label define desocupa 		 0 "Not unemployed" 1 "Unemployed"
+label values desocupa desocupa 
+
 label var    relab           	"Type of employment in the main occupation (harmonized)"
 label define relab 			 	1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
 label values relab relab
@@ -1438,7 +1453,7 @@ label def	trabajo_independiente	1 "Yes" 0 "No"
 label values trabajo_independiente trabajo_independiente
 label var  	razon_no_trabajo  	"Main reason for not working last week"
 label def 	razon_no_trabajo 	1 "Was sick" 2 "Vacations" 3 "Permit" 4 "Labor conflicts" 5 "Reparation of equipment, machinery or vehicle" 7 "Does not want to work" 8 "Lack of work, clients or orders" /// 
-								9 "Impediment of municipal or national authorities" 10 "Will start new employment in 30 days" 11 "Stationary factors" 16 "Other"		
+								9 "Impediment of municipal or national authorities" 11 "Will start new employment in 30 days" 12 "Seasonal factors" 16 "Other"		
 label values razon_no_trabajo razon_no_trabajo
 label var  	razon_no_trabajo_o 	"Other reason for not working last week"
 label var  	sueldo_semana 		"Last week did you receive wages or benefits?"

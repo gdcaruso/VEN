@@ -3,11 +3,11 @@ Detected and corrected missinputed data
 ===========================================================================
 Country name:	Venezuela
 Year:			2019
-Survey:			ECOVI
+Survey:			ENCOVI
 Vintage:		
 Project:	
 ---------------------------------------------------------------------------
-Authors:			Lautaro Chittaro
+Authors:			Lautaro Chittaro, Malena Acuña
 
 Dependencies:		The World Bank
 Creation Date:		22th April, 2020
@@ -17,7 +17,7 @@ Output:			products.dta
 Note: 
 =============================================================================*/
 ********************************************************************************
-
+/*
 // Define rootpath according to user (silenced as this is done by main now)
 
  	    * User 1: Trini
@@ -48,8 +48,8 @@ Note:
  				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 		}
 	
-		global merged "$datapath\data_management\output\merged"
-		global cleaned "$datapath\data_management\output\cleaned"
+		global output "$datapath\data_management\output\merged" // although here it is input
+*/
 
 ********************************************************************************
 
@@ -80,16 +80,13 @@ replace s6q2=2 if s6q2 == 13 & interview__key == "19-22-71-57"
 replace s6q2=5 if s6q2 == 13 & interview__key == "16-09-80-35"
 
 /*==============================================================================
-Only one household has no head: it is a 1-person home
-==============================================================================*/
-
-replace s6q2=1 if interview__id=="41c2e46694f245bd8face23c459ae18e" & interview__key=="16-35-68-66"
-
-/*==============================================================================
 Total missing observation 
 ==============================================================================*/
 
-*Only one that should have not passed the HQ filter but did)
+*Only one household has no head: it is a 1-person home
+*replace s6q2=1 if interview__id=="41c2e46694f245bd8face23c459ae18e" & interview__key=="16-35-68-66"
+
+*Actually, it was the only one that should have not passed the HQ filter but did
 drop if interview__key=="16-35-68-66"
 
 /*==============================================================================

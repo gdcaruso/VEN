@@ -21,7 +21,7 @@ Note:
 // Define rootpath according to user (silenced as this is done by main now)
 
 // clear all 
-
+/*
 	    * User 1: Trini
 		global trini 0
 		
@@ -60,7 +60,7 @@ Note:
 *Output
 	global cleaned "$datapath\data_management\output\cleaned"
 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-
+*/
 
 ********************************************************************************
 	
@@ -69,14 +69,14 @@ Note:
 **********************************
 
 *set seed 1 // The seeds are in the do's in the end
-/*
+
 run "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
 run "$impdos\2. Imputation 2019 - Monetary labor income.do"
 run "$impdos\3. Imputation 2019 - Pensions.do"
 run "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
 run "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
-*/
+
 
 **************************************
 /* NUESTRO DOFILE: TC Y DEFLACTORES */
@@ -335,7 +335,6 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		
 		replace renta_imp = `partrentaimp'*itf_sin_ri  	if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
 		replace renta_imp = max_renta_imp 				if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) & `partrentaimp'*itf_sin_ri>max_renta_imp	 // Para evitar outliers de nuevo
-		stop
 		drop part_rentaimp max_renta_imp
 		
 			

@@ -1575,7 +1575,7 @@ d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro d_sso_cant d_spf_cant d_isr_cant d_ca
 im_patron im_patron_cant im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone i_indep_mes i_indep_mes_cant i_indep_mes_mone ///
 g_indep_mes_cant g_indep_mes_mone razon_menoshs razon_menoshs_o deseamashs buscamashs razon_nobusca razon_nobusca_o cambiotr razon_cambiotr razon_cambiotr_o ///
 aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension ///
-relab ocupado desocupa pea
+relab ocupado desocupa pea labor_status
 
 *Notes: interviews done if age>9
 
@@ -4449,6 +4449,12 @@ include "$pathaux\do_file_1_variables_MA.do"
 			}
 		}
 		
+			gen como_imputa_renta = .
+			replace como_imputa_renta = 0 if propieta_no_paga==0
+			replace como_imputa_renta = 1 if propieta_no_paga==1 & renta_imp!=.
+			replace como_imputa_renta = 2 if propieta_no_paga==1 & renta_imp==.
+			
+			
 	// Taking care of people who need to have rent imputated but didn't answer what would be their housing costs if they had to pay
 		* Assumption: Para los pocos que no contestaron, el ingreso total familiar (pre-renta imputada) por la media de la participación de la renta imputada reportada en el ingreso total familiar (antes de renta imputada), entre aquellos que sí la contestaron.
 	
@@ -4476,6 +4482,12 @@ include "$pathaux\do_file_1_variables_MA.do"
 			clonevar renta_imp_out=renta_imp
 			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing
 			sum	renta_imp_out if out_renta_imp==1 
+			
+			replace como_imputa_renta = 3 if out_renta_imp==1
+			label define como_imputa_renta 0 "Alquila o crédito hipotecario (no imp)" 1 "Rta preg costo potencial, no outlier (eso imp)" 2 "No rta preg costo potencial (imputar)" 3 "Outlier (imputar)"
+			label values como_imputa_renta como_imputa_renta
+				*Check
+				tab como_imputa_renta, mi // ok
 	
 			* Now without outliers
 			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
@@ -4498,9 +4510,12 @@ include "$pathaux\do_file_1_variables_MA.do"
 			
 			*replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with 10% in cases where no guess is provided by hh.
 		
-		replace renta_imp = `partrentaimp'*itf_sin_ri  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
+		egen max_renta_imp = max(renta_imp)
 		
-		drop part_rentaimp
+		replace renta_imp = `partrentaimp'*itf_sin_ri  	if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) & `partrentaimp'*itf_sin_ri<=max_renta_imp // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
+		replace renta_imp = max_renta_imp 				if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) & `partrentaimp'*itf_sin_ri>max_renta_imp	 // Para evitar outliers de nuevo
+		
+		drop part_rentaimp max_renta_imp
 		
 			/* Descriptive analysis (when we were still using the 10% assumption)
 			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
@@ -4581,7 +4596,7 @@ include "$pathaux\do_file_2_variables.do"
 		drop uno 
 
 *(************************************************************************************************************************************************ 
-*---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------------
+*---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------
 ************************************************************************************************************************************************)*/	
 gen linea_pobreza = . // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
 gen linea_pobreza_extrema = .  // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
@@ -4611,7 +4626,9 @@ hogarsec interview_month interview__id interview__key quest labor_status miembro
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-hogarsec interview_month interview__id interview__key quest miembros s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
-stop
+hogarsec interview_month interview__id interview__key quest miembros s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo como_imputa_renta // additional
+
+drop if interview__key=="16-35-68-66" // Don't know why/how this all-missing variable keeps on appearing
+
 save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

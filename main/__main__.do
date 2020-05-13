@@ -119,6 +119,7 @@ imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 global forimp 	"$datapath\data_management\output\for imputation"
 global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
+global numberofimpruns 30
 
 //run ENCOVI imputation
 do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
@@ -128,7 +129,7 @@ do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
 poverty estimation
 ==============================================================================*/
 // set global inflation input
-global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta" // Ya estaba arriba también
 // set path of data
 global povmeasure "$dopath\poverty_measurement\scripts"
 global input "$datapath\poverty_measurement\input"
@@ -174,7 +175,7 @@ labeling and saving final full databases
 
 //run spanish labeling
 preserve
-run "$pathaux\labels ENCOVI spanish.do"
+do "$pathaux\labels ENCOVI spanish.do"
 save "$outENCOVI\ENCOVI_2019_Spanish labels.dta", replace
 restore
 
@@ -204,3 +205,15 @@ run "$pathaux\labels SEDLAC english.do"
 save "$outSEDLAC\VEN_2019_ENCOVI_SEDLAC-01_English labels.dta", replace
 
 clear all
+
+/*==============================================================================
+Additional database with Expenditure Data
+==============================================================================*/
+
+global expendiscript "$dopath\expenditure\script"
+run "$expendiscript\genera_gasto_per_capita.do"
+save "$outENCOVI\ENCOVI_2019_with_expenditures_Spanish labels.dta", replace
+
+clear all
+ 
+

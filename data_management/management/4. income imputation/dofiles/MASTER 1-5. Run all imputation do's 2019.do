@@ -21,7 +21,7 @@ Note:
 // Define rootpath according to user (silenced as this is done by main now)
 
 // clear all 
-/*
+
 	    * User 1: Trini
 		global trini 0
 		
@@ -49,6 +49,8 @@ Note:
 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
 			}
 
+	global numberofimpruns 30
+
 *Inputs
 	global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 	global exrate 	"$datapath\data_management\input\exchenge_rate_price.dta"
@@ -58,7 +60,7 @@ Note:
 *Output
 	global cleaned "$datapath\data_management\output\cleaned"
 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-*/
+
 
 ********************************************************************************
 	
@@ -67,14 +69,14 @@ Note:
 **********************************
 
 *set seed 1 // The seeds are in the do's in the end
-
+/*
 run "$impdos\1. Imputation 2019 - Identification missing values & possible variables for regression.do"
 	* Obs: dofile 1 uses "ENCOVI_2019_Sin imputar (con precios implicitos).dta"
 run "$impdos\2. Imputation 2019 - Monetary labor income.do"
 run "$impdos\3. Imputation 2019 - Pensions.do"
 run "$impdos\4. Imputation 2019 - Non Labor Income (except pensions).do"
 run "$impdos\5. Imputation 2019 - Labor benefits (non monetary income).do"
-
+*/
 
 **************************************
 /* NUESTRO DOFILE: TC Y DEFLACTORES */
@@ -264,7 +266,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	/* NUESTRO DOFILE: RENTA IMPUTADA */
 	************************************
 	
-	foreach i in aux_propieta_no_paga propieta_no_paga renta_imp renta_imp_b {
+	foreach i in aux_propieta_no_paga propieta_no_paga renta_imp renta_imp_b como_imputa_renta {
 			cap drop `i'  	
 		}
 	
@@ -290,6 +292,11 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 			}
 		}
 		
+			gen como_imputa_renta = . // For analysis: to know how we treated the renta imputada in each case
+			replace como_imputa_renta = 0 if propieta_no_paga==0
+			replace como_imputa_renta = 1 if propieta_no_paga==1 & renta_imp!=.
+			replace como_imputa_renta = 2 if propieta_no_paga==1 & renta_imp==.
+
 	// Taking care of people who need to have rent imputated but didn't answer what would be their housing costs if they had to pay
 		* Assumption: Para los pocos que no contestaron, el ingreso total familiar (pre-renta imputada) por la media de la participación de la renta imputada reportada en el ingreso total familiar (antes de renta imputada), entre aquellos que sí la contestaron.
 	
@@ -307,6 +314,12 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing
 			sum	renta_imp_out if out_renta_imp==1 
 	
+				replace como_imputa_renta = 3 if out_renta_imp==1
+				label define como_imputa_renta 0 "Alquila o crédito hipotecario (no imp)" 1 "Rta preg costo potencial, no outlier (no imp)" 2 "No rta preg costo potencial (imputar)" 3 "Outlier (imputar)"
+				label values como_imputa_renta como_imputa_renta
+				*Check
+				tab como_imputa_renta, mi // Ok
+
 			* Now without outliers
 			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
 			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
@@ -318,8 +331,12 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 			* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated 
 		
 		*sum itf_sin_ri if relacion_en==1 & propieta_no_paga==1 & (renta_imp==. | renta_imp==.a | renta_imp==0)
-		replace renta_imp = `partrentaimp'*itf_sin_ri  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
-		drop part_rentaimp
+		egen max_renta_imp = max(renta_imp)
+		
+		replace renta_imp = `partrentaimp'*itf_sin_ri  	if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
+		replace renta_imp = max_renta_imp 				if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) & `partrentaimp'*itf_sin_ri>max_renta_imp	 // Para evitar outliers de nuevo
+		stop
+		drop part_rentaimp max_renta_imp
 		
 			
 	*********************
@@ -367,3 +384,11 @@ drop inlanojub_imp1
 ****************************************************
 
 save "$cleaned\ENCOVI_2019_pre pobreza.dta", replace
+
+
+********************************************************************************
+*** Analyzing imputed data
+********************************************************************************
+
+run "$impdos\Analysis imputation.do"
+

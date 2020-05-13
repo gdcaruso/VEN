@@ -16,9 +16,7 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 	drop nombre_emig_`i'
 	}
 	
-
 *---- From Harmonization and cleaning (auxiliary)
-	   
 	   global harmoclean s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb 
 	   
 *---- Drop globales
@@ -33,7 +31,7 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 	global	vars_aux			quintil perc_ilaenitf perc_inlaenitf perc_rentimpenitf ///
 								perc_ijubi_meninla perc_icap_meninla perc_remeninla perc_itranp_o_meninla perc_itranp_nseninla ///
 								perc_itrane_o_meninla perc_itrane_nseninla perc_inla_extraordeninla ///
-								edad9 recibe_ingresolab_mon_mes recibe_ingresolab_mon_ano recibe_ingresolab_mon report_inglabmon_nocuanto ///
+								/*edad9*/ recibe_ingresolab_mon_mes recibe_ingresolab_mon_ano recibe_ingresolab_mon report_inglabmon_nocuanto ///
 								recibe_ingresolab_nomon report_inglabnomon_nocuanto ///
 								cuantasinlarecibe recibe_ingresonolab_mes ///
 								recibe_ingresonolab_ano recibe_ingresonolab ///
@@ -50,8 +48,7 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 								ila_m_out dila_m_out jubpen_out djubpen_out bene_out dbene_out ///
 								dila_m_zero djubpen_zero dbene_zero dinlanojub_zero
 
-*---- Variables tailored for these analisis
-
+*---- Variables tailored for this analysis
 	global other             	edad2 afiliado_segsalud_comp total_hrtr asiste_o_dejoypq 
 
 *---- Variables without missing (where missing was included as a category)
@@ -66,11 +63,11 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 
 *---- Dummy auxiliary for regressions 
 	global dummy_vars           p_agegroup_sinmis1 p_agegroup_sinmis2 p_agegroup_sinmis3 p_agegroup_sinmis4 p_agegroup_sinmis5 p_agegroup_sinmis6 p_agegroup_sinmis7 p_agegroup_sinmis8 ///
-								p_relacion_comp_sinmis1 p_relacion_comp_sinmis2 p_relacion_comp_sinmis3 p_relacion_comp_sinmis4 p_relacion_comp_sinmis5 p_relacion_comp_sinmis6 p_relacion_comp_sinmis7 p_relacion_comp_sinmis8 p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_relacion_comp_sinmis11 p_relacion_comp_sinmis12 p_relacion_comp_sinmis13 ///
+								p_relacion_comp_sinmis1 p_relacion_comp_sinmis2 p_relacion_comp_sinmis3 p_relacion_comp_sinmis4 p_relacion_comp_sinmis5 p_relacion_comp_sinmis6 p_relacion_comp_sinmis7 p_relacion_comp_sinmis8 p_relacion_comp_sinmis9 p_relacion_comp_sinmis10 p_relacion_comp_sinmis11 p_relacion_comp_sinmis12 ///
 								p_estado_civil_sinmis1 p_estado_civil_sinmis2 p_estado_civil_sinmis3 p_estado_civil_sinmis4 p_estado_civil_sinmis5 p_estado_civil_sinmis6 p_region_est1_sinmis1 p_region_est1_sinmis2 p_region_est1_sinmis3 p_region_est1_sinmis4 p_region_est1_sinmis5 p_region_est1_sinmis6 p_region_est1_sinmis7 ///
 								p_municipio_sinmis1 p_municipio_sinmis2 p_municipio_sinmis3 p_municipio_sinmis4 p_municipio_sinmis5 p_municipio_sinmis6 p_municipio_sinmis7 p_municipio_sinmis8 p_municipio_sinmis9 p_municipio_sinmis10 p_municipio_sinmis11 p_municipio_sinmis12 p_municipio_sinmis13 p_municipio_sinmis14 p_municipio_sinmis15 p_municipio_sinmis16 p_municipio_sinmis17 p_municipio_sinmis18 p_municipio_sinmis19 p_municipio_sinmis20 p_municipio_sinmis21 p_municipio_sinmis22 p_municipio_sinmis23 p_municipio_sinmis24 p_municipio_sinmis25 ///
-								p_tipo_vivienda_hh_sinmis1 p_tipo_vivienda_hh_sinmis2 p_tipo_vivienda_hh_sinmis3 p_tipo_vivienda_hh_sinmis4 p_tipo_vivienda_hh_sinmis5 p_tipo_vivienda_hh_sinmis6 p_tipo_vivienda_hh_sinmis7 p_tipo_vivienda_hh_sinmis8 ///
-								p_propieta_hh_sinmis1 p_propieta_hh_sinmis2 p_propieta_hh_sinmis3 ///
+								p_tipo_vivienda_hh_sinmis1 p_tipo_vivienda_hh_sinmis2 p_tipo_vivienda_hh_sinmis3 p_tipo_vivienda_hh_sinmis4 p_tipo_vivienda_hh_sinmis5 p_tipo_vivienda_hh_sinmis6 p_tipo_vivienda_hh_sinmis7 ///
+								p_propieta_hh_sinmis1 p_propieta_hh_sinmis2 ///
 								p_auto_hh_sinmis1 p_auto_hh_sinmis2 p_auto_hh_sinmis3 p_heladera_hh_sinmis1 p_heladera_hh_sinmis2 p_heladera_hh_sinmis3 p_lavarropas_hh_sinmis1 p_lavarropas_hh_sinmis2 p_lavarropas_hh_sinmis3 p_computadora_hh_sinmis1 p_computadora_hh_sinmis2 p_computadora_hh_sinmis3 p_internet_hh_sinmis1 p_internet_hh_sinmis2 p_internet_hh_sinmis3 p_televisor_hh_sinmis1 p_televisor_hh_sinmis2 p_televisor_hh_sinmis3 p_calentador_hh_sinmis1 p_calentador_hh_sinmis2 p_calentador_hh_sinmis3 p_aire_hh_sinmis1 p_aire_hh_sinmis2 p_aire_hh_sinmis3 p_tv_cable_hh_sinmis1 p_tv_cable_hh_sinmis2 p_tv_cable_hh_sinmis3 p_microondas_hh_sinmis1 p_microondas_hh_sinmis2 p_microondas_hh_sinmis3 ///
 								p_afiliado_segsalud_comp_sinmis1 p_afiliado_segsalud_comp_sinmis2 p_afiliado_segsalud_comp_sinmis3 p_afiliado_segsalud_comp_sinmis4 p_afiliado_segsalud_comp_sinmis5 p_afiliado_segsalud_comp_sinmis6 p_afiliado_segsalud_comp_sinmis7 ///
 								p_nivel_educ_sinmis1 p_nivel_educ_sinmis2 p_nivel_educ_sinmis3 p_nivel_educ_sinmis4 p_nivel_educ_sinmis5 p_nivel_educ_sinmis6 p_nivel_educ_sinmis7 p_nivel_educ_sinmis8 ///

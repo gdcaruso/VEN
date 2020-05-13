@@ -19,63 +19,63 @@ Note:
 ********************************************************************************
 
 
-// // Define rootpath according to user
-//
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
+// Define rootpath according to user
+/*
+ 	    * User 1: Trini
+ 		global trini 0
+		
+ 		* User 2: Julieta
+ 		global juli   0
+		
 		* User 3: Lautaro
-		global lauta  1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//			
-// 		if $juli {
-// 				global dopath "C:\Users\wb563583\GitHub\VEN"
-// 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// 		}
+		global lauta  0
+		
+ 		* User 4: Malena
+ 		global male   1
+			
+ 		if $juli {
+ 				global dopath "C:\Users\wb563583\GitHub\VEN"
+ 				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+ 		}
 	    if $lauta {
 				global dopath "C:\Users\wb563365\GitHub\VEN"
 				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019"
 		}
-// 		if $trini   {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-// 		}
-// 		if $male   {
-// 				global dopath "C:\Users\wb550905\Github\VEN"
-// 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-// }		
-//
-//
-// //set universal datapaths
+ 		if $trini   {
+ 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+ 		}
+ 		if $male   {
+ 				global dopath "C:\Users\wb550905\Github\VEN"
+ 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+				global outENCOVI "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018\"
+	
+	}		
 
 
-// global forinflation "$datapath\data_management\output\for inflation"
-//
-// //set universal dopath
-// global harmonization "$dopath\data_management\management\2. harmonization"
-// global inflado "$dopath\data_management\management\5. inflation"
-//
-// //Exchange rate inputs and auxiliaries
-//
+ //set universal datapaths
 
-// global pathaux "$harmonization\aux_do"
-//
-//
-// // set path of data
-// global povmeasure "$dopath\poverty_measurement\scripts"
-// global input "$datapath\poverty_measurement\input"
-// global output "$datapath\poverty_measurement\output"
-//
+ global forinflation "$datapath\data_management\output\for inflation"
+
+ //set universal dopath
+ global harmonization "$dopath\data_management\management\2. harmonization"
+ global inflado "$dopath\data_management\management\5. inflation"
+
+ //Exchange rate inputs and auxiliaries
+
+ global pathaux "$harmonization\aux_do"
+
+ // set path of data
+ global povmeasure "$dopath\poverty_measurement\scripts"
+ global input "$datapath\poverty_measurement\input"
+ global output "$datapath\poverty_measurement\output"
+*/
+/*
 global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
 global merged "$datapath\data_management\output\merged"
 global cleaned "$datapath\data_management\output\cleaned"
 global output "$datapath\expenditure\output"
-
+*/
 
 ********************************************************************************
 
@@ -97,7 +97,7 @@ qui{
 		* Deflactor
 
 
-use "$inflation", clear //( MALE ACA )
+use "$inflation", clear //( MALE ACA - QUÉ HAGO?)
 			
 			forvalues j = 10(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -129,7 +129,7 @@ use "$inflation", clear //( MALE ACA )
 			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses 1 2 3 4 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$exrate", clear //( MALE ACA )
+			use "$exrate", clear //( MALE ACA - QUÉ HAGO?)
 			
 			destring mes, replace
 			foreach i of local monedas {
@@ -170,7 +170,7 @@ di `deflactor4' //temporary same as march
 
 // import main encovi for basic hh data
 // import other expenditure data
-use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanish labels.dta", replace //MALE ACA
+use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanish labels.dta", replace // MALE ACA
 cap drop if hogarsec == 1
 cap drop _merge
 cap egen miembros = count(com), by (interview__key interview__id)
@@ -688,7 +688,8 @@ use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanis
 
 merge m:1 interview__id interview__key using "$output/winsored_expenditure_hh_level.dta"
 drop _merge
-save "ENCOVI_2019_with_expenditures_Spanish labels.dta", replace //(MALE ACA)
+
+*save "$outENCOVI/ENCOVI_2019_with_expenditures_Spanish labels.dta", replace // NOW DONE IN THE MAIN
 
 // drop lp_* pobre pobre_extremo
 //

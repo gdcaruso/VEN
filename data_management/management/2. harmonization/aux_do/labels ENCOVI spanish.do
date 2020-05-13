@@ -41,7 +41,7 @@ label value region_est1 region_est1
 ** Demographic variables  / Variables demográficas
 
 label def 	relacion_en 	1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)" 4 "Hijastro(a)" ///
-							5 "Nieto(a)" 6 "Yerno, nuera, suegro (a)" 7 "Padre, madre", 8 "Hermano(a)" ///
+							5 "Nieto(a)" 6 "Yerno, nuera, suegro (a)" 7 "Padre, madre" 8 "Hermano(a)" ///
 							9 "Cunado(a)" 10 "Sobrino(a)" 11 "Otro pariente" 12 "No pariente" 13 "Servicio Domestico"
 label values relacion_en relacion_en					
 			

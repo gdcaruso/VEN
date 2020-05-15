@@ -60,8 +60,8 @@ Note:
 *Output
 	global cleaned "$datapath\data_management\output\cleaned"
 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-*/
 
+*/
 ********************************************************************************
 	
 ***********************************
@@ -172,19 +172,16 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		drop ijubi_m 
 		rename jubpen_imp1 ijubi_m 
 		
-		drop inla_otro
-		//replace inlanojub=. if dinlanojub_out==1
+		cap drop inla_otro
+		replace inlanojub=. if dinlanojub_out==1
 			* Polémico, pero no queda otra para que tengan sentido los nuevos agregados monetarios de los outliers:
-			//replace icap_m=. if dinlanojub_out==1
-			//replace rem=. if dinlanojub_out==1
-			//replace itranp_o_m=. if dinlanojub_out==1
-			//replace itranp_ns=. if dinlanojub_out==1
-			//replace itrane_o_m=. if dinlanojub_out==1
-			//replace itrane_ns=. if dinlanojub_out==1
-			//replace inla_extraord=. if dinlanojub_out==1
+			* Change to missing all the variables that generate inlanojub (all inla's except ijubi_m) so that they don't add up again
+			foreach i of varlist icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord {
+				replace `i' =. if dinlanojub_out==1
+			}
 		gen inla_otro = .
-		replace inla_otro = cond(missing(inlanojub_imp1), ., inlanojub_imp1) - cond(missing(inlanojub), 0, inlanojub)
-		replace inla_otro =. if inla_otro==0
+		replace inla_otro = cond(missing(inlanojub_imp1), ., inlanojub_imp1) - cond(missing(inlanojub), 0, inlanojub) // La diferencia entre los que ya están y lo imputado
+		replace inla_otro =. if inla_otro<=0 // Si lo imputado es igual o más bajo, no poner nada
 		
 		*replace imputed rent_currency
 		cap drop d_renta_imp_b
@@ -262,9 +259,9 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 
 	include "$pathaux\do_file_1_variables_MA.do"
 	
-	************************************
-	/* NUESTRO DOFILE: RENTA IMPUTADA */
-	************************************
+	*************************************
+	/* NUESTRO DOFILE: RENTA IMPLICITA */
+	*************************************
 	
 	foreach i in aux_propieta_no_paga propieta_no_paga renta_imp renta_imp_b como_imputa_renta {
 			cap drop `i'  	
@@ -292,18 +289,18 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 			}
 		}
 		
-			gen como_imputa_renta = . // For analysis: to know how we treated the renta imputada in each case
-			replace como_imputa_renta = 0 if propieta_no_paga==0
-			replace como_imputa_renta = 1 if propieta_no_paga==1 & renta_imp!=.
-			replace como_imputa_renta = 2 if propieta_no_paga==1 & renta_imp==.
+				gen como_imputa_renta = . // For analysis: to know how we treated the renta imputada in each case
+				replace como_imputa_renta = 0 if propieta_no_paga==0
+				replace como_imputa_renta = 1 if propieta_no_paga==1 & renta_imp!=.
+				replace como_imputa_renta = 2 if propieta_no_paga==1 & renta_imp==.
 
 	// Taking care of people who need to have rent imputated but didn't answer what would be their housing costs if they had to pay
-		* Assumption: Para los pocos que no contestaron, el ingreso total familiar (pre-renta imputada) por la media de la participación de la renta imputada reportada en el ingreso total familiar (antes de renta imputada), entre aquellos que sí la contestaron.
+		* Assumption: Para los pocos que no contestaron, el ing. total familiar (pre-renta imp) por la media de la participación de la renta imp reportada en el ing. total familiar (antes de renta imp), entre los que sí la contestaron.
 	
-			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
-			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0  
+			sum part_rentaimp [w=pondera_hh] if renta_imp!=. & renta_imp!=0 & relacion_en==1, detail // Lo hacemos a nivel de hogar
 			* Problem: there are people who answer they would spend too much if they paid rent. The 50% percentile answers 66%. The 99% percentile even 687 times their income before imputed rent!
-			* Note: imputation dofile will take care of outliers.
+			* Note: we will take care of outliers.
 			tab renta_imp_mon if renta_imp_en!=. & renta_imp_en!=0, mi
 			drop part_rentaimp
 			
@@ -311,9 +308,9 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 			program drop _all
 			qui: do "$impdos\outliers.do" 			
 			clonevar renta_imp_out=renta_imp
-			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing
-			sum	renta_imp_out if out_renta_imp==1 
-	
+			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing // Obs: se tuvo un trato más estricto de outliers 3 std. dev. en vez de 5
+			sum	renta_imp_out if out_renta_imp==1  // van entre 2.07e+07 y 3.44e+11
+				
 				replace como_imputa_renta = 3 if out_renta_imp==1
 				label define como_imputa_renta 0 "Alquila o crédito hipotecario (no imp)" 1 "Rta preg costo potencial, no outlier (no imp)" 2 "No rta preg costo potencial (imputar)" 3 "Outlier (imputar)"
 				label values como_imputa_renta como_imputa_renta
@@ -322,8 +319,9 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 
 			* Now without outliers
 			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
-			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
-			local partrentaimp = r(p50)
+			sum part_rentaimp [w=pondera_hh] if renta_imp!=. & renta_imp!=0 & relacion_en==1, detail // Lo hacemos a nivel de hogar
+			local partrentaimp2 = r(p50)
+			display `partrentaimp2' // 55.25%
 			
 		sort interview__key interview__id quest relacion_en, stable
 		by interview__key interview__id quest: replace renta_imp=renta_imp[1] if relacion_en!=13 // We add to all the other household members (who are not domestic service) the imputed rent of the head
@@ -331,12 +329,20 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 			* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated 
 		
 		*sum itf_sin_ri if relacion_en==1 & propieta_no_paga==1 & (renta_imp==. | renta_imp==.a | renta_imp==0)
-		egen max_renta_imp = max(renta_imp)
+	
+		egen max_renta_imp = max(renta_imp) // Máximo no outlier que contesta la gente
+		sum max_renta_imp // 18443144 or 1.8e+7
+
+		replace renta_imp = max_renta_imp 					if  propieta_no_paga == 1 & `partrentaimp2'*itf_sin_ri > max_renta_imp	 // We can't impute something higher than the maximum thing someone answered (and is not outlier)
+		replace renta_imp = `partrentaimp2'*itf_sin_ri  	if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) & (`partrentaimp2'*itf_sin_ri)<=max_renta_imp // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
+		cap drop part_rentaimp max_renta_imp
 		
-		replace renta_imp = `partrentaimp'*itf_sin_ri  	if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
-		replace renta_imp = max_renta_imp 				if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) & `partrentaimp'*itf_sin_ri>max_renta_imp	 // Para evitar outliers de nuevo
-		drop part_rentaimp max_renta_imp
-		
+			/*Check: OK
+			gen part = .
+			replace part = renta_imp/itf_sin_ri if  propieta_no_paga == 1 & (renta_imp_en==. | renta_imp_en==.a | renta_imp_en==0) & relacion_en==1
+			sum part if part!=.
+			br renta_imp_en renta_imp itf_sin_ri /*itf*/ part if propieta_no_paga == 1 & (renta_imp_en==. | renta_imp_en==.a | renta_imp_en==0) & relacion_en==1
+			*/
 			
 	*********************
 	/* Dofile CEDLAS 2 */
@@ -374,7 +380,7 @@ egen inla_nuestro = rowtotal(inlanojub_imp1 ijubi_m), mi
 gen dummy_nocoincideinla = 1 if inla != inla_nuestro
 tab dummy_nocoincideinla
 *br inla inla_nuestro inla_otro dinlanojub_out inlanojub_imp1 inlanojub dummy_nocoincideinla if dummy_nocoincideinla==1
-	*Check: fine!
+	*Check: fine! 4 differ only in decimals..
 drop inlanojub_imp1
 
 

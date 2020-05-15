@@ -117,13 +117,12 @@ imputation
 
 *Specific for imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
-global forimp 	"$datapath\data_management\output\for imputation"
-global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
+global forimp "$datapath\data_management\output\for imputation"
+global pathoutexcel "$datapath\data_management\output\post imputation"
 global numberofimpruns 30
 
 //run ENCOVI imputation
 do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
-
 
 /*==============================================================================
 poverty estimation
@@ -144,7 +143,7 @@ creating separate dataset for variables to merge with SEDLAC version
 
 use "$output\ENCOVI_2019_postpobreza.dta", replace
 
-	keep interview__key interview__id com ///
+	keep interview__key interview__id com miembro__id ///
 	pobre pobre_extremo lp_moderada lp_extrema ///
 	iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ///
 	ijubi_nm icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns ///
@@ -216,4 +215,3 @@ save "$outENCOVI\ENCOVI_2019_with_expenditures_Spanish labels.dta", replace
 
 clear all
  
-

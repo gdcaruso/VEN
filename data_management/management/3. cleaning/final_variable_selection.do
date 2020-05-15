@@ -88,7 +88,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 ********************************************************************************	
 
 *---- II. Interview Control / Control de la entrevista
-		global control_ent entidad region_est1 municipio nombmun parroquia nombpar interview_month interview__id interview__key 
+		global control_ent entidad region_est1 municipio nombmun parroquia nombpar interview_month interview__id interview__key miembro__id
 		
 *----III Household determination / Determinacion de hogares
 		global det_hogares npers_viv comparte_gasto_viv npers_gasto_sep npers_gasto_comp
@@ -211,8 +211,8 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global pobreza pobre lp_19usd lp_32usd lp_55usd lp_moderada lp_extrema pobre_extremo 
 		
 *---- Keep 
-order $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $antropo_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
-keep $cedlas $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $antropo_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
+order 	$control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $antropo_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
+keep 	$control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $antropo_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza
 
 *---- Drop de las que teniamos dudas
 cap drop informant_emig 

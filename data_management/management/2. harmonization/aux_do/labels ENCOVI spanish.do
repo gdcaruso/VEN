@@ -1380,7 +1380,7 @@ label var    itranp_o_m        "Ingreso por otras transferencias privadas del pa
 label var    itranp_o_nm       "Ingreso por otras transferencias privadas del país - no monetario"
 label var    itranp_ns         "Ingreso por transferencias privadas no especificadas"
 label var    inla_extraord         "Ingresos no laborales extraordinarios"
-label var    inla_otro         "Otros ingresos no laborales"
+label var    inla_otro         "Otros ingresos no laborales (imputación de inla excepto jubilaciones y pensiones"
 label var    ipatrp            "Ingreso por patrón en la ocupación principal - total"
 label var    iasalp            "Ingreso asalariado en la ocupación principal - total"
 label var    ictapp            "Ingreso por cuenta propia en la ocupación principal - total"

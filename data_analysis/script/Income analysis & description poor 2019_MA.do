@@ -27,7 +27,7 @@ stop
 
 **********************
 
-use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\ENCOVI_2019_Spanish labels.dta"
+use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018\ENCOVI_2019_Spanish labels.dta"
 
 * Cómo se compone el ingreso total familiar?
 	gen part_ilf = .
@@ -55,6 +55,13 @@ use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOV
 	sum part_inlaf [w=pondera] if hogarsec==0 & part_inlaf!=.
 	sum part_rentaimp [w=pondera] if hogarsec==0 & part_rentaimp!=.
 
+	*viendolo para los más ricos
+	
+	sum part_ilf if hogarsec==0 & part_ilf!=. & ipcf>1000000000
+	sum part_inlaf if hogarsec==0 & part_inlaf!=.  & ipcf>1000000000
+	sum part_rentaimp if hogarsec==0 & part_rentaimp!=.  & ipcf>1000000000
+
+	stpo
 	
 * Cuántas hh reciben/responden cada inla?
 	

@@ -4290,6 +4290,11 @@ capture label drop hombre
 capture label drop nivel
 
 *Solo para que corran los do aux de CEDLAS
+	
+	********************
+	/* Dofile CEDLAS 1*/
+	********************
+
 	gen hstrp=hstr_ppal
 	gen hstrt= hstr_ppal 
 		replace hstrt = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
@@ -4315,26 +4320,16 @@ capture label drop nivel
 	
 include "$pathaux\do_file_1_variables_MA.do"
 
-/// RENTA IMPUTADA ///
-
-	/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
-			1 = Propia pagada		
-			2 = Propia pagandose
-			3 = Alquilada
-			4 = Alquilada parte de la vivienda
-			5 = Adjudicada pagándose Gran Misión Vivienda
-			6 = Adjudicada Gran Misión Vivienda
-			7 = Cedida por razones de trabajo
-			8 = Prestada por familiar o amigo
-			9 = Tomada
-			10 = Otra
-			
-			*Obs: Before there were options saying "De algun programa de gobierno (con titulo de propiedad)" and "De algun programa de gobierno (sin titulo de propiedad)" */
+foreach i in aux_propieta_no_paga propieta_no_paga renta_imp renta_imp_b como_imputa_renta {
+			cap drop `i'  	
+		}
+	
+***********************
+/// RENTA IMPLICITA ///
+***********************
 
 	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8 | tenencia_vivienda==9 | tenencia_vivienda==10 
 	replace aux_propieta_no_paga = 0 if tenencia_vivienda==2 | tenencia_vivienda==3 | tenencia_vivienda==4 | tenencia_vivienda==5 | tenencia_vivienda==. 
-		* Follows the division already determined in the survey itself
-	
 	sort id, stable
 	by id: egen propieta_no_paga = max(aux_propieta_no_paga) 
 	replace propieta_no_paga=. if hogarsec==1
@@ -4349,19 +4344,24 @@ include "$pathaux\do_file_1_variables_MA.do"
 				di "////"
 				di `m'
 				di `c'
-				di `tc`c'mes`m''
+				di  `tc`c'mes`m''
 				di `deflactor`m''
 				replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
 			}
 		}
 		
+				gen como_imputa_renta = . // For analysis: to know how we treated the renta imputada in each case
+				replace como_imputa_renta = 0 if propieta_no_paga==0
+				replace como_imputa_renta = 1 if propieta_no_paga==1 & renta_imp!=.
+				replace como_imputa_renta = 2 if propieta_no_paga==1 & renta_imp==.
+
 	// Taking care of people who need to have rent imputated but didn't answer what would be their housing costs if they had to pay
-		* Assumption: Para los pocos que no contestaron, el ingreso total familiar (pre-renta imputada) por la media de la participación de la renta imputada reportada en el ingreso total familiar (antes de renta imputada), entre aquellos que sí la contestaron.
+		* Assumption: Para los pocos que no contestaron, el ing. total familiar (pre-renta imp) por la media de la participación de la renta imp reportada en el ing. total familiar (antes de renta imp), entre los que sí la contestaron.
 	
-			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
-			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0  
+			sum part_rentaimp [w=pondera_hh] if renta_imp!=. & renta_imp!=0 & relacion_en==1, detail // Lo hacemos a nivel de hogar
 			* Problem: there are people who answer they would spend too much if they paid rent. The 50% percentile answers 66%. The 99% percentile even 687 times their income before imputed rent!
-			* Note: imputation dofile will take care of outliers.
+			* Note: we will take care of outliers.
 			tab renta_imp_mon if renta_imp_en!=. & renta_imp_en!=0, mi
 			drop part_rentaimp
 			
@@ -4369,24 +4369,37 @@ include "$pathaux\do_file_1_variables_MA.do"
 			program drop _all
 			qui: do "$impdos\outliers.do" 			
 			clonevar renta_imp_out=renta_imp
-			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing
-			sum	renta_imp_out if out_renta_imp==1 
-	
+			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing // Obs: se tuvo un trato más estricto de outliers 3 std. dev. en vez de 5
+			sum	renta_imp_out if out_renta_imp==1  
+				
+				replace como_imputa_renta = 3 if out_renta_imp==1
+				label define como_imputa_renta 0 "Alquila o crédito hipotecario (no imp)" 1 "Rta preg costo potencial, no outlier (no imp)" 2 "No rta preg costo potencial (imputar)" 3 "Outlier (imputar)"
+				label values como_imputa_renta como_imputa_renta
+				*Check
+				tab como_imputa_renta, mi // Ok
+
 			* Now without outliers
 			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
-			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
-			local partrentaimp = r(p50)
+			sum part_rentaimp [w=pondera_hh] if renta_imp!=. & renta_imp!=0 & relacion_en==1, detail // Lo hacemos a nivel de hogar
+			local partrentaimp2 = r(p50)
+			display `partrentaimp2' // 54.65%
+			
 			
 		sort interview__key interview__id quest relacion_en, stable
 		by interview__key interview__id quest: replace renta_imp=renta_imp[1] if relacion_en!=13 // We add to all the other household members (who are not domestic service) the imputed rent of the head
 		
-			* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated 
+		egen max_renta_imp = max(renta_imp) // Máximo no outlier que contesta la gente
+		sum max_renta_imp // 18443144 or 1.8e+7
+
+		replace renta_imp = max_renta_imp 					if  propieta_no_paga == 1 & `partrentaimp2'*itf_sin_ri > max_renta_imp	 // We can't impute something higher than the maximum thing someone answered (and is not outlier)
+		replace renta_imp = `partrentaimp2'*itf_sin_ri  	if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) & (`partrentaimp2'*itf_sin_ri)<=max_renta_imp // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
+		cap drop part_rentaimp max_renta_imp
 		
-		replace renta_imp = `partrentaimp'*itf_sin_ri  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
-		drop part_rentaimp
 		
 		
-// Second CEDLAS aux do //			
+*********************
+/* Dofile CEDLAS 2 */
+*********************		
  
 include "$pathaux\do_file_2_variables.do"
 

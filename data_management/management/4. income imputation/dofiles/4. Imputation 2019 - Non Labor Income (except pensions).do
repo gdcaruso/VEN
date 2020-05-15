@@ -67,7 +67,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh /*anio_auto_hh*/ heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
 					afiliado_segsalud_comp ///
 					/* nivel_educ tarea sector_encuesta categ_ocu total_hrtr c_sso c_rpv c_spf c_aca c_sps c_otro cuenta_corr cuenta_aho tcredito tdebito no_banco aporte_pension */ ///
-					clap ingsuf_comida comida_trueque 
+					clap ingsuf_comida comida_trueque rtashocks_recibirinla
 
 * Identifying missing values in potential independent variables for Mincer equation
 	*Note: "mdesc" displays the number and proportion of missing values for each variable in varlist.
@@ -94,7 +94,8 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 		p_c_rpv_sinmis1 p_c_rpv_sinmis2 p_c_rpv_sinmis3 p_c_spf_sinmis1 p_c_spf_sinmis2 p_c_spf_sinmis3 p_c_aca_sinmis1 p_c_aca_sinmis2 p_c_aca_sinmis3 p_c_sps_sinmis1 p_c_sps_sinmis2 p_c_sps_sinmis3 p_c_otro_sinmis1 p_c_otro_sinmis2 p_c_otro_sinmis3 ///
 		p_cuenta_corr_sinmis1 p_cuenta_corr_sinmis2 p_cuenta_corr_sinmis3 p_cuenta_aho_sinmis1 p_cuenta_aho_sinmis2 p_cuenta_aho_sinmis3 p_tcredito_sinmis1 p_tcredito_sinmis2 p_tcredito_sinmis3 p_tdebito_sinmis1 p_tdebito_sinmis2 p_tdebito_sinmis3 p_no_banco_sinmis1 p_no_banco_sinmis2 p_no_banco_sinmis3 ///
 		p_aporte_pension_sinmis1 p_aporte_pension_sinmis2 p_aporte_pension_sinmis3 p_aporte_pension_sinmis4 p_aporte_pension_sinmis5 p_aporte_pension_sinmis6 */ ///
-		p_clap_sinmis1 p_clap_sinmis2 p_clap_sinmis3 p_ingsuf_comida_sinmis1 p_ingsuf_comida_sinmis2 p_ingsuf_comida_sinmis3 p_comida_trueque_sinmis1 p_comida_trueque_sinmis2 p_comida_trueque_sinmis3
+		p_clap_sinmis1 p_clap_sinmis2 p_clap_sinmis3 p_ingsuf_comida_sinmis1 p_ingsuf_comida_sinmis2 p_ingsuf_comida_sinmis3 p_comida_trueque_sinmis1 p_comida_trueque_sinmis2 p_comida_trueque_sinmis3  ///
+		rtashocks_recibirinla_sinmis
 		 
 	
 	* Generate dependent variable
@@ -150,7 +151,7 @@ mdesc inlanojub if inlist(recibe_ingresonolab,1,2,3)
 	sum `x' if `x'>0 & inlist(recibe_ingresonolab,1,2,3) & _mi_m==0
 	scalar min_`x'`j'=r(min)
 	replace `x'2=min_`x' if (`x'2<min_`x'`j' & d`x'_miss2==1)
-	* Imputo reemplazando en variable ila_m en las variables imputadas (varias porque hay cuantas replicas como repeticiones tenga el vselect)
+	* Imputo reemplazando en variable inlanojub en las variables imputadas (varias porque hay cuantas replicas como repeticiones tenga el vselect)
     replace `x'=`x'2 if (d`x'_miss2==1 & _mi_m!=0)
 	drop `x'2
 	}	

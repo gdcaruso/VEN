@@ -52,7 +52,7 @@ Note:
  	global cleaned "$datapath\data_management\output\cleaned"
  *Outputs
  	global forimp "$datapath\data_management\output\for imputation"
- 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
+ 	global pathoutexcel "$datapath\data_management\output\post imputation"
 */
 ********************************************************************************
 
@@ -607,9 +607,9 @@ quietly foreach i of varlist report_inglabmon_nocuanto report_inglabnomon_nocuan
 	sum d`x'_out
 	local a2=r(sum)
 	*local a2 "." // Before we had decided not to get rid of outliers but after inla became too high we decided we will
-	
+		
 	** Missing values: sum of both
-	gen d`x'_miss2=1 if (report_ingnolab_nocuanto==1) /*| d`x'_out==1*/
+	gen d`x'_miss2=1 if (report_ingnolab_nocuanto==1) | d`x'_out==1
 			label def d`x'_miss2 1 "Said received monetary non-labor income, but amount missing or outlier"
 			//label values d`x'_miss2 d`x'_miss2
 	sum d`x'_miss2
@@ -684,7 +684,17 @@ matrix drop aux1 aux2 a a1 a2 a3
 	
 	gen total_hrtr = hstr_ppal 
 	replace total_hrtr = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
-
+	
+	*Para los que reciben inla que no son jubilaciones ni pensiones: armo variable que indica si tuvieron respuestas a shocks relacionadas con recibir inla
+	gen rtashocks_recibirinla = 0
+	foreach i in 8 9 10 12 15 19 21 22 {
+		foreach j of numlist 1(1)21{
+		* i respuestas a eventos que implican recibir inla
+		* j todos los shocks
+		replace rtashocks_recibirinla=1 if reaccion_evento_`i'_`j'==1
+		}
+	}
+	
 	global vars_mineq edad edad2 agegroup hombre relacion_comp npers_viv miembros estado_civil region_est1 entidad municipio ///
 					tipo_vivienda_hh material_piso_hh tipo_sanitario_comp_hh propieta_hh auto_hh anio_auto_hh heladera_hh lavarropas_hh	computadora_hh internet_hh televisor_hh calentador_hh aire_hh	tv_cable_hh	microondas_hh  ///
 					/*seguro_salud*/ afiliado_segsalud_comp /*quien_pagosegsalud*/ ///
@@ -692,7 +702,7 @@ matrix drop aux1 aux2 a a1 a2 a3
 					tarea sector_encuesta categ_ocu total_hrtr ///
 					c_sso c_rpv c_spf c_aca c_sps c_otro ///
 					cuenta_corr cuenta_aho tcredito tdebito no_banco ///
-					aporte_pension clap ingsuf_comida comida_trueque 
+					aporte_pension clap ingsuf_comida comida_trueque rtashocks_recibirinla
 		
 	* La imputacion de ingreso no puede basarse en variables que contengan missing
 	* Copio variables para que no tengan missing (missing una variables más)
@@ -714,7 +724,7 @@ matrix drop aux1 aux2 a a1 a2 a3
 								tarea_sinmis sector_encuesta_sinmis categ_ocu_sinmis total_hrtr_sinmis ///
 								c_sso_sinmis c_rpv_sinmis c_spf_sinmis c_aca_sinmis c_sps_sinmis c_otro_sinmis ///
 								cuenta_corr_sinmis cuenta_aho_sinmis tcredito_sinmis tdebito_sinmis no_banco_sinmis ///
-								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis 
+								aporte_pension_sinmis clap_sinmis ingsuf_comida_sinmis comida_trueque_sinmis rtashocks_recibirinla_sinmis
 	
 	* Dado que en la siguiente etapa vamos a seleccionar variables para la regresion con LASSO y selectvars
 	* Tengo que transformar las variables categoricas en dummys para que ambos metodos funcionen
@@ -758,11 +768,12 @@ display "`varlist38'"
 		p_c_rpv_sinmis1 p_c_rpv_sinmis2 p_c_rpv_sinmis3 p_c_spf_sinmis1 p_c_spf_sinmis2 p_c_spf_sinmis3 p_c_aca_sinmis1 p_c_aca_sinmis2 p_c_aca_sinmis3 p_c_sps_sinmis1 p_c_sps_sinmis2 p_c_sps_sinmis3 p_c_otro_sinmis1 p_c_otro_sinmis2 p_c_otro_sinmis3 ///
 		p_cuenta_corr_sinmis1 p_cuenta_corr_sinmis2 p_cuenta_corr_sinmis3 p_cuenta_aho_sinmis1 p_cuenta_aho_sinmis2 p_cuenta_aho_sinmis3 p_tcredito_sinmis1 p_tcredito_sinmis2 p_tcredito_sinmis3 p_tdebito_sinmis1 p_tdebito_sinmis2 p_tdebito_sinmis3 p_no_banco_sinmis1 p_no_banco_sinmis2 p_no_banco_sinmis3 ///
 		p_aporte_pension_sinmis1 p_aporte_pension_sinmis2 p_aporte_pension_sinmis3 p_aporte_pension_sinmis4 p_aporte_pension_sinmis5 p_aporte_pension_sinmis6 ///
-		p_clap_sinmis1 p_clap_sinmis2 p_clap_sinmis3 p_ingsuf_comida_sinmis1 p_ingsuf_comida_sinmis2 p_ingsuf_comida_sinmis3 p_comida_trueque_sinmis1 p_comida_trueque_sinmis2 p_comida_trueque_sinmis3
+		p_clap_sinmis1 p_clap_sinmis2 p_clap_sinmis3 p_ingsuf_comida_sinmis1 p_ingsuf_comida_sinmis2 p_ingsuf_comida_sinmis3 p_comida_trueque_sinmis1 p_comida_trueque_sinmis2 p_comida_trueque_sinmis3 ///
+		rtashocks_recibirinla_sinmis
 
 
 * Equations:
-	* Ingreso laboral montario - hacerlo por categ. ocup?
+	* Ingreso laboral montario (Hacerlo por categ. ocup? No, ya controlamos por eso)
 	* Ingreso laboral no monetario (no jubilación)
 	* Ingreso no laboral
 	* Jubilación/Pensión

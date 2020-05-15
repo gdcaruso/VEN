@@ -206,10 +206,7 @@ replace region_est1 =  4 if entidad==23												// Region Zuliana: Zulia (23)
 replace region_est1 =  5 if entidad==14 | entidad==20 | entidad==21					// Region Andina: Merida (14), Tachira (20), Trujillo (21)
 replace region_est1 =  6 if entidad==3 | entidad==7 | entidad==16 | entidad==17 | entidad==19	// Region Oriental: Bolivar (7), Anzoategui (3), Monagas (16), Nueva Esparta (17), Sucre (19)
 replace region_est1 =  7 if entidad==15 | entidad==24 | entidad==1					// Region Capital: Distrito Capital (1), Miranda (15), Vargas (24) 
-label var region_est1 "Region"
-label def region_est1 1 "Region Central"  2 "Region Llanera" 3 "Region Occidental" 4 "Region Zuliana" ///
-          5 "Region Andina" 6 "Region Nor-Oriental" 7 "Capital"
-label value region_est1 region_est1
+
 * Obs: Delta Amacuro and Amazonas were not surveyed.
 
 
@@ -249,13 +246,16 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 	**Variables id_hh, hhid, id_str were generated for the listing, we shouldn't use them to generate id
 	
 	*combined_id concatenates 5 variables: entidad, municipio, parroquia, centro poblado, segmento
+	
 	*It has 11 or 12 characters, we add 0 to the ones which have 11 so they are all the same length
-	replace combined_id = "0"+combined_id if substr(combined_id, 1,1)==string(entidad) & length(combined_id)==11 
-	*Obs: when uploading the data, ENSURE ANNONIMITY (because combined_id makes families identifiable) 
+	*replace combined_id = "0"+combined_id if substr(combined_id, 1,1)==string(entidad) & length(combined_id)==11 
+		// Note: we stopped doing this because some 11-numbered combined_id's became the same as other 12-numbered combined-id's when adding the 0 in front of them
+		
 	tostring hh_by_combined_id, replace
 	*Up to 10 hh by combined_id
 	replace hh_by_combined_id = "0"+hh_by_combined_id if length(hh_by_combined_id)==1
 	gen id = combined_id + hh_by_combined_id
+	*Obs: when uploading the data, ensure annonimity (however, we concluded that "id" does not make families identifiable)
 	
 * Component identifier: com
 	** ENCOVI 2018 used "lin" (número de linea) which seems to be a created variable
@@ -290,7 +290,7 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 	gen com  = _n + min + 1
 		drop z min
 	
-	duplicates report id com //verification
+	duplicates report id com //verification: ok, no surplus
 
 ** Relation to the head:
 	/* Categories of the new harmonized variable: relacion_comp
@@ -340,31 +340,75 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 	label value relacion_comp relacion_comp
 	label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
+	
+	/*Check
+		sort id, stable
+		by id: egen versihayjefe=min(relacion_en)
+		br if versihayjefe!=1
+		
+		drop if relacion_en!=1
+		cap isid id
+		br if id[_n]==id[_n-1]
+		*solves why there where 3 houses with problems
+	*/
+	
 *** Weights/Factor de ponderacion: pondera
 
+<<<<<<< HEAD
 /*merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
+=======
+	*Old
+	/*
+	merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 
 	* Individual weights
+		
 		gen pondera=final_pw
 		sort objectid, stable
 		by objectid: replace pondera=pondera/_N
 		replace pondera = round(pondera)
 		
+		
+		/*
+		* =1 if hh head
+		gen persona=1
+		* How many people are there in each objectid?
+			sort objectid, stable
+		by objectid: egen total_gente=sum(persona)
+			sort interview__key interview__id quest relacion_en, stable
+		* Weight of the objectid, divided by amount of people in objectid to get to the people weights
+		by interview__key interview__id quest: gen pondera=final_w
+			sort interview__key interview__id quest relacion_en, stable
+		by interview__key interview__id quest: replace pondera=pondera/total_gente if _n==1
+		replace pondera = round(pondera)
+		
+		drop total_gente persona
+		*/
+		
 	* Household weights
+		* =1 if hh head
 			sort interview__key interview__id quest relacion_en, stable
 		by interview__key interview__id quest: gen hogar=1 if _n==1
+		* How many HH are there in each objectid?
 			sort objectid, stable
 		by objectid: egen total_hogares=sum(hogar)
 			sort interview__key interview__id quest relacion_en, stable
+		* How many HH are there in each objectid? Only for HH heads
 		by interview__key interview__id quest: replace total_hogares=. if _n>1
 			sort interview__key interview__id quest relacion_en, stable
+		* Weight of the objectid, divided by amount of households in objectid to get to the hh weights
 		by interview__key interview__id quest: gen pondera_hh=final_w if _n==1
 			sort interview__key interview__id quest relacion_en, stable
 		by interview__key interview__id quest: replace pondera_hh=pondera_hh/total_hogares if _n==1
 		replace pondera_hh = round(pondera_hh)
 		
 		drop total_hogares hogar
+<<<<<<< HEAD
 */
+=======
+	*/
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 
 merge m:1 interview__key interview__id using "$merged\final_encovi_weights.dta" // Sent by Michael and modified by Daniel on April 30th
 drop _merge
@@ -375,7 +419,11 @@ drop _merge
 		
 	* Household weights
 		sort interview__key interview__id quest relacion_en, stable
+<<<<<<< HEAD
 		bys interview__key interview__id quest: replace encovi_w=. if _n!=1
+=======
+		by interview__key interview__id quest: replace encovi_w=. if _n!=1
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 			*Obs: we did it in this way instead of:
 				*gen pondera_hh = encovi_w if relacion_en==1
 			*Because there was one household which did not have "jefe de hogar" - one we have fixed it though. check for the fix:
@@ -405,6 +453,12 @@ drop _merge
 * Primary Sample Unit: psu  
 	gen psu = combined_id
 
+	/* Checking there are no problem in the identification of households using "id"
+	sort id, stable
+	by id: egen dosjefes = total(relacion_en) if relacion_en==1
+	br if dosjefes==2
+	*/
+	
 /*(************************************************************************************************************************************************* 
 *------------------------------------------	1.2: Demographic variables  / Variables demográficas --------------------------------------------------
 *************************************************************************************************************************************************)*/
@@ -762,7 +816,11 @@ gen implicancias_nopago_o=s5q10_os
 label var implicancias_nopago_o "Otras implicancias del no pago"
 
 *** If you had to rent similar dwelling, how much did you think you should pay?
+<<<<<<< HEAD
 *Si usted tuviera que vivir en alquiler en una vivienda como ésta, cuanto cree que deberia pagar?
+=======
+*Si usted tuviera que vivir en alquiler en una vivienda como ésta, cuánto cree que debería pagar?
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 clonevar renta_imp_en=s5q11 if s5q11!=. & s5q11!=.a
 
 *** In which currency?
@@ -1533,7 +1591,8 @@ inm_comida_mone inm_productos_mone inm_transporte_mone inm_vehiculo_mone inm_est
 d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone ///
 im_patron im_patron_cant im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone i_indep_mes i_indep_mes_cant i_indep_mes_mone ///
 g_indep_mes_cant g_indep_mes_mone razon_menoshs razon_menoshs_o deseamashs buscamashs razon_nobusca razon_nobusca_o cambiotr razon_cambiotr razon_cambiotr_o ///
-aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension 
+aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension ///
+relab ocupado desocupa pea labor_status
 
 *Notes: interviews done if age>9
 
@@ -1569,8 +1628,8 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 			7 = No quiere trabajar
 			8 = Falta de trabajo, clientes o pedidos
 			9 = Impedimento de autoridades municipales o nacionales
-			10 = Nuevo empleo a empezar en 30 días
-			11 = Factores estacionales
+			11 = Nuevo empleo a empezar en 30 días
+			12 = Factores estacionales
 			16 = Otro 	*/
 	clonevar	razon_no_trabajo = s9q4 if s9q3==1 & (s9q2!=. & s9q2!=.a) 
 		
@@ -1708,6 +1767,7 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 	*** How many hours did you work last week in your main occupation?
 	/* s9q16 ¿Cuántas horas trabajó durante la semana pasada en su ocupación principal?: hstr_ppal	*/
 	clonevar	hstr_ppal = s9q16 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & (s9q16!=. & s9q16!=.a) 
+	replace hstr_ppal = 60 if hstr_ppal>60 & hstr_ppal!=.
 
 	*** Besides your main occupation, did you do any other activity through which you received income, such as selling things, contracted work, etc?
 	/* s9q17 Además de su trabajo principal, ¿realizó la semana pasada alguna otra actividad por la que percibió ingresos tales como, venta de artículos, trabajos contratados, etc?: trabajo_secundario
@@ -2148,16 +2208,28 @@ aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro
 
 	* Employed:	ocupado
 	gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
-
+	*Another exact way of doing it:
+			*replace ocupado = 1 if trabajo_semana==1 | trabajo_semana_2==1 | trabajo_semana_2==2 | trabajo_independiente==1 | sueldo_semana==1 // Trabajando? 
+			*(Redundant) Assumption: if received a wage or benefits last week (s9q5/sueldo_semana==1), the survey considers them as ocupados (although they answered no to having worked). However, This question is only asked to those who trabajo_independiente==1 so they were already included
+	
+			/*Checks missings
+			gen edad9 = (inlist(edad,0,1,2,3,4,5,6,7,8,9)) if edad!=. & edad!=.a
+			tab ocupado edad9, mi
+			* 5342 de 33081 son niños de 9 o menos
+			br if ocupado==. & edad>9 // May 12: No one
+			drop edad9
+			*/
+			
 	* Unemployed: desocupa
 	gen     desocupa = (labor_status==3)  //buscando trabajo
 			
-	* Inactive: inactivos	
-	gen     inactivo= inrange(labor_status,5,9) 
+	* Inactive: inactivo	(no la incluímos porque es el espejo de PEA)
+	*gen     inactivo= inrange(labor_status,5,9) 
 
 	* Economically active population: pea	
 	gen     pea = (ocupado==1 | desocupa ==1)
 
+	* Note: ocupado, desocupa and pea should be defined for all the population, according to SEDLAC
 	
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- XVI: BANKING / BANCARIZACIÓN ---------------------------------------------------------------
@@ -3528,7 +3600,7 @@ Obs: las categorías no coinciden con las de la pregunta anterior.
 	}
 	
 
- *--------- How did the houselhold cope with the shock
+ *--------- How did the household cope with the most recent shock
  /* (s15q2c_*): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
 
 local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
@@ -4326,6 +4398,11 @@ capture label drop hombre
 capture label drop nivel
 
 *Solo para que corran los do aux de CEDLAS
+
+**********************
+/// DOFILE CEDLAS1 ///
+**********************
+
 	gen hstrp=hstr_ppal
 	gen hstrt= hstr_ppal 
 		replace hstrt = hstr_todos if hstr_todos!=. // los que tienen dos trabajos
@@ -4350,7 +4427,13 @@ capture label drop nivel
 
 include "$pathaux\do_file_1_variables_MA.do"
 
+<<<<<<< HEAD
 /// RENTA IMPUTADA ///
+=======
+***********************
+/// RENTA IMPLICITA ///
+***********************
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 
 	/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
 			1 = Propia pagada		
@@ -4394,6 +4477,7 @@ include "$pathaux\do_file_1_variables_MA.do"
 			}
 		}
 		
+<<<<<<< HEAD
 	// Taking care of people who need to have rent imputated but didn't answer what would be their housing costs if they had to pay
 		* Assumption: Para los pocos que no contestaron, el ingreso total familiar (pre-renta imputada) por la media de la participación de la renta imputada reportada en el ingreso total familiar (antes de renta imputada), entre aquellos que sí la contestaron.
 	
@@ -4401,6 +4485,21 @@ include "$pathaux\do_file_1_variables_MA.do"
 			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
 			* Problem: there are people who answer they would spend too much if they paid rent. The 50% percentile answers 66%. The 99% percentile even 687 times their income before imputed rent!
 			* Note: imputation dofile will take care of outliers.
+=======
+				gen como_imputa_renta = . // For analysis: to know how we treated the renta imputada in each case
+				replace como_imputa_renta = 0 if propieta_no_paga==0
+				replace como_imputa_renta = 1 if propieta_no_paga==1 & renta_imp!=.
+				replace como_imputa_renta = 2 if propieta_no_paga==1 & renta_imp==.
+				
+
+	// Taking care of people who need to have rent imputated but didn't answer what would be their housing costs if they had to pay
+		* Assumption: Para los pocos que no contestaron, el ing. total familiar (pre-renta imp) por la media de la participación de la renta imp reportada en el ing. total familiar (antes de renta imp), entre los que sí la contestaron.
+	
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+			sum part_rentaimp [w=pondera_hh] if renta_imp!=. & renta_imp!=0 & relacion_en==1, detail // Lo hacemos a nivel de hogar
+			* Problem: there are people who answer they would spend too much if they paid rent. The 50% percentile answers 60%. The 99% percentile even 687 times their income before imputed rent!
+			* Note: we will take care of outliers.
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 			tab renta_imp_mon if renta_imp_en!=. & renta_imp_en!=0, mi
 			
 		/* Descriptive analysis, comparison: what people renting or paying mortgage actually pay, vs. what people who don't pay it report they should pay for a place like theirs if they had to
@@ -4419,6 +4518,7 @@ include "$pathaux\do_file_1_variables_MA.do"
 			program drop _all
 			qui: do "$impdos\outliers.do" 			
 			clonevar renta_imp_out=renta_imp
+<<<<<<< HEAD
 			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing
 			sum	renta_imp_out if out_renta_imp==1 
 	
@@ -4426,6 +4526,22 @@ include "$pathaux\do_file_1_variables_MA.do"
 			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
 			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
 			local partrentaimp = r(p50)
+=======
+			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing // Obs: se tuvo un trato más estricto de outliers 3 std. dev. en vez de 5
+			sum	renta_imp_out if out_renta_imp==1 
+			
+				replace como_imputa_renta = 3 if out_renta_imp==1
+				label define como_imputa_renta 0 "Alquila o crédito hipotecario (no imp)" 1 "Rta preg costo potencial, no outlier (eso imp)" 2 "No rta preg costo potencial (imputar)" 3 "Outlier (imputar)"
+				label values como_imputa_renta como_imputa_renta
+					*Check
+					tab como_imputa_renta, mi // ok
+		
+			* Now without outliers
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+			sum part_rentaimp [w=pondera_hh] if renta_imp!=. & renta_imp!=0 & relacion_en==1, detail // Lo hacemos a nivel de hogar
+			gen medianapartrentaimp = r(p50)
+			sum medianapartrentaimp // 60%
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 			
 		sort interview__key interview__id quest relacion_en, stable
 		by interview__key interview__id quest: replace renta_imp=renta_imp[1] if relacion_en!=13 // We add to all the other household members (who are not domestic service) the imputed rent of the head
@@ -4442,6 +4558,38 @@ include "$pathaux\do_file_1_variables_MA.do"
 			* twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny)
 			
 			*replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with 10% in cases where no guess is provided by hh.
+<<<<<<< HEAD
+=======
+		
+			*Cap
+			egen max_renta_imp = max(renta_imp) // Máximo no outlier que contesta la gente
+			sum max_renta_imp // 18443144
+			
+		replace renta_imp = max_renta_imp 					if  propieta_no_paga == 1 & medianapartrentaimp*itf_sin_ri>max_renta_imp	 // We can't impute something higher than the maximum thing someone answered (and is not outlier)
+		replace renta_imp = medianapartrentaimp*itf_sin_ri  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) & itf_sin_ri!=. & medianapartrentaimp*itf_sin_ri<=max_renta_imp // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
+			// 2279 cases changed
+			*br renta_imp medianapartrentaimp itf_sin_ri if  propieta_no_paga == 1 & (renta_imp_en==. | renta_imp_en==0 | renta_imp_en==.a | out_renta_imp==1 ) & relacion_en==1  // ok
+			
+
+			/* Descriptive analysis (when we were still using the 10% assumption)
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0 & d_renta_imp_b==1, detail 
+			drop part_rentaimp
+			*/
+			
+			/*check again: OKK
+			gen part = .
+			replace part = renta_imp/itf_sin_ri if  propieta_no_paga == 1 & (renta_imp_en==. | renta_imp_en==.a | renta_imp_en==0) & relacion_en==1
+			sum part if part!=.
+			br renta_imp_en medianapartrentaimp renta_imp itf_sin_ri /*itf*/ part if propieta_no_paga == 1 & (renta_imp_en==. | renta_imp_en==.a | renta_imp_en==0) & relacion_en==1
+			*/
+		drop part_rentaimp /*max_renta_imp*/ medianapartrentaimp /*part*/
+		
+		
+**********************
+/// DOFILE CEDLAS2 ///
+**********************
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 		
 		replace renta_imp = `partrentaimp'*itf_sin_ri  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
 		
@@ -4458,21 +4606,28 @@ include "$pathaux\do_file_2_variables.do"
 
 * include "$pathaux\Labels_ENCOVI.do" // This will get done in the Master do, in English and Spanish, at the end
 
-/*
-* Checking population estimates
+
+****************************
+/// CHECK POPU ESTIMATES ///
+****************************
 	gen uno=1
-		
+	
 	*	Population
+		
 		*National
 		sum uno [w=pondera], detail 	// 24.9 M de personas
+		
 		*Regional
 		sort region_est1, stable
 		by region_est1: sum uno [w=pondera], detail
+		
 		*Departments
 		sort entidad, stable
 		by entidad: sum uno [w=pondera], detail 
+		
 		*Gender
 		tab hombre [w=pondera], mi
+		
 		*Age
 		sum edad [w=pondera], detail
 			gen agegroup=1 if edad<=14 & edad!=.
@@ -4485,23 +4640,43 @@ include "$pathaux\do_file_2_variables.do"
 			cap label def agegroup 1 "[0-14]" 2 "[15-24]" 3 "[25-34]" 4 "[35-44]" 5 "[45-54]" 6 "[55-64]" 7 "[65+]"
 			cap label value agegroup agegroup
 		tab agegroup [w=pondera], mi
-		drop agegroup
+		
 		* Education - no tenemos años promedio, pero tenemos max nivel alcanzado
 		tab nivel_educ [w=pondera], mi
+		
 		* Tamaño promedio del hogar
-		sum miembros, detail
+		sum miembros [w=pondera], detail
+		sum miembros [w=pondera_hh] if relacion_en==1, detail
+		
 		sort region_est1, stable
 		by region_est1: sum miembros [w=pondera], detail
+		*by region_est1: sum miembros [w=pondera_hh] if relacion_en==1, detail
 		sort entidad, stable
 		by entidad: sum miembros [w=pondera], detail
+		*by entidad: sum miembros [w=pondera_hh] if relacion_en==1, detail
+	
 	*	Households
 		sum uno [w=pondera_hh], detail	// 6.5 M de hogares
-	
-	drop uno
+			
+/* NOT: Checking population estimates with pondera_hh
+		
+	*	Population
+		gen pondera_hhind = pondera_hh * miembros
+		*National
+		sum uno [w=pondera_hhind] if relacion_en==1, detail 	// 24.9 M de personas
+		*Regional
+		sort region_est1, stable
+		by region_est1: sum uno [w=pondera_hhind] if relacion_en==1, detail
+		*Departments
+		sort entidad, stable
+		by entidad: sum uno [w=pondera_hhind] if relacion_en==1, detail 
+		
+		drop pondera_hhind
 */
+		drop uno 
 
 *(************************************************************************************************************************************************ 
-*---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------------
+*---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------
 ************************************************************************************************************************************************)*/	
 gen linea_pobreza = . // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
 gen linea_pobreza_extrema = .  // prices from asamblea nacional, orsh =2, no laged incomes, no imputation
@@ -4531,7 +4706,13 @@ hogarsec interview_month interview__id interview__key quest labor_status miembro
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
+<<<<<<< HEAD
 hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
+=======
+hogarsec interview_month interview__id interview__key quest miembros s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo como_imputa_renta miembro__id // additional
+
+drop if interview__key=="16-35-68-66" // Don't know why/how this all-missing variable keeps on appearing
+>>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c
 
 save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

@@ -1546,7 +1546,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 *(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global socialprog_ENCOVI  
+global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria clap
 
 
 
@@ -1713,8 +1713,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI
-keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI
+order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2017_COMP.dta", replace
 

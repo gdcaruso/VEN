@@ -15,47 +15,41 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-/*
+
 	    * User 1: Trini
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 			
 		if $juli {
-<<<<<<< HEAD:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_2018.do
 				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 "C:\Users\WB563583\Github\VEN" 
-
-=======
+				global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
 				global rootpath "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
->>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_COMP_2018.do
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-<<<<<<< HEAD:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_2018.do
 				global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
 				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
                 global rootpath2 "C:\Users\wb550905\Github\VEN" 
-=======
+
 		}
 		if $male   {
 				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
                	global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
->>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_COMP_2018.do
 		}
 
 global dataofficial "$rootpath\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
@@ -65,7 +59,7 @@ global data2016 "$dataofficial\ENCOVI 2016\Data"
 global data2017 "$dataofficial\ENCOVI 2017\Data"
 global data2018 "$dataofficial\ENCOVI 2018\Data"
 global pathout "$rootpath\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018"
-*/
+
 
 ********************************************************************************
 
@@ -1201,7 +1195,7 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_* numeroemig_*
 
 global foodcons_ENCOVI clap /*clap_cuando*/
 	
- *--------- 'Caja CLAP' (In kind-transfer)
+  /**--------- 'Caja CLAP' (In kind-transfer)
  /* 60. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?*/
 	*-- Check values
 	tab mp60, mi
@@ -1217,7 +1211,7 @@ global foodcons_ENCOVI clap /*clap_cuando*/
 	label value clap clap
 
 *--------- 'Caja CLAP' (In kind-transfer): Frequency
- /* 61. ¿CON QUÉ FRECUENCIA LES LLEGA LA BOLSA/CAJA DEL CLAP? 
+ 61. ¿CON QUÉ FRECUENCIA LES LLEGA LA BOLSA/CAJA DEL CLAP? 
 	*-- Check values
 	tab mp61, mi
 	*-- Standarization of missing values
@@ -1719,7 +1713,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global socialprog_ENCOVI  
+global socialprog_ENCOVI  beneficiario mision_1 mision_2 mision_3 carnet_patria clap
 
 
 
@@ -1844,8 +1838,8 @@ global socialprog_ENCOVI
 	label def clap 1 "Yes" 0 "No"
 	label value clap clap
 
- *--------- 'Caja CLAP' (In kind-transfer): Reasons 
- /* 60. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?
+  /**--------- 'Caja CLAP' (In kind-transfer): Reasons 
+ 60. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?
 		  Not received: Reasons */
 	*-- Check values
 	tab mp61, mi
@@ -1905,8 +1899,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables  --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI /*$shocks_ENCOVI*/ $emigra_ENCOVI $foodcons_ENCOVI
-keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI /*$shocks_ENCOVI*/ $emigra_ENCOVI $foodcons_ENCOVI
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI /*$shocks_ENCOVI*/ $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI /*$shocks_ENCOVI*/ $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2018_COMP.dta", replace
 

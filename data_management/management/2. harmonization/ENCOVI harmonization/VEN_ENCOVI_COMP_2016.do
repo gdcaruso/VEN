@@ -610,13 +610,20 @@ label value razon_dejo_est_comp razon_dejo_est_comp
 *----------------------------------- XII: FOOD CONSUMPTION / CONSUMO DE ALIMENTO --------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global foodcons_ENCOVI clap /*clap_cuando*/
+global foodcons_ENCOVI  /*clap_cuando*/
 	
+
+*(*********************************************************************************************************************************************** 
+*---------------------------------------------------------- : Social Programs ----------------------------------------------------------
+***********************************************************************************************************************************************)*/	
+global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria clap
+
  *--------- 'Caja CLAP' (In kind-transfer)
  /* 65. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?*/
 *-- Check values
  gen clap=.
 /*
+
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.7: Variables Salud ---------------------------------------------------------------
 ************************************************************************************************************************************************)*/
@@ -1211,7 +1218,7 @@ bro id relacion ipcf tp39 tp45 tp46 tp47 tp47m tp48m pp61*m relab ipatrp_m iasal
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI
-keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2016_COMP.dta", replace

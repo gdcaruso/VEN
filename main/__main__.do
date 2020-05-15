@@ -47,7 +47,9 @@ clear all
 		if $male   {
 				global dopath "C:\Users\wb550905\Github\VEN"
 				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-}		
+				global outSEDLAC "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_SEDLAC_DATA_2014_2019\"
+				global outENCOVI "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018\"
+		}		
 ********************************************************************************
 
 
@@ -82,7 +84,6 @@ global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 *set path of data
 global merging "$dopath\data_management\management\1. merging"
 global input "$datapath\data_management\input\latest"
-global output "$datapath\data_management\output\merged"
 
 * run merge
 run "$merging\__main__merge.do"
@@ -116,18 +117,18 @@ imputation
 
 *Specific for imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
-global forimp 	"$datapath\data_management\output\for imputation"
-global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
+global forimp "$datapath\data_management\output\for imputation"
+global pathoutexcel "$datapath\data_management\output\post imputation"
+global numberofimpruns 30
 
 //run ENCOVI imputation
-run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
-
+do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
 
 /*==============================================================================
 poverty estimation
 ==============================================================================*/
 // set global inflation input
-global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
+global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta" // Ya estaba arriba también
 // set path of data
 global povmeasure "$dopath\poverty_measurement\scripts"
 global input "$datapath\poverty_measurement\input"
@@ -142,7 +143,7 @@ creating separate dataset for variables to merge with SEDLAC version
 
 use "$output\ENCOVI_2019_postpobreza.dta", replace
 
-	keep interview__key interview__id com ///
+	keep interview__key interview__id com miembro__id ///
 	pobre pobre_extremo lp_moderada lp_extrema ///
 	iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ///
 	ijubi_nm icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns ///
@@ -173,13 +174,13 @@ labeling and saving final full databases
 
 //run spanish labeling
 preserve
-run "$pathaux\labels ENCOVI spanish.do"
-save "$datapath\ENCOVI_2019_Spanish labels.dta", replace
+do "$pathaux\labels ENCOVI spanish.do"
+save "$outENCOVI\ENCOVI_2019_Spanish labels.dta", replace
 restore
 
 //run english labeling
 run "$pathaux\labels ENCOVI english.do"
-save "$datapath\ENCOVI_2019_English labels.dta", replace
+save "$outENCOVI\ENCOVI_2019_English labels.dta", replace
 
 /*==============================================================================
 run sedlac and adding variables of income, prices and poverty
@@ -195,11 +196,22 @@ sedlac-format labeling and saving final full dataset
 //run spanish labeling
 preserve
 run "$pathaux\labels SEDLAC spanish.do"
-save "$datapath\VEN_2019_ENFT_v01_M_v01_A_SEDLAC-01_Spanish labels.dta", replace
+save "$outSEDLAC\VEN_2019_ENCOVI_SEDLAC-01_Spanish labels.dta", replace
 restore
 
 //run english labeling
 run "$pathaux\labels SEDLAC english.do"
-save "$datapath\VEN_2019_ENFT_v01_M_v01_A_SEDLAC-01_English labels.dta", replace
+save "$outSEDLAC\VEN_2019_ENCOVI_SEDLAC-01_English labels.dta", replace
 
 clear all
+
+/*==============================================================================
+Additional database with Expenditure Data
+==============================================================================*/
+
+global expendiscript "$dopath\expenditure\script"
+run "$expendiscript\genera_gasto_per_capita.do"
+save "$outENCOVI\ENCOVI_2019_with_expenditures_Spanish labels.dta", replace
+
+clear all
+ 

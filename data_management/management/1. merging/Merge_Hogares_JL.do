@@ -1,7 +1,7 @@
 /*===========================================================================
 Country name:	Venezuela
-Year:			2014
-Survey:			ECNFT
+Year:			2019
+Survey:			ENCOVI
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
@@ -15,40 +15,44 @@ Output:			Merged Dataset ENCOVI
 Note: 
 =============================================================================*/
 ********************************************************************************
-// 	    * User 1: Trini
-// 		global trini 0
-//		
-// 		* User 2: Julieta
-// 		global juli   0
-//		
-// 		* User 3: Lautaro
-// 		global lauta   1
-//		
-// 		* User 4: Malena
-// 		global male   0
-//
-//			
-// 		if $juli {
-// 				global rootpath CAMBIAR A ONE DRIVE (VER MALE ABAJO) "C:\Users\wb563583\GitHub\VEN"
-// 		}
-// 	    if $lauta {
-// 				global rootpath "C:\Users\lauta\Documents\GitHub\ENCOVI-2019"
-// 		}
-// 	    if $lautaa {
-// 				global rootpath "C:\Users\wb563365\GitHub\VEN"
-// 		}
-// 		if $trini {
-// 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
-// 		}
-//		
-// 		if $male {
-// 				global rootpath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019"
-// 		}	
-//
+/*
+ 	    * User 1: Trini
+ 		global trini 0
+		
+ 		* User 2: Julieta
+ 		global juli   0
+		
+ 		* User 3: Lautaro
+ 		global lauta  0
+		
+ 		* User 4: Malena
+ 		global male   1
+			
+		if $juli {
+				global dopath "C:\Users\wb563583\GitHub\VEN"
+				global datapath 	"C:\Users\wb563583\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}
+	    if $lauta {
+				global dopath "C:\Users\wb563365\GitHub\VEN"
+				global datapath "C:\Users\wb563365\DataEncovi\"
+		}
+		if $trini   {
+				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+		}
+		if $male   {
+				global dopath "C:\Users\wb550905\Github\VEN"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+				global outSEDLAC "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_SEDLAC_DATA_2014_2019\"
+				global outENCOVI "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018\"
+				global datapath "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+		}		
 
-//
-// global input "$datapath\data_management\input\latest"
-// global output "$datapath\data_management\output\merged"
+// set path for dofiles
+global input "$datapath\data_management\input\latest"
+global merging "$dopath\data_management\management\1. merging"
+global merged "$datapath\data_management\output\merged"
+
+*/
 
 // Set the path for the three questionnaires
 global pathnew "$input\ENCOVI_3_STATA_All"
@@ -282,5 +286,5 @@ foreach file in `com_data' {
 	compress
 *-------- Save 
 
-save "$output\household.dta", replace
+save "$merged\household.dta", replace
 

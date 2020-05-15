@@ -59,6 +59,10 @@ label var   pondera         "Weighting factor (individual level)"
 cap label var 	pondera_hh		"Weighting factor (household level)"
 *label var   strata          "Stratification variable"   
 label var    psu	     	 "Primary sampling unit"
+label var region_est1 "Region"
+label def region_est1 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
+          5 "Andina" 6 "Nor-Oriental" 7 "Capital"
+label value region_est1 region_est1
 
 
 /*(************************************************************************************************************************************************* 
@@ -1420,7 +1424,18 @@ label values mes_pagosegsalud mes_pagosegsalud
 *---------------------------------------------------------- IX: LABOR / EMPLEO ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-label var 	ocupado				"Occupied"
+label var    pea             "Dummy for activity status: economically active"
+label define pea 			 0 "Inactive" 1 "Active"
+label values pea pea
+
+label var    ocupado         "Dummy for activity status: employed"
+label define ocupado 		 0 "Not employed" 1 "Employed"
+label values ocupado ocupado
+
+label var    desocupa        "Dummy for activity status: unemployed"
+label define desocupa 		 0 "Not unemployed" 1 "Unemployed"
+label values desocupa desocupa 
+
 label var    relab           	"Type of employment in the main occupation (harmonized)"
 label define relab 			 	1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
 label values relab relab
@@ -1438,7 +1453,7 @@ label def	trabajo_independiente	1 "Yes" 0 "No"
 label values trabajo_independiente trabajo_independiente
 label var  	razon_no_trabajo  	"Main reason for not working last week"
 label def 	razon_no_trabajo 	1 "Was sick" 2 "Vacations" 3 "Permit" 4 "Labor conflicts" 5 "Reparation of equipment, machinery or vehicle" 7 "Does not want to work" 8 "Lack of work, clients or orders" /// 
-								9 "Impediment of municipal or national authorities" 10 "Will start new employment in 30 days" 11 "Stationary factors" 16 "Other"		
+								9 "Impediment of municipal or national authorities" 11 "Will start new employment in 30 days" 12 "Seasonal factors" 16 "Other"		
 label values razon_no_trabajo razon_no_trabajo
 label var  	razon_no_trabajo_o 	"Other reason for not working last week"
 label var  	sueldo_semana 		"Last week did you receive wages or benefits?"
@@ -2167,8 +2182,7 @@ label var  iext_alquil "Received in the last year income from… 9. Rentals (veh
 
 
 *--------- Events which affected the household
- /* Events(s15q1): 1. Cuáles de los siguientes eventos han afectado a
-su hogar desde el año 2017 ?
+ /* Events(s15q1): 1. Cuáles de los siguientes eventos han afectado a su hogar desde el año 2017?
 		1.Muerte o discapacidad de un miembro adulto del hogar que trabajaba
 		2.Muerte de alguien que enviaba remesas al hogar
 		3.Enfermedad de la persona con el ingreso más importante del hogar
@@ -2285,30 +2299,8 @@ su hogar desde el año 2017 ?
 	}
 	
 
- *--------- How did the houselhold cope with the shock
+ *--------- How did the houselhold cope with the most recent shock
  /* (s15q2c): 2c. Cómo se las arregló su hogar con el choque más reciente?*/
- 
-local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
-	foreach i of local x {
-		forval k = 1/21 {
-	label var reaccion_evento_`i'_`k' "Response to event"
-	*-- Label values
-	label def reaccion_evento_`i'_`k'_eng 1 "Selling livestock" 2 "Selling land" 3 "Selling property" ///
-	4 "Sending the children to live with friends" 5 "Stopped sending children to school" ///
-	6 "Working in other income generating activities" ///
-	8 "Received assiatnce from friends and relatives" 9 "Loans from friends and family" ///
-	10 "Loans from financial institution" ///
-	12 "Members of the household emigrated looking for a job" ///
-	13 "Credit purchases" 14 "Delayed payment of obligations" ///
-	15 "Sold the harvest in advance" 16 "Reduced the consumption of food" /// 
-	17 "Reduced consumption of non-food item" 18 "Used savings" ///
-	19 "Received assiatnce from a NGO" 20 "Advance payment from employer" ///
-	21 "Received assiatence from the government" 22 "The insurance covered the costs" ///
-	23 "Nothing" 24 "Other"
-	label val reaccion_evento_`i'_`k' reaccion_evento_`i'_`k'_eng
-		}
-	}
-	
 	
 	label var reaccion_evento_1_1 "2c. Your home sold livestock due to the recent shock  1. Death or disability of an adult household member who works"
 	label var reaccion_evento_2_1 "2c. Your home sold land due to the recent shock  1. Death or disability of an adult household member who works"
@@ -3100,7 +3092,7 @@ label	var	itranp_ns	"Income from non-specified private transfers	"
 label	var	itrane_o_m	"Income from public transfers other than CCTs - monetary	"
 label	var	itrane_ns	"Income from unspecified public transfers	"
 label	var	inla_extraord	"Extraordinary non-labor income"
-label	var	inla_otro	"Other non-labor income	"
+label	var	inla_otro	"Other non-labor income	(imputation for inla except retirement benefits & pensions)"
 label	var	iasalp_m	"Labor income from main occupation - monetary	"
 label	var	iasalp_nm	"Labor income from main occupation - non-monetary	"
 label	var	ictapp_m	"Self-employed income from main occupation - monetary	"
@@ -3217,4 +3209,4 @@ cap label var    ipcf_ppp11	     "Per capita household income (2011 dollars)"
 	label define hogarsec 		 	 0 "No" 1 "Yes"
 	label values hogarsec hogarsec
 
-	label var 	quest 	"Questionnaire (ENCOVI admin use)"
+	cap label var 	quest 	"Questionnaire (ENCOVI admin use)"

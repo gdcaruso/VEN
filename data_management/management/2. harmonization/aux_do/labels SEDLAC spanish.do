@@ -91,6 +91,9 @@ label define matpreca 0 "Materiales no Precarios" 1 "Materiales Precarios"
 label values matpreca matpreca
 
 label var    region_est1     "Region geografica desagregacion menor (estandarizada)" 
+cap label def region_est1 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
+          5 "Andina" 6 "Nor-Oriental" 7 "Capital"
+cap label value region_est1 region_est1
 label var    region_est2     "Region geografica desagregacion intermedia (estandarizada)" 
 label var    region_est3     "Region geografica desagregacion mayor (estandarizada)" 
 
@@ -364,7 +367,7 @@ label var    rem               "Ingreso por remesas del exterior - monetario"
 label var    itranp_o_m        "Ingreso por otras transferencias privadas del país - monetario"
 label var    itranp_o_nm       "Ingreso por otras transferencias privadas del país - no monetario"
 label var    itranp_ns         "Ingreso por transferencias privadas no especificadas"
-label var    inla_otro         "Otros ingresos no laborales"
+label var    inla_otro         "Otros ingresos no laborales (imputación de inla excepto jubilaciones y pensiones"
 label var    ipatrp            "Ingreso por patrón en la ocupación principal - total"
 label var    iasalp            "Ingreso asalariado en la ocupación principal - total"
 label var    ictapp            "Ingreso por cuenta propia en la ocupación principal - total"

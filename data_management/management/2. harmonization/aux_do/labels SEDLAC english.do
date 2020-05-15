@@ -85,6 +85,10 @@ label define matpreca 		 0 "Non-precarious materials" 1 "Precarious materials"
 label values matpreca matpreca
 
 label var    region_est1     "Geographic region lowest disaggregation (standardized)" 
+cap label def region_est1 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
+          5 "Andina" 6 "Nor-Oriental" 7 "Capital"
+cap label value region_est1 region_est1
+
 label var    region_est2     "Geographic region intermediate disaggregation  (standardized)" 
 label var    region_est3     "Geographic region highest disaggregation  (standardized)" 
 
@@ -358,7 +362,7 @@ label var    rem             "Income from remittances del exterior - monetary"
 label var    itranp_o_m      "Income from other private transfers in the country - monetary"
 label var    itranp_o_nm     "Income from other private transfers in the country - non monetary"
 label var    itranp_ns       "Income from non-specified private transfers"
-label var    inla_otro       "Other non-labor income"
+label var    inla_otro       "Other non-labor income (imputation for inla except retirement benefits & pensions)"
 label var    ipatrp          "Employer income from main occupation - total"
 label var    iasalp          "Salaried worker income from main occupation - total"
 label var    ictapp          "Self-employed income from main occupation - total"

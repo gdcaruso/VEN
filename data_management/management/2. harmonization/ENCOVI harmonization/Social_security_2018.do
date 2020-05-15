@@ -1,7 +1,7 @@
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global socialprog_ENCOVI  
+global socialprog_ENCOVI  beneficiario
 
 
 
@@ -126,9 +126,8 @@ global socialprog_ENCOVI
 	label def clap 1 "Yes" 0 "No"
 	label value clap clap
 
- *--------- 'Caja CLAP' (In kind-transfer): Reasons 
- /* 60. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?
-		  Not received: Reasons */
+*--------- 'Caja CLAP' (In kind-transfer): Frequency
+ /* 61. ¿CON QUÉ FRECUENCIA LES LLEGA LA BOLSA/CAJA DEL CLAP? */ 
 	*-- Check values
 	tab mp61, mi
 	*-- Standarization of missing values
@@ -143,18 +142,3 @@ global socialprog_ENCOVI
 	label value clap_cuando clap_cuando
 	
 		
-*--------- 'Caja CLAP' (In kind-transfer): Frequency
- /* 61. ¿CON QUÉ FRECUENCIA LES LLEGA LA BOLSA/CAJA DEL CLAP? */ 
-
-	*-- Check values
-	tab mp61, mi
-	*-- Standarization of missing values
-	replace mp61=. if mp61==99
-	*-- Generate variable
-	clonevar clap_cuando = mp61
-	*-- Label variable
-	label var clap_cuando "How often the houselhold received the 'CLAP'"
-	*-- Label values 
-	label def clap_cuando 1 "Cada dos o tres semanas" 2 "Cada mes" ///
-						  3 "Cada dos meses" 4 "No hay periodicidad" 
-	label value clap_cuando clap_cuando

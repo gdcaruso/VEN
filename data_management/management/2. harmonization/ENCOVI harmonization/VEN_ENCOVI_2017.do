@@ -29,22 +29,22 @@ Note:
 		
 			
 		if $juli {
-				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 
+				global rootpath "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath2 "C:\Users\WB563583\Github\VEN"
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
 		}
 		if $trini   {
-				global rootpath1 "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
 				global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
-				global rootpath1 "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
                 global rootpath2 "C:\Users\wb550905\Github\VEN" 
 		}
 
-global dataofficial "$rootpath1\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
+global dataofficial "$rootpath\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
 global data2014 "$dataofficial\ENCOVI 2014\Data"
 global data2015 "$dataofficial\ENCOVI 2015\Data"
 global data2016 "$dataofficial\ENCOVI 2016\Data"
@@ -976,6 +976,43 @@ opaisemig_* razonemig_*  razonemigot_* ///
 	tab razonemigot_`i' hogar_emig
 	} 
 
+/*(************************************************************************************************************************************************* 
+*----------------------------------- XII: FOOD CONSUMPTION / CONSUMO DE ALIMENTO --------------------------------------------------------
+*************************************************************************************************************************************************)*/
+
+global foodcons_ENCOVI clap /*clap_cuando*/
+	
+ *--------- 'Caja CLAP' (In kind-transfer)
+ /* 65. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?*/
+*-- Check values
+	tab mp65, mi
+	*-- Standarization of missing values
+	replace mp65=. if mp65==99
+	*-- Generate variable
+	clonevar clap = mp65
+	replace clap = 0 if mp65==2
+	*-- Label variable
+	label var clap "Has the houselhold received the 'CLAP'"
+	*-- Label values 
+	label def clap 1 "Yes" 2 "No"
+	label value clap clap
+
+		
+*--------- 'Caja CLAP' (In kind-transfer): Frequency
+ /* 61. ¿CON QUÉ FRECUENCIA LES LLEGA LA BOLSA/CAJA DEL CLAP? 
+
+*-- Check values
+	tab mp66, mi
+	*-- Standarization of missing values
+	replace mp66=. if mp66==99
+	*-- Generate variable
+	clonevar clap_cuando = mp66
+	*-- Label variable
+	label var clap_cuando "How often the houselhold received the 'CLAP'"
+	*-- Label values 
+	label def clap_cuando 1 "Cada mes" 2 "Cada 2 meses" ///
+	3 "No hay periodicidad" 98 "NA"  
+	label value clap_cuando clap_cuando */ 
 
 /*
 /*(************************************************************************************************************************************************ 
@@ -1854,8 +1891,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI
-keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI
+order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI
+keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI
 
 save "$pathout\ENCOVI_2017_COMP.dta", replace
 

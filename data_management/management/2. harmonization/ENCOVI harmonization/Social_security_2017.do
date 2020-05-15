@@ -117,6 +117,7 @@ global socialprog_ENCOVI
 	replace mp65=. if mp65==99
 	*-- Generate variable
 	clonevar clap = mp65
+    replace clap = 0 if mp65==2
 	*-- Label variable
 	label var clap "Has the houselhold received the 'CLAP'"
 	*-- Label values 

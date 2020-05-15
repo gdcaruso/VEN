@@ -79,8 +79,7 @@ append using "$pathout\ENCOVI_`i'_COMP.dta"
 }
 sort ano id com
 
-gen weight=pondera if ano!=2019
-replace weight=1 if ano==2019
+gen weight=pondera 
 gen all=1
 clonevar year=ano
 
@@ -153,6 +152,7 @@ replace hogarsec =0 if inrange(relacion_comp, 1,11)
 * Numero de miembros del hogar (de la familia principal): miembros 
 tempvar uno
 gen `uno' = 1
+drop miembros
 egen miembros = sum(`uno') if hogarsec==0 & relacion_comp!=., by(year id)
 
 clonevar hhsize=miembros

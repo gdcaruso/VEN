@@ -1,33 +1,33 @@
 /*===========================================================================
 Country name:	Venezuela
 Year:			2019/2020
-Survey:			ECNFT
+Survey:			ENCOVI
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
 Authors:			Malena Acuña, Trinidad Saavedra, Lautaro Chittaro, Julieta Ladronis
 
-Dependencies:		CEDLAS/UNLP -- The World Bank
+Dependencies:		The World Bank
 Creation Date:		March/April, 2020
 Modification Date:  
-Output:			sedlac do-file template
+Output:				
 
 Note: 
 =============================================================================*/
 ********************************************************************************
 // Define rootpath according to user (silenced as this is done by main now)
-/*
+
  	    * User 1: Trini
  		global trini 0
 		
  		* User 2: Julieta
- 		global juli   0
+ 		global juli   1
 		
  		* User 3: Lautaro
  		global lauta   0
 		
  		* User 4: Malena
- 		global male   1
+ 		global male   0
 			
  		if $juli {
  				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -50,9 +50,10 @@ Note:
 		global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 		global merged "$datapath\data_management\output\merged"
 		global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
+		global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 *Outputs
 		global cleaned "$datapath\data_management\output\cleaned"
-*/
+
 ********************************************************************************
 
 /*==============================================================================
@@ -162,10 +163,10 @@ save `household_hhid'
 use "$merged\individual.dta", clear
 merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
-* I drop those who do not collaborate in the survey
+* Dropping those who do not collaborate in the survey
 drop if colabora_entrevista==2
 
-*Obs: there is 1 obs. which does not merge. Maybe they are people who started to answer but then stopped answering
+*Obs: there was 1 obs. which does not merge (should not have been approved by headquarters as it was an empty interview. We deleted it in the "ad-hoc" cleaning part)
 
 *Change names to lower cases
 rename _all, lower
@@ -194,9 +195,9 @@ gen string_interview_month = substr(s4_start,6,2)
 gen new_interview_month = real(string_interview_month)
 replace interview_month = new_interview_month if (interview_month==.a | interview_month==.)
 
-// this is only to test wha
-//drop if interview month is november
-// drop if interview_month==11
+	// Testing:
+	// drop if interview month is november
+	// drop if interview_month==11
 
 gen     region_est1 =  1 if entidad==5 | entidad==8 | entidad==13					// Region Central: Aragua (5), Carabobo (8), Lara (13)
 replace region_est1 =  2 if entidad==12 | entidad==4 | entidad==6          			// Region LLanera: Guarico (12), Apure (4), Barinas (6)
@@ -321,28 +322,27 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 			13 = Servicio Domestico		*/
 	clonevar relacion_en = s6q2 if s6q2!=. & s6q2!=.a
 
-	gen     reltohead = 1		if  relacion_en==1
-	replace reltohead = 2		if  relacion_en==2
-	replace reltohead = 3		if  relacion_en==3  | relacion_en==4
-	replace reltohead = 4		if  relacion_en==5  
-	replace reltohead = 5		if  relacion_en==6 
-	replace reltohead = 6		if  relacion_en==7
-	replace reltohead = 7		if  relacion_en==8  
-	replace reltohead = 8		if  relacion_en==9
-	replace reltohead = 9		if  relacion_en==10
-	replace reltohead = 10		if  relacion_en==11
-	replace reltohead = 11		if  relacion_en==12
-	replace reltohead = 12		if  relacion_en==13
+	gen     relacion_comp = 1		if  relacion_en==1
+	replace relacion_comp = 2		if  relacion_en==2
+	replace relacion_comp = 3		if  relacion_en==3  | relacion_en==4
+	replace relacion_comp = 4		if  relacion_en==5  
+	replace relacion_comp = 5		if  relacion_en==6 
+	replace relacion_comp = 6		if  relacion_en==7
+	replace relacion_comp = 7		if  relacion_en==8  
+	replace relacion_comp = 8		if  relacion_en==9
+	replace relacion_comp = 9		if  relacion_en==10
+	replace relacion_comp = 10		if  relacion_en==11
+	replace relacion_comp = 11		if  relacion_en==12
+	replace relacion_comp = 12		if  relacion_en==13
 
-	label def reltohead 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
+	label def relacion_comp 1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hijo(a)/Hijastro(a)" 4 "Nieto(a)" 5 "Yerno, nuera, suegro (a)" ///
 						6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"	
-	label value reltohead reltohead
-	rename reltohead relacion_comp
+	label value relacion_comp relacion_comp
 	label var    relacion_comp  "Parentesco con el jefe de hogar (comparable)"
 
 *** Weights/Factor de ponderacion: pondera
 
-merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
+/*merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by Michael and modified by Daniel
 
 	* Individual weights
 		gen pondera=final_pw
@@ -364,14 +364,39 @@ merge m:1 objectid using "$merged\pesos_encovi_malena_20200422.dta" // Sent by M
 		replace pondera_hh = round(pondera_hh)
 		
 		drop total_hogares hogar
+*/
+
+merge m:1 interview__key interview__id using "$merged\final_encovi_weights.dta" // Sent by Michael and modified by Daniel on April 30th
+drop _merge
+
+	* Individual weights
+		gen pondera = encovi_pw
+		replace pondera = round(pondera) // some commands later cannot work with non-integer weights
 		
-	* Checking population estimates
+	* Household weights
+		sort interview__key interview__id quest relacion_en, stable
+		bys interview__key interview__id quest: replace encovi_w=. if _n!=1
+			*Obs: we did it in this way instead of:
+				*gen pondera_hh = encovi_w if relacion_en==1
+			*Because there was one household which did not have "jefe de hogar" - one we have fixed it though. check for the fix:
+				/*Check:
+				gen primeroqueaparece=.
+				sort id relacion_en, stable
+				by id: replace primeroqueaparece = relacion_en[1]
+				tab primeroqueaparece if relacion_en!=1
+				*Its okay!
+				*/
+		gen pondera_hh=encovi_w 
+		replace pondera_hh = round(pondera_hh) // some commands later cannot work with non-integer weights
+	
+	* Checking population & hh estimates
 		gen uno=1
 		*	Population
 		sum uno [w=pondera] , detail 	// 24.9 M de personas
 		*	Households
 		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
 		drop uno
+		* 171 individuals and 53 households do not have weights assigned as they were in the "Listado Remoto"
 
 * Strata: strata
 	*Old: gen strata = estrato // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 
@@ -737,7 +762,7 @@ gen implicancias_nopago_o=s5q10_os
 label var implicancias_nopago_o "Otras implicancias del no pago"
 
 *** If you had to rent similar dwelling, how much did you think you should pay?
-*Si usted tuviera que vivir en una vivienda como esta, cuanto cree que deberia pagar?
+*Si usted tuviera que vivir en alquiler en una vivienda como ésta, cuanto cree que deberia pagar?
 clonevar renta_imp_en=s5q11 if s5q11!=. & s5q11!=.a
 
 *** In which currency?
@@ -4325,7 +4350,8 @@ capture label drop nivel
 
 include "$pathaux\do_file_1_variables_MA.do"
 
-* RENTA IMPUTADA
+/// RENTA IMPUTADA ///
+
 	/* TENENCIA_VIVIENDA (s5q7): Para su hogar, la vivienda es?
 			1 = Propia pagada		
 			2 = Propia pagandose
@@ -4340,43 +4366,94 @@ include "$pathaux\do_file_1_variables_MA.do"
 			
 			*Obs: Before there were options saying "De algun programa de gobierno (con titulo de propiedad)" and "De algun programa de gobierno (sin titulo de propiedad)" */
 
-	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==2 | tenencia_vivienda==5 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8
-	replace aux_propieta_no_paga = 0 if tenencia_vivienda==3 | tenencia_vivienda==4 | (tenencia_vivienda>=9 & tenencia_vivienda<=10) | tenencia_vivienda==.
+	gen aux_propieta_no_paga = 1 if tenencia_vivienda==1 | tenencia_vivienda==6 | tenencia_vivienda==7 | tenencia_vivienda==8 | tenencia_vivienda==9 | tenencia_vivienda==10 
+	replace aux_propieta_no_paga = 0 if tenencia_vivienda==2 | tenencia_vivienda==3 | tenencia_vivienda==4 | tenencia_vivienda==5 | tenencia_vivienda==. 
+		* Follows the division already determined in the survey itself
+		
 	sort id, stable
 	by id: egen propieta_no_paga = max(aux_propieta_no_paga) 
 	replace propieta_no_paga=. if hogarsec==1
 
-	// Creates implicit rent from hh guess of its housing costs if they do noy pay rent and 10% of actual income if hh do not make any guess
+	// Creating implicit rent from hh guess of its housing costs if they had to pay rent of their dwelling
 		gen     renta_imp = .
+		gen 	pago_alq_bolfeb2020 = . // To compare with what people paying for rent actually pay
 		
 		levelsof interview_month, local(rent_month)
 		foreach m in `rent_month'{
-			levelsof renta_imp_mon, local(rent_currency)
-
-			foreach c in `rent_currency'{
+			
+			*local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
+			foreach c in `monedas'{
+			
 				di "////"
 				di `m'
 				di `c'
-				di  `tc`c'mes`m''
+				di `tc`c'mes`m''
 				di `deflactor`m''
 				replace renta_imp = renta_imp_en * `tc`c'mes`m'' * `deflactor`m'' if interview_month == `m' & renta_imp_mon == `c' & propieta_no_paga == 1
+				replace pago_alq_bolfeb2020 = pago_alq_mutuo * `tc`c'mes`m'' * `deflactor`m'' if pago_alq_mutuo_m == `m' & pago_alq_mutuo_mon == `c' & propieta_no_paga == 0
 			}
 		}
 		
+	// Taking care of people who need to have rent imputated but didn't answer what would be their housing costs if they had to pay
+		* Assumption: Para los pocos que no contestaron, el ingreso total familiar (pre-renta imputada) por la media de la participación de la renta imputada reportada en el ingreso total familiar (antes de renta imputada), entre aquellos que sí la contestaron.
+	
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
+			* Problem: there are people who answer they would spend too much if they paid rent. The 50% percentile answers 66%. The 99% percentile even 687 times their income before imputed rent!
+			* Note: imputation dofile will take care of outliers.
+			tab renta_imp_mon if renta_imp_en!=. & renta_imp_en!=0, mi
+			
+		/* Descriptive analysis, comparison: what people renting or paying mortgage actually pay, vs. what people who don't pay it report they should pay for a place like theirs if they had to
+			tab tenencia_vivienda if relacion_en==1, mi
+			tab propieta_no_paga if relacion_en==1, mi
+			
+			gen part_alqhip = pago_alq_bolfeb2020/itf_sin_ri if pago_alq_bolfeb2020!=. & pago_alq_bolfeb2020!=0
+			sum part_alqhip [w=pondera] if pago_alq_bolfeb2020!=. & pago_alq_bolfeb2020!=0, detail
+			tab pago_alq_mutuo_mon if pago_alq_bolfeb2020!=. & pago_alq_bolfeb2020!=0, mi
+			drop part_alqhip
+			*/
+			drop pago_alq_bolfeb2020
+			drop part_rentaimp
+			
+			* Changing outliers to missing	
+			program drop _all
+			qui: do "$impdos\outliers.do" 			
+			clonevar renta_imp_out=renta_imp
+			outliers renta_imp 10 90 5 5 // Ya cambia los outliers a missing
+			sum	renta_imp_out if out_renta_imp==1 
+	
+			* Now without outliers
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0, detail
+			local partrentaimp = r(p50)
+			
 		sort interview__key interview__id quest relacion_en, stable
 		by interview__key interview__id quest: replace renta_imp=renta_imp[1] if relacion_en!=13 // We add to all the other household members (who are not domestic service) the imputed rent of the head
 		
 			* tab tenencia_vivienda if renta_imp==. // to check cases of reported rent but not imputated 
 		
-		gen renta_imp_b = itf_sin_ri*0.1 if propieta_no_paga == 1
-		
+			/*
+			*We ended up not using this assumption, for being a lot lower than what people report of imputed rent
+			gen renta_imp_b = itf_sin_ri*0.1 if propieta_no_paga == 1
 			gen d_renta_imp_b = .
 			replace d_renta_imp_b = 1 if renta_imp==. & propieta_no_paga == 1 // Dummy for other calculations: who will have the 10%
-
+			*/
+			
 			* twoway scatter renta_imp renta_imp_b if renta_imp<10000000 & renta_imp_b<10000000, msize(tiny)
 			
-		replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with 10% in cases where no guess is provided by hh.
+			*replace renta_imp = renta_imp_b  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with 10% in cases where no guess is provided by hh.
 		
+		replace renta_imp = `partrentaimp'*itf_sin_ri  if  propieta_no_paga == 1 & (renta_imp==. | renta_imp==0 | renta_imp==.a) // Complete with r(p50) of ITF_SIN_RI in cases where no guess is provided by hh.
+		
+		drop part_rentaimp
+		
+			/* Descriptive analysis (when we were still using the 10% assumption)
+			gen part_rentaimp = renta_imp/itf_sin_ri if renta_imp!=. & renta_imp!=0
+			sum part_rentaimp [w=pondera] if renta_imp!=. & renta_imp!=0 & d_renta_imp_b==1, detail 
+			drop part_rentaimp
+			*/
+			
+// Second CEDLAS aux do //			
 include "$pathaux\do_file_2_variables.do"
 
 * include "$pathaux\Labels_ENCOVI.do" // This will get done in the Master do, in English and Spanish, at the end
@@ -4454,7 +4531,7 @@ hogarsec interview_month interview__id interview__key quest labor_status miembro
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb d_renta_imp_b linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
+hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
 
 save "$cleaned\ENCOVI_2019_Sin imputar (con precios implicitos).dta", replace
 *save "$dataout\ENCOVI_2019_Asamblea Nacional_lag_ingresos.dta", replace

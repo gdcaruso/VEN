@@ -134,7 +134,7 @@ drop if unidad_medida==.
 preserve
 use  "$cleaned/ENCOVI_2019_pre pobreza.dta", clear
 drop if hogarsec == 1
-keep interview__id interview__key quest miembros pondera
+keep interview__id interview__key quest miembros
 duplicates drop
 tempfile hhsize
 save `hhsize'

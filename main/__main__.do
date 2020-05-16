@@ -209,21 +209,21 @@ clear all
 Additional database with Expenditure Data and consumption
 ==============================================================================*/
 
-global expendiscript "$dopath/expenditure/script"
+global expendiscript "$dopath\expenditure\script"
 
-run "$expendiscript/genera_consumo_calorico.do"
+run "$expendiscript\genera_consumo_calorico.do"
 
-run "$expendiscript/genera_gasto_per_capita.do"
+run "$expendiscript\genera_gasto_per_capita.do"
 
-use "$outENCOVI/ENCOVI_2019_Spanish labels.dta", replace
-merge m:1 interview__id interview__key using "$output/winsored_expenditure_hh_level.dta"
+use "$outENCOVI\ENCOVI_2019_Spanish labels.dta", replace
+merge m:1 interview__id interview__key using "$output\winsored_expenditure_hh_level.dta"
 drop _merge
-save "$outENCOVI/ENCOVI_2019_expenditures&calintake_Spanish labels.dta", replace // NOW DONE IN THE MAIN
+save "$outENCOVI\ENCOVI_2019_expenditures&calintake_Spanish labels.dta", replace // NOW DONE IN THE MAIN
 
 clear all
 
-use "$outENCOVI/ENCOVI_2019_English labels.dta", replace
-merge m:1 interview__id interview__key using "$output/winsored_expenditure_hh_level.dta"
+use "$outENCOVI\ENCOVI_2019_English labels.dta", replace
+merge m:1 interview__id interview__key using "$output\winsored_expenditure_hh_level.dta"
 drop _merge
 save "$outENCOVI\ENCOVI_2019_expenditures&calintake_English labels.dta", replace
 clear all

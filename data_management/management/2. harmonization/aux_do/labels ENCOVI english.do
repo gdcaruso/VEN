@@ -3087,9 +3087,9 @@ label var clap_cuando "When was the last time that the 'Bolsa-Caja' CLAP arrived
 	*** Extreme poverty identifier
 	label var pobre_extremo "Extreme poverty identifier"
 	
-	label variable pobre_19usd "Poverty identifier: income less that 1.9usd a day ppp2011"
-	label variable pobre_32usd "Poverty identifier: income less that 3.2usd a day ppp2011"
-	label variable pobre_32usd "Poverty identifier: income less that 5.5usd a day ppp2011"
+	label variable pobre_19 "Poverty identifier: income less that 1.9usd a day ppp2011"
+	label variable pobre_32 "Poverty identifier: income less that 3.2usd a day ppp2011"
+	label variable pobre_55 "Poverty identifier: income less that 5.5usd a day ppp2011"
 
 
 /*(************************************************************************************************************************************************ 

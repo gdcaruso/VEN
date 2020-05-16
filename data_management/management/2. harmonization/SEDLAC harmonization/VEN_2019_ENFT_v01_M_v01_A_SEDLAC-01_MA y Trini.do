@@ -200,39 +200,62 @@ label def relacion 1 "Jefe" 2 "Cónyuge/Pareja" 3 "Hijo(a)/Hijastro(a)" 4 "Padre
 		              5 "Hermano/Hermana"  6 "Nieto/Nieta"	7 "Otros familiares" 8 "Otros no familiares"
 label value relacion relacion
 
-*** Weights/Factor de ponderacion: pondera
-
-merge m:1 interview__key interview__id using "$merged\final_encovi_weights.dta" // Sent by Michael and modified by Daniel on April 30th
-drop _merge
-
-	* Individual weights
-		gen pondera = encovi_pw
-		replace pondera = round(pondera) // some commands later cannot work with non-integer weights
-		
-	* Household weights
-		sort interview__key interview__id quest relacion_en, stable
-		by interview__key interview__id quest: replace encovi_w=. if _n!=1
-			*Obs: we did it in this way instead of:
-				*gen pondera_hh = encovi_w if relacion_en==1
-			*Because there was one household which did not have "jefe de hogar" - one we have fixed it though. check for the fix:
-				/*Check:
-				gen primeroqueaparece=.
-				sort id relacion_en, stable
-				by id: replace primeroqueaparece = relacion_en[1]
-				tab primeroqueaparece if relacion_en!=1
-				*Its okay!
-				*/
-		gen pondera_hh=encovi_w 
-		replace pondera_hh = round(pondera_hh) // some commands later cannot work with non-integer weights
+	* Miembros de hogares secundarios (seleccionando personal doméstico): hogarsec // definición CEDLAS
+	gen hogarsec =.
+	replace hogarsec =1 if relacion_en==13
+	replace hogarsec =0 if inrange(relacion_en, 1,12)
 	
-	* Checking population estimates
-		gen uno=1
-		*	Population
-		sum uno [w=pondera] , detail 	// 24.9 M de personas
-		*	Households
-		sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
-		drop uno
+	tempvar uno
+	gen `uno' = 1
+	sort id, stable
+	egen miembros = sum(`uno') if hogarsec==0 & relacion_en!=., by(id)
+
+*** Weights/Factor de ponderacion: pondera
+	* 171 individuals and 53 households do not have weights assigned as they were in the "Listado Remoto"
+
+	*FIRST WEIGHTS
+	merge m:1 interview__key interview__id using "$merged\intermediate_encovi_weights.dta" // Sent by Michael and modified by Daniel on April 30th
+	drop _merge
+
+		* Individual weights
+			gen pondera = encovi_pw
+			replace pondera = round(pondera) // some commands later cannot work with non-integer weights
+			
+		* Household weights
+			sort interview__key interview__id quest relacion_en, stable
+			by interview__key interview__id quest: replace encovi_w=. if _n!=1
+				*Obs: we did it in this way instead of:
+					*gen pondera_hh = encovi_w if relacion_en==1
+				*Because there was one household which did not have "jefe de hogar" - one we have fixed it though. check for the fix:
+					/*Check:
+					gen primeroqueaparece=.
+					sort id relacion_en, stable
+					by id: replace primeroqueaparece = relacion_en[1]
+					tab primeroqueaparece if relacion_en!=1
+					*Its okay!
+					*/
+			gen pondera_hh=encovi_w 
+			replace pondera_hh = round(pondera_hh) // some commands later cannot work with non-integer weights
 		
+		* Checking population & hh estimates
+			gen uno=1
+			*	Population
+			sum uno [w=pondera] , detail 	// 24.9 M de personas
+			*	Households
+			sum uno [w=pondera_hh] , detail	// 6.5 M de hogares
+			drop uno
+			
+	* UN ESTIMATIONS CORRECTIONS TO THE WEIGHTS
+		do "$pathaux\un_weight_calibration_20200513.do"
+		
+		* Checking population & hh estimates
+			gen uno=1
+			*	Population
+			sum uno [w=pondera] , detail 	// 28.4 M de personas - en linea con UN
+			*	Households
+			sum uno [w=pondera_hh] , detail	// 8.5 M de hogares - sale de poblacion dividido miembros por hogar promedio
+			drop uno
+			
 * Estrato: strata
 	gen strata = . // problem: we don't know how they were generated. We believe they were socioeconomic (AB, C, D, EF; not geographic) but not done statistically. If so, we should delete them from the Datalib uploaded database 
 	**In ENCOVI 2019 there are 2 strata, geographical, by size of the segment. Check later with Daniel
@@ -253,9 +276,12 @@ global demo_SEDLAC relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro
 gen hogar = (relacion==1)	
 
 * Miembros de hogares secundarios (seleccionando personal doméstico): hogarsec 
+	*Already above
+/*
 gen hogarsec =.
 replace hogarsec =1 if relacion_en==13
 replace hogarsec =0 if inrange(relacion_en, 1,12)
+*/
 
 * Hogares con presencia de miembros secundarios: presec	
 tempvar aux
@@ -266,9 +292,12 @@ replace   presec = .  if  relacion!=1
 drop `aux'
 
 * Numero de miembros del hogar (de la familia principal): miembros 
+	*Already above
+/*
 tempvar uno
 gen `uno' = 1
 egen miembros = sum(`uno') if hogarsec==0 & relacion!=., by(id)
+*/
 
 * Dummy de hombre: hombre 
 /* SEXO (s6q3): El sexo de ... es

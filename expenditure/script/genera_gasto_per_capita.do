@@ -97,7 +97,7 @@ qui{
 		* Deflactor
 
 
-use "$inflation", clear //( MALE ACA - QUÉ HAGO?)
+use "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta", clear
 			
 			forvalues j = 10(1)12 {
 				sum indice if mes==`j' & ano==2019
@@ -129,7 +129,7 @@ use "$inflation", clear //( MALE ACA - QUÉ HAGO?)
 			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses 1 2 3 4 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$exrate", clear //( MALE ACA - QUÉ HAGO?)
+			use "$datapath\data_management\input\exchenge_rate_price.dta", clear //( MALE ACA - QUÉ HAGO?)
 			
 			destring mes, replace
 			foreach i of local monedas {
@@ -170,7 +170,7 @@ di `deflactor4' //temporary same as march
 
 // import main encovi for basic hh data
 // import other expenditure data
-use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanish labels.dta", replace // MALE ACA
+use "$outENCOVI/ENCOVI_2019_Spanish labels.dta", replace 
 cap drop if hogarsec == 1
 cap drop _merge
 cap egen miembros = count(com), by (interview__key interview__id)
@@ -183,7 +183,7 @@ save `hh'
 
 
 // import feb2020 product data
-use "$merged/product-hh.dta", replace //use merged because we need expenditure, not homogenized units of cleaned dataset ( MALE ACA )
+use "$merged/product-hh.dta", replace //use merged because we need expenditure, not homogenized units of cleaned dataset
 merge m:1 interview__id interview__key using `hh', keep(matched) 
 
 // // generate month of the survey
@@ -267,7 +267,7 @@ save `conSpending'
 * // HH section  (wide shape) 
 *********************************************************************************************************************)*/
 // import other expenditure data
-use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanish labels.dta", replace // (MALE ACA)
+use "$outENCOVI/ENCOVI_2019_Spanish labels.dta", replace
 cap drop _merge
 merge m:1 interview__id interview__key using `hh', keep(matched) 
 
@@ -589,15 +589,15 @@ by bien: replace current_good = current_good[1]
 gen gasto_men_pc = gasto_mensual/miembros
 
 
-save "$output/unwinsored_expenditure.dta", replace
+save "$datapath\poverty_measurement\output\unwinsored_expenditure.dta", replace
 
 
 /*(************************************************************************************************************************************************* 
 * 1:detect outliars
 *************************************************************************************************************************************************)*/
-use "$output/unwinsored_expenditure.dta", replace
+use "$datapath\poverty_measurement\output\unwinsored_expenditure.dta", replace
 
-// need to correct by outliears!
+// need to correct by outliers!
 egen total = total(gasto_men_pc), by(interview__id)
 gen share = gasto_men_pc/total
 
@@ -605,16 +605,25 @@ gen share = gasto_men_pc/total
 levelsof bien, local (good_list)
 gen gasto_men_pc_winsored = .
 gen winsored = 0
+sort bien, stable
+gen uno=1
+by bien: egen popular=count(uno) if gasto_men_pc>0
+gsort bien -popular
+by bien: replace popular = popular[1]
+distinct interview__key interview__id 
+replace popular = popular /r(ndistinct)
+keep if popular > 0.01 // dropping 41 goods
+drop uno
 
-foreach b in `good_list'{
+foreach b in `good_list' {
  
 di "----------------"
 di `b'
 qui summarize gasto_men_pc if bien == `b' & gasto_men_pc>0, detail
 		replace gasto_men_pc_winsored = gasto_men_pc if bien == `b'
-		replace gasto_men_pc_winsored =r(p99) if gasto_men_pc>r(p99) & bien == `b' & gasto_men_pc>0 //replace values over p99
+		replace gasto_men_pc_winsored =r(p98) if gasto_men_pc>r(p98) & bien == `b' & gasto_men_pc>0 //replace values over p99
 		replace gasto_men_pc_winsored =r(p1) if gasto_men_pc<r(p1) & bien == `b' & gasto_men_pc>0 //replace values under p1 (no answer excluded)
-		replace winsored = 1 if (gasto_men_pc<r(p1) | gasto_men_pc>r(p99)) & bien == `b' & gasto_men_pc>0 //flag
+		replace winsored = 1 if (gasto_men_pc<r(p1) | gasto_men_pc>r(p98)) & bien == `b' & gasto_men_pc>0 //flag
 }
 
 egen total_winsored = total(gasto_men_pc_winsored), by(interview__id)
@@ -654,7 +663,7 @@ gen share_food = gpcf_food/gpcf
 gen share_housing = gpcf_housing/gpcf
 gen share_other = gpcf_other/gpcf
 
-save "$output/winsored_expenditure_product_level.dta", replace
+save "$datapath\poverty_measurement\output\winsored_expenditure_product_level.dta", replace
 
 
 // 17 hh do not answer consumption
@@ -674,7 +683,7 @@ collapse (max) gpcf gpcf_* share*, by(interview__key interview__id)
 
 
 
-save "$output/winsored_expenditure_hh_level.dta", replace
+save "$datapath\poverty_measurement\output\winsored_expenditure_hh_level.dta", replace
 
 
 /*(************************************************************************************************************************************************* 

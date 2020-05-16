@@ -1596,7 +1596,7 @@ compress
 
 sort id com, stable
 
-order pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
+order pais ano encuesta id com pondera pondera_hh strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
 region_est1 region_est2 region_est3 cen lla ceo zul and nor capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
 propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
 alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///
@@ -1608,7 +1608,7 @@ relab durades hstrt hstrp deseamas antigue asal empresa grupo_lab categ_lab sect
 /*pobreza_enc pobreza_extrema_enc lp_extrema lp_moderada ing_pob_ext ing_pob_mod ing_pob_mod_lp p_reg ipc pipcf dipcf p_ing_ofi d_ing_ofi piea qiea pondera_i ipc05 ipc11 ppp05 ppp11 ipcf_cpi05 ipcf_cpi11 ipcf_ppp05 ipcf_ppp11*/ ///
 interview_month interview__key interview__id quest
 				
-keep pais ano encuesta id com pondera strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
+keep pais ano encuesta id com pondera pondera_hh strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
 region_est1 region_est2 region_est3 cen lla ceo zul and nor capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///
 propieta habita dormi precaria matpreca agua banio cloacas elect telef heladera lavarropas aire calefaccion_fija telefono_fijo celular celular_ind televisor tv_cable video computadora internet_casa uso_internet auto ant_auto auto_nuevo moto bici ///
 alfabeto asiste edu_pub aedu nivel nivedu prii pric seci secc supi supc exp ///

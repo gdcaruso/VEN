@@ -123,7 +123,7 @@ drop cal_intake
 
 label variable calorias_diarias_per_capita "Consumo diario de kilocalorias per capita"
 
-save "$outENCOVI/ENCOVI_2019_expenditures&calintake_Spanish labels.dta", replace
+save "$outENCOVI/ENCOVI_2019_Spanish labels.dta", replace
 
 // merge encovi with cal. intake (english labels)
 use "$outENCOVI/ENCOVI_2019_English labels.dta", replace
@@ -135,5 +135,5 @@ gen calorias_diarias_per_capita= cal_intake/miembros
 drop cal_intake
 label variable calorias_diarias_per_capita "Daily caloric intake per capita in kcal."
 
-save "$outENCOVI/ENCOVI_2019_expenditures&calintake_English labels.dta", replace 
+save "$outENCOVI/ENCOVI_2019_English labels.dta", replace 
 

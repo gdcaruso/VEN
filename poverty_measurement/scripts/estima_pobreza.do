@@ -1,5 +1,5 @@
 /*===========================================================================
-Puropose: TThis scrip takes basket value, orshansky and ENCOVI ipcf and estimates
+Puropose: This scrip takes basket value, orshansky and ENCOVI ipcf and estimates
 poverty
 ===========================================================================
 Country name:	Venezuela
@@ -132,9 +132,9 @@ gen extremo_new = ipcf<le_new
 gen pobre_new = ipcf<lp_new
 gen extremo_ofi = ipcf<le_ofi
 gen pobre_ofi = ipcf<lp_ofi
-gen pobre_19 = ipcf<lp_19_ready
-gen pobre_32 = ipcf<lp_32_ready
-gen pobre_55 = ipcf<lp_55_ready
+gen pobre_19 = ipcf<lp_19_ready if hogarsec!=1
+gen pobre_32 = ipcf<lp_32_ready if hogarsec!=1
+gen pobre_55 = ipcf<lp_55_ready if hogarsec!=1
 
 
 // just to tabulate, 0 is extreme poverty

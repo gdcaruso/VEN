@@ -445,11 +445,11 @@ notes   edad: range of the variable: 0-97
 	replace grupo_edad=8 if edad>=70 & edad<=79 & edad!=.
 	replace grupo_edad=9 if edad>=80 & edad!=.
 	
-	gen     gedad = 1		if  edad<=14
-	replace gedad = 2		if  edad>=15 & edad<=24
-	replace gedad = 3		if  edad>=25 & edad<=40
-	replace gedad = 4		if  edad>=41 & edad<=64
-	replace gedad = 5		if  edad>=65 & edad~=.
+	gen     gedad1 = 1		if  edad<=14
+	replace gedad1 = 2		if  edad>=15 & edad<=24
+	replace gedad1 = 3		if  edad>=25 & edad<=40
+	replace gedad1 = 4		if  edad>=41 & edad<=64
+	replace gedad1 = 5		if  edad>=65 & edad~=.
 
 *** Year of birth
 clonevar anio_naci = s6q4_year if (s6q4_year!=. & s6q4_year!=.a & s6q4_year!=9999 & s6q4_year!=9 ) 
@@ -4578,7 +4578,7 @@ foreach p in pondera /*new_pondera new_pondera_un*/ {
 		sum miembros [w=pondera_hh] if relacion_en==1
 		
 		sort region_est1, stable
-		tabstat sum miembros [w=`p'], by(region_est1)
+		tabstat miembros [w=`p'], by(region_est1)
 		*by region_est1: sum miembros [w=pondera_hh] if relacion_en==1, detail
 		sort entidad, stable
 		tabstat miembros [w=`p'], by(entidad)
@@ -4587,8 +4587,7 @@ foreach p in pondera /*new_pondera new_pondera_un*/ {
 	}
 		*	Households
 		sum uno [w=pondera_hh], detail	
-
-		drop uno 			
+		
 	/* NOT: Checking population estimates with pondera_hh
 		
 	*	Population
@@ -4604,8 +4603,8 @@ foreach p in pondera /*new_pondera new_pondera_un*/ {
 		
 		drop pondera_hhind
 	*/
-		drop uno 
-
+		drop uno 	
+		
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------
 ************************************************************************************************************************************************)*/	

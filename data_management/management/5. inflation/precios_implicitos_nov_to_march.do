@@ -156,7 +156,7 @@ drop if unidad_medida==.
 preserve
 use  "$forinflation\ENCOVI_2019_sinimputar_sindeflactar_parainflacion.dta", clear
 
-keep interview__id interview__key quest miembros pondera
+keep interview__id interview__key quest miembros
 duplicates drop
 
 tempfile hhsize

@@ -99,7 +99,7 @@ global inflationout "$datapath\data_management\input"
 
 
 // calculates inflation
-do "$inflado/__main__inflation.do"
+run "$inflado/__main__inflation.do"
 
 // set global inflation input
 global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"

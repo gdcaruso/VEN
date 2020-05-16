@@ -3,7 +3,7 @@ Puropose: This script tries to replicate Chilenian methodolody of pov estimation
 ===========================================================================
 Country name:	Venezuela
 Year:			2019
-Survey:			ECOVI
+Survey:			ENCOVI
 Vintage:		
 Project:	
 ---------------------------------------------------------------------------

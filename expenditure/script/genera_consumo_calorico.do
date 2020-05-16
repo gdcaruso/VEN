@@ -1,10 +1,10 @@
 /*===========================================================================
-Puropose: TThis scrip takes basket value, orshansky and ENCOVI ipcf and estimates
+Puropose: This scrip takes basket value, orshansky and ENCOVI ipcf and estimates
 poverty
 ===========================================================================
 Country name:	Venezuela
 Year:			2019
-Survey:			ECOVI
+Survey:			ENCOVI
 Vintage:		
 Project:	
 ---------------------------------------------------------------------------
@@ -20,7 +20,7 @@ Note:
 ********************************************************************************
 
 // Define rootpath according to user
-
+/*
 	    * User 1: Trini
 		global trini 0
 		
@@ -52,8 +52,8 @@ Note:
 //
 // //set universal datapaths
 global merged "$datapath\data_management\output\merged"
-global final_output "$datapath\..\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018"
-global povinput "$datapath\poverty_measurement\input"
+global outENCOVI "$datapath\..\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018"
+global input /*poverty*/ "$datapath\poverty_measurement\input"
 
 // global cleaned "$datapath\data_management\output\cleaned"
 // global forinflation "$datapath\data_management\output\for inflation"
@@ -75,6 +75,7 @@ global povinput "$datapath\poverty_measurement\input"
 // global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 //
 // global orsh = 1.9
+*/
 ********************************************************************************
 
 /*==============================================================================
@@ -112,23 +113,17 @@ save `calintake'
 restore
 
 // merge encovi with cal intake (spanish labels)
-use "$final_output/ENCOVI_2019_Spanish labels.dta", replace
+use "$outENCOVI/ENCOVI_2019_Spanish labels.dta", replace
 merge m:1 interview__id interview__key using `calintake'
 keep if _merge != 2
 drop _merge
 
 gen calorias_diarias_per_capita= cal_intake/miembros
 drop cal_intake
-gen pobre_19usd = ipcf<lp_19usd if hogarsec !=1
-gen pobre_32usd = ipcf<lp_32usd if hogarsec !=1
-gen pobre_55usd = ipcf<lp_55usd if hogarsec !=1
 
 label variable calorias_diarias_per_capita "Consumo diario de kilocalorias per capita"
-label variable pobre_19usd "Identificador situación de pobreza para línea de 1.9usd ppp2011"
-label variable pobre_32usd "Identificador situación de pobreza para línea de 3.2usd ppp2011"
-label variable pobre_55usd "Identificador situación de pobreza para línea de 5.5usd ppp2011"
 
-//save "$final_output/ENCOVI_2019_Spanish label with calintake.dta"
+save "$outENCOVI/ENCOVI_2019_expenditures&calintake_Spanish labels.dta"" 
 
 // merge encovi with cal intake (english labels)
 use "$final_output/ENCOVI_2019_English labels.dta", replace
@@ -138,14 +133,7 @@ drop _merge
 
 gen caloric_diarias_per_capita= cal_intake/miembros
 drop cal_intake
-gen pobre_19usd = ipcf<lp_19usd if hogarsec !=1
-gen pobre_32usd = ipcf<lp_32usd if hogarsec !=1
-gen pobre_55usd = ipcf<lp_55usd if hogarsec !=1
-
 label variable calorias_diarias_per_capita "Daily caloric intake per capita in kcal."
-label variable pobre_19usd "Indicator of poverty: 1 = income less that 1.9usd a day ppp2011"
-label variable pobre_32usd "Indicator of poverty: 1 = income less that 3.2usd a day ppp2011"
-label variable pobre_32usd "Indicator of poverty: 1 = income less that 5.5usd a day ppp2011"
 
-//save "$final_output/ENCOVI_2019_English label with calintake.dta"
+save "$outENCOVI/ENCOVI_2019_expenditures&calintake_English labels.dta" 
 

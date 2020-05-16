@@ -97,7 +97,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 
 *----1.2: Demographic variables  / Variables demográficas
-		global demo_ENCOVI relacion_en relacion_comp hombre edad anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi razon_cambio_resi_o pert_2014 razon_incorp_hh razon_incorp_hh_o ///
+		global demo_ENCOVI relacion_en relacion_comp hombre edad grupo_edad gedad1 anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi razon_cambio_resi_o pert_2014 razon_incorp_hh razon_incorp_hh_o ///
 				certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo miembros
 
 *----1.4: Dwelling characteristics / Caracteristicas de la vivienda
@@ -208,7 +208,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 		rename lp_19 lp_19usd
 		rename lp_32 lp_32usd
 		rename lp_55 lp_55usd
-		global pobreza pobre lp_19usd lp_32usd lp_55usd lp_moderada lp_extrema pobre_extremo 
+		global pobreza pobre pobre_extremo lp_moderada lp_extrema pobre_19 pobre_32 pobre_55 lp_19usd lp_32usd lp_55usd  
 		
 *---- Keep 
 order 	$control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $antropo_ENCOVI $shocks_ENCOVI /*$ingreso_ENCOVI*/ $from_cedlas $pobreza

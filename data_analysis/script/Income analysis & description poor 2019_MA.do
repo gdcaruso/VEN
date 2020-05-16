@@ -25,9 +25,11 @@
 stop
 */
 
-**********************
+*****************************************************************
 
 use "C:\Users\wb550905\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018\ENCOVI_2019_Spanish labels.dta"
+	
+*****************************************************************
 
 * Cómo se compone el ingreso total familiar?
 	gen part_ilf = .

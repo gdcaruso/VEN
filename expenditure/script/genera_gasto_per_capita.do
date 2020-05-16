@@ -682,14 +682,14 @@ save "$output/winsored_expenditure_hh_level.dta", replace
 *************************************************************************************************************************************************)*/
 
 
-use "$datapath/../FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018/ENCOVI_2019_Spanish labels.dta", replace // (MALE ACA)
+*use "$outENCOVI/ENCOVI_2019_Spanish labels.dta", replace
 
-
-
-merge m:1 interview__id interview__key using "$output/winsored_expenditure_hh_level.dta"
-drop _merge
+*merge m:1 interview__id interview__key using "$output/winsored_expenditure_hh_level.dta"
+*drop _merge
 
 *save "$outENCOVI/ENCOVI_2019_with_expenditures_Spanish labels.dta", replace // NOW DONE IN THE MAIN
+
+
 
 // drop lp_* pobre pobre_extremo
 //

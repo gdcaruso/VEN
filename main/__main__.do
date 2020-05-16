@@ -99,7 +99,7 @@ global inflationout "$datapath\data_management\input"
 
 
 // calculates inflation
-run "$inflado/__main__inflation.do"
+do "$inflado/__main__inflation.do"
 
 // set global inflation input
 global inflation "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_implicitos.dta"
@@ -119,7 +119,7 @@ imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 global forimp "$datapath\data_management\output\for imputation"
 global pathoutexcel "$datapath\data_management\output\post imputation"
-global numberofimpruns 30
+global numberofimpruns 2
 
 //run ENCOVI imputation
 do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
@@ -206,12 +206,25 @@ save "$outSEDLAC\VEN_2019_ENCOVI_SEDLAC-01_English labels.dta", replace
 clear all
 
 /*==============================================================================
-Additional database with Expenditure Data
+Additional database with Expenditure Data and consumption
 ==============================================================================*/
 
-global expendiscript "$dopath\expenditure\script"
-run "$expendiscript\genera_gasto_per_capita.do"
-save "$outENCOVI\ENCOVI_2019_with_expenditures_Spanish labels.dta", replace
+global expendiscript "$dopath/expenditure/script"
 
+run "$expendiscript/genera_consumo_calorico.do"
+
+run "$expendiscript/genera_gasto_per_capita.do"
+
+use "$outENCOVI/ENCOVI_2019_Spanish labels.dta", replace
+merge m:1 interview__id interview__key using "$output/winsored_expenditure_hh_level.dta"
+drop _merge
+save "$outENCOVI/ENCOVI_2019_expenditures&calintake_Spanish labels.dta", replace // NOW DONE IN THE MAIN
+
+clear all
+
+use "$outENCOVI/ENCOVI_2019_English labels.dta", replace
+merge m:1 interview__id interview__key using "$output/winsored_expenditure_hh_level.dta"
+drop _merge
+save "$outENCOVI\ENCOVI_2019_expenditures&calintake_English labels.dta", replace
 clear all
  

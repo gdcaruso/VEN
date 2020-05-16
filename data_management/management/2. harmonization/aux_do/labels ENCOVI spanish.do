@@ -49,6 +49,14 @@ label def 	relacion_comp 	1 "Jefe del Hogar" 2 "Esposa(o) o Compañera(o)" 3 "Hi
 							6 "Padre, madre" 7 "Hermano(a)" 8 "Cunado(a)" 9 "Sobrino(a)" 10 "Otro pariente" 11 "No pariente" 12 "Servicio Domestico"
 label values relacion_comp relacion_comp
 			
+label var    gedad1          "Grupos de edad: 2=[15,24], 3=[25,40], 4=[41,64]"
+label define gedad1 1 "[0,14]" 2 "[15,24]" 3 "[25,40]" 4 "[41,64]" 5 "[65+]"
+label values gedad1 gedad1
+
+label var    grupo_edad          "Grupos de edad: 10 en 10"
+label def grupo_edad 1 "[0-9]" 2 "[10-19]" 3 "[20-29]" 4 "[30-39]" 5 "[40-49]" 6 "[50-59]" 7 "[60-69]" 8 "[70-79]" 7 "[80+]"
+label value grupo_edad grupo_edad
+
 label var	hombre 			"Género"
 label def 	hombre 			0 "Mujer" 1 "Hombre"
 label values hombre hombre
@@ -1343,6 +1351,10 @@ label var lp_55usd "Línea de pobreza internacional 5.5 USD (en dólares ppp men
 	
 label var pobre 		"Identificador situación de pobreza"
 label var pobre_extremo	"Identificador situación de pobreza extrema"
+
+label var pobre_19 		"Identificador situación de pobreza: ingreso debajo de línea int. 1.9USD PPP al día"
+label var pobre_32		"Identificador situación de pobreza: ingreso debajo de línea int. 3.2USD PPP al día"
+label var pobre_55 		"Identificador situación de pobreza: ingreso debajo de línea int. 5.5USD PPP al día"
 
 /*(************************************************************************************************************************************************ 
 *---------------------------------------------------- INCOME VARIABLES / VARIABLES DE INGRESO ------------------------------------------------

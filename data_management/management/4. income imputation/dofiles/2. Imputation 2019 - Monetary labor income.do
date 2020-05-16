@@ -50,7 +50,7 @@ clear all
 
 	global forimp "$datapath\data_management\output\for imputation"
 	global pathoutexcel "$dopath\data_management\management\4. income imputation\output"
-	global numberofimpruns 30
+	global numberofimpruns 2
 */
 ********************************************************************************
 
@@ -124,7 +124,7 @@ clear all
 		lassoregress log_ila_m $xvar1 if log_ila_m>0 & log_ila_m!=. & ocup_o_rtarecibenilamon==1 & recibe_ingresolab_mon!=0, numfolds(10)
 		display e(varlist_nonzero)
 		global lassovars = e(varlist_nonzero)
-		
+
 	** Vselect
 		* Se puede usar R2adjustado como criterio. Ojo, no se puede poner variable como factor variables 
 		* return - rpret list

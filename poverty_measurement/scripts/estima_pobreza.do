@@ -203,7 +203,7 @@ gen lp_ofi_ppp = lp_ofi / ppp11 / ipc*ipc11 / 30.42
 //cleaning
 cap drop lp_ofi le_ofi 
 cap drop extremo_new extremo_ofi
-cap drop pobre_19 pobre_32 pobre_55 pobre_new pobre_ofi pobreza_new pobreza_ofi
+cap drop pobre_new pobre_ofi pobreza_new pobreza_ofi
 cap drop obs max_obs lp_19_ready lp_32_ready lp_55_ready *_ppp
 
 replace pobre =. if hogarsec ==1

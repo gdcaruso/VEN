@@ -78,6 +78,13 @@ label def 	relacion_comp 	1 "Head" 2 "Spouse/Partner" 3 "Son/Daughter/Stepson/St
 							5 "Son/Daughter in law, father/mother in law" 6 "Mother/Father" 7 "Brother/Sister" 8 "Brother in law" ///
 							9 "Nephew" 10 "Other family" 11 "Other non-family" 12 "Domestic service"
 label values relacion_comp relacion_comp
+label var    gedad1          "Age groups: 2=[15,24], 3=[25,40], 4=[41,64]"
+label define gedad1 1 "[0,14]" 2 "[15,24]" 3 "[25,40]" 4 "[41,64]" 5 "[65+]"
+label values gedad1 gedad1
+
+label var    grupo_edad          "Age groups (10ys each)"
+label def grupo_edad 1 "[0-9]" 2 "[10-19]" 3 "[20-29]" 4 "[30-39]" 5 "[40-49]" 6 "[50-59]" 7 "[60-69]" 8 "[70-79]" 9 "[80+]"
+label value grupo_edad grupo_edad
 label var	hombre 			"Gender (Male?)"
 label def 	hombre 			0 "Female" 1 "Male"
 label values hombre hombre
@@ -3079,6 +3086,11 @@ label var clap_cuando "When was the last time that the 'Bolsa-Caja' CLAP arrived
 	
 	*** Extreme poverty identifier
 	label var pobre_extremo "Extreme poverty identifier"
+	
+	label variable pobre_19usd "Poverty identifier: income less that 1.9usd a day ppp2011"
+	label variable pobre_32usd "Poverty identifier: income less that 3.2usd a day ppp2011"
+	label variable pobre_32usd "Poverty identifier: income less that 5.5usd a day ppp2011"
+
 
 /*(************************************************************************************************************************************************ 
 *---------------------------------------------------- INCOME VARIABLES / VARIABLES DE INGRESO ------------------------------------------------

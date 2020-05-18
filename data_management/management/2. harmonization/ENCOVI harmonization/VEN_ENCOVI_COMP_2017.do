@@ -15,45 +15,40 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-/*
-	    * User 1: Trini
+    * User 1: Trini
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 			
 		if $juli {
+				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
 				global rootpath "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-<<<<<<< HEAD:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_2017.do
-				global rootpath2 "C:\Users\WB563583\Github\VEN"
-=======
->>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_COMP_2017.do
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-<<<<<<< HEAD:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_2017.do
 				global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
 				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
                 global rootpath2 "C:\Users\wb550905\Github\VEN" 
-=======
+
 		}
 		if $male   {
 				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
                	global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
->>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_COMP_2017.do
 		}
 
 global dataofficial "$rootpath\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
@@ -63,7 +58,7 @@ global data2016 "$dataofficial\ENCOVI 2016\Data"
 global data2017 "$dataofficial\ENCOVI 2017\Data"
 global data2018 "$dataofficial\ENCOVI 2018\Data"
 global pathout "$rootpath\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018"
-*/
+
 
 ********************************************************************************
 
@@ -665,10 +660,11 @@ opaisemig_* razonemig_*  razonemigot_* ///
 	replace emp70=. if emp70==99
 	*-- Generate variable
 	clonevar hogar_emig = emp70
+	replace hogar_emig = 0 if emp70==2 
 	*-- Label variable
 	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
 	*-- Label values
-	label def house_emig 1 "Yes" 2 "No"
+	label def house_emig 1 "Yes" 0 "No"
 	label value hogar_emig house_emig
 
 *--------- Number of Emigrants from the household
@@ -972,61 +968,34 @@ opaisemig_* razonemig_*  razonemigot_* ///
    *--------- Other Reasons for leaving the country
  /*  Reason (emp77ot):9a. Cuál fue el motivo por el cual X se fue (Otros)*/
   	*-- Given that the maximum number of emigrantes per household is 5
-	*-- We will have 5 variables with names
+	*-- We will have 5 variaot_`i'=="98"
+	forval i=1/5 {
+	replace emp77ot_cod`i'=. if emp77ot_cod`i'==99
+	replace emp77ot_cod`i'=. if emp77ot_cod`i'==98
+	*-- Generate variable
+	clonevar razonemigot_`i' = emp77ot_cod`i'
+	*-- Label variable
+	label var razonemigot_`i' "Why X emigrated (Other reasons)"
+	*-- Cross check
+	tab razonemigot_`i' hogar_emig
+	*label def 1 "" 2 "" 3 
+	} 
+
+/*(*****************bles with names
 	forval i = 1/5{
 	*-- Rename main variable 
 	rename emp77ot`i' emp77ot_`i'
 	*-- Label original variable
 	label var emp77ot_`i' "9a. Cuál fue el motivo por el cual X se fue (Otros)"
 	*-- Standarization of missing values
-	replace emp77ot_`i'="." if emp77ot_`i'=="98"
-	replace emp77ot_`i'="." if emp77ot_`i'=="99"
-	*-- Generate variable
-	gen razonemigot_`i' = emp77ot_`i'
-	*-- Label variable
-	label var razonemigot_`i' "Why X emigrated (Other reasons)"
-	*-- Cross check
-	tab razonemigot_`i' hogar_emig
-	} 
-
-/*(************************************************************************************************************************************************* 
+	replace emp77ot_`i'="." if emp77
+******************************************************************************************************************************** 
 *----------------------------------- XII: FOOD CONSUMPTION / CONSUMO DE ALIMENTO --------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global foodcons_ENCOVI clap /*clap_cuando*/
+global foodcons_ENCOVI  
 	
- *--------- 'Caja CLAP' (In kind-transfer)
- /* 65. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?*/
-*-- Check values
-	tab mp65, mi
-	*-- Standarization of missing values
-	replace mp65=. if mp65==99
-	*-- Generate variable
-	clonevar clap = mp65
-	replace clap = 0 if mp65==2
-	*-- Label variable
-	label var clap "Has the houselhold received the 'CLAP'"
-	*-- Label values 
-	label def clap 1 "Yes" 2 "No"
-	label value clap clap
-
-		
-*--------- 'Caja CLAP' (In kind-transfer): Frequency
- /* 61. ¿CON QUÉ FRECUENCIA LES LLEGA LA BOLSA/CAJA DEL CLAP? 
-
-*-- Check values
-	tab mp66, mi
-	*-- Standarization of missing values
-	replace mp66=. if mp66==99
-	*-- Generate variable
-	clonevar clap_cuando = mp66
-	*-- Label variable
-	label var clap_cuando "How often the houselhold received the 'CLAP'"
-	*-- Label values 
-	label def clap_cuando 1 "Cada mes" 2 "Cada 2 meses" ///
-	3 "No hay periodicidad" 98 "NA"  
-	label value clap_cuando clap_cuando */ 
-
+ 
 /*
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.7: Variables Salud ---------------------------------------------------------------
@@ -1551,7 +1520,7 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 
 
 *--------- Receive 'Mision' or social program
- /* (mmhp62):62. EN EL PRESENTE (2018),
+ /* (mmhp62):62. EN EL PRESENTE (2017),
  ¿… RECIBE O ES BENEFICIARIO DE ALGUNA MISIÓN O PROGRAMA SOCIAL?
  */
 	*-- Check values
@@ -1564,10 +1533,11 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	label value mmhp62 mmhp62
 	*-- Generate variable
 	clonevar beneficiario= mmhp62
+	replace beneficiario=0 if mmhp62==2
 	*-- Label variable
 	label var beneficiario "In 2017: do you receive a 'Mision' or social program"
 	*-- Label values	
-	label def beneficiario  1 "Yes" 2 "No" 						  	
+	label def beneficiario  1 "Yes" 0 "No" 						  	
 	label value beneficiario beneficiario
 
 
@@ -1634,7 +1604,6 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	tab mp64, mi
 	*-- Standarization of missing values
 	replace mp64=. if mp64==.
-	/* MA: there was a problem here
 	*-- Generate variable
 	clonevar carnet_patria = mp64
 	*-- Label variable
@@ -1642,7 +1611,7 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	*-- Label values 
 	label def carnet_patria 1 "Yes" 2 "No"
 	label value carnet_patria carnet_patria
-	*/
+	
 
  *--------- 'Carnet patria' Not obtained: Reasons
 	*-- Check values
@@ -1650,13 +1619,11 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	*-- Standarization of missing values
 	replace mp64pqn="." if mp64pqn=="98"
 	replace mp64pqn="." if mp64pqn=="99"
-	/* MA: there was a problem here
-	
 	*-- Generate variable
-	clonevar carnet_patria_no = mp64pqn
+	gen carnet_patria_no = mp64pqn
 	*-- Label variable
 	label var carnet_patria_no "Why not obtained the 'Carnet Patria'"
-	*/
+	
 	
  *--------- 'Caja CLAP' (In kind-transfer)
  /* 65. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?*/

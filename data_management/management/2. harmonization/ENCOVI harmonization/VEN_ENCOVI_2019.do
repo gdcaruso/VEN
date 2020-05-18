@@ -231,14 +231,14 @@ clonevar npers_gasto_comp=s3q4 if s3q4!=. & s3q4!=.a
 *************************************************************************************************************************************************)*/
 global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 
-* Country identifier: country
+* Country identifier: 	pais
 	gen pais = "VEN"
 
-* Year identifier: year
+* Year identifier: 		ano
 	capture drop year
 	gen ano = 2019
 
-* Survey identifier: survey
+* Survey identifier: 	encuesta
 	gen encuesta = "ENCOVI - 2019"
 
 * Household identifier: id

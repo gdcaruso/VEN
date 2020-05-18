@@ -682,6 +682,35 @@ restore
 collapse (max) gpcf gpcf_* share*, by(interview__key interview__id)
 
 
+**************ARREGLO AD HOC DE GERMÁN ÚLTIMO MOMENTO**************************
+		*Replace outliers after P95
+			*Food
+			summ gpcf_food , detail
+			gen gpcf_food_p95=gpcf_food
+			replace gpcf_food_p95=r(p95) if gpcf_food>r(p95) 
+
+			*Non-Food
+			summ gpcf_housing , detail
+			gen gpcf_housing_p95=gpcf_housing
+			replace gpcf_housing_p95=r(p95) if gpcf_housing>r(p95) 
+
+			summ gpcf_other , detail
+			gen gpcf_other_p95=gpcf_other
+			replace gpcf_other_p95=r(p95) if gpcf_other>r(p95) 
+
+			gen gpcf_nonfood_p95 = gpcf_housing_p95 + gpcf_other_p95
+
+			*Total Exp
+			gen gpcf_p95= gpcf_nonfood_p95 + gpcf_food_p95
+
+		*Drop old variables and rename
+			drop gpcf- share_other
+
+			foreach v in gpcf_food gpcf_housing gpcf_other gpcf_nonfood gpcf{ 
+			rename `v'_p95 `v'
+			}
+*******************************************************************************
+
 
 save "$datapath\poverty_measurement\output\winsored_expenditure_hh_level.dta", replace
 

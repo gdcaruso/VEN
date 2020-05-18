@@ -15,6 +15,7 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
+/*
 	    * User 1: Trini
 		global trini 0
 		
@@ -29,16 +30,14 @@ Note:
 		
 			
 		if $juli {
-				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
 				global rootpath2 "C:\Users\WB563583\Github\VEN" 
-
 		}
 	    if $lauta {
-				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
+				
 		}
 		if $trini   {
-				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+		
 		}
 		if $male   {
 				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
@@ -52,7 +51,7 @@ global data2016 "$dataofficial\ENCOVI 2016\Data"
 global data2017 "$dataofficial\ENCOVI 2017\Data"
 global data2018 "$dataofficial\ENCOVI 2018\Data"
 global pathout "$rootpath2\data_management\output\cleaned"
-
+*/
 ********************************************************************************
 
 /*===============================================================================

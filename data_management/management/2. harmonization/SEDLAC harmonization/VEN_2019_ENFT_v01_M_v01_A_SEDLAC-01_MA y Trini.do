@@ -49,6 +49,7 @@ Note:
 // Set output data path
 *Inputs
 global merged "$datapath\data_management\output\merged"
+global pathaux "$dopath\data_management\management\2. harmonization\aux_do"
 *Outputs
 global cleaned "$datapath\data_management\output\cleaned"
 */
@@ -84,7 +85,7 @@ local vr       "01"     // version renta
 *Generate unique household identifier by strata
 use "$merged\household.dta", clear
 tempfile household_hhid
-sort combined_id, stable
+sort combined_id, stable // Instead of "bysort", to make sure we keep order
 by combined_id: gen hh_by_combined_id = _n
 save `household_hhid'
 
@@ -92,10 +93,10 @@ save `household_hhid'
 use "$merged\individual.dta", clear
 merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
-* I drop those who do not collaborate in the survey
+* Dropping those who do not collaborate in the survey
 drop if colabora_entrevista==2
 
-*Obs: the is 1 observation which does not merge. Maybe they are people who started to answer but then stopped answering
+*Obs: Obs: there was 1 obs. which does not merge (should not have been approved by headquarters as it was an empty interview. We deleted it in the "ad-hoc" cleaning part)
 
 *Change names to lower cases
 rename _all, lower
@@ -118,14 +119,17 @@ rename _all, lower
 	**Variables id_hh, hhid, id_str were generated for the listing, we shouldn't use them to generate id
 	
 	*combined_id concatenates 5 variables: entidad, municipio, parroquia, centro poblado, segmento
+	
 	*It has 11 or 12 characters, we add 0 to the ones which have 11 so they are all the same length
-	replace combined_id = "0"+combined_id if substr(combined_id, 1,1)==string(entidad) & length(combined_id)==11 
-	*Obs: when uploading the data, ENSURE ANNONIMITY (because combined_id makes families identifiable) 
+	*replace combined_id = "0"+combined_id if substr(combined_id, 1,1)==string(entidad) & length(combined_id)==11 
+		// Note: we stopped doing this because some 11-numbered combined_id's became the same as other 12-numbered combined-id's when adding the 0 in front of them
+		
 	tostring hh_by_combined_id, replace
 	*Up to 10 hh by combined_id
 	replace hh_by_combined_id = "0"+hh_by_combined_id if length(hh_by_combined_id)==1
-	gen id = combined_id + hh_by_combined_id 
-	
+	gen id = combined_id + hh_by_combined_id
+	*Obs: when uploading the data, ensure annonimity (however, we concluded that "id" does not make families identifiable)
+		
 * Component identifier: com
 	** ENCOVI 2018 used "lin" (número de linea) which seems to be a created variable
 	
@@ -145,12 +149,12 @@ rename _all, lower
 			label define hombre 1 "Masculino" 0 "Femenino"
 			label value hombre hombre
 		* Name
-			clonevar nombre = s6q1
+			gen nombre = s6q1
 		*Random var
 		sort interview__key interview__id quest edad hombre nombre, stable
 		set seed 123
 		generate z = runiform()
-		sort z 
+		sort z, stable
 		*Sorting
 		gsort id_numeric -edad z
 		egen min =  min(_n), by(id)
@@ -159,7 +163,7 @@ rename _all, lower
 	gen com  = _n + min + 1
 		drop z min
 	
-	duplicates report id com //verification
+	duplicates report id com //verification: ok, no surplus
 
 * Relation to the head:	relacion
 /* Categories of the new harmonized variable:
@@ -186,7 +190,7 @@ rename _all, lower
 		12 = No pariente
 		13 = Servicio Domestico
 */
-clonevar relacion_en = s6q2
+clonevar relacion_en = s6q2 if s6q2!=. & s6q2!=.a
 gen     relacion = 1		if  relacion_en==1
 replace relacion = 2		if  relacion_en==2
 replace relacion = 3		if  relacion_en==3  | relacion_en==4
@@ -209,6 +213,7 @@ label value relacion relacion
 	gen `uno' = 1
 	sort id, stable
 	egen miembros = sum(`uno') if hogarsec==0 & relacion_en!=., by(id)
+
 
 *** Weights/Factor de ponderacion: pondera
 	* 171 individuals and 53 households do not have weights assigned as they were in the "Listado Remoto"
@@ -263,6 +268,11 @@ label value relacion relacion
 * Unidad Primaria de Muestreo: psu  
 gen psu = combined_id
 
+	/* Checking there are no problem in the identification of households using "id"
+	sort id, stable
+	by id: egen dosjefes = total(relacion_en) if relacion_en==1
+	br if dosjefes==2
+	*/
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
@@ -1595,6 +1605,8 @@ compress
 *************************************************************************************************************************************************)*/
 
 sort id com, stable
+
+drop if interview__key=="16-35-68-66" // Don't know why/how this all-missing variable keeps on appearing
 
 order pais ano encuesta id com pondera pondera_hh strata psu relacion relacion_en hombre edad gedad1 jefe conyuge hijo nro_hijos hogarsec hogar presec miembros casado soltero estado_civil raza lengua ///
 region_est1 region_est2 region_est3 cen lla ceo zul and nor capital urbano migrante migra_ext migra_rur anios_residencia migra_rec ///

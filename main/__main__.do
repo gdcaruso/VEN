@@ -141,6 +141,7 @@ do "$povmeasure\__main__pobreza.do"
 creating separate dataset for variables to merge with SEDLAC version
 ==============================================================================*/
 
+global output "$datapath\poverty_measurement\output"
 use "$output\ENCOVI_2019_postpobreza.dta", replace
 
 	keep interview__key interview__id com miembro__id ///
@@ -154,8 +155,8 @@ use "$output\ENCOVI_2019_postpobreza.dta", replace
 	itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ///
 	ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m ///
 	itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m ///
-	inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee  pipcf dipcf ///
-	piea qiea ipc11 ppp11 ipcf_cpi11 ipcf_ppp11  pipcf dipcf  piea qiea ipc11 ppp11 ipcf_cpi11 ipcf_ppp11
+	inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee ///
+	pipcf dipcf piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 
 
 save "$pathaux\Variables to merge with SEDLAC.dta", replace
 
@@ -206,7 +207,7 @@ save "$outSEDLAC\VEN_2019_ENCOVI_SEDLAC-01_English labels.dta", replace
 clear all
 
 /*==============================================================================
-Additional database with Expenditure Data and consumption
+Adding expenditure and consumption data to ENCOVI 2019 database
 ==============================================================================*/
 
 global expendiscript "$dopath\expenditure\script"

@@ -15,41 +15,33 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-
-    * User 1: Trini
+/*
+		* User 1: Trini
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0 
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
-			
 		if $juli {
-				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
 				global rootpath "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
+				global rootpath2 "C:\Users\WB563583\Github\VEN" 
 		}
 	    if $lauta {
-				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
+				
 		}
 		if $trini   {
-				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
+	
 		}
 		if $male   {
 				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
-                global rootpath2 "C:\Users\wb550905\Github\VEN" 
-
-		}
-		if $male   {
-				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
-               	global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
+                global rootpath2 "C:\Users\WB550905\Github\VEN" 
 		}
 
 global dataofficial "$rootpath\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
@@ -58,9 +50,8 @@ global data2015 "$dataofficial\ENCOVI 2015\Data"
 global data2016 "$dataofficial\ENCOVI 2016\Data"
 global data2017 "$dataofficial\ENCOVI 2017\Data"
 global data2018 "$dataofficial\ENCOVI 2018\Data"
-global pathout "$rootpath\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018"
-
-
+global pathout "$rootpath2\data_management\output\cleaned"
+*/
 ********************************************************************************
 
 /*===============================================================================
@@ -1194,8 +1185,8 @@ capture label drop hombre
 capture label drop nivel
 include "$aux_do\cuantiles.do"
 *include "$aux_do\do_file_aspire.do"
-include "$aux_do\do_file_1_variables.do"
-include "$aux_do\do_file_2_variables.do"
+*include "$aux_do\do_file_1_variables.do" // Generated in the whole SEDLAC harmonization and then merged here by main.do
+*include "$aux_do\do_file_2_variables.do" // Generated in the whole SEDLAC harmonization and then merged here by main.do
 include "$aux_do\labels.do"
 compress
 

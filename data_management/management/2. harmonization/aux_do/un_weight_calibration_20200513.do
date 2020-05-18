@@ -94,9 +94,9 @@ local old=`r(N)'*`r(mean)'
 dis "`old'"
 
 * un pop== 28,435,943
-local new=28435943
+local newpop=28435943
 
-local un_factor=`new'/`old'
+local un_factor=`newpop'/`old'
 
 gen new_pondera_un=new_pondera*`un_factor'
 
@@ -121,7 +121,7 @@ dis "`old2'"
 	local hogarestotales = `poblatotal'/`miembrosporhh' // 8536633
 	display `hogarestotales'
 
-local hh_factor=`new'/`old2'
+local hh_factor=`hogarestotales'/`old2'
 
 gen new_pondera_hh=pondera_hh*`hh_factor'
 

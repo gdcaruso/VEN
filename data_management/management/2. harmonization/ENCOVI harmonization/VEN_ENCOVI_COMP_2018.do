@@ -684,10 +684,11 @@ volvioemig_* volvioanoemig_* volviomesemig_* miememig_* numeroemig_*
 	replace emp62=. if emp62==99
 	*-- Generate variable
 	clonevar hogar_emig = emp62
+	replace hogar_emig=0 if emp62==2
 	*-- Label variable
 	label var hogar_emig "During last 5 years: any person who live/lived in the household left the country" 
 	*-- Label values
-	label def house_emig 1 "Yes" 2 "No"
+	label def house_emig 1 "Yes" 0 "No"
 	label value hogar_emig house_emig
 
 *--------- Number of Emigrants from the household
@@ -1713,7 +1714,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global socialprog_ENCOVI  beneficiario mision_1 mision_2 mision_3 carnet_patria clap
+global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria clap
 
 
 
@@ -1871,7 +1872,10 @@ global socialprog_ENCOVI  beneficiario mision_1 mision_2 mision_3 carnet_patria 
 	label def clap_cuando 1 "Cada dos o tres semanas" 2 "Cada mes" ///
 						  3 "Cada dos meses" 4 "No hay periodicidad" 
 	label value clap_cuando clap_cuando
-
+	*-- Comparable variable
+	*gen clap_cuando_comp=1 if clap_cuando==1 | clap_cuando==2 
+	*replace clap_cuando_comp=2 if 
+	*1 "At least once a month (or more)"
 
 /*
 

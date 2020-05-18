@@ -15,46 +15,41 @@ Output:			sedlac do-file template
 Note: 
 =============================================================================*/
 ********************************************************************************
-/*
-	   	* User 1: Trini
+
+    * User 1: Trini
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
-				
+			
+			
 		if $juli {
-<<<<<<< HEAD:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_2015.do
 				global rootpath1 "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
-				global rootpath2 "C:\Users\wb563583\Github\VEN" 
-
-=======
+				global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
 				global rootpath "C:\Users\WB563583\WBG\Christian Camilo Gomez Canon - ENCOVI"
->>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_COMP_2015.do
 		}
 	    if $lauta {
 				global rootpath "C:\Users\lauta\Desktop\worldbank\analisis\ENCOVI"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\WBG\Christian Camilo Gomez Canon - ENCOVI"
-<<<<<<< HEAD:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_2015.do
 				global rootpath2 "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
 		}
 		if $male   {
 				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
                 global rootpath2 "C:\Users\wb550905\Github\VEN" 
-=======
+
 		}
 		if $male   {
 				global rootpath "C:\Users\WB550905\WBG\Christian Camilo Gomez Canon - ENCOVI"
                	global pathdo "C:\Users\wb550905\Github\VEN\data_management\management\2. harmonization\ENCOVI harmonization"
->>>>>>> 10da4bc669849f75c9f78a7c9008e85e2550734c:data_management/management/2. harmonization/ENCOVI harmonization/VEN_ENCOVI_COMP_2015.do
 		}
 
 global dataofficial "$rootpath\ENCOVI 2014 - 2018\Data\OFFICIAL_ENCOVI"
@@ -64,7 +59,7 @@ global data2016 "$dataofficial\ENCOVI 2016\Data"
 global data2017 "$dataofficial\ENCOVI 2017\Data"
 global data2018 "$dataofficial\ENCOVI 2018\Data"
 global pathout "$rootpath\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018"
-*/
+
 
 ********************************************************************************
 
@@ -617,6 +612,109 @@ label def razon_dejo_est_comp 1 "Terminó los estudios" 2 "Escuela distante" 3 "
 label value razon_dejo_est_comp razon_dejo_est_comp
 
 
+*(*********************************************************************************************************************************************** 
+*---------------------------------------------------------- : Social Programs ----------------------------------------------------------
+***********************************************************************************************************************************************)*/	
+global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria clap
+
+
+
+*--------- Receive 'Mision' or social program
+ /* (psp68):62. EN EL PRESENTE (2018),
+ ¿… RECIBE O ES BENEFICIARIO DE ALGUNA MISIÓN O PROGRAMA SOCIAL?
+ */
+	*-- Check values
+	tab psp68, mi
+	*-- Standarization of missing values
+	replace psp68=. if psp68==99
+	*-- Label values
+	label def psp68  1 "Si" 2 "No" 						  	
+	label value psp68 psp68
+	*-- Generate variable
+	clonevar beneficiario= psp68
+	replace beneficiario=0 if psp68==2
+	*-- Label variable
+	label var beneficiario "In 2015: do you receive a 'Mision' or social program"
+	*-- Label values	
+	label def beneficiario  1 "Yes" 0 "No" 						  	
+	label value beneficiario beneficiario
+
+
+*--------- Which type of 'Mision'
+ /* 63. ¿PUEDE IDENTIFICAR CUÁL MISIÓN O PROGRAMA SOCIAL RECIBE ACTUALMENTE? 
+ (selecciones hasta tres)
+ 
+ Each person can chose three programs:
+	 Variable 1: ¿Puede identificar cuál misión o programa social recibe actualmente?: Misión 1
+	(psp69m1)
+	 Variable 2: ¿Puede identificar cuál misión o programa social recibe actualmente?: Misión 2
+	(psp69m2) 
+	 Variable 3: ¿Puede identificar cuál misión o programa social recibe actualmente?: Misión 3
+	(psp69m3)
+	 
+	 Categories:
+				1. Alimentación/Mercal
+				2. Barrio Adentro
+				3. Milagro
+				4. Sonrisa
+				5. Robinson
+				6. Ribas
+				7. Sucre
+				8. Saber y Trabajo, Vuelvan Caras y/o Ché Guevara
+				9. G. M. Vivienda y/o Barrio Tricolor
+				10. Casa Bien Equipada
+				11. Madres del Barrio
+				12. Hijos de Venezuela
+				13. Negra Hipólita
+				14. Amor Mayor
+				15. Identidad
+				16. Otra
+				98. NA
+				99. NS/NR
+ */
+
+	forval i = 1/3{
+	*-- Standarization of missing values
+	replace psp69m`i'=. if psp69m`i'==99
+	*-- Generate variable
+	clonevar mision_`i' = psp69m`i' 
+	*-- Label variable
+	label var mision_`i' "Name of the social program: Mision `i'"
+	*-- Label values 
+	label def mision_`i' 1 "Alimentación/Mercal" 2 "Barrio Adentro" 3 "Milagro" ///
+					     4 "Sonrisa" 5 "Robinson" 6 "Ribas" 7 "Sucre" ///
+						 8 "Saber y Trabajo, Vuelvan Caras y/o Ché Guevara" ///
+						 9 "G. M. Vivienda y/o Barrio Tricolor" 10 "Casa Bien Equipada" ///
+						11 "Madres del Barrio" 12 "Hijos de Venezuela" 13 "Negra Hipólita" ///
+						14 "Amor Mayor"	15 "Identidad" 16 "Otra" 98 "NA"
+	label value mision_`i' mision_`i'
+	*-- Check values
+	tab mision_`i' beneficiario, mi 
+	}
+
+
+	
+ *--------- 'Carnet patria' 
+ /* 64. ¿SE HA SACADO USTED EL CARNET DE LA PATRIA?
+				1. Sí
+				2. No. Indique por qué no:  */
+
+	*-- Check values
+	gen carnet_patria=.
+	*-- Label variable
+	label var carnet_patria "Has at least one member of the houselhold obtained the 'Carnet Patria'"
+
+	
+ *--------- 'Caja CLAP' (In kind-transfer)
+ /* 65. ¿EN ESTE HOGAR HAN ADQUIRIDO LA BOLSA/CAJA DEL CLAP?*/
+*-- Check values
+	gen clap = .
+	*-- Label variable
+	label var clap "Has the houselhold received the 'CLAP'"
+
+		
+
+
 /*
 /*(************************************************************************************************************************************************ 
 *------------------------------------------------------------- 1.7: Variables Salud ---------------------------------------------------------------
@@ -1110,8 +1208,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI
-keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI 
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2015_COMP.dta", replace
 

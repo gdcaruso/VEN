@@ -4548,20 +4548,20 @@ gen agegroup=1 if edad<=14 & edad!=.
 	cap label def agegroup 1 "[0-14]" 2 "[15-24]" 3 "[25-34]" 4 "[35-44]" 5 "[45-54]" 6 "[55-64]" 7 "[65+]"
 	cap label value agegroup agegroup
 
-foreach p in pondera /*new_pondera new_pondera_un*/ {
+*	Population
 	
-	*	Population
-
+	foreach p in /*1*/ pondera {
+	
 		*National
 		sum uno [w=`p']
 		
 		*Regional
 		sort region_est1, stable
-		tabstat uno [w=`p'], by(region_est1)
+		tabstat uno [w=`p'], by(region_est1) stat(sum)
 		
 		*Departments
 		sort entidad, stable
-		tabstat uno [w=`p'], by(entidad)
+		tabstat uno [w=`p'], by(entidad) stat(sum)
 		
 		*Gender
 		tab hombre [w=`p'], mi
@@ -4572,38 +4572,29 @@ foreach p in pondera /*new_pondera new_pondera_un*/ {
 		
 		* Education - no tenemos años promedio, pero tenemos max nivel alcanzado
 		*tab nivel_educ [w=`p'], mi
-		
-		* Tamaño promedio del hogar
-		sum miembros [w=`p']
-		sum miembros [w=pondera_hh] if relacion_en==1
-		
-		sort region_est1, stable
-		tabstat miembros [w=`p'], by(region_est1)
-		*by region_est1: sum miembros [w=pondera_hh] if relacion_en==1, detail
-		sort entidad, stable
-		tabstat miembros [w=`p'], by(entidad)
-		*by entidad: sum miembros [w=pondera_hh] if relacion_en==1, detail
 	
+		* Tamaño promedio del hogar
+			sum miembros [w=`p']
 	}
-		*	Households
-		sum uno [w=pondera_hh], detail	
+	
+*	Households
+	
+foreach p in /*1*/ pondera_hh {
+	
+	* National
+		sum uno [w=`p'], detail	// 8.5 M de hogares
 		
-	/* NOT: Checking population estimates with pondera_hh
+	* Tamaño promedio del hogar
+		sum miembros [w=`p'] if relacion_en==1
 		
-	*	Population
-		gen pondera_hhind = pondera_hh * miembros
-		*National
-		sum uno [w=pondera_hhind] if relacion_en==1, detail 	// 24.9 M de personas
-		*Regional
 		sort region_est1, stable
-		by region_est1: sum uno [w=pondera_hhind] if relacion_en==1, detail
-		*Departments
-		sort entidad, stable
-		by entidad: sum uno [w=pondera_hhind] if relacion_en==1, detail 
+		tabstat miembros [w=`p'] if relacion_en==1, by(region_est1)
 		
-		drop pondera_hhind
-	*/
-		drop uno 	
+		sort entidad, stable
+		tabstat miembros [w=`p'] if relacion_en==1, by(entidad)
+}
+
+	drop uno 
 		
 *(************************************************************************************************************************************************ 
 *---------------------------------------------------------------- 1.1: linea pobreza  ------------------------------------------------------------

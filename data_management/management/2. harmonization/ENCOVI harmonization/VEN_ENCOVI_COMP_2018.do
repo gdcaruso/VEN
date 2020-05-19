@@ -1705,7 +1705,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria clap
+global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria carnet_patria_no clap
 
 
 
@@ -1798,10 +1798,11 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	*-- Generate variable
 	clonevar carnet_patria = mp59
 	replace carnet_patria = 0 if mp59==2
+	replace carnet_patria = . if mp59==99
 	*-- Label variable
 	label var carnet_patria "Has at least one member of the houselhold obtained the 'Carnet Patria'"
 	*-- Label values 
-	label def carnet_patria 1 "Yes" 2 "No"
+	label def carnet_patria 1 "Yes" 0 "No"
 	label value carnet_patria carnet_patria
 	
  *--------- 'Carnet patria' Not obtained: Reasons

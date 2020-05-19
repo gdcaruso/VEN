@@ -20,13 +20,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -1507,7 +1507,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 *(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria clap
+global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria carnet_patria_no clap
 
 
 
@@ -1598,10 +1598,12 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	replace mp64=. if mp64==.
 	*-- Generate variable
 	clonevar carnet_patria = mp64
+	replace carnet_patria = 0 if mp64==2
+	replace carnet_patria = . if mp64==99
 	*-- Label variable
 	label var carnet_patria "Has at least one member of the houselhold obtained the 'Carnet Patria'"
 	*-- Label values 
-	label def carnet_patria 1 "Yes" 2 "No"
+	label def carnet_patria 1 "Yes" 0 "No"
 	label value carnet_patria carnet_patria
 	
 

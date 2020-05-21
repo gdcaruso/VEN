@@ -1514,7 +1514,7 @@ label def	sector_encuesta		1 "Agriculture, livestock, fishing, hunting and relat
 								9 "Public administration and defense, education, health, social assistance, art, entertainment, embassies" 10 "Other service activities such as repairs, cleaning, hairdressing, funeral and domestic service"
 label values  sector_encuesta sector_encuesta
 label var  	categ_ocu  	"In your work you work as..."
-label def	categ_ocu	1 "Employee or worker in the public sector" 3 "Employee or worker in a private company" 5 "Employer or employer" ///
+label def	categ_ocu	1 "Employee or worker in the public sector" 3 "Employee or worker in a private company" 5 "Employer" ///
 						6 "Self-employed worker" 7 "Member of cooperatives" 8 "Paid / unpaid family helper" 9 "Domestic service"
 label values categ_ocu categ_ocu
 label var  	hstr_ppal  			"How many hours did you work last week in your main occupation?"
@@ -3083,13 +3083,23 @@ label var clap_cuando "When was the last time that the 'Bolsa-Caja' CLAP arrived
 	
 	*** Poverty identifier
 	label var pobre "Poverty identifier"
+	label define pobre 		 	 0 "Not poor" 1 "Poor"
+	label values pobre pobre
 	
 	*** Extreme poverty identifier
 	label var pobre_extremo "Extreme poverty identifier"
+	label define pobre_extremo 		 	 0 "Not extreme poor" 1 "Extreme poor"
+	label values pobre_extremo pobre_extremo
 	
 	label variable pobre_19 "Poverty identifier: income less that 1.9usd a day ppp2011"
+	label define pobre_19 		 	 0 "Not poor (1.9 line)" 1 "Poor (1.9 line)"
+	label values pobre_19 pobre_19
 	label variable pobre_32 "Poverty identifier: income less that 3.2usd a day ppp2011"
+	label define pobre_32 		 	 0 "Not poor (3.2 line)" 1 "Poor (3.2 line)"
+	label values pobre_32 pobre_32
 	label variable pobre_55 "Poverty identifier: income less that 5.5usd a day ppp2011"
+	label define pobre_55 		 	 0 "Not poor (5.5 line)" 1 "Poor (5.5 line)"
+	label values pobre_55 pobre_55
 
 
 /*(************************************************************************************************************************************************ 

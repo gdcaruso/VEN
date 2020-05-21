@@ -1802,7 +1802,7 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	*-- Label variable
 	label var carnet_patria "Has at least one member of the houselhold obtained the 'Carnet Patria'"
 	*-- Label values 
-	label def carnet_patria 1 "Yes" 0 "No"
+	label def carnet_patria 1 "Yes" 0 "No", replace
 	label value carnet_patria carnet_patria
 	
  *--------- 'Carnet patria' Not obtained: Reasons

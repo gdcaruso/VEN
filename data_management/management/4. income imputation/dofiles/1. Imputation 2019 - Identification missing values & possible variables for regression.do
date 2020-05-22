@@ -201,9 +201,9 @@ sort interview_month quintil, stable
 				
 			* Ingreso no laboral monetario (local) excepto jubilación/pension, segun si recibieron en el último MES
 				gen recibe_ingresonolab_mes = .
-				replace recibe_ingresonolab_mes = 1 if (inla_pens_dsa==1 | inla_beca_pub==1 | inla_beca_pri==1 | inla_ayuda_pu==1 | inla_ayuda_pr==1 | inla_ayuda_fa==1 | inla_asig_men==1 | inla_otros==1)
+				replace recibe_ingresonolab_mes = 1 if (inla_pens_dsa==1 | inla_beca_pub==1 | inla_beca_pri==1 | inla_ayuda_pu==1 | inla_ayuda_pr==1 | inla_ayuda_fa==1 | inla_asig_men==1 | inla_otros==1 | inla_petro==1)
 					// Recibió ingreso monetario no laboral en algún concepto en el último mes
-				replace recibe_ingresonolab_mes = 0 if (inla_pens_dsa==0 & inla_beca_pub==0 & inla_beca_pri==0 & inla_ayuda_pu==0 & inla_ayuda_pr==0 & inla_ayuda_fa==0 & inla_asig_men==0 & inla_otros==0) 
+				replace recibe_ingresonolab_mes = 0 if (inla_pens_dsa==0 & inla_beca_pub==0 & inla_beca_pri==0 & inla_ayuda_pu==0 & inla_ayuda_pr==0 & inla_ayuda_fa==0 & inla_asig_men==0 & inla_otros==0 & inla_petro==0) 
 					// No recibió ingreso laboral monetario en ningún concepto mensual
 				* Problem: income from abroad (s9q29a_3 to _9) are measured on a yearly basis, not monthly as the others.
 			
@@ -244,8 +244,8 @@ sort interview_month quintil, stable
 		
 			* Jubilaciones/Pensiones (locales), segun si recibieron en el ultimo MES
 				gen		recibe_ingresopenjub_mes = .
-				replace	recibe_ingresopenjub_mes = 1 if (inla_pens_soi==1 | inla_pens_vss==1 | inla_jubi_emp==1	| inla_petro==1) // Recibió pensión/jubilación en algún concepto en el último mes
-				replace recibe_ingresopenjub_mes = 0 if (inla_pens_soi==0 & inla_pens_vss==0 & inla_jubi_emp==0 & inla_petro==0) // No recibió pensión/jubilación en ningún concepto mensual
+				replace	recibe_ingresopenjub_mes = 1 if (inla_pens_soi==1 | inla_pens_vss==1 | inla_jubi_emp==1) // Recibió pensión/jubilación en algún concepto en el último mes
+				replace recibe_ingresopenjub_mes = 0 if (inla_pens_soi==0 & inla_pens_vss==0 & inla_jubi_emp==0) // No recibió pensión/jubilación en ningún concepto mensual
 				* Problem: income from abroad (s9q29a_3 to _9) are measured on a yearly basis, not monthly as the others.
 			
 			*Ingreso no laboral monetario (proveniente del exterior), segun si recibieron en el ultimo AÑO

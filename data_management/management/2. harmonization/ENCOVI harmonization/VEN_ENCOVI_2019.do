@@ -3629,8 +3629,10 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 *---------------------------------------------------------- 1.9: Income Variables ----------------------------------------------------------
 *****************************************************************************************************************************************)*/
 
-global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro
+global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro ///
+c_sso_cant_bolfeb c_rpv_cant_bolfeb c_spf_cant_bolfeb c_aca_cant_bolfeb c_sps_cant_bolfeb c_otro_cant_bolfeb d_sso_cant_bolfeb d_spf_cant_bolfeb d_isr_cant_bolfeb d_cah_cant_bolfeb d_cpr_cant_bolfeb d_rpv_cant_bolfeb d_otro_cant_bolfeb
 
+	
 * Check for negative variables
 	forvalues i = 1(1)12 {	
 	tab s9q19a_`i' if s9q19a_`i'<0
@@ -3705,7 +3707,47 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
 			cap replace s9q19a`i'_bolfeb = s9q19a`i'*`tc4mes4' 	* `deflactor4' 	if interview_month==4 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a 
 	}
-		
+	
+	local incomevar20 _1 _2 _3 _4 _5 _6
+	foreach i of local incomevar20 {
+
+		* Bolívares 
+			gen c`i'_bolfeb = s9q20a`i' 					* `deflactor11'  if interview_month==11 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor12'	if interview_month==12 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor1'	if interview_month==1 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor2' 	if interview_month==2 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor3'	if interview_month==3 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor4' 	if interview_month==4 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+		* Dólares
+			replace c`i'_bolfeb = s9q20a`i' * `tc2mes11' * `deflactor11' 	if interview_month==11 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc2mes2' 	* `deflactor2' 	if interview_month==2 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a 
+			cap replace c`i'_bolfeb = s9q20a`i' *`tc2mes4'	* `deflactor4' 	if interview_month==4 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+		* Euros
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes2'	* `deflactor2' 	if interview_month==2 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			cap replace c`i'_bolfeb = s9q20a`i'	*`tc3mes4'* `deflactor4' if interview_month==4 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+		* Colombianos
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes2'	* `deflactor2' 	if interview_month==2 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			cap replace c`i'_bolfeb = s9q20a`i'*`tc4mes4' 	* `deflactor4' 	if interview_month==4 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+	}
+	
+	rename c_1_bolfeb c_sso_cant_bolfeb
+	rename c_2_bolfeb c_rpv_cant_bolfeb
+	rename c_3_bolfeb c_spf_cant_bolfeb
+	rename c_4_bolfeb c_aca_cant_bolfeb
+	rename c_5_bolfeb c_sps_cant_bolfeb
+	rename c_6_bolfeb c_otro_cant_bolfeb
+	
 	local incomevar21 _1 _2 _3 _4 _5 _6 _7 _8 _9
 	foreach i of local incomevar21 {
 		* Bolívares
@@ -3737,6 +3779,46 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes3'	* `deflactor3'	if  interview_month==3 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
 			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes4'* `deflactor4' if  interview_month==4 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a 
 		}
+
+	local incomevar22 _1 _2 _3 _4 _5 _6 _7
+	foreach i of local incomevar22 {
+
+		* Bolívares 
+			gen d`i'_bolfeb = s9q22a`i' 					* `deflactor11'  if interview_month==11 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor12'	if interview_month==12 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor1'	if interview_month==1 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor2' 	if interview_month==2 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor3'	if interview_month==3 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor4' 	if interview_month==4 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+		* Dólares
+			replace d`i'_bolfeb = s9q22a`i' * `tc2mes11' * `deflactor11' 	if interview_month==11 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc2mes2' 	* `deflactor2' 	if interview_month==2 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a 
+			cap replace d`i'_bolfeb = s9q22a`i' *`tc2mes4'	* `deflactor4' 	if interview_month==4 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+		* Euros
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes2'	* `deflactor2' 	if interview_month==2 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			cap replace d`i'_bolfeb = s9q22a`i'	*`tc3mes4'* `deflactor4' if interview_month==4 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+		* Colombianos
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes2'	* `deflactor2' 	if interview_month==2 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			cap replace d`i'_bolfeb = s9q22a`i'*`tc4mes4' 	* `deflactor4' 	if interview_month==4 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+	}
+		rename d_1_bolfeb d_sso_cant_bolfeb
+		rename d_2_bolfeb d_spf_cant_bolfeb
+		rename d_3_bolfeb d_isr_cant_bolfeb
+		rename d_4_bolfeb d_cah_cant_bolfeb
+		rename d_5_bolfeb d_cpr_cant_bolfeb
+		rename d_6_bolfeb d_rpv_cant_bolfeb
+		rename d_7_bolfeb d_otro_cant_bolfeb
 
 	local incomevar23456 23 24 25 26
 	foreach i of local incomevar23456 {
@@ -3928,12 +4010,15 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			* Obs: First line is for the first not missing one to add up, second line is for the next ones to add up (same later for employers and self-employed)
 			* Obs: The last parenthesis controls for cases where they say they were paid in a certain money, but don't say how much (same later for employers and self-employed)
 	}
+		/*
 		gen ingresoslab_monpe = . 	// Those who received payment in Petro
 		replace ingresoslab_monpe = s9q19_petromonto 	if s9q19_petro==1 & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19_petro!=. & s9q19_petro!=.a)	// Al final no usamos esto
 		gen ingresoslab_monpe_dummy = .
 		replace ingresoslab_monpe_dummy = 1 	if ingresoslab_monpe>=0 & ingresoslab_monpe!=.
-		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
-		gen ingresoslab_monpe_bolfeb  = ingresoslab_monpe_dummy	* 30 * 73460.1238 		if ingresoslab_monpe_dummy==1
+		*/
+		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30 
+		gen ingresoslab_monpe_bolfeb  = im_petro * 30 * 73460.1238 		if im_petro==1
+		replace im_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation)
 	
 	*For employers (s9q15==5)
 		replace ingresoslab_mon_local = ingresoslab_mon_local + s9q23a_bolfeb 	if ingresoslab_mon_local!=. & s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
@@ -4114,7 +4199,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 			* s9q28__1==1 // Pensión de incapacidad, orfandad, sobreviviente
 			* s9q28__2==1 // Pensión de vejez por el seguro social
 			* s9q28__3==1 // Jubilación por trabajo
-			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
 		*Transferencias estatales // itrane_o_m 
 			* s9q28__5==1 // Beca o ayuda escolar pública 
 			* s9q28__7==1 // Ayuda de instituciones públicas
@@ -4138,6 +4222,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		* Ingresos no laborales extraordinarios
 			* s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord
 			* s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord
+			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
 	* Imputaciones: inla_otro
 
   
@@ -4151,9 +4236,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 
 	s9q28a_* // Monto recibido
 	s9q28b_* // Moneda
-	
-	s9q28_petro // Recibió petro
-	s9q28_petromonto // Monto recibido
 	
 	s9q29a__5==1 // Recibe pensión o jubilacion del exterior
 	s9q29b__5 // Monto que recibe del exterior por su pensión o jubilación
@@ -4176,21 +4258,9 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		replace ijubi_m_bolfeb = ijubi_m_bolfeb + s9q29b_5_bolfeb / 12 	if ijubi_m_bolfeb!=. & (s9q29b_5!=. & s9q29b_5!=.a)
 		replace ijubi_m_bolfeb = s9q29b_5_bolfeb / 12 					if ijubi_m_bolfeb==. & (s9q29b_5!=. & s9q29b_5!=.a)
 	
-	*Petro "currency"
-		gen ijubi_mpetro=.
-		replace ijubi_mpetro = ijubi_mpetro + s9q28_petromonto 	if ijubi_mpetro!=. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
-		replace ijubi_mpetro = s9q28_petromonto 				if ijubi_mpetro==. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
-
-		gen ijubi_mpetro_dummy=.
-		replace ijubi_mpetro_dummy = 1 	if ijubi_mpetro>=0 & ijubi_mpetro!=.
-			
-		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
-		gen ijubi_mpe_bolfeb  = ijubi_mpetro_dummy	* 30 * 73460.1238 	if ijubi_mpetro_dummy==1
+	*Obs: before we were adding Petros here but not anymore
 	
-		tab ijubi_mpetro_dummy
-		sum ijubi_mpetro
-			
-	egen ijubi_m = rowtotal(ijubi_m_bolfeb ijubi_mpe_bolfeb), missing
+	gen ijubi_m = ijubi_m_bolfeb
 	sum ijubi_m
                          
 * No monetario	
@@ -4303,13 +4373,36 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		
 ***** V) INGRESOS NO LABORALES EXTRAORDINARIOS 
 
-	gen inla_extraord = .
-	foreach i of numlist 3 8 {
-		replace inla_extraord = inla_extraord + s9q29b_`i'_bolfeb / 12	if inla_extraord!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-		replace inla_extraord = s9q29b_`i'_bolfeb / 12					if inla_extraord==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-		}		
-	sum inla_extraord
+	*s9q28_petro // Recibió petro
+	*s9q28_petromonto // Monto recibido
+	*AND MORE
+	
 
+	gen inla_extraord_sinpetro = .
+	foreach i of numlist 3 8 {
+		replace inla_extraord_sinpetro = inla_extraord_sinpetro + s9q29b_`i'_bolfeb / 12	if inla_extraord_sinpetro!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
+		replace inla_extraord_sinpetro = s9q29b_`i'_bolfeb / 12								if inla_extraord_sinpetro==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
+		}		
+
+	*Petro "cryptocurrency" - It seems to be an exception: www.youtube.com/watch?v=rYcN2LH7QEY&feature=youtu.be
+		/* NOT ANYMORE
+		gen ijubi_mpetro=.
+		replace ijubi_mpetro = ijubi_mpetro + s9q28_petromonto 	if ijubi_mpetro!=. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
+		replace ijubi_mpetro = s9q28_petromonto 				if ijubi_mpetro==. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
+
+		gen ijubi_mpetro_dummy=.
+		replace ijubi_mpetro_dummy = 1 	if ijubi_mpetro>=0 & ijubi_mpetro!=.
+		*/
+			
+		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30
+		gen ijubi_mpe_bolfeb  = inla_petro	* 30 * 73460.1238 	if inla_petro==1
+		replace inla_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation)
+		
+		*tab ijubi_mpetro_dummy
+		*sum ijubi_mpetro
+			
+	egen inla_extraord = rowtotal(inla_extraord_sinpetro ijubi_mpe_bolfeb), missing
+	sum inla_extraord
 	
 ***** IV) OTROS INGRESOS NO LABORALES
 	gen  inla_otro = .

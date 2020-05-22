@@ -17,7 +17,7 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 	}
 	
 *---- From Harmonization and cleaning (auxiliary)
-	   global harmoclean s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb 
+	   global harmoclean s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb /*ijubi_mpe_bolfeb*/ s9q29b_5_bolfeb 
 	   
 *---- Drop globales
 		drop $geoloc $harmoclean

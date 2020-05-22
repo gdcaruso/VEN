@@ -184,8 +184,8 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 				hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_me18_norecursos comepoco_me18_norecursos nocomedia_me18_norecursos comida_trueque
 
 *----XIV: ANTROPOMETRÍA
-		global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
-		
+		global antropo_ENCOVI edad_meses medido razon_nomedido confirma_edad solo_medicion peso peso1 peso2 peso3 altura altura1 altura2 altura3 posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
+
 *----XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES 
 		global shocks_ENCOVI informant_shock evento_* evento_ot imp_evento_* veces_evento_* ano_evento_* ///
 				reaccion_evento_* reaccionot_evento*

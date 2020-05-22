@@ -3284,9 +3284,13 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 *----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
 ************************************************************************************************************************************************)*/
 
-global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
+global antropo_ENCOVI edad_meses medido razon_nomedido confirma_edad solo_medicion peso peso1 peso2 peso3 altura altura1 altura2 altura3 posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
 
 * For children younger than 5 years old
+
+*** Age in months age_months
+	gen edad_meses = age_months
+	label var edad_meses "Edad en meses"
 
 *** Was the child measured?
 	/*s14q1 Fue medido?
@@ -3382,17 +3386,17 @@ global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso alt
 	
 *** Height for age index, calculated by the survey
 	* hfa Índice de altura para la edad
-	replace hfa =. if age_months<=120 & (hfa!=. & hfa!=.a)
+	replace hfa =. if age_months<=120 & (hfa==. & hfa==.a)
 	label var hfa "Height For Age index - Índice de altura para la edad"
 	
 *** Weight for age index, calculated by the survey
 	* wfa Índice de peso para la edad
-	replace wfa =. if age_months<=120 & (wfa!=. & wfa!=.a)
+	replace wfa =. if age_months<=120 & (wfa==. & wfa==.a)
 	label var wfa "Weight For Age index - Índice de peso para la edad"
 	
 *** Weight for height index, calculated by the survey
 	* wfh Índice de peso para la altura
-	replace wfh =. if age_months<=120 & (wfh!=. & wfh!=.a)
+	replace wfh =. if age_months<=120 & (wfh==. & wfh==.a)
 	label var wfh "Weight For Height index - Índice de peso para la altura"
 	
 

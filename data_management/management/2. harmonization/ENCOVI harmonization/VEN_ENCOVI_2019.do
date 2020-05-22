@@ -4020,9 +4020,9 @@ c_sso_cant_bolfeb c_rpv_cant_bolfeb c_spf_cant_bolfeb c_aca_cant_bolfeb c_sps_ca
 		gen ingresoslab_monpe_dummy = .
 		replace ingresoslab_monpe_dummy = 1 	if ingresoslab_monpe>=0 & ingresoslab_monpe!=.
 		*/
-		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30 
-		gen ingresoslab_monpe_bolfeb  = im_petro * 30 * 73460.1238 		if im_petro==1
-		replace im_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation)
+		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30, y lo dividimos por 12 porque es aguinaldo.
+		gen ingresoslab_monpe_bolfeb  = (im_petro * 30 * 73460.1238)/ 12	if im_petro==1
+		replace im_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation) - we will change it later again
 	
 	*For employers (s9q15==5)
 		replace ingresoslab_mon_local = ingresoslab_mon_local + s9q23a_bolfeb 	if ingresoslab_mon_local!=. & s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
@@ -4206,6 +4206,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		*Transferencias estatales // itrane_o_m 
 			* s9q28__5==1 // Beca o ayuda escolar pública 
 			* s9q28__7==1 // Ayuda de instituciones públicas
+			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
 		*Transferencias privadas // itranp_o_m 
 			* s9q28__4==1 // Pensión por divorcio, separación, alimentación
 			* s9q28__6==1 // Beca o ayuda escolar privada
@@ -4226,7 +4227,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		* Ingresos no laborales extraordinarios
 			* s9q29a__8==1 // Transferencias extraordinarias (indemnizaciones por seguro, herencia, ayuda de otros hogares)  //  inla_extraord
 			* s9q29a__3==1 // Indemnizaciones por enfermedad o accidente  //  inla_extraord
-			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
 	* Imputaciones: inla_otro
 
   
@@ -4347,14 +4347,37 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 ****** 9.3.6.2 OTRAS TRANSFERENCIAS ESTATALES******
 * itrane_o_m Ingreso monetario por transferencias estatales diferentes a las transferencias monetarias condicionadas
 
+	*s9q28_petro // Recibió petro 
+	*s9q28_petromonto // Monto recibido
+	*AND MORE
+	
 * Monetarias
 	
-	gen itrane_o_m = .
+	gen itrane_o_m_sinpetro = .
 		
 	foreach i of numlist 5 7 {
-		replace itrane_o_m = itrane_o_m + s9q28a_`i'_bolfeb 	if itrane_o_m!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
-		replace itrane_o_m = s9q28a_`i'_bolfeb 					if itrane_o_m==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
+		replace itrane_o_m_sinpetro = itrane_o_m_sinpetro + s9q28a_`i'_bolfeb 	if itrane_o_m_sinpetro!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
+		replace itrane_o_m_sinpetro = s9q28a_`i'_bolfeb 						if itrane_o_m_sinpetro==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
 	}		
+	
+	*Petro "cryptocurrency" - It seems to be an exception: www.youtube.com/watch?v=rYcN2LH7QEY&feature=youtu.be
+		/* NOT ANYMORE
+		gen ijubi_mpetro=.
+		replace ijubi_mpetro = ijubi_mpetro + s9q28_petromonto 	if ijubi_mpetro!=. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
+		replace ijubi_mpetro = s9q28_petromonto 				if ijubi_mpetro==. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
+
+		gen ijubi_mpetro_dummy=.
+		replace ijubi_mpetro_dummy = 1 	if ijubi_mpetro>=0 & ijubi_mpetro!=.
+		*/
+			
+		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30, y lo dividimos por 12 porque parece que es una cosa de 1 vez en el año.
+		gen itrane_o_m_petro  = (inla_petro	* 30 * 73460.1238) / 12 	if inla_petro==1
+		replace inla_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation) - we will change it later again
+		
+		*tab ijubi_mpetro_dummy
+		*sum ijubi_mpetro
+			
+	egen itrane_o_m = rowtotal(itrane_o_m_sinpetro itrane_o_m_petro), missing
 	sum itrane_o_m
 	
 	
@@ -4375,37 +4398,14 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	sum itrane_ns
 	
 		
-***** V) INGRESOS NO LABORALES EXTRAORDINARIOS 
+***** V) INGRESOS NO LABORALES EXTRAORDINARIOS 	
 
-	*s9q28_petro // Recibió petro
-	*s9q28_petromonto // Monto recibido
-	*AND MORE
-	
-
-	gen inla_extraord_sinpetro = .
+	gen inla_extraord = .
 	foreach i of numlist 3 8 {
-		replace inla_extraord_sinpetro = inla_extraord_sinpetro + s9q29b_`i'_bolfeb / 12	if inla_extraord_sinpetro!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
-		replace inla_extraord_sinpetro = s9q29b_`i'_bolfeb / 12								if inla_extraord_sinpetro==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
+		replace inla_extraord = inla_extraord + s9q29b_`i'_bolfeb / 12	if inla_extraord!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
+		replace inla_extraord = s9q29b_`i'_bolfeb / 12					if inla_extraord==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
 		}		
 
-	*Petro "cryptocurrency" - It seems to be an exception: www.youtube.com/watch?v=rYcN2LH7QEY&feature=youtu.be
-		/* NOT ANYMORE
-		gen ijubi_mpetro=.
-		replace ijubi_mpetro = ijubi_mpetro + s9q28_petromonto 	if ijubi_mpetro!=. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
-		replace ijubi_mpetro = s9q28_petromonto 				if ijubi_mpetro==. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
-
-		gen ijubi_mpetro_dummy=.
-		replace ijubi_mpetro_dummy = 1 	if ijubi_mpetro>=0 & ijubi_mpetro!=.
-		*/
-			
-		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30
-		gen ijubi_mpe_bolfeb  = inla_petro	* 30 * 73460.1238 	if inla_petro==1
-		replace inla_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation)
-		
-		*tab ijubi_mpetro_dummy
-		*sum ijubi_mpetro
-			
-	egen inla_extraord = rowtotal(inla_extraord_sinpetro ijubi_mpe_bolfeb), missing
 	sum inla_extraord
 	
 ***** IV) OTROS INGRESOS NO LABORALES
@@ -4726,7 +4726,7 @@ hogarsec interview_month interview__id interview__key quest labor_status relab s
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-hogarsec interview_month interview__id interview__key quest s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo como_imputa_renta miembro__id // additional
+hogarsec interview_month interview__id interview__key quest s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb /*ijubi_mpe_bolfeb*/ s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo como_imputa_renta miembro__id // additional
 
 drop if interview__key=="16-35-68-66" // Don't know why/how this all-missing variable keeps on appearing
 

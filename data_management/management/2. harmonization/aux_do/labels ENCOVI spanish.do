@@ -824,7 +824,10 @@ label values relab relab
 		label values iext_`i'_mone iext_`i'_mone
 	}
 	
-		
+	label def categ_ocu 	1 "Empleado u obrero en el sector publico" 3 "Empleado u obrero en empresa privada"	5 "Patrono o empleador" 6 "Trabajador por cuenta propia" ///
+							7 "Miembro de cooperativas" 8 "Ayudante familiar remunerado/no remunerado" 9 "Servicio domestico"
+	label values categ_ocu categ_ocu
+	
 ** Shocks
 
 	*Cuáles de los siguientes eventos han afectado a su hogar desde el año 2017?

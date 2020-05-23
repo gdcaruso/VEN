@@ -918,6 +918,7 @@ gen embarazada=.
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
+global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -1145,10 +1146,12 @@ replace contrato = 0 if relab==2 & (contrato_encuesta== 3 | contrato_encuesta==4
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
+*/
 
 * Derecho a percibir una jubilacion: djubila
-gen    djubila = (pp65==1) if relab==2 & (pp65!=98 & pp65!=.) //tomo si realiza aportes a fondo de pension publico o privado
+gen    aporta_pension = (pp65==1) if (pp65!=98 & pp65!=.) //tomo si realiza aportes a fondo de pension publico o privado
 
+/*
 * Seguro de salud ligado al empleo: dsegsale
 gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2 
 
@@ -1197,8 +1200,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
-keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2015_COMP.dta", replace
 

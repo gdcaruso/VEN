@@ -892,6 +892,8 @@ gen deporte = (actividad_fisica >=20) if actividad_fisica!=.
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
+global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa inactivo pea
+
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
         1 = Empleador
@@ -1201,6 +1203,7 @@ replace contrato = 0 if relab==2 & (contrato_encuesta== 3 | contrato_encuesta==4
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
+*/
 
 * Derecho a percibir una jubilacion: djubila
 /*APORTE_PENSION (pp62)
@@ -1211,8 +1214,9 @@ gen     ocuperma = (contrato_encuesta==1) if relab==2
 		99 = NS/NR  
 */
 clonevar aporte_pension = pp62 if (pp62!=98 & pp62!=99)
-gen     djubila = (aporte_pension==1 | aporte_pension==2) if  relab==2   
+gen     aporta_pension = (aporte_pension==1 | aporte_pension==2)  
 
+/*
 * Seguro de salud ligado al empleo: dsegsale
 gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2 
 
@@ -1277,7 +1281,7 @@ bro id relacion ipcf tp39 tp45 tp46 tp47 tp47m tp48m pp61*m relab ipatrp_m iasal
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
-keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2016_COMP.dta", replace

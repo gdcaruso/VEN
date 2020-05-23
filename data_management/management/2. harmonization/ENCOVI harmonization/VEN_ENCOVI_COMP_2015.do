@@ -1,5 +1,5 @@
 /*===========================================================================
-Country name:		Venezuela
+Country name:	Venezuela
 Year:			2015
 Survey:			ENCOVI
 Vintage:		01M-01A
@@ -912,9 +912,12 @@ notes fumar: the variable is not completely comparable
 gen actividad_fisica = cep89fh*60+cep89fm if (cep89fh!=98 & cep89fh!=99) & (cep89fm!=98 & cep89fm!=99)
 gen deporte = (actividad_fisica >=20) if actividad_fisica!=.
 gen embarazada=.
+*/
+
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
+
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -964,6 +967,7 @@ replace relab = 2 if (labor_status==1 | labor_status==2) & categ_ocu== 8 & (tp50
 gen relab_s =.
 gen relab_o =.
 
+/*
 * Duracion del desempleo: durades (en meses)
 gen     durades = . 
 notes durades: the survey does not include information to define this variable
@@ -1148,19 +1152,13 @@ gen    djubila = (pp65==1) if relab==2 & (pp65!=98 & pp65!=.) //tomo si realiza 
 * Seguro de salud ligado al empleo: dsegsale
 gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2 
 
-* Derecho a aguinaldo: aguinaldo
-gen     aguinaldo = .
-notes aguinaldo: the survey does not include information to define this variable
-
 * Derecho a vacaciones pagas: dvacaciones
 gen     dvacaciones = tp53v==1 if ((tp53v!=98 & tp53v!=99) & relab==2) 
 
 * Sindicalizado: sindicato
 gen     sindicato = tp53s==1 if ((tp53s!=98 & tp53s!=99) & relab==2) 
 
-* Programa de empleo: prog_empleo //si el individuo está trabajando en un plan de empleo publico
-gen     prog_empleo = .
-notes prog_empleo: the survey does not include information to define this variable
+*/
 
 * Empleado:	ocupado
 rename  ocupado ocupado_encuesta
@@ -1175,7 +1173,7 @@ gen     inactivo= inrange(labor_status,5,9)
 * Poblacion economicamte activa: pea	
 gen     pea = (ocupado==1 | desocupa ==1)
 
-
+/*
 /*=================================================================================================================================================
 					2: Preparacion de los datos: Variables de segundo orden
 =================================================================================================================================================*/

@@ -851,29 +851,11 @@ notes fumar: the variable is not completely comparable
 */
 gen deporte =.
 notes razon_no_remedio: the survey does not include information to define this variable
+*/
 
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
-
-*Chequeo
-	gen error = 0
-	replace error = 1 if (tp47==3 | tp47==4 | tp47==5 | tp47==6 | tp47==7 | tp47==8 | tp47==9 | tp47==99 | tp47==98 ) & (tp49!=98 & tp50!=98 & tp51!=98 & tp51m!=98 & tp52!=98 & tp53s!=98 & tp53c!=98 & tp53p!=98 & tp53v!=98 & tp53h!=98 & tp53ss!=98 & tp53g!=98 & tp53ph!=98 & tp54!=998 & tp55!=98 & tp56!=98 & tp57!=98 & tp58!=98 )
-	tab error
-	drop error
-	*OK
-
-	gen error = 0
-	replace error = 1 if (tp54>30 & tp54<990) & (tp55!=98 & tp56!=98 & tp57!=98 & tp58!=98 )
-	tab error
-	drop error
-	*OK
-
-	gen error = 0
-	replace error = 1 if (tp56==2 | tp56==99 | tp57==1) & (tp58!=98 )
-	tab error
-	drop error
-	*OK
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -923,6 +905,7 @@ replace relab = 5 if (labor_status==3 | labor_status==4)
 gen relab_s =.
 gen relab_o =.
 
+/*
 * Duracion del desempleo: durades (en meses)
 /* DILIGENCIAS_BT (tp41): ¿Cuando fue la ultima vez que hizo diligencias para buscar trabajo? // No esta en 2014
 */
@@ -1088,6 +1071,7 @@ replace contrato = 0 if relab==2 & (contrato_encuesta== 3 | contrato_encuesta==4
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if (relab==2 & contrato_encuesta!=.)
 
+
 /* Derecho a percibir una jubilacion: djubila
  ¿Realiza aportes para fondos de pensiones? (pp65)
            1  Si
@@ -1109,19 +1093,13 @@ gen      djubila = (pp65==1) if relab==2 & (pp65!=98 & pp65!=.)
  */
 gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2
 
-* Derecho a aguinaldo: aguinaldo
-gen     aguinaldo = .
-notes aguinaldo: the survey does not include information to define this variable
-
 * Derecho a vacaciones pagas: dvacaciones
 gen     dvacaciones = tp53v==1 if ((tp53v!=98 & tp53v!=99) & relab==2) 
 
 * Sindicalizado: sindicato
 gen     sindicato = tp53s==1 if ((tp53s!=98 & tp53s!=99) & relab==2) 
 
-* Programa de empleo: prog_empleo //si el individuo está trabajando en un plan de empleo publico
-gen     prog_empleo = .
-notes prog_empleo: the survey does not include information to define this variable
+*/
 
 * Empleado:	ocupado
 gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
@@ -1135,7 +1113,7 @@ gen     inactivo= inrange(labor_status,5,9)
 * Poblacion economicamte activa: pea	
 gen     pea = (ocupado==1 | desocupa ==1)
 
-
+/*
 /*=================================================================================================================================================
 					2: Preparacion de los datos: Variables de segundo orden
 =================================================================================================================================================*/

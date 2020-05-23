@@ -1200,6 +1200,7 @@ notes fumar: the survey does not include information to define this variable
 */
 gen    deporte = .
 notes deporte: the survey does not include information to define this variable
+*/
 
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
@@ -1292,6 +1293,7 @@ replace relab = 5 if (labor_status==3 | labor_status==4)
 gen     relab_s =.
 gen     relab_o =.
 
+/*
 * Duracion del desempleo: durades (en meses)
 /* DILIGENCIAS_BT (tmhp38): ¿Cuando fue la ultima vez que hizo diligencias para buscar trabajo?
         1 = 1 a 3 meses
@@ -1487,9 +1489,7 @@ notes dvacaciones: the survey does not include information to define this variab
 * Sindicalizado: sindicato
 gen     sindicato = tmhp47as==1 if ((tmhp47as!=98 & tmhp47as!=99) & relab==2)
 
-* Programa de empleo: prog_empleo //si el individuo esta trabajando en un plan de empleo publico
-gen     prog_empleo = .
-notes prog_empleo: the survey does not include information to define this variable
+*/
  
 * Empleado:	ocupado
 gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo

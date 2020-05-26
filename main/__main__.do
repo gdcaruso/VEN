@@ -20,7 +20,6 @@ Note:
 clear all
 
 // Define rootpath according to user
-
 	    * User 1: Trini
 		global trini 0
 		
@@ -28,10 +27,10 @@ clear all
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -39,7 +38,9 @@ clear all
 		}
 	    if $lauta {
 				global dopath "C:\Users\wb563365\GitHub\VEN"
-				global datapath "C:\Users\wb563365\DataEncovi\"
+				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
+				global outSEDLAC "C:\Users\wb563365\GitHub\VEN\petrosensitivity\"
+				global outENCOVI "C:\Users\wb563365\GitHub\VEN\petrosensitivity\"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
@@ -75,6 +76,9 @@ global pathaux "$harmonization\aux_do"
 //exchange rate input
 global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 
+//petro globals
+global ipetro = 12
+global jpetro = 12
 
 
 /*==============================================================================
@@ -119,7 +123,7 @@ imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 global forimp "$datapath\data_management\output\for imputation"
 global pathoutexcel "$datapath\data_management\output\post imputation"
-global numberofimpruns 2
+global numberofimpruns 30
 
 //run ENCOVI imputation
 do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
@@ -230,4 +234,40 @@ drop _merge
 save "$outENCOVI\ENCOVI_2019_English labels.dta", replace
 
 clear all
+ 
+//      Poverty |
+//  identifier |      Freq.     Percent        Cum.
+// ------------+-----------------------------------
+//    Not poor |  1,267,133        4.46        4.46
+//        Poor | 27,164,688       95.54      100.00
+// ------------+-----------------------------------
+//       Total | 28,431,821      100.00
+//
+// . sum lp_extrema
+//
+//     Variable |        Obs        Mean    Std. Dev.       Min        Max
+// -------------+---------------------------------------------------------
+//   lp_extrema |     33,086     2247048           0    2247048    2247048
+//
+// . sum lp_moderada
+//
+//     Variable |        Obs        Mean    Std. Dev.       Min        Max
+// -------------+---------------------------------------------------------
+//  lp_moderada |     33,086     5500606           0    5500606    5500606
+//
+// . tab extrema [w=pondera]
+// variable extrema not found
+// r(111);
+//
+// . tab pobre_extremo  [w=pondera]
+// (frequency weights assumed)
+//
+//  Extreme poverty |
+//       identifier |      Freq.     Percent        Cum.
+// -----------------+-----------------------------------
+// Not extreme poor |  6,473,077       22.77       22.77
+//     Extreme poor | 21,958,744       77.23      100.00
+// -----------------+-----------------------------------
+//            Total | 28,431,821      100.00
+
  

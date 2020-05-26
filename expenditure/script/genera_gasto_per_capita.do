@@ -116,7 +116,7 @@ use "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_
 			local deflactor1 `indice2'/`indice1'
 			local deflactor2 `indice2'/`indice2'
 			local deflactor3 `indice2'/`indice3'
-			local deflactor4 `indice2'/`indice3' //fix when we have aprils data
+			local deflactor4 `indice2'/`indice3' // this are surveys started on march, in most cases
 // 			local deflactor11 1
 // 			local deflactor12 1
 // 			local deflactor1 1
@@ -129,7 +129,7 @@ use "$datapath\data_management\input\inflacion_canasta_alimentos_diaria_precios_
 			local monedas 1 2 3 4 // 1=bolivares, 2=dolares, 3=euros, 4=colombianos
 			local meses 1 2 3 4 11 12 // 11=nov, 12=dic, 1=jan, 2=feb, 3=march
 			
-			use "$datapath\data_management\input\exchenge_rate_price.dta", clear //( MALE ACA - QUÉ HAGO?)
+			use "$datapath\data_management\input\exchenge_rate_price.dta", clear //
 			
 			destring mes, replace
 			foreach i of local monedas {

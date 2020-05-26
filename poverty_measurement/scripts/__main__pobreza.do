@@ -109,7 +109,7 @@ run "$povmeasure\precios_implicitos.do"
 run "$povmeasure\genera_costo_canasta.do"
 
 // //estimates orshansky
-run "$povmeasure\estima_orshansky.do"
+run "$povmeasure\estima_orshansky2.do" //changed to a general approach
 
 // //estimates poverty headcount
 do "$povmeasure\estima_pobreza.do"

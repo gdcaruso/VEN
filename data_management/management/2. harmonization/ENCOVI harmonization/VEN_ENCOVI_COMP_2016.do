@@ -886,9 +886,13 @@ notes fumar: the variable is not completely comparable
 gen actividad_fisica = cep70fh*60+cep70fm if (cep70fh!=98 & cep70fh!=99) & (cep70fm!=98 & cep70fm!=99)
 gen deporte = (actividad_fisica >=20) if actividad_fisica!=.
 
+*/
+
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
+
+global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -932,6 +936,7 @@ replace relab = 4 if (labor_status==1 | labor_status==2) & (categ_ocu== 8) //unp
 replace relab = 2 if (labor_status==1 | labor_status==2) & (categ_ocu== 8 & tp47m>0 & tp47m!=98 & tp47m!=99) //paid family worker
 replace relab = 5 if (labor_status==3 | labor_status==4) //unemployed
 
+/*
 * Duracion del desempleo: durades (en meses)
 /* DILIGENCIAS_BT (tp41): ¿Cuando fue la ultima vez que hizo diligencias para buscar trabajo?
         1 = Entre 1 y 6 meses
@@ -1198,6 +1203,7 @@ replace contrato = 0 if relab==2 & (contrato_encuesta== 3 | contrato_encuesta==4
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
+*/
 
 * Derecho a percibir una jubilacion: djubila
 /*APORTE_PENSION (pp62)
@@ -1208,14 +1214,11 @@ gen     ocuperma = (contrato_encuesta==1) if relab==2
 		99 = NS/NR  
 */
 clonevar aporte_pension = pp62 if (pp62!=98 & pp62!=99)
-gen     djubila = (aporte_pension==1 | aporte_pension==2) if  relab==2   
+gen     aporta_pension = (aporte_pension==1 | aporte_pension==2)  
 
+/*
 * Seguro de salud ligado al empleo: dsegsale
 gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2 
-
-* Derecho a aguinaldo: aguinaldo
-gen     aguinaldo = .
-notes aguinaldo: the survey does not include information to define this variable
 
 * Derecho a vacaciones pagas: dvacaciones
 gen     dvacaciones = tp50v==1 if ((tp50v!=98 & tp50v!=99) & relab==2) 
@@ -1224,9 +1227,7 @@ notes dvacaciones: the survey does not include information to define this variab
 * Sindicalizado: sindicato
 gen     sindicato = tp50s==1 if ((tp50s!=98 & tp50s!=99) & relab==2) 
 
-* Programa de empleo: prog_empleo //si el individuo esta trabajando en un plan de empleo publico
-gen     prog_empleo = .
-notes prog_empleo: the survey does not include information to define this variable
+*/
 
 * Empleado:	ocupado
 gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
@@ -1241,7 +1242,7 @@ gen     inactivo= inrange(labor_status,5,9)
 gen     pea = (ocupado==1 | desocupa ==1)
 
 
-
+/*
 /*=================================================================================================================================================
 					2: Preparacion de los datos: Variables de segundo orden
 =================================================================================================================================================*/
@@ -1280,7 +1281,7 @@ bro id relacion ipcf tp39 tp45 tp46 tp47 tp47m tp48m pp61*m relab ipatrp_m iasal
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
-keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+order $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2016_COMP.dta", replace

@@ -1200,10 +1200,13 @@ notes fumar: the survey does not include information to define this variable
 */
 gen    deporte = .
 notes deporte: the survey does not include information to define this variable
+*/
 
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
+
+global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 
 *Chequeo
 	gen error = 0
@@ -1292,6 +1295,7 @@ replace relab = 5 if (labor_status==3 | labor_status==4)
 gen     relab_s =.
 gen     relab_o =.
 
+/*
 * Duracion del desempleo: durades (en meses)
 /* DILIGENCIAS_BT (tmhp38): ¿Cuando fue la ultima vez que hizo diligencias para buscar trabajo?
         1 = 1 a 3 meses
@@ -1456,6 +1460,7 @@ replace contrato = 0 if relab==2 & (contrato_encuesta== 3 | contrato_encuesta==4
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
+*/
 
 * Derecho a percibir una jubilacion: djubila
 /*APORTE_PENSION (pmhp611,pmhp612,pmhp613,pmhp614,pmhp615)
@@ -1472,8 +1477,9 @@ replace aporte_pension = 2 if pmhp612==2
 replace aporte_pension = 3 if pmhp613==3
 replace aporte_pension = 4 if pmhp614==4
 replace aporte_pension = 5 if pmhp615==5
-gen     djubila = (aporte_pension>=1 & aporte_pension<=4) if  relab==2   
+gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) 
 
+/*
 * Seguro de salud ligado al empleo: dsegsale
 gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2 
 
@@ -1487,9 +1493,7 @@ notes dvacaciones: the survey does not include information to define this variab
 * Sindicalizado: sindicato
 gen     sindicato = tmhp47as==1 if ((tmhp47as!=98 & tmhp47as!=99) & relab==2)
 
-* Programa de empleo: prog_empleo //si el individuo esta trabajando en un plan de empleo publico
-gen     prog_empleo = .
-notes prog_empleo: the survey does not include information to define this variable
+*/
  
 * Empleado:	ocupado
 gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
@@ -1674,8 +1678,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
-keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2017_COMP.dta", replace
 

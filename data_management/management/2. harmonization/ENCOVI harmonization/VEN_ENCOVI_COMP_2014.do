@@ -857,7 +857,7 @@ notes razon_no_remedio: the survey does not include information to define this v
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa inactivo pea
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -897,6 +897,9 @@ global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa
 
 gen labor_status = tp47 if (tp47!=98 & tp47!=99)
 gen categ_ocu = tp50    if (tp50!=98 & tp50!=99)
+replace categ_ocu = 1 if categ_ocu==2
+replace categ_ocu = 3 if categ_ocu==4
+
 gen     relab = .
 replace relab = 1 if (labor_status==1 | labor_status==2) & categ_ocu== 5  //employer 
 replace relab = 2 if (labor_status==1 | labor_status==2) & ((categ_ocu>=1 & categ_ocu<=4) | categ_ocu== 9 | categ_ocu==7) // Employee - Obs: survey's CAPI1 defines the miembro de cooperativas as not self-employed

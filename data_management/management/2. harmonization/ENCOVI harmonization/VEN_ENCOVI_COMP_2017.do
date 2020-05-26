@@ -1206,7 +1206,7 @@ notes deporte: the survey does not include information to define this variable
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa inactivo pea
+global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea
 
 *Chequeo
 	gen error = 0
@@ -1284,6 +1284,9 @@ global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa
 */
 gen labor_status = tmhp36 if (tmhp36!=98 & tmhp36!=99)
 gen categ_ocu = tmhp43    if (tmhp43!=98 & tmhp43!=99)
+replace categ_ocu = 1 if categ_ocu==2
+replace categ_ocu = 3 if categ_ocu==4
+
 gen     relab = .
 replace relab = 1 if (labor_status==1 | labor_status==2) & categ_ocu== 5  //employer 
 replace relab = 2 if (labor_status==1 | labor_status==2) & ((categ_ocu>=1 & categ_ocu<=4) | categ_ocu== 9 | categ_ocu==7) // Employee - Obs: survey's CAPI1 defines the miembro de cooperativas as not self-employed
@@ -1384,6 +1387,7 @@ replace grupo_lab = 7 if relab==4
 gen     categ_lab = .
 replace categ_lab = 1 if grupo_lab>=1 & grupo_lab<=4
 replace categ_lab = 2 if grupo_lab>=5 & grupo_lab<=7
+*/
 
 * Sector de actividad: sector1d (clasificacion CIIU) y sector (10 sectores)
 /*      1 = Agricola, actividades primarias
@@ -1411,6 +1415,8 @@ replace categ_lab = 2 if grupo_lab>=5 & grupo_lab<=7
 	    99 = NS/NR
 */
 clonevar sector_encuesta = tmhp41 if (tmhp41!=98 & tmhp41!=99)
+
+/*
 gen     sector1d = .
 notes sector1d: the survey does not include information to define this variable
 
@@ -1477,7 +1483,7 @@ replace aporte_pension = 2 if pmhp612==2
 replace aporte_pension = 3 if pmhp613==3
 replace aporte_pension = 4 if pmhp614==4
 replace aporte_pension = 5 if pmhp615==5
-gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) 
+gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) if pmhp611!=98 & pmhp612!=98 & pmhp613!=98 & pmhp614!=98 & pmhp615!=98
 
 /*
 * Seguro de salud ligado al empleo: dsegsale

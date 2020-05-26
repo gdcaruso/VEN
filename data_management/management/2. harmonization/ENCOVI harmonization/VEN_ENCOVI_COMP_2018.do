@@ -1433,7 +1433,7 @@ notes deporte: the survey does not include information to define this variable
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa inactivo pea
+global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea
   
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -1469,6 +1469,9 @@ global labor_ENCOVI labor_status categ_ocu relab aporta_pension ocupado desocupa
 */
 gen labor_status = tmhp34 if (tmhp34!=98 & tmhp34!=99)
 gen categ_ocu = tmhp41    if (tmhp41!=98 & tmhp41!=99)
+replace categ_ocu = 1 if categ_ocu==2
+replace categ_ocu = 3 if categ_ocu==4
+
 gen     relab = .
 replace relab = 1 if (labor_status==1 | labor_status==2) & categ_ocu== 5  //employer 
 replace relab = 2 if (labor_status==1 | labor_status==2) & ((categ_ocu>=1 & categ_ocu<=4) | categ_ocu== 9 | categ_ocu==7) // Employee - Obs: survey's CAPI1 defines the miembro de cooperativas as not self-employed
@@ -1593,6 +1596,8 @@ replace categ_lab = 2 if grupo_lab>=5 & grupo_lab<=7
 	    8 = Administración pública, defensa y organismos extraterritoriales
 	    9 = Educacion, salud, servicios personales 
 	    10 = Servicio domestico 
+*/
+
 * SECTOR_ENCUESTA (tmhp39): ¿A que se dedica el negocio, organismo o empresa en la que trabaja?
         1 = Agricultura, ganaderia, pesca, caza y actividades de servicios conexas
 		2 = Explotación de minas y canteras
@@ -1608,6 +1613,8 @@ replace categ_lab = 2 if grupo_lab>=5 & grupo_lab<=7
 	    99 = NS/NR
 */
 clonevar sector_encuesta = tmhp39 if (tmhp39!=98 & tmhp39!=99)
+
+/*
 gen     sector1d = .
 notes sector1d: the survey does not include information to define this variable
 
@@ -1674,7 +1681,7 @@ replace aporte_pension = 2 if pmhp56si==2
 replace aporte_pension = 3 if pmhp56se==3
 replace aporte_pension = 4 if pmhp56so==4
 replace aporte_pension = 5 if pmhp56so==5
-gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4)
+gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) if pmhp56sv!=98 & pmhp56si!=98 & pmhp56se!=98 & pmhp56so!=98 & pmhp56no!=98
 
 /*
 * Seguro de salud ligado al empleo: dsegsale

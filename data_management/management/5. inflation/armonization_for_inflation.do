@@ -82,7 +82,7 @@ run "$pathaux\cuantiles.do"
 /*==================================================================================================================================================
 								1: Data preparation: First-Order Variables
 ==================================================================================================================================================*/
-qui{
+
 			// mute all deflaction
 						local deflactor11 1
 						local deflactor12 1
@@ -3877,7 +3877,7 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 		replace ingresoslab_monpe_dummy = 1 	if ingresoslab_monpe>=0 & ingresoslab_monpe!=.
 		*/
 		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30, y lo dividimos por 12 porque es aguinaldo.
-		gen ingresoslab_monpe_bolfeb  = (im_petro * 30 * 73460.1238)/ 12	if im_petro==1
+		gen ingresoslab_monpe_bolfeb  = (im_petro * 30 * 73460.1238)/ $ipetro	if im_petro==1
 		replace im_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation) - we will change it later again
 
 	*For employers (s9q15==5)
@@ -4227,7 +4227,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		*/
 			
 		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30, y lo dividimos por 12 porque parece que es una cosa de 1 vez en el año.
-		gen itrane_o_m_petro  = (inla_petro	* 30 * 73460.1238) / 12 	if inla_petro==1
+		gen itrane_o_m_petro  = (inla_petro	* 30 * 73460.1238) / $jpetro 	if inla_petro==1
 		replace inla_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation) - we will change it later again
 		
 		*tab ijubi_mpetro_dummy
@@ -4464,7 +4464,7 @@ hogarsec interview_month interview__id interview__key quest labor_status miembro
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
 hogarsec interview_month interview__id interview__key quest labor_status miembros relab s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb /*ijubi_mpe_bolfeb*/ s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo  // additional
-}
+
 
 save "$forinflation\ENCOVI_2019_sinimputar_sindeflactar_parainflacion.dta", replace
 

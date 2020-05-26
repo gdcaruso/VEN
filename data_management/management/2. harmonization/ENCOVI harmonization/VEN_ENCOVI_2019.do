@@ -1362,7 +1362,7 @@ clonevar	razon_no_medico = s8q4 if (s8q4!=. & s8q4!=.a) & (s8q1==1 & s8q3==2)
 
 ***Other
 *Otra
-clonevar	razon_no_medico_o = s8q4_os if s9q4==9
+clonevar	razon_no_medico_o = s8q4_os if s8q4==9
 
 *** Who did you mainly consult to treat the sickness or accident?
 /*	s8q5 ¿A quién consultó principalmente para tratar esta enfermedad síntoma o malestar y/o accidente?
@@ -4021,7 +4021,7 @@ c_sso_cant_bolfeb c_rpv_cant_bolfeb c_spf_cant_bolfeb c_aca_cant_bolfeb c_sps_ca
 		replace ingresoslab_monpe_dummy = 1 	if ingresoslab_monpe>=0 & ingresoslab_monpe!=.
 		*/
 		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30, y lo dividimos por 12 porque es aguinaldo.
-		gen ingresoslab_monpe_bolfeb  = (im_petro * 30 * 73460.1238)/ 12	if im_petro==1
+		gen ingresoslab_monpe_bolfeb  = (im_petro * 30 * 73460.1238)/ $ipetro	if im_petro==1
 		replace im_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation) - we will change it later again
 	
 	*For employers (s9q15==5)
@@ -4371,7 +4371,7 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		*/
 			
 		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30, y lo dividimos por 12 porque parece que es una cosa de 1 vez en el año.
-		gen itrane_o_m_petro  = (inla_petro	* 30 * 73460.1238) / 12 	if inla_petro==1
+		gen itrane_o_m_petro  = (inla_petro	* 30 * 73460.1238) / $jpetro 	if inla_petro==1
 		replace inla_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation) - we will change it later again
 		
 		*tab ijubi_mpetro_dummy

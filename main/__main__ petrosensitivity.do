@@ -81,15 +81,17 @@ global exrate "$datapath\data_management\input\exchenge_rate_price.dta"
 /*==============================================================================
 petro sensitivity
 ==============================================================================*/
-global petro_parameter_wage 1 3 6 12
-global petro_parameter_other 1 3 6 12
-putexcel set "$outENCOVI/petrosensi_22may20.xlsx", replace
+global petro_parameter_wage 1 4 6 12
+global petro_parameter_other 1 4 6 12
+putexcel set "$outENCOVI/petrosensi_24may20.xlsx", replace
 global i = 1
+include "$pathaux\cuantiles.do"
 
-foreach i in $petro_parameter_wage{
-foreach j in $petro_parameter_other{
-
-
+foreach ipetro in $petro_parameter_wage{
+foreach jpetro in $petro_parameter_other{
+qui{
+global ipetro = `ipetro'
+global jpetro = `jpetro'
 /*==============================================================================
  merging data
  ==============================================================================*/
@@ -127,15 +129,15 @@ run "$harmonization\ENCOVI harmonization\VEN_ENCOVI_2019.do"
 /*==============================================================================
 imputation
 ==============================================================================*/
-
+include "$pathaux\cuantiles.do"
 *Specific for imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 global forimp "$datapath\data_management\output\for imputation"
 global pathoutexcel "$datapath\data_management\output\post imputation"
-global numberofimpruns 3
+global numberofimpruns 2
 
 //run ENCOVI imputation
-do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
+run "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
 
 /*==============================================================================
 poverty estimation
@@ -148,7 +150,7 @@ global input "$datapath\poverty_measurement\input"
 global output "$datapath\poverty_measurement\output"
 
 //run poverty estimation
-do "$povmeasure\__main__pobreza.do"
+run "$povmeasure\__main__pobreza.do"
 
 /*==============================================================================
 creating separate dataset for variables to merge with SEDLAC version
@@ -186,14 +188,17 @@ labeling and saving final full databases
 ==============================================================================*/
 
 //run spanish labeling
-do "$pathaux\labels ENCOVI spanish.do"
+run "$pathaux\labels ENCOVI spanish.do"
 
 
-
+putexcel set "$outENCOVI/petrosensi_24may20.xlsx", modify
 putexcel A$i = ("wageparam")
-putexcel B$i = (`i')
+putexcel B$i = (`ipetro')
 putexcel C$i = ("otherparam")
-putexcel D$i = (`j')
+putexcel D$i = (`jpetro')
+}
+di "$ipetro"
+di "$jpetro"
 
 tabstat pobre pobre_extremo [w=pondera], s(mean) save
 global ii = ($i + 2)
@@ -202,8 +207,10 @@ putexcel A$ii = matrix(result)
 global j = ($ii + rowsof(result) + 1)
 
 local orshansky_result = lp_moderada[1]/lp_extrema[1]
+di `orshansky_result'
 putexcel A$j = ("orshansky")
 putexcel B$j = (`orshansky_result')
+
 
 global i = $j + 3
 

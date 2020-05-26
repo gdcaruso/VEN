@@ -3524,10 +3524,9 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	cap rename (s15q2c__`i'_`k') (s15q2c_`i'_`k')
 	*-- Label original variable
 	label var s15q2c_`i'_`k' "2c.Cómo se las arregló su hogar con el choque más reciente?"
-	*-- Standarization of missing values
-	replace s15q2c_`i'_`k'=. if s15q2c_`i'_`k'==.a
 	*-- Generate variable
-	clonevar reaccion_evento_`i'_`k' = s15q2c_`i'_`k'
+	gen reaccion_evento_`i'_`k' = s15q2c_`i'_`k' if s15q2c_`i'_`k'!=. & s15q2c_`i'_`k'!=.a
+	replace reaccion_evento_`i'_`k' = 1 if reaccion_evento_`i'_`k'>1 & reaccion_evento_`i'_`k'!=.
 		}
 	}
 	

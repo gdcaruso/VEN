@@ -3585,10 +3585,9 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	cap rename (s15q2c__`i'_`k') (s15q2c_`i'_`k')
 	*-- Label original variable
 	label var s15q2c_`i'_`k' "2c.Cómo se las arregló su hogar con el choque más reciente?"
-	*-- Standarization of missing values
-	replace s15q2c_`i'_`k'=. if s15q2c_`i'_`k'==.a
 	*-- Generate variable
-	clonevar reaccion_evento_`i'_`k' = s15q2c_`i'_`k'
+	gen reaccion_evento_`i'_`k' = s15q2c_`i'_`k' if s15q2c_`i'_`k'!=. & s15q2c_`i'_`k'!=.a
+	replace reaccion_evento_`i'_`k' = 1 if reaccion_evento_`i'_`k'>1 & reaccion_evento_`i'_`k'!=.
 		}
 	}
 	
@@ -3605,27 +3604,27 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	tab reaccionot_evento`i'
 	}
 *-- Label variables
-	label var reaccionot_evento1 "2d. Especifique otro arreglo de su hogar con el reciente 1. Muerte o discapacidad de un miembro adulto del hogar que trabaja"
-	label var reaccionot_evento2 "2d. Especifique otro arreglo de su hogar con el reciente 2. Muerte de alguien que envía remesas a la casa"
-	label var reaccionot_evento3 "2d. Especifique otro arreglo de su hogar con el reciente 3. Enfermedad de la persona con el ingreso más importante del hogar"
-	label var reaccionot_evento4 "2d. Especifique otro arreglo de su hogar con el reciente 4. Pérdida de un contacto importante"
-	label var reaccionot_evento5 "2d. Especifique otro arreglo de su hogar con el reciente 5. Perdida de trabajo"
-	label var reaccionot_evento6 "2d. Especifique otro arreglo de su hogar con el reciente 6. Salida del miembro de la familia que genera ingresos debido a la separación o el divorcio"
-	label var reaccionot_evento7 "2d. Especifique otro arreglo de su hogar con el reciente 7. Salida del miembro de la familia que genera ingresos debido al matrimonio"
-	label var reaccionot_evento8 "2d. Especifique otro arreglo de su hogar con el reciente 8. Fracaso empresarial no agrícola"
-	label var reaccionot_evento9 "2d. Especifique otro arreglo de su hogar con el reciente 9. Robo de cultivos, dinero en efectivo, ganado u otros bienes"
-	label var reaccionot_evento10 "2d. Especifique otro arreglo de su hogar con el reciente 10. Destrucción de cosecha por fuego"
-	label var reaccionot_evento11 "2d. Especifique otro arreglo de su hogar con el reciente 11. Vivienda dañada / demolida"
-	label var reaccionot_evento12 "2d. Especifique otro arreglo de su hogar con el reciente 12. Pocas lluvias que causaron el fracaso de la cosecha"
-	label var reaccionot_evento13 "2d. Especifique otro arreglo de su hogar con el reciente 13. Inundaciones que causaron el fracaso de la cosecha"
-	label var reaccionot_evento14 "2d. Especifique otro arreglo de su hogar con el reciente 14. Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento"
-	label var reaccionot_evento15 "2d. Especifique otro arreglo de su hogar con el reciente 15. Pérdida de propiedad por incendio o inundación"
-	label var reaccionot_evento16 "2d. Especifique otro arreglo de su hogar con el reciente 16. Pérdida de tierra"
-	label var reaccionot_evento17 "2d. Especifique otro arreglo de su hogar con el reciente 17: Muerte de ganado por enfermedad,"
-	label var reaccionot_evento18 "2d. Especifique otro arreglo de su hogar con el reciente 18: Incremento en el precio de los insumos,"
-	label var reaccionot_evento19 "2d. Especifique otro arreglo de su hogar con el reciente 19: Caída en el precio de los productos,"
-	label var reaccionot_evento20 "2d. Especifique otro arreglo de su hogar con el reciente 20: Incremento en el precio de los principales alimentos consumidos,"
-	label var reaccionot_evento21 "2d. Especifique otro arreglo de su hogar con el reciente 21: Secuestro / robo / asalto,"
+	label var reaccionot_evento1 "2d. Especifique otro arreglo del hogar por reciente 1.Muerte o discapacidad de un miembro adulto del hogar que trabaja"
+	label var reaccionot_evento2 "2d. Especifique otro arreglo del hogar por reciente 2.Muerte de alguien que envía remesas a la casa"
+	label var reaccionot_evento3 "2d. Especifique otro arreglo del hogar por reciente 3.Enfermedad de la persona con el ingreso más importante del hogar"
+	label var reaccionot_evento4 "2d. Especifique otro arreglo del hogar por reciente 4.Pérdida de un contacto importante"
+	label var reaccionot_evento5 "2d. Especifique otro arreglo del hogar por reciente 5.Perdida de trabajo"
+	label var reaccionot_evento6 "2d. Especifique otro arreglo del hogar por reciente 6.Salida del miembro de la familia que genera ingresos debido a la separación o el divorcio"
+	label var reaccionot_evento7 "2d. Especifique otro arreglo del hogar por reciente 7.Salida del miembro de la familia que genera ingresos debido al matrimonio"
+	label var reaccionot_evento8 "2d. Especifique otro arreglo del hogar por reciente 8.Fracaso empresarial no agrícola"
+	label var reaccionot_evento9 "2d. Especifique otro arreglo del hogar por reciente 9.Robo de cultivos, dinero en efectivo, ganado u otros bienes"
+	label var reaccionot_evento10 "2d. Especifique otro arreglo del hogar por reciente 10.Destrucción de cosecha por fuego"
+	label var reaccionot_evento11 "2d. Especifique otro arreglo del hogar por reciente 11.Vivienda dañada / demolida"
+	label var reaccionot_evento12 "2d. Especifique otro arreglo del hogar por reciente 12.Pocas lluvias que causaron el fracaso de la cosecha"
+	label var reaccionot_evento13 "2d. Especifique otro arreglo del hogar por reciente 13.Inundaciones que causaron el fracaso de la cosecha"
+	label var reaccionot_evento14 "2d. Especifique otro arreglo del hogar por reciente 14.Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento"
+	label var reaccionot_evento15 "2d. Especifique otro arreglo del hogar por reciente 15.Pérdida de propiedad por incendio o inundación"
+	label var reaccionot_evento16 "2d. Especifique otro arreglo del hogar por reciente 16.Pérdida de tierra"
+	label var reaccionot_evento17 "2d. Especifique otro arreglo del hogar por reciente 17.Muerte de ganado por enfermedad"
+	label var reaccionot_evento18 "2d. Especifique otro arreglo del hogar por reciente 18.Incremento en el precio de los insumos"
+	label var reaccionot_evento19 "2d. Especifique otro arreglo del hogar por reciente 19.Caída en el precio de los productos"
+	label var reaccionot_evento20 "2d. Especifique otro arreglo del hogar por reciente 20.Incremento en el precio de los principales alimentos consumidos"
+	label var reaccionot_evento21 "2d. Especifique otro arreglo del hogar por reciente 21.Secuestro / robo / asalto"
 
 
 	

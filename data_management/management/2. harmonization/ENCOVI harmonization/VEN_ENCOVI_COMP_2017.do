@@ -1200,10 +1200,13 @@ notes fumar: the survey does not include information to define this variable
 */
 gen    deporte = .
 notes deporte: the survey does not include information to define this variable
+*/
 
 /*(************************************************************************************************************************************************* 
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
+
+global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc
 
 *Chequeo
 	gen error = 0
@@ -1281,6 +1284,9 @@ notes deporte: the survey does not include information to define this variable
 */
 gen labor_status = tmhp36 if (tmhp36!=98 & tmhp36!=99)
 gen categ_ocu = tmhp43    if (tmhp43!=98 & tmhp43!=99)
+replace categ_ocu = 1 if categ_ocu==2
+replace categ_ocu = 3 if categ_ocu==4
+
 gen     relab = .
 replace relab = 1 if (labor_status==1 | labor_status==2) & categ_ocu== 5  //employer 
 replace relab = 2 if (labor_status==1 | labor_status==2) & ((categ_ocu>=1 & categ_ocu<=4) | categ_ocu== 9 | categ_ocu==7) // Employee - Obs: survey's CAPI1 defines the miembro de cooperativas as not self-employed
@@ -1292,6 +1298,7 @@ replace relab = 5 if (labor_status==3 | labor_status==4)
 gen     relab_s =.
 gen     relab_o =.
 
+/*
 * Duracion del desempleo: durades (en meses)
 /* DILIGENCIAS_BT (tmhp38): ¿Cuando fue la ultima vez que hizo diligencias para buscar trabajo?
         1 = 1 a 3 meses
@@ -1335,7 +1342,7 @@ notes   antigue: variable defined for all individuals
 
 * Asalariado en la ocupacion principal: asal
 gen     asal = (relab==2) if (relab>=1 & relab<=4)
-
+*/
 * Tipo de empresa: empresa 
 /*      1 = Empresa privada grande (mas de cinco trabajadores)
         2 = Empresa privada pequena (cinco o menos trabajadores)
@@ -1351,11 +1358,11 @@ gen     asal = (relab==2) if (relab>=1 & relab<=4)
 		98 = No aplica
 		99 = NS/NR
 */
-gen firm_size = tmhp42 if (tmhp42!=98 & tmhp42!=99)
-gen     empresa = 1 if (categ_ocu==3 | categ_ocu==4 | categ_ocu== 9) & (firm_size>=4 & firm_size!=.)
-replace empresa = 2 if (categ_ocu==3 | categ_ocu==4 | categ_ocu== 9) & (firm_size>=1 & firm_size<=3)
-replace empresa = 3 if (categ_ocu==1 | categ_ocu==2)
+gen empresa_enc = tmhp42 if (tmhp42!=98 & tmhp42!=99)
+label define empresa_enc 1 "1 persona" 2 "2 a 4 personas" 3 "5 personas" 4 "6 a 10 personas" 5 "11 a 20 personas" 6 "21 a 100 personas" 7 "100+ personas"
+label value empresa_enc empresa_enc
 
+/*
 * Grupos de condicion laboral: grupo_lab
 /*      1 = Patrones //formal
         2 = Trabajadores asalariados en empresas grandes //formal
@@ -1380,6 +1387,7 @@ replace grupo_lab = 7 if relab==4
 gen     categ_lab = .
 replace categ_lab = 1 if grupo_lab>=1 & grupo_lab<=4
 replace categ_lab = 2 if grupo_lab>=5 & grupo_lab<=7
+*/
 
 * Sector de actividad: sector1d (clasificacion CIIU) y sector (10 sectores)
 /*      1 = Agricola, actividades primarias
@@ -1407,6 +1415,8 @@ replace categ_lab = 2 if grupo_lab>=5 & grupo_lab<=7
 	    99 = NS/NR
 */
 clonevar sector_encuesta = tmhp41 if (tmhp41!=98 & tmhp41!=99)
+
+/*
 gen     sector1d = .
 notes sector1d: the survey does not include information to define this variable
 
@@ -1456,6 +1466,7 @@ replace contrato = 0 if relab==2 & (contrato_encuesta== 3 | contrato_encuesta==4
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
+*/
 
 * Derecho a percibir una jubilacion: djubila
 /*APORTE_PENSION (pmhp611,pmhp612,pmhp613,pmhp614,pmhp615)
@@ -1472,8 +1483,9 @@ replace aporte_pension = 2 if pmhp612==2
 replace aporte_pension = 3 if pmhp613==3
 replace aporte_pension = 4 if pmhp614==4
 replace aporte_pension = 5 if pmhp615==5
-gen     djubila = (aporte_pension>=1 & aporte_pension<=4) if  relab==2   
+gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) if pmhp611!=98 & pmhp612!=98 & pmhp613!=98 & pmhp614!=98 & pmhp615!=98
 
+/*
 * Seguro de salud ligado al empleo: dsegsale
 gen     dsegsale = (afiliado_seguro_salud==3 | afiliado_seguro_salud==4) if relab==2 
 
@@ -1487,9 +1499,7 @@ notes dvacaciones: the survey does not include information to define this variab
 * Sindicalizado: sindicato
 gen     sindicato = tmhp47as==1 if ((tmhp47as!=98 & tmhp47as!=99) & relab==2)
 
-* Programa de empleo: prog_empleo //si el individuo esta trabajando en un plan de empleo publico
-gen     prog_empleo = .
-notes prog_empleo: the survey does not include information to define this variable
+*/
  
 * Empleado:	ocupado
 gen     ocupado = inrange(labor_status,1,2) //trabajando o no trabajando pero tiene trabajo
@@ -1674,8 +1684,8 @@ compress
 *-------------------------------------------------------------- 3.1 Ordena y Mantiene las Variables --------------
 *************************************************************************************************************************************************)*/
 sort id com
-order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
-keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+order  $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
+keep   $id_ENCOVI $control_ent $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $labor_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $socialprog_ENCOVI
 
 save "$pathout\ENCOVI_2017_COMP.dta", replace
 

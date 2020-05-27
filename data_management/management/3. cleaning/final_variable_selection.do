@@ -17,7 +17,7 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 	}
 	
 *---- From Harmonization and cleaning (auxiliary)
-	   global harmoclean s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb 
+	   global harmoclean s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb /*ijubi_mpe_bolfeb*/ s9q29b_5_bolfeb 
 	   
 *---- Drop globales
 		drop $geoloc $harmoclean
@@ -98,7 +98,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 
 *----1.2: Demographic variables  / Variables demográficas
 		global demo_ENCOVI relacion_en relacion_comp hombre edad grupo_edad gedad1 anio_naci mes_naci dia_naci pais_naci residencia resi_estado resi_municipio razon_cambio_resi razon_cambio_resi_o pert_2014 razon_incorp_hh razon_incorp_hh_o ///
-				certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo miembros
+				certificado_naci cedula razon_nocertificado razon_nocertificado_o estado_civil_en estado_civil hijos_nacidos_vivos hijos_vivos anio_ult_hijo mes_ult_hijo dia_ult_hijo miembros hogarsec
 
 *----1.4: Dwelling characteristics / Caracteristicas de la vivienda
 		global dwell_ENCOVI material_piso material_pared_exterior material_techo tipo_vivienda ///
@@ -134,11 +134,11 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 			im_sueldo im_hsextra im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro im_petro ///
 			im_sueldo_cant im_hsextra_cant im_propina_cant im_comision_cant im_ticket_cant im_guarderia_cant im_beca_cant im_hijos_cant im_antiguedad_cant im_transporte_cant im_rendimiento_cant im_otro_cant im_petro_cant ///
 			im_sueldo_mone im_hsextra_mone im_propina_mone im_comision_mone im_ticket_mone im_guarderia_mone im_beca_mone im_hijos_mone im_antiguedad_mone im_transporte_mone im_rendimiento_mone im_otro_mone ///
-			c_sso c_rpv c_spf c_aca c_sps c_otro c_sso_cant c_rpv_cant c_spf_cant c_aca_cant c_sps_cant c_otro_cant c_sso_mone c_rpv_mone c_spf_mone c_aca_mone c_sps_mone c_otro_mone ///
+			c_sso c_rpv c_spf c_aca c_sps c_otro c_sso_cant c_rpv_cant c_spf_cant c_aca_cant c_sps_cant c_otro_cant c_sso_mone c_rpv_mone c_spf_mone c_aca_mone c_sps_mone c_otro_mone c_sso_cant_bolfeb c_rpv_cant_bolfeb c_spf_cant_bolfeb c_aca_cant_bolfeb c_sps_cant_bolfeb c_otro_cant_bolfeb ///
 			inm_comida inm_productos inm_transporte inm_vehiculo inm_estaciona inm_telefono inm_servicios inm_guarderia inm_otro ///
 			inm_comida_cant inm_productos_cant inm_transporte_cant inm_vehiculo_cant inm_estaciona_cant inm_telefono_cant inm_servicios_cant inm_guarderia_cant inm_otro_cant ///
 			inm_comida_mone inm_productos_mone inm_transporte_mone inm_vehiculo_mone inm_estaciona_mone inm_telefono_mone inm_servicios_mone inm_guarderia_mone inm_otro_mone ///
-			d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone ///
+			d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro d_sso_cant d_spf_cant d_isr_cant d_cah_cant d_cpr_cant d_rpv_cant d_otro_cant d_sso_mone d_spf_mone d_isr_mone d_cah_mone d_cpr_mone d_rpv_mone d_otro_mone d_sso_cant_bolfeb d_spf_cant_bolfeb d_isr_cant_bolfeb d_cah_cant_bolfeb d_cpr_cant_bolfeb d_rpv_cant_bolfeb d_otro_cant_bolfeb ///
 			im_patron im_patron_cant im_patron_mone inm_patron inm_patron_cant inm_patron_mone im_indep im_indep_cant im_indep_mone i_indep_mes i_indep_mes_cant i_indep_mes_mone ///
 			g_indep_mes_cant g_indep_mes_mone razon_menoshs razon_menoshs_o deseamashs buscamashs razon_nobusca razon_nobusca_o cambiotr razon_cambiotr razon_cambiotr_o ///
 			aporta_pension pension_IVSS pension_publi pension_priv pension_otro pension_otro_o aporte_pension cant_aporta_pension mone_aporta_pension 
@@ -184,13 +184,13 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 				hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_me18_norecursos comepoco_me18_norecursos nocomedia_me18_norecursos comida_trueque
 
 *----XIV: ANTROPOMETRÍA
-		global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
-		
+		global antropo_ENCOVI edad_meses medido razon_nomedido confirma_edad solo_medicion peso peso1 peso2 peso3 altura altura1 altura2 altura3 posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
+
 *----XV: SHOCKS AFFECTING HOUSEHOLDS / EVENTOS QUE AFECTAN A LOS HOGARES 
 		global shocks_ENCOVI informant_shock evento_* evento_ot imp_evento_* veces_evento_* ano_evento_* ///
 				reaccion_evento_* reaccionot_evento*
 				
-*----1.9: Income Variables 
+*----1.9: Income Variables (in bolívares feb. 2020)
 		rename ingresoslab_bene ila_nm
 		rename ingresoslab_mon_local ila_m_local
 		rename ingresoslab_mon_afuera ila_m_ext
@@ -201,8 +201,7 @@ drop $vars_aux $vars_ident $other $vars_mineq_sinmis $dummy_vars $checks
 *----Más variables de ingreso CEDLAS 
 		global from_cedlas iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ///
 		ijubi_m ijubi_nm /*ijubi_o*/ icap_m icap_nm rem cct itrane_o_m itrane_o_nm itranp_o_m itranp_o_nm itranp_ns ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ///
-		ila ila_m ila_m_local ila_m_ext ila_nm ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_ns itrane_m itran itran_m inla_extraord inla_otro inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-		hogarsec  // additional
+		ila ila_m ila_m_local ila_m_ext ila_nm ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_ns itrane_m itran itran_m inla_extraord inla_otro inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11
 				
 *----Pobreza
 		rename lp_19 lp_19usd

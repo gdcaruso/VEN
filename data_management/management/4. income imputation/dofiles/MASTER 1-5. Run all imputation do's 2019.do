@@ -185,6 +185,10 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		
 		*replace imputed rent_currency
 		cap drop d_renta_imp_b
+		
+	* Bringing back a small ad-hoc we did before to do the imputation
+		replace im_petro=. if quest==1 
+		replace inla_petro=. if quest==1 
 	
 	******************************************
 	/* OUR DOFILE: LABOR & NON-LABOR INCOME */
@@ -395,5 +399,5 @@ save "$cleaned\ENCOVI_2019_pre pobreza.dta", replace
 *** Analyzing imputed data
 ********************************************************************************
 
-run "$impdos\Analysis imputation.do"
+//run "$impdos\Analysis imputation.do"
 

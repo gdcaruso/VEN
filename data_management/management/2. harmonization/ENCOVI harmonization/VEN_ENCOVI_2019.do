@@ -1362,7 +1362,7 @@ clonevar	razon_no_medico = s8q4 if (s8q4!=. & s8q4!=.a) & (s8q1==1 & s8q3==2)
 
 ***Other
 *Otra
-clonevar	razon_no_medico_o = s8q4_os if s9q4==9
+clonevar	razon_no_medico_o = s8q4_os if s8q4==9
 
 *** Who did you mainly consult to treat the sickness or accident?
 /*	s8q5 ¿A quién consultó principalmente para tratar esta enfermedad síntoma o malestar y/o accidente?
@@ -3284,9 +3284,13 @@ hambre_norecursos nocomedia_norecursos pocovariado_me18_norecursos salteacomida_
 *----------------------------------------------------------- XIV: ANTHROPOMETRY / ANTROPOMETRÍA --------------------------------------------------
 ************************************************************************************************************************************************)*/
 
-global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso altura posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
+global antropo_ENCOVI edad_meses medido razon_nomedido confirma_edad solo_medicion peso peso1 peso2 peso3 altura altura1 altura2 altura3 posicion problema_pesar problema_medir problema_medir2 hfa wfa wfh
 
 * For children younger than 5 years old
+
+*** Age in months age_months
+	gen edad_meses = age_months
+	label var edad_meses "Edad en meses"
 
 *** Was the child measured?
 	/*s14q1 Fue medido?
@@ -3382,17 +3386,17 @@ global antropo_ENCOVI medido razon_nomedido confirma_edad solo_medicion peso alt
 	
 *** Height for age index, calculated by the survey
 	* hfa Índice de altura para la edad
-	replace hfa =. if age_months<=120 & (hfa!=. & hfa!=.a)
+	replace hfa =. if age_months<=120 & (hfa==. & hfa==.a)
 	label var hfa "Height For Age index - Índice de altura para la edad"
 	
 *** Weight for age index, calculated by the survey
 	* wfa Índice de peso para la edad
-	replace wfa =. if age_months<=120 & (wfa!=. & wfa!=.a)
+	replace wfa =. if age_months<=120 & (wfa==. & wfa==.a)
 	label var wfa "Weight For Age index - Índice de peso para la edad"
 	
 *** Weight for height index, calculated by the survey
 	* wfh Índice de peso para la altura
-	replace wfh =. if age_months<=120 & (wfh!=. & wfh!=.a)
+	replace wfh =. if age_months<=120 & (wfh==. & wfh==.a)
 	label var wfh "Weight For Height index - Índice de peso para la altura"
 	
 
@@ -3581,10 +3585,9 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	cap rename (s15q2c__`i'_`k') (s15q2c_`i'_`k')
 	*-- Label original variable
 	label var s15q2c_`i'_`k' "2c.Cómo se las arregló su hogar con el choque más reciente?"
-	*-- Standarization of missing values
-	replace s15q2c_`i'_`k'=. if s15q2c_`i'_`k'==.a
 	*-- Generate variable
-	clonevar reaccion_evento_`i'_`k' = s15q2c_`i'_`k'
+	gen reaccion_evento_`i'_`k' = s15q2c_`i'_`k' if s15q2c_`i'_`k'!=. & s15q2c_`i'_`k'!=.a
+	replace reaccion_evento_`i'_`k' = 1 if reaccion_evento_`i'_`k'>1 & reaccion_evento_`i'_`k'!=.
 		}
 	}
 	
@@ -3601,27 +3604,27 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 	tab reaccionot_evento`i'
 	}
 *-- Label variables
-	label var reaccionot_evento1 "2d. Especifique otro arreglo de su hogar con el reciente 1. Muerte o discapacidad de un miembro adulto del hogar que trabaja"
-	label var reaccionot_evento2 "2d. Especifique otro arreglo de su hogar con el reciente 2. Muerte de alguien que envía remesas a la casa"
-	label var reaccionot_evento3 "2d. Especifique otro arreglo de su hogar con el reciente 3. Enfermedad de la persona con el ingreso más importante del hogar"
-	label var reaccionot_evento4 "2d. Especifique otro arreglo de su hogar con el reciente 4. Pérdida de un contacto importante"
-	label var reaccionot_evento5 "2d. Especifique otro arreglo de su hogar con el reciente 5. Perdida de trabajo"
-	label var reaccionot_evento6 "2d. Especifique otro arreglo de su hogar con el reciente 6. Salida del miembro de la familia que genera ingresos debido a la separación o el divorcio"
-	label var reaccionot_evento7 "2d. Especifique otro arreglo de su hogar con el reciente 7. Salida del miembro de la familia que genera ingresos debido al matrimonio"
-	label var reaccionot_evento8 "2d. Especifique otro arreglo de su hogar con el reciente 8. Fracaso empresarial no agrícola"
-	label var reaccionot_evento9 "2d. Especifique otro arreglo de su hogar con el reciente 9. Robo de cultivos, dinero en efectivo, ganado u otros bienes"
-	label var reaccionot_evento10 "2d. Especifique otro arreglo de su hogar con el reciente 10. Destrucción de cosecha por fuego"
-	label var reaccionot_evento11 "2d. Especifique otro arreglo de su hogar con el reciente 11. Vivienda dañada / demolida"
-	label var reaccionot_evento12 "2d. Especifique otro arreglo de su hogar con el reciente 12. Pocas lluvias que causaron el fracaso de la cosecha"
-	label var reaccionot_evento13 "2d. Especifique otro arreglo de su hogar con el reciente 13. Inundaciones que causaron el fracaso de la cosecha"
-	label var reaccionot_evento14 "2d. Especifique otro arreglo de su hogar con el reciente 14. Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento"
-	label var reaccionot_evento15 "2d. Especifique otro arreglo de su hogar con el reciente 15. Pérdida de propiedad por incendio o inundación"
-	label var reaccionot_evento16 "2d. Especifique otro arreglo de su hogar con el reciente 16. Pérdida de tierra"
-	label var reaccionot_evento17 "2d. Especifique otro arreglo de su hogar con el reciente 17: Muerte de ganado por enfermedad,"
-	label var reaccionot_evento18 "2d. Especifique otro arreglo de su hogar con el reciente 18: Incremento en el precio de los insumos,"
-	label var reaccionot_evento19 "2d. Especifique otro arreglo de su hogar con el reciente 19: Caída en el precio de los productos,"
-	label var reaccionot_evento20 "2d. Especifique otro arreglo de su hogar con el reciente 20: Incremento en el precio de los principales alimentos consumidos,"
-	label var reaccionot_evento21 "2d. Especifique otro arreglo de su hogar con el reciente 21: Secuestro / robo / asalto,"
+	label var reaccionot_evento1 "2d. Especifique otro arreglo del hogar por reciente 1.Muerte o discapacidad de un miembro adulto del hogar que trabaja"
+	label var reaccionot_evento2 "2d. Especifique otro arreglo del hogar por reciente 2.Muerte de alguien que envía remesas a la casa"
+	label var reaccionot_evento3 "2d. Especifique otro arreglo del hogar por reciente 3.Enfermedad de la persona con el ingreso más importante del hogar"
+	label var reaccionot_evento4 "2d. Especifique otro arreglo del hogar por reciente 4.Pérdida de un contacto importante"
+	label var reaccionot_evento5 "2d. Especifique otro arreglo del hogar por reciente 5.Perdida de trabajo"
+	label var reaccionot_evento6 "2d. Especifique otro arreglo del hogar por reciente 6.Salida del miembro de la familia que genera ingresos debido a la separación o el divorcio"
+	label var reaccionot_evento7 "2d. Especifique otro arreglo del hogar por reciente 7.Salida del miembro de la familia que genera ingresos debido al matrimonio"
+	label var reaccionot_evento8 "2d. Especifique otro arreglo del hogar por reciente 8.Fracaso empresarial no agrícola"
+	label var reaccionot_evento9 "2d. Especifique otro arreglo del hogar por reciente 9.Robo de cultivos, dinero en efectivo, ganado u otros bienes"
+	label var reaccionot_evento10 "2d. Especifique otro arreglo del hogar por reciente 10.Destrucción de cosecha por fuego"
+	label var reaccionot_evento11 "2d. Especifique otro arreglo del hogar por reciente 11.Vivienda dañada / demolida"
+	label var reaccionot_evento12 "2d. Especifique otro arreglo del hogar por reciente 12.Pocas lluvias que causaron el fracaso de la cosecha"
+	label var reaccionot_evento13 "2d. Especifique otro arreglo del hogar por reciente 13.Inundaciones que causaron el fracaso de la cosecha"
+	label var reaccionot_evento14 "2d. Especifique otro arreglo del hogar por reciente 14.Invasión de plagas que causó el fracaso de la cosecha o la pérdida de almacenamiento"
+	label var reaccionot_evento15 "2d. Especifique otro arreglo del hogar por reciente 15.Pérdida de propiedad por incendio o inundación"
+	label var reaccionot_evento16 "2d. Especifique otro arreglo del hogar por reciente 16.Pérdida de tierra"
+	label var reaccionot_evento17 "2d. Especifique otro arreglo del hogar por reciente 17.Muerte de ganado por enfermedad"
+	label var reaccionot_evento18 "2d. Especifique otro arreglo del hogar por reciente 18.Incremento en el precio de los insumos"
+	label var reaccionot_evento19 "2d. Especifique otro arreglo del hogar por reciente 19.Caída en el precio de los productos"
+	label var reaccionot_evento20 "2d. Especifique otro arreglo del hogar por reciente 20.Incremento en el precio de los principales alimentos consumidos"
+	label var reaccionot_evento21 "2d. Especifique otro arreglo del hogar por reciente 21.Secuestro / robo / asalto"
 
 
 	
@@ -3629,8 +3632,10 @@ local x 1 2 3 4 5 6 8 9 10 12 13 14 15 16 17 18 19 20 21 22 23 24
 *---------------------------------------------------------- 1.9: Income Variables ----------------------------------------------------------
 *****************************************************************************************************************************************)*/
 
-global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro
+global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_mon ingresoslab_bene ijubi_m icap_m rem itranp_o_m itranp_ns itrane_o_m itrane_ns inla_extraord inla_otro ///
+c_sso_cant_bolfeb c_rpv_cant_bolfeb c_spf_cant_bolfeb c_aca_cant_bolfeb c_sps_cant_bolfeb c_otro_cant_bolfeb d_sso_cant_bolfeb d_spf_cant_bolfeb d_isr_cant_bolfeb d_cah_cant_bolfeb d_cpr_cant_bolfeb d_rpv_cant_bolfeb d_otro_cant_bolfeb
 
+	
 * Check for negative variables
 	forvalues i = 1(1)12 {	
 	tab s9q19a_`i' if s9q19a_`i'<0
@@ -3705,7 +3710,47 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			replace s9q19a`i'_bolfeb = s9q19a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a
 			cap replace s9q19a`i'_bolfeb = s9q19a`i'*`tc4mes4' 	* `deflactor4' 	if interview_month==4 & s9q19b`i'==4 & s9q19a`i'!=. & s9q19a`i'!=.a 
 	}
-		
+	
+	local incomevar20 _1 _2 _3 _4 _5 _6
+	foreach i of local incomevar20 {
+
+		* Bolívares 
+			gen c`i'_bolfeb = s9q20a`i' 					* `deflactor11'  if interview_month==11 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor12'	if interview_month==12 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor1'	if interview_month==1 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor2' 	if interview_month==2 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor3'	if interview_month==3 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'				* `deflactor4' 	if interview_month==4 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+		* Dólares
+			replace c`i'_bolfeb = s9q20a`i' * `tc2mes11' * `deflactor11' 	if interview_month==11 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc2mes2' 	* `deflactor2' 	if interview_month==2 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a 
+			cap replace c`i'_bolfeb = s9q20a`i' *`tc2mes4'	* `deflactor4' 	if interview_month==4 & s9q20b`i'==2 & s9q20a`i'!=. & s9q20a`i'!=.a
+		* Euros
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes2'	* `deflactor2' 	if interview_month==2 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+			cap replace c`i'_bolfeb = s9q20a`i'	*`tc3mes4'* `deflactor4' if interview_month==4 & s9q20b`i'==3 & s9q20a`i'!=. & s9q20a`i'!=.a
+		* Colombianos
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes2'	* `deflactor2' 	if interview_month==2 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			replace c`i'_bolfeb = s9q20a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+			cap replace c`i'_bolfeb = s9q20a`i'*`tc4mes4' 	* `deflactor4' 	if interview_month==4 & s9q20b`i'==4 & s9q20a`i'!=. & s9q20a`i'!=.a
+	}
+	
+	rename c_1_bolfeb c_sso_cant_bolfeb
+	rename c_2_bolfeb c_rpv_cant_bolfeb
+	rename c_3_bolfeb c_spf_cant_bolfeb
+	rename c_4_bolfeb c_aca_cant_bolfeb
+	rename c_5_bolfeb c_sps_cant_bolfeb
+	rename c_6_bolfeb c_otro_cant_bolfeb
+	
 	local incomevar21 _1 _2 _3 _4 _5 _6 _7 _8 _9
 	foreach i of local incomevar21 {
 		* Bolívares
@@ -3737,6 +3782,46 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes3'	* `deflactor3'	if  interview_month==3 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a
 			cap replace s9q21a`i'_bolfeb = s9q21a`i'	*`tc4mes4'* `deflactor4' if  interview_month==4 & s9q21b`i'==4 & s9q21a`i'!=. & s9q21a`i'!=.a 
 		}
+
+	local incomevar22 _1 _2 _3 _4 _5 _6 _7
+	foreach i of local incomevar22 {
+
+		* Bolívares 
+			gen d`i'_bolfeb = s9q22a`i' 					* `deflactor11'  if interview_month==11 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor12'	if interview_month==12 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor1'	if interview_month==1 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor2' 	if interview_month==2 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor3'	if interview_month==3 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'				* `deflactor4' 	if interview_month==4 & s9q22b`i'==1 & s9q22a`i'!=. & s9q22a`i'!=.a
+		* Dólares
+			replace d`i'_bolfeb = s9q22a`i' * `tc2mes11' * `deflactor11' 	if interview_month==11 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc2mes12' * `deflactor12'	if interview_month==12 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc2mes1' 	* `deflactor1'	if interview_month==1 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc2mes2' 	* `deflactor2' 	if interview_month==2 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc2mes3'	* `deflactor3'	if interview_month==3 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a 
+			cap replace d`i'_bolfeb = s9q22a`i' *`tc2mes4'	* `deflactor4' 	if interview_month==4 & s9q22b`i'==2 & s9q22a`i'!=. & s9q22a`i'!=.a
+		* Euros
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes11' * `deflactor11'	if interview_month==11 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes12' * `deflactor12'	if interview_month==12 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes1' 	* `deflactor1' 	if interview_month==1 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes2'	* `deflactor2' 	if interview_month==2 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc3mes3'	* `deflactor3'	if interview_month==3 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+			cap replace d`i'_bolfeb = s9q22a`i'	*`tc3mes4'* `deflactor4' if interview_month==4 & s9q22b`i'==3 & s9q22a`i'!=. & s9q22a`i'!=.a
+		* Colombianos
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes11'	* `deflactor11'	if interview_month==11 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes12' * `deflactor12'	if interview_month==12 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes1'	* `deflactor1'	if interview_month==1 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes2'	* `deflactor2' 	if interview_month==2 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			replace d`i'_bolfeb = s9q22a`i'	*`tc4mes3'	* `deflactor3'	if interview_month==3 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+			cap replace d`i'_bolfeb = s9q22a`i'*`tc4mes4' 	* `deflactor4' 	if interview_month==4 & s9q22b`i'==4 & s9q22a`i'!=. & s9q22a`i'!=.a
+	}
+		rename d_1_bolfeb d_sso_cant_bolfeb
+		rename d_2_bolfeb d_spf_cant_bolfeb
+		rename d_3_bolfeb d_isr_cant_bolfeb
+		rename d_4_bolfeb d_cah_cant_bolfeb
+		rename d_5_bolfeb d_cpr_cant_bolfeb
+		rename d_6_bolfeb d_rpv_cant_bolfeb
+		rename d_7_bolfeb d_otro_cant_bolfeb
 
 	local incomevar23456 23 24 25 26
 	foreach i of local incomevar23456 {
@@ -3928,12 +4013,15 @@ global ingreso_ENCOVI ingresoslab_mon_local ingresoslab_mon_afuera ingresoslab_m
 			* Obs: First line is for the first not missing one to add up, second line is for the next ones to add up (same later for employers and self-employed)
 			* Obs: The last parenthesis controls for cases where they say they were paid in a certain money, but don't say how much (same later for employers and self-employed)
 	}
+		/*
 		gen ingresoslab_monpe = . 	// Those who received payment in Petro
 		replace ingresoslab_monpe = s9q19_petromonto 	if s9q19_petro==1 & (s9q15==1 | s9q15==3 | s9q15==7 | s9q15==8 | s9q15==9) & (s9q19_petro!=. & s9q19_petro!=.a)	// Al final no usamos esto
 		gen ingresoslab_monpe_dummy = .
 		replace ingresoslab_monpe_dummy = 1 	if ingresoslab_monpe>=0 & ingresoslab_monpe!=.
-		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
-		gen ingresoslab_monpe_bolfeb  = ingresoslab_monpe_dummy	* 30 * 73460.1238 		if ingresoslab_monpe_dummy==1
+		*/
+		* Assumption: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30, y lo dividimos por 12 porque es aguinaldo.
+		gen ingresoslab_monpe_bolfeb  = (im_petro * 30 * 73460.1238)/ $ipetro	if im_petro==1
+		replace im_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation) - we will change it later again
 	
 	*For employers (s9q15==5)
 		replace ingresoslab_mon_local = ingresoslab_mon_local + s9q23a_bolfeb 	if ingresoslab_mon_local!=. & s9q15==5 & (s9q23a!=. & s9q23a!=.a) 
@@ -4114,10 +4202,10 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 			* s9q28__1==1 // Pensión de incapacidad, orfandad, sobreviviente
 			* s9q28__2==1 // Pensión de vejez por el seguro social
 			* s9q28__3==1 // Jubilación por trabajo
-			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
 		*Transferencias estatales // itrane_o_m 
 			* s9q28__5==1 // Beca o ayuda escolar pública 
 			* s9q28__7==1 // Ayuda de instituciones públicas
+			* s9q28_petro==1 // Petro - Dado como pago de pensión  // Added in the last questionnaire update
 		*Transferencias privadas // itranp_o_m 
 			* s9q28__4==1 // Pensión por divorcio, separación, alimentación
 			* s9q28__6==1 // Beca o ayuda escolar privada
@@ -4152,9 +4240,6 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	s9q28a_* // Monto recibido
 	s9q28b_* // Moneda
 	
-	s9q28_petro // Recibió petro
-	s9q28_petromonto // Monto recibido
-	
 	s9q29a__5==1 // Recibe pensión o jubilacion del exterior
 	s9q29b__5 // Monto que recibe del exterior por su pensión o jubilación
 	s9q29b__5 // Moneda														*/
@@ -4176,21 +4261,9 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 		replace ijubi_m_bolfeb = ijubi_m_bolfeb + s9q29b_5_bolfeb / 12 	if ijubi_m_bolfeb!=. & (s9q29b_5!=. & s9q29b_5!=.a)
 		replace ijubi_m_bolfeb = s9q29b_5_bolfeb / 12 					if ijubi_m_bolfeb==. & (s9q29b_5!=. & s9q29b_5!=.a)
 	
-	*Petro "currency"
-		gen ijubi_mpetro=.
-		replace ijubi_mpetro = ijubi_mpetro + s9q28_petromonto 	if ijubi_mpetro!=. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
-		replace ijubi_mpetro = s9q28_petromonto 				if ijubi_mpetro==. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
-
-		gen ijubi_mpetro_dummy=.
-		replace ijubi_mpetro_dummy = 1 	if ijubi_mpetro>=0 & ijubi_mpetro!=.
-			
-		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1 petro=$US 30
-		gen ijubi_mpe_bolfeb  = ijubi_mpetro_dummy	* 30 * 73460.1238 	if ijubi_mpetro_dummy==1
+	*Obs: before we were adding Petros here but not anymore
 	
-		tab ijubi_mpetro_dummy
-		sum ijubi_mpetro
-			
-	egen ijubi_m = rowtotal(ijubi_m_bolfeb ijubi_mpe_bolfeb), missing
+	gen ijubi_m = ijubi_m_bolfeb
 	sum ijubi_m
                          
 * No monetario	
@@ -4273,14 +4346,37 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 ****** 9.3.6.2 OTRAS TRANSFERENCIAS ESTATALES******
 * itrane_o_m Ingreso monetario por transferencias estatales diferentes a las transferencias monetarias condicionadas
 
+	*s9q28_petro // Recibió petro 
+	*s9q28_petromonto // Monto recibido
+	*AND MORE
+	
 * Monetarias
 	
-	gen itrane_o_m = .
+	gen itrane_o_m_sinpetro = .
 		
 	foreach i of numlist 5 7 {
-		replace itrane_o_m = itrane_o_m + s9q28a_`i'_bolfeb 	if itrane_o_m!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
-		replace itrane_o_m = s9q28a_`i'_bolfeb 					if itrane_o_m==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
+		replace itrane_o_m_sinpetro = itrane_o_m_sinpetro + s9q28a_`i'_bolfeb 	if itrane_o_m_sinpetro!=. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
+		replace itrane_o_m_sinpetro = s9q28a_`i'_bolfeb 						if itrane_o_m_sinpetro==. & (s9q28a_`i'!=. & s9q28a_`i'!=.a)
 	}		
+	
+	*Petro "cryptocurrency" - It seems to be an exception: www.youtube.com/watch?v=rYcN2LH7QEY&feature=youtu.be
+		/* NOT ANYMORE
+		gen ijubi_mpetro=.
+		replace ijubi_mpetro = ijubi_mpetro + s9q28_petromonto 	if ijubi_mpetro!=. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
+		replace ijubi_mpetro = s9q28_petromonto 				if ijubi_mpetro==. & s9q28_petro==1 & (s9q28_petro!=. & s9q28_petro!=.a)
+
+		gen ijubi_mpetro_dummy=.
+		replace ijubi_mpetro_dummy = 1 	if ijubi_mpetro>=0 & ijubi_mpetro!=.
+		*/
+			
+		* Supuesto: Dado que la gente contestaba números muy raros sobre lo que cobró en petro, vamos a asumir 1/2, que es el valor del aguinaldo/pensiones recibidas. También asumiremos que 1/2 petro=$US 30, y lo dividimos por 12 porque parece que es una cosa de 1 vez en el año.
+		gen itrane_o_m_petro  = (inla_petro	* 30 * 73460.1238) / $jpetro 	if inla_petro==1
+		replace inla_petro=0 if quest==1 // We assume that those that were asked in the first questionnaire on whether they received petros, did not receive any (this makes a difference for imputation) - we will change it later again
+		
+		*tab ijubi_mpetro_dummy
+		*sum ijubi_mpetro
+			
+	egen itrane_o_m = rowtotal(itrane_o_m_sinpetro itrane_o_m_petro), missing
 	sum itrane_o_m
 	
 	
@@ -4301,15 +4397,15 @@ ictapp_m: ingreso monetario laboral de la actividad principal si es cuenta propi
 	sum itrane_ns
 	
 		
-***** V) INGRESOS NO LABORALES EXTRAORDINARIOS 
+***** V) INGRESOS NO LABORALES EXTRAORDINARIOS 	
 
 	gen inla_extraord = .
 	foreach i of numlist 3 8 {
 		replace inla_extraord = inla_extraord + s9q29b_`i'_bolfeb / 12	if inla_extraord!=. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
 		replace inla_extraord = s9q29b_`i'_bolfeb / 12					if inla_extraord==. & (s9q29b_`i'!=. & s9q29b_`i'!=.a)
 		}		
-	sum inla_extraord
 
+	sum inla_extraord
 	
 ***** IV) OTROS INGRESOS NO LABORALES
 	gen  inla_otro = .
@@ -4629,7 +4725,7 @@ hogarsec interview_month interview__id interview__key quest labor_status relab s
 
 keep $control_ent $det_hogares $id_ENCOVI $demo_ENCOVI $dwell_ENCOVI $dur_ENCOVI $educ_ENCOVI $health_ENCOVI $labor_ENCOVI $otherinc_ENCOVI $bank_ENCOVI $mortali_ENCOVI $emigra_ENCOVI $foodcons_ENCOVI $segalimentaria_ENCOVI $shocks_ENCOVI $antropo_ENCOVI $ingreso_ENCOVI ///
 /* Más variables de ingreso CEDLAS */ iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_nm /*ijubi_o*/ icap_nm cct itrane_o_nm itranp_o_nm ipatrp iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ictapnp iolnp inp ipatr ipatr_m iasal iasal_m ictap ictap_m ila ila_m ilaho ilaho_m perila ijubi icap itranp itranp_m itrane itrane_m itran itran_m inla inla_m ii ii_m perii n_perila_h n_perii_h ilf_m ilf inlaf_m inlaf itf_m itf_sin_ri renta_imp itf cohi cohh coh_oficial ilpc_m ilpc inlpc_m inlpc ipcf_sr ipcf_m ipcf iea ilea_m ieb iec ied iee pipcf dipcf /*d_ing_ofi p_ing_ofi*/ piea qiea ipc ipc11 ppp11 ipcf_cpi11 ipcf_ppp11 ///
-hogarsec interview_month interview__id interview__key quest s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb ijubi_mpe_bolfeb s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo como_imputa_renta miembro__id // additional
+hogarsec interview_month interview__id interview__key quest s9q25a_bolfeb s9q26a_bolfeb s9q27_bolfeb s9q28a_1_bolfeb s9q28a_2_bolfeb s9q28a_3_bolfeb s9q28a_4_bolfeb /*ijubi_mpe_bolfeb*/ s9q29b_5_bolfeb /*d_renta_imp_b*/ linea_pobreza linea_pobreza_extrema pobre pobre_extremo como_imputa_renta miembro__id // additional
 
 drop if interview__key=="16-35-68-66" // Don't know why/how this all-missing variable keeps on appearing
 

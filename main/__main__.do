@@ -27,10 +27,10 @@ clear all
 		global juli   0
 		
 		* User 3: Lautaro
-		global lauta  0
+		global lauta  1
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 			
 		if $juli {
 				global dopath "C:\Users\wb563583\GitHub\VEN"
@@ -39,8 +39,8 @@ clear all
 	    if $lauta {
 				global dopath "C:\Users\wb563365\GitHub\VEN"
 				global datapath "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\Databases ENCOVI 2019\"
-				global outSEDLAC "C:\Users\wb563365\GitHub\VEN\petrosensitivity\"
-				global outENCOVI "C:\Users\wb563365\GitHub\VEN\petrosensitivity\"
+				global outSEDLAC "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_SEDLAC_DATA_2014_2019\"
+				global outENCOVI "C:\Users\wb563365\WBG\Christian Camilo Gomez Canon - ENCOVI\FINAL_ENCOVI_DATA_2019_COMPARABLE_2014-2018\"
 		}
 		if $trini   {
 				global rootpath "C:\Users\WB469948\OneDrive - WBG\LAC\Venezuela\VEN"
@@ -123,7 +123,7 @@ imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 global forimp "$datapath\data_management\output\for imputation"
 global pathoutexcel "$datapath\data_management\output\post imputation"
-global numberofimpruns 1
+global numberofimpruns 30
 
 //run ENCOVI imputation
 do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"

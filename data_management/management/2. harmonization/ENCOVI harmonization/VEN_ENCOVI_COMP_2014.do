@@ -20,13 +20,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -568,7 +568,7 @@ global foodcons_ENCOVI  /*clap_cuando*/
 *(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria clap
+global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria clap mision_gov_support
 
 
 *--------- Receive 'Mision' or social program
@@ -628,21 +628,51 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	forval i = 1/3{
 	*-- Standarization of missing values
 	replace cod69m`i'=. if cod69m`i'==99
+	replace cod69m`i'=. if cod69m`i'==98
 	*-- Generate variable
 	clonevar mision_`i' = cod69m`i' 
 	*-- Label variable
 	label var mision_`i' "Name of the social program: Mision `i'"
 	*-- Label values 
-	label def mision_`i' 1 "Alimentación/Mercal" 2 "Barrio Adentro" 3 "Milagro" ///
-					     4 "Sonrisa" 5 "Robinson" 6 "Ribas" 7 "Sucre" ///
-						 8 "Saber y Trabajo, Vuelvan Caras y/o Ché Guevara" ///
-						 9 "G. M. Vivienda y/o Barrio Tricolor" 10 "Casa Bien Equipada" ///
-						11 "Madres del Barrio" 12 "Hijos de Venezuela" 13 "Negra Hipólita" ///
-						14 "Amor Mayor"	15 "Identidad" 16 "Otra" 98 "NA"
+	label def mision_`i'  1 "Misión en Amor Mayor" ///
+           2 "Misión Hijos de Venezuela" ///
+           3 "Misión Alimentación" ///
+           4 "Misión Barrio Adentro" ///
+           5 "Misión Ribas" ///
+           6 "Misión Negra Hipólita" ///
+           7 "Misión Ciencia" ///
+           8 "Gran Misión Vivienda Venezuela" ///
+           9 "Misión Madres del Barrio" ///
+          10 "Misión Barrio Tricolor" ///
+          11 "Misión Robinson" ///
+          12 "Misión Cultura" ///
+          13 "Misión Sucre" ///
+          14 "Misión Milagros" ///
+          15 "Misión Barrio Adentro Deportivo" ///
+          16 "Misión José Gregorio Hernández" ///
+          17 "Misión Agro Venezuela" ///
+          18 "Misión Sonrisa" ///
+          19 "Misión Identidad" ///
+          20 "Misión Vuelvan Caras" ///
+          23 "Mi casa bien equipada" ///
+          25 "Misión Saber y Trabajo" ///
+          50 "Otros Programas" ///
+          98 "No aplica" ///
+          99 "NS/NR" 
 	label value mision_`i' mision_`i'
 	*-- Check values
 	tab mision_`i' beneficiario, mi 
 	}
+	*--------- Mision: Do you believe that you have to support the goverment to benefit from social programs?
+	*-- Generate variable
+	tab pmp74, mi
+	clonevar mision_gov_support = pmp74 
+	replace mision_gov_support=. if pmp74==99
+	replace mision_gov_support=0 if pmp74==2
+	label def mision_gov_support 1 "Yes" 0 "No"
+	label val mision_gov_support mision_gov_support
+	label var mision_gov_support "Only those who upport the goverment to benefit from social programs"
+
 
 
  *--------- 'Caja CLAP' (In kind-transfer)
@@ -650,7 +680,6 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 *-- Check values
  gen clap=.
  gen carnet_patria=.
-
 
 /*
 

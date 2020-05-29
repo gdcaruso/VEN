@@ -288,7 +288,13 @@ label define sector1d 		 1 "Agriculture, Livestock, Hunting and Forestry" 2 "Fis
 label values sector1d sector1d
 
 label var    sector          "Activity sector - Own classification"
-label var    tarea           "Task performed in the main occupation"
+
+label var  	sector_encuesta 	"What does the business, institution or firm in which you work do?"
+label def	sector_encuesta		1 "Agriculture, livestock, fishing, hunting and related service activities" 2 "Mining and quarrying" 3 "Manufacturing industry" 4 "Installation / supply / distribution of electricity, gas or water" 5 "Construction" ///
+								6 "Wholesale and retail trade; repair of motor vehicles and motorcycles" 7 "Transportation, storage, lodging and food service, communications and computer services" 8 "Financial and insurance, real estate, professional, scientific and technical entities; and administrative support services" ///
+								9 "Public administration and defense, education, health, social assistance, art, entertainment, embassies" 10 "Other service activities such as repairs, cleaning, hairdressing, funeral and domestic service"
+
+								label var    tarea           "Task performed in the main occupation"
 
 label var    contrato        "Has signed work contract?"
 label define contrato 		 0 "Does not have" 1 "Has"

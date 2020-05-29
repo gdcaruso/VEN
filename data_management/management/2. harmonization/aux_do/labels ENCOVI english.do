@@ -1812,10 +1812,9 @@ label var  iext_alquil "Received in the last year income from… 9. Rentals (veh
 	*-- Label variable
 	label var relemig_`i' "Emigrant's relationship with the head of the household"
 	*-- Label values
-	label def remig_`i'_eng 1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter/stepson/stepdaughter" ///
-							  4 "Grandchild" 5 "Son/daugther/father/mother-in-law" 6 "Father/mother" 7 "Sibling" ///
-							  8 "Brother/sister-in-law" 9 "Nephew/niece" 10 "Other relative" 11 "Other: non relative" ///
-							  12 "House maid"
+	label def remig_`i'_eng 1 "Head of the household" 2 "Spouse/partner" 3 "Son/daughter" 4 "Stepson/stepdaughter" ///
+							  5 "Grandchild" 6 "Son/daugther/father/mother-in-law" 7 "Father/mother" 8 "Sibling" ///
+							  9 "Brother/sister-in-law" 10 "Nephew/niece" 11 "Other relative" 12 "Other: non relative" 
 	label value relemig_`i' remig_`i'_eng
 	}
 	
@@ -3176,7 +3175,7 @@ label	var	ii		"Total individual income	"
 label	var	ii_m	"Total individual income - monetary	"
 label	var	perii	"Income earner	"
 label	var	n_perila_h	"Number of labor income earners in household	"
-label	var	n_perii_h	"Number of labor income earners in household	"
+label	var	n_perii_h	"Number of individual income earners in household	"
 label	var	ilf_m	"Total household labor income - monetary	"
 label	var	ilf		"Total household labor income	"
 label	var	inlaf_m	"Total household non-labor income - monetary	"

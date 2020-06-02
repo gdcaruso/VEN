@@ -1659,8 +1659,8 @@ clonevar tarea= tmhp38 if (relab>=1 & relab<=4) & (tmhp38!=98 & tmhp38!=99)
 		98 = No aplica 
 		99 = NS/NR
 */
-clonevar contrato_encuesta = tmhp43 if (tmhp43!=98 & tmhp43!=99)
-gen     contrato = (contrato_encuesta== 1 | contrato_encuesta==2) if relab==2 & tmhp43!=98
+clonevar contrato_encuesta = tmhp43 if (tmhp43!=98 & tmhp43!=99 & tmhp43!=.a)
+gen     contrato = (contrato_encuesta== 1 | contrato_encuesta==2) if relab==2 & contrato_encuesta!=.
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
@@ -1680,7 +1680,7 @@ replace aporte_pension = 2 if pmhp56si==2
 replace aporte_pension = 3 if pmhp56se==3
 replace aporte_pension = 4 if pmhp56so==4
 replace aporte_pension = 5 if pmhp56no==5
-gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) if (relab>=1 & relab<=4)
+gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) if (relab>=1 & relab<=4) & aporte_pension!=.
 
 /*
 * Seguro de salud ligado al empleo: dsegsale

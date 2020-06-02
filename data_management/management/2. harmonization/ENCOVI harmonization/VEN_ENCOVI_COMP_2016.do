@@ -1201,8 +1201,8 @@ label value tarea tarea
 		98 = No aplica 
 		99 = NS/NR
 */
-clonevar contrato_encuesta = tp49 if (tp49!=98 & tp49!=99)
-gen     contrato = (contrato_encuesta== 1 | contrato_encuesta==2) if relab==2 & tp49!=98
+clonevar contrato_encuesta = tp49 if (tp49!=98 & tp49!=99 & tp49!=.a)
+gen     contrato = (contrato_encuesta== 1 | contrato_encuesta==2) if relab==2 & contrato_encuesta!=.
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
@@ -1214,8 +1214,8 @@ gen     ocuperma = (contrato_encuesta==1) if relab==2
 		98 = No aplica
 		99 = NS/NR  
 */
-clonevar aporte_pension = pp62 if pp62!=98
-gen     aporta_pension = (aporte_pension==1) if (relab>=1 & relab<=4) & pp62!=98
+clonevar aporte_pension = pp62 if pp62!=98 & pp62!=99 & pp62!=.a
+gen     aporta_pension = (aporte_pension==1) if (relab>=1 & relab<=4) & aporte_pension!=.
 
 /*
 * Seguro de salud ligado al empleo: dsegsale

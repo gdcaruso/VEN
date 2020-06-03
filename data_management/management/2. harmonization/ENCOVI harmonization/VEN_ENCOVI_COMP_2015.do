@@ -20,13 +20,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   0 
+		global juli   1
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   1
+		global male   0
 		
 			
 		if $juli {
@@ -667,14 +667,19 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	forval i = 1/3{
 	*-- Standarization of missing values
 	replace psp69m`i'=. if psp69m`i'==99
+	replace psp69m`i'=. if psp69m`i'==98
 	*-- Generate variable
 	clonevar mision_`i' = psp69m`i' 
 	*-- Label variable
 	label var mision_`i' "Name of the social program: Mision `i'"
 	*-- Label values 
-	label def mision_`i' 1 "Alimentación/Mercal" 2 "Barrio Adentro" 3 "Milagro" ///
-					     4 "Sonrisa" 5 "Robinson" 6 "Ribas" 7 "Sucre" ///
-						 8 "Saber y Trabajo, Vuelvan Caras y/o Ché Guevara" ///
+	label def mision_`i' 1 "Alimentación/Mercal" ///
+						 2 "Barrio Adentro" ///
+						 3 "Milagro" ///
+					     4 "Sonrisa" ///
+						 5 "Robinson" ///
+						 6 "Ribas" 7 "Sucre" ///
+						 8 "Saber y Trabajo, Vuelvan Caras y/o Che Guevara" ///
 						 9 "G. M. Vivienda y/o Barrio Tricolor" 10 "Casa Bien Equipada" ///
 						11 "Madres del Barrio" 12 "Hijos de Venezuela" 13 "Negra Hipólita" ///
 						14 "Amor Mayor"	15 "Identidad" 16 "Otra" 98 "NA"

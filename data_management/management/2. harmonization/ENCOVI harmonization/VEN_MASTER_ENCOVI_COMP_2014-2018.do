@@ -63,7 +63,7 @@ do "$pathdo\VEN_ENCOVI_COMP_`y'"
 use "$incomevars\VEN_`y'_ENCOVI_SEDLAC-01_English labels.dta"
 
 	keep id com ///
-	iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ///
+	pobreza_enc pobreza_extrema_enc iasalp_m iasalp_nm ictapp_m ictapp_nm ipatrp_m ipatrp_nm iolp_m iolp_nm iasalnp_m iasalnp_nm ictapnp_m ictapnp_nm ipatrnp_m ipatrnp_nm iolnp_m iolnp_nm ijubi_m ///
 	ijubi_nm icap_m icap_nm cct itrane_o_m itrane_o_nm itrane_ns ///
 	rem itranp_o_m itranp_o_nm itranp_ns inla_otro ipatrp ///
 	iasalp ictapp iolp ip ip_m wage wage_m ipatrnp iasalnp ///

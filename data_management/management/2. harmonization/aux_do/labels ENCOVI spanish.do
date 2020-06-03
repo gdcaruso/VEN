@@ -827,7 +827,17 @@ label values relab relab
 	label def categ_ocu 	1 "Empleado u obrero en el sector publico" 3 "Empleado u obrero en empresa privada"	5 "Patrono o empleador" 6 "Trabajador por cuenta propia" ///
 							7 "Miembro de cooperativas" 8 "Ayudante familiar remunerado/no remunerado" 9 "Servicio domestico"
 	label values categ_ocu categ_ocu
+
 	
+** Emigración
+
+label define relemig_label 2 "Esposo(a)" 3 "Hijo(a)" 4 "Hijastro(a)" 5 "Nieto(a)" 6 "Yerno, nuera, suegro(a)" 7 "Padre, Madre" 8 "Hermano(a)" 9 "Cuñado(a)" 10 "Sobrino(a)" 11 "Otro pariente" 12 "No pariente"
+
+forvalues x = 1/10 {
+label values relemig_`x' relemig_label
+} 
+
+
 ** Shocks
 
 	*Cuáles de los siguientes eventos han afectado a su hogar desde el año 2017?

@@ -2008,18 +2008,18 @@ relab ocupado desocupa pea labor_status
 	*** In which currency? 
 	/* s9q26b En qué moneda?: i_indep_mes_mone
 		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
-	clonevar     i_indep_mes_mone 	= s9q26b if s9q15==5 & (s9q26b!=. & s9q26b!=.a)
+	clonevar     i_indep_mes_mone 	= s9q26b if s9q15==6 & (s9q26b!=. & s9q26b!=.a)
 	
 	*** Last month, how much money did you spend to generate income (e.g. office renting, transport expenditures, cleaning products)?
 	* s9q27: El mes pasado, ¿cuánto dinero gastó  para generar el ingreso (p.e. alquiler de oficina, gastos de transporte, productos de limpieza)?: gm_indep_mes_cant
 		* Note: For self-employed workers (s9q15==6) // CAPI3=true	
 		* Note2: g stands for gasto monetario
-	clonevar     g_indep_mes_cant 	= s9q27 if s9q15==5 & (s9q27!=. & s9q27!=.a) 
+	clonevar     g_indep_mes_cant 	= s9q27 if s9q15==6 & (s9q27!=. & s9q27!=.a) 
 		
 	*** In which currency? 
 	/* s9q27b En qué moneda?: inm_indep_mes_mone
 		1 = Bolívares, 2 = Dólares, 3 = Euros, 4 = Pesos colombianos */
-	clonevar     g_indep_mes_mone 	= s9q27a if s9q15==5 & (s9q27a!=. & s9q27a!=.a)
+	clonevar     g_indep_mes_mone 	= s9q27a if s9q15==6 & (s9q27a!=. & s9q27a!=.a)
 
 * For part-time workers (those who worked less than 35 hours last week in all their jobs) // CAPI4
 				
@@ -3715,7 +3715,7 @@ c_sso_cant_bolfeb c_rpv_cant_bolfeb c_spf_cant_bolfeb c_aca_cant_bolfeb c_sps_ca
 	foreach i of local incomevar20 {
 
 		* Bolívares 
-			gen c`i'_bolfeb = s9q20a`i' 					* `deflactor11'  if interview_month==11 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
+			gen c`i'_bolfeb = s9q20a`i' 				* `deflactor11'  if interview_month==11 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
 			replace c`i'_bolfeb = s9q20a`i'				* `deflactor12'	if interview_month==12 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
 			replace c`i'_bolfeb = s9q20a`i'				* `deflactor1'	if interview_month==1 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a
 			replace c`i'_bolfeb = s9q20a`i'				* `deflactor2' 	if interview_month==2 & s9q20b`i'==1 & s9q20a`i'!=. & s9q20a`i'!=.a

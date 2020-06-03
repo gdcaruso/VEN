@@ -893,7 +893,7 @@ gen deporte = (actividad_fisica >=20) if actividad_fisica!=.
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -1190,6 +1190,7 @@ label def tarea 1 "Oficiales de las fuerzas armadas" 2 "Otros miembros de las fu
 		95 "Recolectores de desechos y otras ocupac" 96 "Recolectores de desechos y otras ocupac" 98 "No aplica" ///
 		99 "NS/NR" 999 "No clasificable"
 label value tarea tarea
+*/
 
 * Caracteristicas del empleo y acceso a beneficios a partir del empleo
 * Trabajador con contrato:  contrato (definida para trabajadores asalariados)
@@ -1201,13 +1202,11 @@ label value tarea tarea
 		98 = No aplica 
 		99 = NS/NR
 */
-clonevar contrato_encuesta = tp49 if (tp49!=98 & tp49!=99)
-gen     contrato = 1 if relab==2 & (contrato_encuesta== 1 | contrato_encuesta==2)
-replace contrato = 0 if relab==2 & (contrato_encuesta== 3 | contrato_encuesta==4)
+clonevar contrato_encuesta = tp49 if (tp49!=98 & tp49!=99 & tp49!=.a)
+gen     contrato = (contrato_encuesta== 1 | contrato_encuesta==2) if relab==2 & contrato_encuesta!=.
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
-*/
 
 * Derecho a percibir una jubilacion: djubila
 /*APORTE_PENSION (pp62)
@@ -1216,8 +1215,8 @@ gen     ocuperma = (contrato_encuesta==1) if relab==2
 		98 = No aplica
 		99 = NS/NR  
 */
-clonevar aporte_pension = pp62 if (pp62!=98 & pp62!=99)
-gen     aporta_pension = (pp62==1) if pp62!=98
+clonevar aporte_pension = pp62 if pp62!=98 & pp62!=99 & pp62!=.a
+gen     aporta_pension = (aporte_pension==1) if (relab>=1 & relab<=4) & aporte_pension!=.
 
 /*
 * Seguro de salud ligado al empleo: dsegsale

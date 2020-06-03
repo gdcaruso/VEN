@@ -1206,7 +1206,7 @@ notes deporte: the survey does not include information to define this variable
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc
+global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc contrato
 
 *Chequeo
 	gen error = 0
@@ -1449,7 +1449,7 @@ replace sector8 = 8 if (relab>=1 & relab<=4) & (sector_encuesta==9 | sector_encu
 		99 = NS/NR
 */
 clonevar tarea= tmhp40 if (relab>=1 & relab<=4) & (tmhp40!=98 & tmhp40!=99)
-
+*/
 * Caracteristicas del empleo y acceso a beneficios a partir del empleo
 * Trabajador con contrato:  contrato (definida para trabajadores asalariados)
 /* CONTRATO_ENCUESTA (tmhp46): ¿En su trabajo, tienen contrato?
@@ -1460,13 +1460,11 @@ clonevar tarea= tmhp40 if (relab>=1 & relab<=4) & (tmhp40!=98 & tmhp40!=99)
 		98 = No aplica 
 		99 = NS/NR
 */
-clonevar contrato_encuesta = tmhp46 if (tmhp46!=98 & tmhp46!=99)
-gen     contrato = 1 if relab==2 & (contrato_encuesta== 1 | contrato_encuesta==2)
-replace contrato = 0 if relab==2 & (contrato_encuesta== 3 | contrato_encuesta==4)
+clonevar contrato_encuesta = tmhp46 if (tmhp46!=98 & tmhp46!=99 & tmhp46!=.a)
+gen     contrato = (contrato_encuesta== 1 | contrato_encuesta==2) if relab==2 & contrato_encuesta!=.
 
 * Ocupacion permanente
 gen     ocuperma = (contrato_encuesta==1) if relab==2 
-*/
 
 * Derecho a percibir una jubilacion: djubila
 /*APORTE_PENSION (pmhp611,pmhp612,pmhp613,pmhp614,pmhp615)
@@ -1483,7 +1481,7 @@ replace aporte_pension = 2 if pmhp612==2
 replace aporte_pension = 3 if pmhp613==3
 replace aporte_pension = 4 if pmhp614==4
 replace aporte_pension = 5 if pmhp615==5
-gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) if pmhp611!=98 & pmhp612!=98 & pmhp613!=98 & pmhp614!=98 & pmhp615!=98
+gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) if (relab>=1 & relab<=4) & aporte_pension!=.
 
 /*
 * Seguro de salud ligado al empleo: dsegsale

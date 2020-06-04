@@ -2122,6 +2122,7 @@ relab ocupado desocupa pea labor_status
 	replace aporte_pension = 3 if s9q36==1 & s9q37__3==1
 	replace aporte_pension = 4 if s9q36==1 & s9q37__4==1
 	replace aporte_pension = 5 if s9q36==2
+	*Problem: actually this question is multi-select, but overlap is low... 
 	
 	***Other
 	*Otro

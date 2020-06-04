@@ -126,8 +126,8 @@ sort interview_month quintil, stable
 		* Ingreso laboral monetario (empleados y empleadores), segun si recibieron o no en el ultimo mes
 			gen recibe_ingresolab_mon_mes = .
 			replace recibe_ingresolab_mon_mes = 0 if (im_sueldo==0 & im_hsextra==0 & im_propina==0 & im_comision==0 & im_ticket==0 & im_guarderia==0 & im_beca==0 & im_hijos==0 & im_antiguedad==0 & im_transporte==0 & im_rendimiento==0 & im_otro==0 & im_petro==0) /*empleados*/ ///
-				| im_patron==0 /*patrones*/ | i_indep_mes==0 /*indep*/ // No recibió ingreso laboral monetario en ningún concepto mensual
-			replace recibe_ingresolab_mon_mes = 1 if (im_sueldo==1 | im_hsextra==1 | im_propina==1 | im_comision==1 | im_ticket==1 | im_guarderia==1 | im_beca==1 | im_hijos==1 | im_antiguedad==1 | im_transporte==1 | im_rendimiento==1 | im_otro==1	| im_petro==1 /*empleados*/ ///
+				| im_patron==0 | i_indep_mes==0 	// No recibió ingreso laboral monetario en ningún concepto mensual (para empleados, patrones e indep.)
+			replace recibe_ingresolab_mon_mes = 1 if (im_sueldo==1 | im_hsextra==1 | im_propina==1 | im_comision==1 | im_ticket==1 | im_guarderia==1 | im_beca==1 | im_hijos==1 | im_antiguedad==1 | im_transporte==1 | im_rendimiento==1 | im_otro==1	| im_petro==1) /*empleados*/ ///
 				| im_patron==1 | i_indep_mes==1 // Recibió ingreso monetario en algún concepto en el último mes
 			* Problem: income from abroad for salaries/wages and net benefits for independent workers (s9q29a_1 and _2), and local benefits/utilities of independent workers (s9q25) are measured on a yearly basis, not monthly as the others
 			* If we include them in this dummy, there ends up being some unemployed or inactives who report labor income.
@@ -135,8 +135,8 @@ sort interview_month quintil, stable
 		*Ingreso laboral monetario (independientes y otros), segun si recibieron o no en el ultimo año
 			* Thus, analysis on the side for imputation for those 3 variables, create a new variables
 			gen recibe_ingresolab_mon_ano = .
-			replace recibe_ingresolab_mon_ano = 0 if im_indep==0 & iext_sueldo==0 & iext_ingnet==0 if categ_ocu==6
-			replace recibe_ingresolab_mon_ano = 0 if iext_sueldo==0 & iext_ingnet==0 if categ_ocu!=6
+			replace recibe_ingresolab_mon_ano = 0 if im_indep==0 & iext_sueldo==0 & iext_ingnet==0 & categ_ocu==6
+			replace recibe_ingresolab_mon_ano = 0 if iext_sueldo==0 & iext_ingnet==0 & categ_ocu!=6
 			replace recibe_ingresolab_mon_ano = 1 if (im_indep==1 & inlist(i_indep_mes,.,1)) | (iext_sueldo==1 | iext_ingnet==1) 
 				// Obs.: si contestaron que sí a ingreso anual im_indep pero ya habían contestado que no recibieron el mes pasado, no queremos que cuenten como que sí recibieron porque no queremos a imputarles nada, es un "0 verdadero"
 			

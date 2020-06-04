@@ -123,7 +123,7 @@ imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 global forimp "$datapath\data_management\output\for imputation"
 global pathoutexcel "$datapath\data_management\output\post imputation"
-global numberofimpruns 2
+global numberofimpruns 30
 
 //run ENCOVI imputation
 do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"

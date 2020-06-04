@@ -399,5 +399,5 @@ save "$cleaned\ENCOVI_2019_pre pobreza.dta", replace
 *** Analyzing imputed data
 ********************************************************************************
 
-//run "$impdos\Analysis imputation.do"
+run "$impdos\Analysis imputation.do"
 

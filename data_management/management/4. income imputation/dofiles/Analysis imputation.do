@@ -20,7 +20,7 @@ Note: Income imputation - Identification missing values
 clear all
 
 // Define rootpath according to user (silenced as this is done by main now)
-
+/*
 	    * User 1: Trini
 		global trini 0
 		
@@ -50,8 +50,8 @@ clear all
 
 	global forimp "$datapath\data_management\output\for imputation"
 	global pathoutexcel "$datapath\data_management\output\post imputation"
-
-
+	global cleaned "$datapath\data_management\output\cleaned"
+*/
 ********************************************************************************
 
 

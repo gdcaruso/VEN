@@ -258,7 +258,7 @@ graph twoway line av_cal mobquant if mobquant<81 ///
 || line median_cal mobquant if mobquant<81 ///
 || line cal_req mobquant if mobquant<81
 
-graph save pobl_ref_{$ipetro}_{$jpetro}_{$numberofimpruns}, replace
+*graph save pobl_ref_{$ipetro}_{$jpetro}_{$numberofimpruns}, replace	// to decide on how much to divide petro income by
 
 // select where mobile quant matchs requirements
 keep if cal_req <= median_cal & mobquant!=1 // we exclude mobile quant=1 because there are 0 income hh that report sustancial consumption

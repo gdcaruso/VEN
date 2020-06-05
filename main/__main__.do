@@ -123,7 +123,7 @@ imputation
 global impdos "$dopath\data_management\management\4. income imputation\dofiles"
 global forimp "$datapath\data_management\output\for imputation"
 global pathoutexcel "$datapath\data_management\output\post imputation"
-global numberofimpruns 2
+global numberofimpruns 30
 
 //run ENCOVI imputation
 do "$impdos\MASTER 1-5. Run all imputation do's 2019.do"
@@ -222,14 +222,14 @@ run "$expendiscript\genera_consumo_calorico.do"
 run "$expendiscript\genera_gasto_per_capita.do"
 
 use "$outENCOVI\ENCOVI_2019_Spanish labels.dta", replace
-merge m:1 interview__id interview__key using "$datapath\poverty_measurement\output\winsored_expenditure_hh_level.dta"
+merge m:1 interview__id interview__key using "$outENCOVI\winsored_expenditure_hh_level.dta"
 drop _merge
 save "$outENCOVI\ENCOVI_2019_Spanish labels.dta", replace
 
 clear all
 
 use "$outENCOVI\ENCOVI_2019_English labels.dta", replace
-merge m:1 interview__id interview__key using "$datapath\poverty_measurement\output\winsored_expenditure_hh_level.dta"
+merge m:1 interview__id interview__key using "$outENCOVI\winsored_expenditure_hh_level.dta"
 drop _merge
 save "$outENCOVI\ENCOVI_2019_English labels.dta", replace
 

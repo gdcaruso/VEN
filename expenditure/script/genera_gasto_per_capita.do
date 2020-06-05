@@ -663,7 +663,7 @@ gen share_food = gpcf_food/gpcf
 gen share_housing = gpcf_housing/gpcf
 gen share_other = gpcf_other/gpcf
 
-save "$datapath\poverty_measurement\output\winsored_expenditure_product_level.dta", replace
+save "$outENCOVI\winsored_expenditure_product_level.dta", replace
 
 
 // 17 hh do not answer consumption
@@ -712,7 +712,7 @@ collapse (max) gpcf gpcf_* share*, by(interview__key interview__id)
 *******************************************************************************
 
 
-save "$datapath\poverty_measurement\output\winsored_expenditure_hh_level.dta", replace
+save "$outENCOVI\winsored_expenditure_hh_level.dta", replace
 
 
 /*(************************************************************************************************************************************************* 

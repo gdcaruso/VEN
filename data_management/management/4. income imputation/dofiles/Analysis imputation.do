@@ -50,7 +50,7 @@ clear all
 
 	global forimp "$datapath\data_management\output\for imputation"
 	global pathoutexcel "$datapath\data_management\output\post imputation"
-
+	global cleaned "$datapath\data_management\output\cleaned"
 */
 ********************************************************************************
 

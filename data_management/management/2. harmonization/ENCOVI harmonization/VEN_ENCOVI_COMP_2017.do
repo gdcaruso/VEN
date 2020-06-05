@@ -1635,10 +1635,11 @@ global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria c
 	replace mp65=. if mp65==99
 	*-- Generate variable
 	clonevar clap = mp65
+	replace clap =0 if mp65==2
 	*-- Label variable
 	label var clap "Has the houselhold received the 'CLAP'"
 	*-- Label values 
-	label def clap 1 "Yes" 2 "No"
+	label def clap 1 "Yes" 0 "No"
 	label value clap clap
 
 		

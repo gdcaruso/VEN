@@ -1715,7 +1715,7 @@ gen     pea = (ocupado==1 | desocupa ==1)
 /*(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------
 ***********************************************************************************************************************************************)*/	
-global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria carnet_patria_no clap
+global socialprog_ENCOVI beneficiario mision_1 mision_2 mision_3 carnet_patria carnet_patria_no clap clap_cuando
 
 
 

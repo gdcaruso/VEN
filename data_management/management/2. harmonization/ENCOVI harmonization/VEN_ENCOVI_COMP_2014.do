@@ -886,7 +886,7 @@ notes razon_no_remedio: the survey does not include information to define this v
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -899,7 +899,7 @@ global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 
 * LABOR_STATUS (tp47): La semana pasada estaba:
         1 = Trabajando
-		2 = No trabajo', pero tiene trabajo
+		2 = No trabajó, pero tiene trabajo
 		3 = Buscando trabajo por primera vez
 		4 = Buscando trabajo habiendo trabajado antes
 		5 = En quehaceres del hogar
@@ -908,8 +908,7 @@ global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 		8 = Incapacitado
 		9 = Otra
 		98 = No aplica
-		99 = NS/NR
-		
+		99 = NS/NR	
 * CATEG_OCUP (tp50): En su trabajo se desempena como
         1 = Empleado en el sector publico
 		2 = Obrero en el sector publico
@@ -923,8 +922,13 @@ global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 		98 = No aplica
 		99 = NS/NR
 */
-
 gen labor_status = tp47 if (tp47!=98 & tp47!=99)
+gen actividades = labor_status if inlist(labor_status,1,2,3,4,5)
+replace actividades = 8 if labor_status==6 // estudiando
+replace actividades = 9 if labor_status==7 // pensionado o jubilado
+replace actividades = 6 if labor_status==8 // incapacitado
+replace actividades = 7 if labor_status==9 // otra situacion
+
 gen categ_ocu = tp50    if (tp50!=98 & tp50!=99)
 replace categ_ocu = 1 if categ_ocu==2
 replace categ_ocu = 3 if categ_ocu==4

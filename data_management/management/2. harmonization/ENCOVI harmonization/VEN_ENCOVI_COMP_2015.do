@@ -923,7 +923,7 @@ gen embarazada=.
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -935,7 +935,7 @@ global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 		. = No economicamente activos
 * LABOR_STATUS (tp45): La semana pasada estaba:
         1 = Trabajando
-		2 = No trabajo', pero tiene trabajo
+		2 = No trabajó, pero tiene trabajo
 		3 = Buscando trabajo por primera vez
 		4 = Buscando trabajo habiendo trabajado antes
 		5 = En quehaceres del hogar
@@ -959,6 +959,12 @@ global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 		99 = NS/NR
 */
 gen labor_status = tp45 if (tp45!=98 & tp45!=99)
+gen actividades = labor_status if inlist(labor_status,1,2,3,4,5)
+replace actividades = 8 if labor_status==6 // estudiando
+replace actividades = 9 if labor_status==7 // pensionado o jubilado
+replace actividades = 6 if labor_status==8 // incapacitado
+replace actividades = 7 if labor_status==9 // otra situacion
+
 gen categ_ocu = tp49    if (tp49!=98 & tp49!=99)
 replace categ_ocu = 1 if categ_ocu==2
 replace categ_ocu = 3 if categ_ocu==4

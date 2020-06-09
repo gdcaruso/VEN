@@ -893,7 +893,7 @@ gen deporte = (actividad_fisica >=20) if actividad_fisica!=.
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -906,14 +906,14 @@ global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 
 * LABOR_STATUS (tp39): La semana pasada estaba:
         1 = Trabajando
-		2 = No trabajo', pero tiene trabajo
+		2 = No trabajó, pero tiene trabajo
 		3 = Buscando trabajo por primera vez
 		4 = Buscando trabajo habiendo trabajado antes
 		5 = En quehaceres del hogar
-		6 = Incapacitado
-		7 = Otra situacion
-		8 = Estudiando o de vacaciones escolares
-		9 = Pensionado o jubilado
+		6 = Estudiando
+		7 = Pensionado
+		8 = Incapacitado
+		9 = Otra situacion		
 		99 = NS/NR
 * CATEG_OCUP (tp46): En su trabajo se desempena como
         1 = Empleado en el sector publico
@@ -928,6 +928,12 @@ global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea
 		99 = NS/NR
 */
 gen labor_status = tp39 if (tp39!=98 & tp39!=99)
+gen actividades = labor_status if inlist(labor_status,1,2,3,4,5)
+replace actividades = 8 if labor_status==6 // estudiando
+replace actividades = 9 if labor_status==7 // pensionado o jubilado
+replace actividades = 6 if labor_status==8 // incapacitado
+replace actividades = 7 if labor_status==9 // otra situacion
+
 gen categ_ocu = tp46    if (tp46!=98 & tp46!=99)
 replace categ_ocu = 1 if categ_ocu==2
 replace categ_ocu = 3 if categ_ocu==4
@@ -1242,6 +1248,19 @@ gen     inactivo= inrange(labor_status,5,9)
 
 * Poblacion economicamte activa: pea	
 gen     pea = (ocupado==1 | desocupa ==1)
+
+*** Why aren't you currently looking for a job?
+	/* tp42 ¿Por cuál de estos motivos no está buscando trabajo actualmente?: razon_no_busca
+			1 = Está cansado de buscar trabajo
+			2 = No encuentra el trabajo apropiado
+			3 = Cree que no va a encontrar trabajo
+			4 = No sabe cómo ni dónde buscar trabajo
+			5 = Por su edad no le darán trabajo
+			6 = Ningún trabajo se adapta a sus capacidades
+			7 = No tiene quién le cuide los niños
+			8 = Está enfermo/motivos de salud
+			9 = Otro motivo ? Especifique */
+clonevar  razon_no_busca = tp42 if inlist(tp39,3,4,5,6,8,9) & tp40!=2 & tp42!=. & tp42!=.a & tp42!=99 & tp42!=98
 
 
 /*

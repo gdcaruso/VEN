@@ -1206,7 +1206,7 @@ notes deporte: the survey does not include information to define this variable
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc contrato
+global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca
 
 *Chequeo
 	gen error = 0
@@ -1283,6 +1283,8 @@ global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desoc
 		99 = NS/NR
 */
 gen labor_status = tmhp36 if (tmhp36!=98 & tmhp36!=99)
+gen actividades = labor_status
+
 gen categ_ocu = tmhp43    if (tmhp43!=98 & tmhp43!=99)
 replace categ_ocu = 1 if categ_ocu==2
 replace categ_ocu = 3 if categ_ocu==4
@@ -1510,7 +1512,19 @@ gen     inactivo= inrange(labor_status,5,9)
 
 * Poblacion economicamte activa: pea	
 gen     pea = (ocupado==1 | desocupa ==1)
-*/
+
+*** Why aren't you currently looking for a job?
+	/* tmhp39 ¿Por cuál de estos motivos no está buscando trabajo actualmente?: razon_no_busca
+			1 = Está cansado de buscar trabajo
+			2 = No encuentra el trabajo apropiado
+			3 = Cree que no va a encontrar trabajo
+			4 = No sabe cómo ni dónde buscar trabajo
+			5 = Por su edad no le darán trabajo
+			6 = Ningún trabajo se adapta a sus capacidades
+			7 = No tiene quién le cuide los niños
+			8 = Está enfermo/motivos de salud
+			9 = Otro motivo ? Especifique */
+clonevar  razon_no_busca = tmhp39 if inlist(tmhp37,2,99) & tmhp39!=. & tmhp39!=.a & tmhp39!=99 & tmhp39!=98
 
 *(*********************************************************************************************************************************************** 
 *---------------------------------------------------------- : Social Programs ----------------------------------------------------------

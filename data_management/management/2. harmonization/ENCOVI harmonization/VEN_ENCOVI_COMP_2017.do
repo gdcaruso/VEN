@@ -1206,7 +1206,7 @@ notes deporte: the survey does not include information to define this variable
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca
+global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca deseamashs buscamashs
 
 *Chequeo
 	gen error = 0
@@ -1326,14 +1326,16 @@ replace  hstrt = nhorast if (relab>=1 & relab<=4) & (nhorast>=0 & nhorast!=.)
 
 gen      hstrp = . 
 replace  hstrp = nhorast if (relab>=1 & relab<=4) & (nhorast>=0 & nhorast!=.)
+*/
 
 * Deseo o busqueda de otro trabajo o mas horas: deseamas (el trabajador ocupado manifiesta el deseo de trabajar mas horas y/o cambiar de empleo (proxy de inconformidad con su estado ocupacional actual)
 /* DMASHORAS (tmhp50): ¿Preferiria trabajar mas de 35 horas por semana?
    BMASHORAS (tmhp51): ¿Ha hecho algo parar trabajar mas horas?
    CAMBIO_EMPLEO (tmhp53):  ¿ Ha cambiado de trabajo durante los ultimos meses?
 */
-gen dmashoras = tmhp50     if (tmhp50!=98 & tmhp50!=99)
-gen bmashoras = tmhp51      if (tmhp51!=98 & tmhp51!=99)
+gen deseamashs = tmhp50     if (tmhp50!=98 & tmhp50!=99) & tmhp48<35
+gen buscamashs = tmhp51      if (tmhp51!=98 & tmhp51!=99)  & tmhp48<35
+/*
 gen cambio_empleo = tmhp53  if (tmhp53!=98 & tmhp53!=99)
 gen     deseamas = 0 if (relab>=1 & relab<=4)
 replace deseamas = 1 if dmashoras==1  | bmashoras==1

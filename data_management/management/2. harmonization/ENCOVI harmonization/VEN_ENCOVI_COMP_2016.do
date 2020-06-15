@@ -893,7 +893,7 @@ gen deporte = (actividad_fisica >=20) if actividad_fisica!=.
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca deseamashs buscamashs
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -970,14 +970,16 @@ replace  hstrt = nhorast if (relab>=1 & relab<=4) & (nhorast>=0 & nhorast!=.)
 
 gen      hstrp = .
 replace  hstrp = nhorast if (relab>=1 & relab<=4) & (nhorast>=0 & nhorast!=.)
-
+*/
+	
 * Deseo o busqueda de otro trabajo o mas horas: deseamas (el trabajador ocupado manifiesta el deseo de trabajar mas horas y/o cambiar de empleo (proxy de inconformidad con su estado ocupacional actual)
 /* DMASHORAS (tp53): ¿Preferiria trabajar mas de 30 horas por semana?
    BMASHORAS (tp54): ¿Ha hecho algo parar trabajar mas horas?
    CAMBIO_EMPLEO (tp56):  ¿ Ha cambiado de trabajo durante los 12 ultimos meses?
 */
-gen dmashoras = tp53     if (tp53!=98 & tp53!=99)
-gen bmashoras = tp54      if (tp54!=98 & tp54!=99)
+gen deseamashs  = tp53     if (tp53!=98 & tp53!=99) & tp51<30
+gen buscamashs = tp54      if (tp54!=98 & tp54!=99) & tp51<30
+/*
 gen cambio_empleo = tp56  if (tp56!=98 & tp56!=99)
 gen     deseamas = 0 if (relab>=1 & relab<=4)
 replace deseamas = 1 if  dmashoras==1 | bmashoras == 1 

@@ -886,7 +886,7 @@ notes razon_no_remedio: the survey does not include information to define this v
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades deseamashs buscamashs
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -958,14 +958,16 @@ replace  hstrt = nhorast if (relab>=1 & relab<=4) & (nhorast>=0 & nhorast!=.)
 
 gen      hstrp = . 
 replace hstrp = nhorast if (relab>=1 & relab<=4) & (nhorast>=0 & nhorast!=.) 
+*/
 
 * Deseo o busqueda de otro trabajo o mas horas: deseamas (el trabajador ocupado manifiesta el deseo de trabajar mas horas y/o cambiar de empleo (proxy de inconformidad con su estado ocupacional actual)
 /* DMASHORAS (tp56): ¿Preferiria trabajar mas de 30 horas por semana?
    BMASHORAS (tp57): ¿Ha hecho algo parar trabajar mas horas?
    CAMBIO_EMPLEO (tp56):  ¿ Ha cambiado de trabajo durante los 12 ultimos meses?
 */
-gen dmashoras = tp56     if (tp56!=98 & tp56!=99)
-gen bmashoras = tp57     if (tp57!=98 & tp57!=99)
+gen deseamashs = tp56     if (tp56!=98 & tp56!=99) & tp54<30
+gen buscamashs = tp57     if (tp57!=98 & tp57!=99) & tp54<30
+/*
 gen cambio_empleo = .    //no aparece en 2014 esta pregunta
 gen     deseamas = 0 if (relab>=1 & relab<=4)
 replace deseamas = 1 if dmashoras==1 | bmashoras==1

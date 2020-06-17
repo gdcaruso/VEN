@@ -1749,7 +1749,7 @@ relab ocupado desocupa pea labor_status
 	*** How many hours do you normally work weekly in all your jobs or businesses?
 	/* s9q18 ¿Cuántas horas trabaja normalmente a la semana en todos sus trabajos o negocios?: hstr_todos */
 
-	clonevar hstr_todos = s9q18 if s9q17==1 & (s9q18!=. & s9q18!=.a) 
+	clonevar hstr_todos = s9q18 if s9q17==1 & (s9q18!=. & s9q18!=.a) // Solo si tienen 2 trabajos
 
 		*Problem: it should not be possible but there is at least one case in which the total hours worked appears to be greater than the hours worked for the main job
 		
@@ -2032,25 +2032,25 @@ relab ocupado desocupa pea labor_status
 		5 = Escasez de materiales o equipos en reparación
 		6 = Otra (Especifique)	*/
 		*Note: for part-time workers, i.e. those who worked less than 35 hours last week in all their jobs // CAPI4
-	clonevar 	razon_menoshs = s9q30 if s9q18<35 & (s9q30!=. & s9q30!=.a) 
+	clonevar 	razon_menoshs = s9q30 if (s9q18<35 | s9q16<35) & (s9q30!=. & s9q30!=.a) 
 
 	***Other
 	* Otra
-	clonevar 	razon_menoshs_o = s9q30_os if s9q18<35 & s9q30==6
+	clonevar 	razon_menoshs_o = s9q30_os if (s9q18<35 | s9q16<35) & s9q30==6
 
 	*** Would you prefer to work more than 35 hs per week?
 	/* s9q31 ¿Preferiría trabajar más de 35 horas por semana? 
 				1 = si
 				2 = no	*/
-		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	gen 	deseamashs = s9q31==1 if s9q18<35 & (s9q31!=. & s9q31!=.a)
+		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 | s9q16<35 // CAPI4==true
+	gen 	deseamashs = s9q31==1 if (s9q18<35 | s9q16<35) & (s9q31!=. & s9q31!=.a)
 
 	*** Have you done something to work more hours?
 	/* s9q32 ¿Ha hecho algo parar trabajar mas horas?: buscamashs
 				1 = si
 				2 = no	*/
 		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	gen 	buscamashs = s9q32==1 if s9q18<35 & (s9q32!=. & s9q32!=.a)
+	gen 	buscamashs = s9q32==1 if (s9q18<35 | s9q16<35) & (s9q32!=. & s9q32!=.a)
 		
 	*** Why haven't you done something to work additional hours?
 	/* s9q33 ¿Por cuál motivo no ha hecho diligencias para trabajar horas adicionales?: razon_nobusca
@@ -2066,11 +2066,11 @@ relab ocupado desocupa pea labor_status
 			10 = Enfermedad o discapacidad
 			11 = Otra (Especifique)	*/
 		* Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	clonevar	razon_nobusca = s9q33 if s9q18<35 & (s9q33!=. & s9q33!=.a)
+	clonevar	razon_nobusca = s9q33 if (s9q18<35 | s9q16<35) & (s9q33!=. & s9q33!=.a)
 	
 	*** Other reason
 	*Otra razón
-	clonevar 	razon_nobusca_o = s9q33_os if s9q18<35 & s9q33==11
+	clonevar 	razon_nobusca_o = s9q33_os if (s9q18<35 | s9q16<35) & s9q33==11
 	
 * For all workers
 

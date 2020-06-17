@@ -1320,8 +1320,8 @@ global labor_SEDLAC // completar
 	   BUSCAMASHS (s9q32): ¿Ha hecho algo parar trabajar mas horas?
 	   CAMBIOTR (s9q34): ¿Ha cambiado de trabajo durante los últimos meses?
 	*/
-	gen deseamashs = s9q31 if s9q18<35 & (s9q31!=. & s9q31!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
-	gen buscamashs = s9q32 if s9q18<35 & (s9q32!=. & s9q32!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen deseamashs = s9q31 if (s9q18<35 | s9q16<35) & (s9q31!=. & s9q31!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen buscamashs = s9q32 if (s9q18<35 | s9q16<35) & (s9q32!=. & s9q32!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
 	*Assumption: only part-time workers can want to work more
 	
 	gen cambiotr = s9q34 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active
@@ -1461,10 +1461,10 @@ global labor_SEDLAC // completar
 	replace aporte_pension = 4 if s9q36==1 & s9q37__4==1
 	replace aporte_pension = 5 if s9q36==2
 
-	gen     djubila = (s9q36==1) if relab==2 & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //the last parenthesis means means being economically active
+	gen     djubila = (s9q36==1) if relab==2 & (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) & s9q36!=. & s9q36!=.a  //the last parenthesis means means being economically active
 
 * Health insurance linked to employment: dsegsale
-gen     dsegsale = (afiliado_segsalud==3 | afiliado_segsalud==4) if relab==2
+gen     dsegsale = (afiliado_segsalud==3 | afiliado_segsalud==4) if relab==2 & afiliado_segsalud!=.
 
 * Right to be paid 13 months a year (instead of 12): aguinaldo
 gen     aguinaldo = .

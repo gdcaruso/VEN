@@ -164,6 +164,8 @@ merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
 * Dropping those who do not collaborate in the survey
 drop if colabora_entrevista==2
+* One number per observation
+*gen numero = _n // it is an id
 
 *Obs: there was 1 obs. which does not merge (should not have been approved by headquarters as it was an empty interview. We deleted it in the "ad-hoc" cleaning part)
 
@@ -277,12 +279,12 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 		* Name
 			gen nombre = s6q1
 		*Random var
-		sort interview__key interview__id quest edad hombre nombre, stable
+		sort interview__key interview__id quest edad hombre nombre /*numero*/, stable
 		set seed 123
 		generate z = runiform()
 		sort z, stable
 		*Sorting
-		gsort id_numeric -edad z
+		gsort id_numeric -edad z /*numero*/
 		egen min =  min(_n), by(id)
 		replace min = -min
 		
@@ -417,6 +419,9 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 	by id: egen dosjefes = total(relacion_en) if relacion_en==1
 	br if dosjefes==2
 	*/
+
+* Hasta acá igual a SEDLAC, guardamos para asegurarnos tener el mismo COM y demás
+save "$merged\household-individual.dta", replace
 	
 /*(************************************************************************************************************************************************* 
 *------------------------------------------	1.2: Demographic variables  / Variables demográficas --------------------------------------------------
@@ -4035,7 +4040,7 @@ c_sso_cant_bolfeb c_rpv_cant_bolfeb c_spf_cant_bolfeb c_aca_cant_bolfeb c_sps_ca
 		gen indep_ingneto_mens 	= cond(missing(s9q26a_bolfeb), ., s9q26a_bolfeb) - cond(missing(s9q27_bolfeb), 0, s9q27_bolfeb)
 		replace indep_ingneto_mens = . if (s9q26a_bolfeb==. | s9q26a_bolfeb==.a)
 		gen indep_registraingpaglabmon_men = 1 if (s9q26a_bolfeb>=0 & s9q26a_bolfeb!=. & s9q26a_bolfeb!=.a) & (s9q27_bolfeb>=0 & s9q27_bolfeb!=. & s9q27_bolfeb!=.a)
-		gen indep_usamos_mens = 1 if indep_registraingpaglabmon_men==1 & indep_ingneto_mens>=0
+		gen indep_usamos_mens = 1 if indep_registraingpaglabmon_men==1 & indep_ingneto_mens>=0 // obs: dado que acá definimos =0 también, muchos quedan con ila=0
 
 		replace ingresoslab_mon_local = ingresoslab_mon_local + indep_ingneto_mens	if ingresoslab_mon_local!=. & s9q15==6 & indep_usamos_mens==1
 		replace ingresoslab_mon_local = indep_ingneto_mens							if ingresoslab_mon_local==. & s9q15==6 & indep_usamos_mens==1

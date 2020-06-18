@@ -1,7 +1,7 @@
 /*===========================================================================
 Country name:	Venezuela
 Year:			2019/2020
-Survey:			ECNFT
+Survey:			ENCOVI
 Vintage:		01M-01A
 Project:	
 ---------------------------------------------------------------------------
@@ -79,6 +79,8 @@ local vr       "01"     // version renta
 * The other do-file, with all the ENCOVI data (not SEDLAC harmonization) imports exchange rates and inflation at first, 
 * this one won't do it as we will merge all the income agreggates from the other, more complete, database
 
+*The next parts (1.0 Open databases and 1.1 identification variables is also the same as for all ENCOVI 
+
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.0: Open Databases  ---------------------------------------------------------
 *************************************************************************************************************************************************)*/ 
@@ -95,6 +97,8 @@ merge m:1 interview__key interview__id quest using `household_hhid'
 drop _merge
 * Dropping those who do not collaborate in the survey
 drop if colabora_entrevista==2
+*One number per observation
+*gen numero = _n // it is an id - we didnt use it in the end
 
 *Obs: Obs: there was 1 obs. which does not merge (should not have been approved by headquarters as it was an empty interview. We deleted it in the "ad-hoc" cleaning part)
 
@@ -151,12 +155,12 @@ rename _all, lower
 		* Name
 			gen nombre = s6q1
 		*Random var
-		sort interview__key interview__id quest edad hombre nombre, stable
+		sort interview__key interview__id quest edad hombre nombre /*numero*/, stable
 		set seed 123
 		generate z = runiform()
 		sort z, stable
 		*Sorting
-		gsort id_numeric -edad z
+		gsort id_numeric -edad z /*numero*/
 		egen min =  min(_n), by(id)
 		replace min = -min
 		
@@ -273,6 +277,10 @@ gen psu = combined_id
 	by id: egen dosjefes = total(relacion_en) if relacion_en==1
 	br if dosjefes==2
 	*/
+
+
+*USAMOS LA MISMA QUE LA OTRA BASE PARA ASEGURARNOS COMPARABILIDAD
+*use "$merged\household-individual.dta", clear
 
 /*(************************************************************************************************************************************************* 
 *-------------------------------------------------------------	1.2: Demographic variables  -------------------------------------------------------
@@ -1320,8 +1328,8 @@ global labor_SEDLAC // completar
 	   BUSCAMASHS (s9q32): ¿Ha hecho algo parar trabajar mas horas?
 	   CAMBIOTR (s9q34): ¿Ha cambiado de trabajo durante los últimos meses?
 	*/
-	gen deseamashs = s9q31 if (s9q18<35 | s9q16<35) & (s9q31!=. & s9q31!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
-	gen buscamashs = s9q32 if (s9q18<35 | s9q16<35) & (s9q32!=. & s9q32!=.a) // Only asked if capi4==true, i.e. s9q18<35 , worked less than 35 hs -> worked part-time
+	gen deseamashs = s9q31 if (s9q18<35 | s9q16<35) & (s9q31!=. & s9q31!=.a) // Only asked if capi4==true, i.e. s9q18<35 or s9q16<35, worked less than 35 hs -> worked part-time
+	gen buscamashs = s9q32 if (s9q18<35 | s9q16<35) & (s9q32!=. & s9q32!=.a) // Only asked if capi4==true, i.e. s9q18<35 or s9q16<35, worked less than 35 hs -> worked part-time
 	*Assumption: only part-time workers can want to work more
 	
 	gen cambiotr = s9q34 if (s9q1==1 | s9q2==1 | s9q2==2 | s9q3==1 | s9q5==1) //what comes after the "if" means being economically active

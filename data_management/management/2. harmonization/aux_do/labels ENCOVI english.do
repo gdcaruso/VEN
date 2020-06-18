@@ -1521,7 +1521,7 @@ label var  	hstr_ppal  			"How many hours did you work last week in your main oc
 label var  	trabajo_secundario  "Besides your main occupation, did you do any other activity through which you received income, such as selling things, contracted work, etc?"
 label def	trabajo_secundario 	1 "Yes" 0 "No"
 label values trabajo_secundario trabajo_secundario
-label var  	hstr_todos 		"How many hours do you normally work weekly in all your jobs or businesses?"
+label var  	hstr_todos 		"How many hours do you normally work weekly in all your jobs or businesses? (for those with more than 1 job)"
 
 label var  	im_sueldo  		"Received income in your job/business for wages & salaries last month?"
 label var  	im_hsextra 		"Received income in your job/business for overtime last month?"

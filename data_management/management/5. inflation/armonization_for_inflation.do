@@ -144,6 +144,8 @@ drop _merge
 drop if colabora_entrevista==2
 
 *Obs: there was 1 obs. which does not merge (should not have been approved by headquarters as it was an empty interview. We deleted it in the "ad-hoc" cleaning part)
+*One number per observation
+*gen numero = _n // it is an id - we didnt use it in the end
 
 *Change names to lower cases
 rename _all, lower
@@ -254,12 +256,12 @@ global id_ENCOVI pais ano encuesta id com pondera pondera_hh psu
 		* Name
 			gen nombre = s6q1
 		*Random var
-		sort interview__key interview__id quest edad hombre nombre, stable
+		sort interview__key interview__id quest edad hombre nombre /*numero*/, stable
 		set seed 123
 		generate z = runiform()
 		sort z, stable
 		*Sorting
-		gsort id_numeric -edad z
+		gsort id_numeric -edad z /*numero*/
 		egen min =  min(_n), by(id)
 		replace min = -min
 		
@@ -1987,25 +1989,25 @@ relab ocupado desocupa pea
 		5 = Escasez de materiales o equipos en reparación
 		6 = Otra (Especifique)	*/
 		*Note: for part-time workers, i.e. those who worked less than 35 hours last week in all their jobs // CAPI4
-	clonevar 	razon_menoshs = s9q30 if s9q18<35 & (s9q30!=. & s9q30!=.a) 
+	clonevar 	razon_menoshs = s9q30 if (s9q18<35 | s9q16<35) & (s9q30!=. & s9q30!=.a) 
 
 	***Other
 	* Otra
-	clonevar 	razon_menoshs_o = s9q30_os if s9q18<35 & s9q30==6
+	clonevar 	razon_menoshs_o = s9q30_os if (s9q18<35 | s9q16<35) & s9q30==6
 
 	*** Would you prefer to work more than 35 hs per week?
 	/* s9q31 ¿Preferiría trabajar más de 35 horas por semana? 
 				1 = si
 				2 = no	*/
-		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	gen 	deseamashs = s9q31==1 if s9q18<35 & (s9q31!=. & s9q31!=.a)
+		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 | s9q16<35 // CAPI4==true
+	gen 	deseamashs = s9q31==1 if (s9q18<35 | s9q16<35) & (s9q31!=. & s9q31!=.a)
 
 	*** Have you done something to work more hours?
 	/* s9q32 ¿Ha hecho algo parar trabajar mas horas?: buscamashs
 				1 = si
 				2 = no	*/
 		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	gen 	buscamashs = s9q32==1 if s9q18<35 & (s9q32!=. & s9q32!=.a)
+	gen 	buscamashs = s9q32==1 if (s9q18<35 | s9q16<35) & (s9q32!=. & s9q32!=.a)
 		
 	*** Why haven't you done something to work additional hours?
 	/* s9q33 ¿Por cuál motivo no ha hecho diligencias para trabajar horas adicionales?: razon_nobusca
@@ -2020,12 +2022,12 @@ relab ocupado desocupa pea
 			9 = Se ocupa del hogar
 			10 = Enfermedad o discapacidad
 			11 = Otra (Especifique)	*/
-		* Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
-	clonevar	razon_nobusca = s9q33 if s9q18<35 & (s9q33!=. & s9q33!=.a)
+		* Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 | s9q16<35 // CAPI4==true
+	clonevar	razon_nobusca = s9q33 if (s9q18<35 | s9q16<35) & (s9q33!=. & s9q33!=.a)
 	
 	*** Other reason
 	*Otra razón
-	clonevar 	razon_nobusca_o = s9q33_os if s9q18<35 & s9q33==11
+	clonevar 	razon_nobusca_o = s9q33_os if (s9q18<35 | s9q16<35) & s9q33==11
 	
 * For all workers
 
@@ -3123,7 +3125,7 @@ global foodcons_ENCOVI clap clap_cuando
 	/* s12aq10 Este hogar es/ha sido beneficiario de la Bolsa-Caja del CLAP?
 				1 = si
 				2 = no	*/
-		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 // CAPI4==true
+		*Note: For part-time workers, i.e. worked less than 35 hs s9q18<35 | s9q16<35 // CAPI4==true
 	gen 	clap = s12aq10==1 if (s12aq10!=. & s12aq10!=.a)
 	
 *** When was the last time that the "Bolsa-Caja" CLAP arrived to the household?

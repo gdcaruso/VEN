@@ -20,13 +20,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -886,7 +886,7 @@ notes razon_no_remedio: the survey does not include information to define this v
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades deseamashs buscamashs
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades deseamashs buscamashs proxy_formal aporta_pension_mejorada
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -1120,7 +1120,18 @@ gen     ocuperma = (contrato_encuesta==1) if relab==2
           98 No aplica
           99  NS/NR 
 */
-gen      aporta_pension = (pp65==1) if (relab>=1 & relab<=4) & pp65!=98 & pp65!=99 & pp65!=. & pp65!=.a
+gen    aporta_pension = (pp65==1) if (relab>=1 & relab<=4) & pp65!=98 & pp65!=99 & pp65!=. & pp65!=.a //tomo si realiza aportes a fondo de pension publico o privado
+
+gen      aporta_pension_mejorada = 0 if (relab>=1 & relab<=4) & ((pp65!=98 & pp65!=99 & pp65!=. & pp65!=.a) | (tp53ss!=98 & tp53ss!=99 & tp53ss!=. & tp53ss!=.a) )
+replace      aporta_pension_mejorada = 1 if (relab>=1 & relab<=4) & pp65==1		// pension
+replace      aporta_pension_mejorada = 1 if (relab>=1 & relab<=4) & tp53ss==1	//Seguro social 
+
+*tp53p = prestaciones sociales 
+*tp53h = caja de ahorro
+*tp53ss = seguro social
+*tp53ph = politica habitacional
+gen proxy_formal = 0 if (relab>=1 & relab<=4)
+replace proxy_formal = 1 if aporta_pension==1 | tp53p==1 | tp53h==1 | tp53ss==1 | tp53ph==1
 
 /*
 * Seguro de salud ligado al empleo: dsegsale (sp30)

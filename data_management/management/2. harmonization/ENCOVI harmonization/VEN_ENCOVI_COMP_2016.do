@@ -20,13 +20,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -893,7 +893,7 @@ gen deporte = (actividad_fisica >=20) if actividad_fisica!=.
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca deseamashs buscamashs
+global labor_ENCOVI categ_ocu relab aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca deseamashs buscamashs proxy_formal aporta_pension_mejorada
 
 * Relacion laboral en su ocupacion principal: relab
 /* RELAB:
@@ -1218,13 +1218,24 @@ gen     ocuperma = (contrato_encuesta==1) if relab==2
 
 * Derecho a percibir una jubilacion: djubila
 /*APORTE_PENSION (pp62)
-		1 = Si, para otra institucion o empresa publica
+		1 = Si
 		2 = No
 		98 = No aplica
 		99 = NS/NR  
 */
 clonevar aporte_pension = pp62 if pp62!=98 & pp62!=99 & pp62!=.a
 gen     aporta_pension = (aporte_pension==1) if (relab>=1 & relab<=4) & aporte_pension!=.
+
+gen      aporta_pension_mejorada = 0 if (relab>=1 & relab<=4) & ((pp62!=98 & pp62!=99 & pp62!=. & pp62!=.a) | (tp50ss!=98 & tp50ss!=99 & tp50ss!=. & tp50ss!=.a) )
+replace      aporta_pension_mejorada = 1 if (relab>=1 & relab<=4) & pp62==1
+replace      aporta_pension_mejorada = 1 if (relab>=1 & relab<=4) & tp50ss==1
+
+*tp50p = prestaciones sociales 
+*tp50h = caja de ahorro
+*tp50ss = seguro social
+*tp50ph = politica habitacional
+gen proxy_formal = 0 if (relab>=1 & relab<=4)
+replace proxy_formal = 1 if aporta_pension==1 | tp50p==1 | tp50h==1 | tp50ss==1 | tp50ph==1
 
 /*
 * Seguro de salud ligado al empleo: dsegsale

@@ -20,13 +20,13 @@ Note:
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta  0
 		
 		* User 4: Malena
-		global male   0
+		global male   1
 		
 			
 		if $juli {
@@ -1206,7 +1206,7 @@ notes deporte: the survey does not include information to define this variable
 *---------------------------------------------------------- 1.8: Variables laborales ---------------------------------------------------------------
 *************************************************************************************************************************************************)*/
 
-global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca deseamashs buscamashs
+global labor_ENCOVI categ_ocu relab sector_encuesta aporta_pension ocupado desocupa inactivo pea empresa_enc contrato actividades razon_no_busca deseamashs buscamashs aporta_pension_priv proxy_formal aporta_pension_mejorada
 
 *Chequeo
 	gen error = 0
@@ -1486,6 +1486,21 @@ replace aporte_pension = 3 if pmhp613==3
 replace aporte_pension = 4 if pmhp614==4
 replace aporte_pension = 5 if pmhp615==5
 gen     aporta_pension = (aporte_pension>=1 & aporte_pension<=4) if (relab>=1 & relab<=4) & aporte_pension!=.
+
+gen      aporta_pension_mejorada = 0 if (relab>=1 & relab<=4) & (aporte_pension!=. | (tmhp47ss!=98 & tmhp47ss!=99 & tmhp47ss!=. & tmhp47ss!=.a) )
+replace      aporta_pension_mejorada = 1 if (relab>=1 & relab<=4) & aporta_pension==1
+replace      aporta_pension_mejorada = 1 if (relab>=1 & relab<=4) & tmhp47ss==1
+
+gen aporta_pension_priv = (aporte_pension>=2 & aporte_pension<=4) if (relab>=1 & relab<=4) & aporte_pension!=.
+
+*tmhp47pr = prestaciones sociales 
+*tmhp47ss = seguro social obligatorio
+*tmhp47sp = seguro privado
+*tmhp47ca = caja de ahorros
+*tmhp47fh = fondo de ahorro habitacional
+*tmhp47sf = seguro de paro forzoso
+gen proxy_formal = 0 if (relab>=1 & relab<=4)
+replace proxy_formal = 1 if (aporte_pension>=1 & aporte_pension<=4) | tmhp47pr==1 | tmhp47ss==1 | tmhp47sp==1 | tmhp47ca==1 | tmhp47fh==1 | tmhp47sf==1
 
 /*
 * Seguro de salud ligado al empleo: dsegsale

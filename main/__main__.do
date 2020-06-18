@@ -234,3 +234,10 @@ drop _merge
 save "$outENCOVI\ENCOVI_2019_English labels.dta", replace
 
 clear all
+
+
+/*==============================================================================
+Ad-hoc fix July
+==============================================================================*/
+
+do "$dopath\data_management\management\3. cleaning\Ad-hoc arreglo junio.do"

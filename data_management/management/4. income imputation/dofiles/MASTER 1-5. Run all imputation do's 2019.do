@@ -142,7 +142,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	* Mergeamos ila_m_imp1
 	capture drop _merge
 	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_ila_m_imp1_2019.dta" // da lo mismo usando id com
-
+	
 	* Mergeamos jubpen_imp1
 	capture drop _merge
 	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_jubpen_imp1_2019.dta"
@@ -155,9 +155,16 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 	capture drop _merge
 	merge 1:1 interview__key interview__id quest com using "$forimp\VEN_bene_imp1_2019.dta"
 
-	
+		/*Fix (those who idd answer they do not receive, i.e. real zeros): 
+		replace ila_m_imp1 = 0 		if recibe_ingresolab_mon==0
+		replace bene_imp1 = 0 		if recibe_ingresolab_nomon==0
+		replace inlanojub_imp1 = 0	if recibe_ingresonolab==0
+		replace jubpen_imp1 = 0 	if recibe_ingresopenjub==0
+		*/
+		*Done at the end
+		
 ****************************************************
-//*** Replacing imputed labor income variables ***//
+//***    Replacing imputed income variables    ***//
 ****************************************************
 	
 	*Labor income
@@ -169,6 +176,7 @@ use "$forimp\ENCOVI_forimputation_2019.dta", clear
 		rename bene_imp1 ingresoslab_bene
 	
 	*Non labor income
+	
 		drop ijubi_m 
 		rename jubpen_imp1 ijubi_m 
 		

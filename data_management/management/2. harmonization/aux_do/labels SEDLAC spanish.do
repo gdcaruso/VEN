@@ -253,7 +253,7 @@ label define desocupa 0 "No desocupado" 1 "Desocupado"
 label values desocupa desocupa 
 
 label var    durades          "Duracion del desempleo en meses"
-label var    hstrt            "Horas trabajadas en todas las ocupaciones"
+label var    hstrt            "Horas trabajadas en todas las ocupaciones (para aquellos con más de 1 trabajo)"
 label var    hstrp            "Horas trabajadas en la ocupacion principal"
 
 label var    deseamas        "Desea conseguir otro empleo o trabajar mas horas?"

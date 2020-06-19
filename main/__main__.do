@@ -237,7 +237,7 @@ clear all
 
 
 /*==============================================================================
-Ad-hoc fix July
+Ad-hoc fix June
 ==============================================================================*/
 
 do "$dopath\data_management\management\3. cleaning\Ad-hoc arreglo junio.do"

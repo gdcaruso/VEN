@@ -200,7 +200,9 @@ use "$output\ENCOVI_2019_postpobreza.dta", clear
 *ila
 	replace ila_m = 0 		if recibe_ingresolab_mon==0
 	replace ila_nm = 0 		if recibe_ingresolab_nomon==0
-	replace ila = 0 		if recibe_ingresolab_mon==0 & recibe_ingresolab_nomon==0
+	replace ila = 0 		if recibe_ingresolab_mon==0 & recibe_ingresolab_nomon==0 & categ_ocu!=6
+	replace ila = 0 		if recibe_ingresolab_mon==0 & categ_ocu==6
+	
 *inla
 	replace inla_m = 0		if recibe_ingresonolab==0 & recibe_ingresopenjub==0
 	replace inla = 0 		if recibe_ingresonolab==0 & recibe_ingresopenjub==0 // because there is no non-monetary

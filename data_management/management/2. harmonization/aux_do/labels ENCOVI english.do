@@ -4,13 +4,13 @@
 /*(************************************************************************************************************************************************* 
 *----------------------------------------	II. Interview Control / Control de la entrevista  -------------------------------------------------------
 *************************************************************************************************************************************************)*/
-label var    entidad 	"Federal entity"
-label def 	entidad		1 "Distrito Capital" 2 "Amazonas" 3 "Anzoategui" 4 "Apure" ///
+label var   entidad 	"Federal entity"
+label def 	entidad_eng	1 "Distrito Capital" 2 "Amazonas" 3 "Anzoategui" 4 "Apure" ///
 						5 "Aragua" 6 "Barinas" 7 "Bolivar" 8 "Carabobo" 9 "Cojedes" ///
 						10 "Delta Amacuro" 11 "Falcon" 12 "Guarico" 13 "Lara" 14 "Merida" ///
 						15 "Miranda" 16 "Monagas" 17 "Nueva Esparta" 18 "Portuguesa" ///
 						19 "Sucre" 20 "Tachira" 21 "Trujillo" 22 "Yaracuy" 23 "Zulia" 24 "Vargas"
-label value entidad entidad
+label value entidad entidad_eng
 label var    municipio 	"Municipality"
 label var    nombmun 	"Municipality's name"
 label var    parroquia 	"Parish"
@@ -33,7 +33,7 @@ label var    nombpar 	"Parish name"
 *label var    gps_coord_tiempo	"GPS coordinates: Time stamp"
 *label var    id_str 	"Number of structures according to listing"
 *label var    statut 	"Number of the household in the structure"
-*label def 	 status		1 "Residential" 2 "Non-residential"
+*label def 	 status_eng		1 "Residential" 2 "Non-residential"
 *label var    sector_urb "Sector/Urbanization/Neighborhood according to listing"
 
 
@@ -42,7 +42,6 @@ label var    nombpar 	"Parish name"
 *************************************************************************************************************************************************)*/
 label var   npers_viv 			"Number of residents in dwelling"
 label var   comparte_gasto_viv 	"All residents share expenses to buy food?"
-label def 	relacion 			0 "No" 1 "Si"
 label var   npers_gasto_sep 	"How many groups of people have separate food expenses"
 label var   npers_gasto_comp	"How many people in household (sharing food expenses)"
 
@@ -60,78 +59,78 @@ label var 	pondera_hh		"Weighting factor at the household level (expands to hous
 *label var   strata          "Stratification variable"   
 label var    psu	     	 "Primary sampling unit"
 label var region_est1 "Region"
-label def region_est1 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
+label def region_est1_eng 1 "Central"  2 "Llanera" 3 "Occidental" 4 "Zuliana" ///
           5 "Andina" 6 "Nor-Oriental" 7 "Capital"
-label value region_est1 region_est1
+label value region_est1 region_est1_eng
 
 
 /*(************************************************************************************************************************************************* 
 *------------------------------------------	1.2: Demographic variables / Variables demográficas --------------------------------------------------
 *************************************************************************************************************************************************)*/
 label var	relacion_en 	"Relationship with head of household (this survey)"
-label def 	relacion_en	 	1 "Head" 2 "Spouse/Partner" 3 "Son/Daughter" 4 "Stepson/Stepdaughter" 5 "Granddaughter/Grandson" ///
+label def 	relacion_en_eng	 	1 "Head" 2 "Spouse/Partner" 3 "Son/Daughter" 4 "Stepson/Stepdaughter" 5 "Granddaughter/Grandson" ///
 							6 "Son/Daughter in law, father/mother in law" 7 "Mother/Father" 8 "Brother/Sister" 9 "Brother in law" ///
 							10 "Nephew" 11 "Other family" 12 "Other non-family" 13 "Domestic service"
-label values relacion_en relacion_en
+label values relacion_en relacion_en_eng
 label var	relacion_comp 	"Relationship with head of household (harmonized)"
-label def 	relacion_comp 	1 "Head" 2 "Spouse/Partner" 3 "Son/Daughter/Stepson/Stepdaughter" 4 "Granddaughter/Grandson" ///
+label def 	relacion_comp_eng 	1 "Head" 2 "Spouse/Partner" 3 "Son/Daughter/Stepson/Stepdaughter" 4 "Granddaughter/Grandson" ///
 							5 "Son/Daughter in law, father/mother in law" 6 "Mother/Father" 7 "Brother/Sister" 8 "Brother in law" ///
 							9 "Nephew" 10 "Other family" 11 "Other non-family" 12 "Domestic service"
-label values relacion_comp relacion_comp
+label values relacion_comp relacion_comp_eng
 label var    gedad1          "Age groups: 2=[15,24], 3=[25,40], 4=[41,64]"
-label define gedad1 1 "[0,14]" 2 "[15,24]" 3 "[25,40]" 4 "[41,64]" 5 "[65+]"
-label values gedad1 gedad1
+label define gedad1_eng 1 "[0,14]" 2 "[15,24]" 3 "[25,40]" 4 "[41,64]" 5 "[65+]"
+label values gedad1 gedad1_eng
 
 label var    grupo_edad          "Age groups (10ys each)"
-label def grupo_edad 1 "[0-9]" 2 "[10-19]" 3 "[20-29]" 4 "[30-39]" 5 "[40-49]" 6 "[50-59]" 7 "[60-69]" 8 "[70-79]" 9 "[80+]"
-label value grupo_edad grupo_edad
+label def grupo_edad_eng 		1 "[0-9]" 2 "[10-19]" 3 "[20-29]" 4 "[30-39]" 5 "[40-49]" 6 "[50-59]" 7 "[60-69]" 8 "[70-79]" 9 "[80+]"
+label value grupo_edad grupo_edad_eng
 label var	hombre 			"Gender (Male?)"
-label def 	hombre 			0 "Female" 1 "Male"
-label values hombre hombre
+label def 	hombre_eng 			0 "Female" 1 "Male"
+label values hombre hombre_eng
 label var	edad 			"Age"
 label var	anio_naci 		"Year of birth"
 label var	mes_naci 		"Month of birth"
 label def 	mes_naci 		1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
 label var	dia_naci 		"Day of birth"
 label var	pais_naci 		"Country of birth"
-label def 	pais_naci		1 "Venezuela" 2 "Colombia" 3 "Ecuador" 4 "Peru" 5 "Chile" 6 "Argentina" 7 "Brasil" 8 "Guyana" ///
+label def 	pais_naci_eng		1 "Venezuela" 2 "Colombia" 3 "Ecuador" 4 "Peru" 5 "Chile" 6 "Argentina" 7 "Brasil" 8 "Guyana" ///
 							9 "España" 10 "Italy" 11 "Portugal" 12 "United States" 13 "Siria" 14 "Lebanon" 15 "Other" 
-label values pais_naci pais_naci
+label values pais_naci pais_naci_eng
 label var	residencia 		"Place of residence in September 2018"
-label def 	residencia		1 "This same county" 2 "Another Venezuelan county" 3 "Another country" 4 "Not born"
-label values residencia residencia
+label def 	residencia_eng		1 "This same county" 2 "Another Venezuelan county" 3 "Another country" 4 "Not born"
+label values residencia residencia_eng
 label var	resi_estado 	"Federal state of residence in September 2018"
-label def 	resi_estado		1 "Distrito Capital" 2 "Amazonas" 3 "Anzoategui" 4 "Apure" 5 "Aragua" 6 "Barinas" 7 "Bolivar" ///
+label def 	resi_estado_eng		1 "Distrito Capital" 2 "Amazonas" 3 "Anzoategui" 4 "Apure" 5 "Aragua" 6 "Barinas" 7 "Bolivar" ///
 							8 "Carabobo" 9 "Cojedes" 10 "Delta Amacuro" 11 "Falcón" 12 "Guárico" 13 "Lara" 14 "Mérida" 15 "Miranda" 16 "Monagas"
-label values resi_estado resi_estado
+label values resi_estado resi_estado_eng
 label var	resi_municipio 	"County of residence in September 2018"
 /* label def 	resi_municipio	Libertador Anaco Juan Antonio Sotillo Libertad Piritu San Jose de Guanipa Simon Bolivar Simon Rodriguez Paez Romulo Gallegos San Fernando Bolivar Camatagua Girardot Jose Rafael Revenga Mario Briceno Iragorry San Sebastian Santiago Marino Francisco Linares Alcantara Alberto Arvelo Torrealba Barinas Cruz Paredes Sosa Gran Sabana Heres Piar Guacara Libertador Los Guayos San Diego San Joaquin Valencia Falcon Colina Falcon Leonardo Infante Las Mercedes Jose Tadeo Monagas Jose Felix Ribas Crespo Iribarren Palavecino Urdaneta Alberto Adriani Antonio Pinto Salinas Arzobispo Chacon Libertador Zea Cristobal Rojas Guaicaipuro Ezequiel Zamora Libertador Maturin Maneiro Marino Guanare Guanarito Turen Andres Mata Bermudez Bolivar Libertador Sucre Valdez Fernandez Feo Libertador San Felipe Urachiche Francisco Javier Pulgar Maracaibo Rosario de Perija San Francisco Santa Rita Sucre Vargas */
 label var	razon_cambio_resi "Reason for moving"
-label def	razon_cambio_resi 1 "Risks of natural disaster (flooding, landslide or earthquake" 2 "Threat or risk for life, freedom or phyisical integrity" 3 "Absense of subsistence means" ///
+label def	razon_cambio_resi_eng 1 "Risks of natural disaster (flooding, landslide or earthquake" 2 "Threat or risk for life, freedom or phyisical integrity" 3 "Absense of subsistence means" ///
 							4 "Lack of access to services" 5 "Difficulties to find a job" 6 "Health reasons" 7 "Other"
-label values razon_cambio_resi razon_cambio_resi
+label values razon_cambio_resi razon_cambio_resi_eng
 label var 	razon_cambio_resi_o "Other reason for moving"
 label var	pert_2014		"Incorporated to the household in the last 5 years?"
-label def 	pert_2014		1 "Yes" 0 "No"
-label values pert_2014 pert_2014
+label def 	pert_2014_eng		1 "Yes" 0 "No"
+label values pert_2014 pert_2014_eng
 label var	razon_incorp_hh	"Reason for incorporating to the household"
-label def 	razon_incorp_hh	1 "New born" 2 "Separated, divorced, cancelled marriage" 3 "Married or came to live with couple" 4 "Came to live as close friend" 5 "Came back from work" 6 "Came back from studying" ///
+label def 	razon_incorp_hh_eng	1 "New born" 2 "Separated, divorced, cancelled marriage" 3 "Married or came to live with couple" 4 "Came to live as close friend" 5 "Came back from work" 6 "Came back from studying" ///
 							7 "Came because of improved economic situation" 8 "Came because of worsened economic situation" 9 "Came because of bad family relationships" 10 "Came back from living abroad" 12 "Came for other reasons"
-label values razon_incorp_hh razon_incorp_hh
+label values razon_incorp_hh razon_incorp_hh_eng
 label var razon_incorp_hh_o "Reason for incorporating to the household(Other)"
 label var	certificado_naci "Birth certificate"
 label var	cedula 			"ID card"
 label var	razon_nocertificado "Reason for not having ID card"
-label def	razon_nocertificado	1 "Not important" 2 "Doesn't know the requirements" 3 "Doesn't know where to process it" 4 "There are no offices near" 5 "Doesn't have the resources to process it" 6 "Its in process" 7 "Other reason"
-label values razon_nocertificado razon_nocertificado
+label def	razon_nocertificado_eng	1 "Not important" 2 "Doesn't know the requirements" 3 "Doesn't know where to process it" 4 "There are no offices near" 5 "Doesn't have the resources to process it" 6 "Its in process" 7 "Other reason"
+label values razon_nocertificado razon_nocertificado_eng
 label var	razon_nocertificado_o "Other reason for not having ID card"
 label var	estado_civil_en "Marital status (this survey)"
-label def	estado_civil_en 1 "Married, living together" 2 "Married, not living together" 3 "United, living together" ///
+label def	estado_civil_en_eng 1 "Married, living together" 2 "Married, not living together" 3 "United, living together" ///
 							4 "United, not living together" 5 "Divorced" 6 "Separated" 7 "Widowed" 8 "Single / Never united"
-label values estado_civil_en estado_civil_en
+label values estado_civil_en estado_civil_en_eng
 label var	estado_civil 	"Marital status (harmonized)"
-label def	estado_civil	1 "Married" 2 "Never married" 3 "Living together" 4 "Divorced/separated" 5 "Widowed"
-label values estado_civil estado_civil
+label def	estado_civil_eng	1 "Married" 2 "Never married" 3 "Living together" 4 "Divorced/separated" 5 "Widowed"
+label values estado_civil estado_civil_eng
 label var	hijos_nacidos_vivos "Number of sons/daughters born alive"
 label var	hijos_vivos 	"Number of sons/daughters currently alive"
 label var	anio_ult_hijo 	"Year your last son/daughter was born"
@@ -153,8 +152,8 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 	*-- Label variable
 	label var material_piso "Type of flooring material"
 	 *-- Label values
-		label def material_piso 1 "Mosaic,granite,vynil, brick.." 2 "Cement" 3 "Ground floor" 4 "Boards" 5 "Other"
-		label value material_piso material_piso
+		label def material_piso_eng 1 "Mosaic,granite,vynil, brick.." 2 "Cement" 3 "Ground floor" 4 "Boards" 5 "Other"
+		label value material_piso material_piso_eng
 
 *** Type of exterior wall material		 
 /* MATERIAL_PARED_EXTERIOR (s4q2)
@@ -172,9 +171,9 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 	*-- Label variable
 	label var material_pared_exterior "Type of exterior wall material"
 	*-- Label values
-	label def material_pared_exterior 1 "Frieze brick" 2 "Non frieze brick" 3 "Concrete" ///
+	label def material_pared_exterior_eng 1 "Frieze brick" 2 "Non frieze brick" 3 "Concrete" ///
 	4 "Wood" 5 "Polyvinyl chloride block" 6 "Adobe, mud or frieze bahareque" 7 "Adobe, mud or non frieze bahareque" 8 "Other"
-	label value material_pared_exterior material_pared_exterior
+	label value material_pared_exterior material_pared_exterior_eng
 
 *** Type of roofing material
 /* MATERIAL_TECHO (s4q3)
@@ -188,11 +187,11 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 	*-- Label variable
 	label var material_techo "Type of roofing material"
 	*-- Label values
-	label def material_techo_en 1 "Platabanda (concrete or planks)" ///		
+	label def material_techo_eng 1 "Platabanda (concrete or planks)" ///		
 		 2 "Roof tile or similar"  3 "Asphalt sheet" ///
 		 4 "Metal sheets (zinc, aluminum and the like)" ///
 		 5 "Waste materials (plank, boards or the like, palm)"
-	label val material_techo material_techo_en
+	label val material_techo material_techo_eng
 	
 *** Type of dwelling
 /* TIPO_VIVIENDA (s4q4): Tipo de Vivienda 
@@ -209,12 +208,12 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 	*-- Label variable
 	label var tipo_vivienda "Type of dwelling"
 	*-- Label values
-	label def tipo_vivienda_en 1 "Detached house" ///
+	label def tipo_vivienda_eng 1 "Detached house" ///
 		2 "House" 3 "Apartament in building complex" ///
 		4 "Annex in detached house" 5 "Vivienda rustica (rancho)" ///
 		6 "Room in a house or workplace" ///
 		7 "Rancho campesino"
-	label val tipo_vivienda tipo_vivienda_en
+	label val tipo_vivienda tipo_vivienda_eng
 	
 *** Water supply
 /* SUMINISTRO_AGUA (s4q5): Cuales han sido las principales fuentes de suministro de agua en esta vivienda?
@@ -230,10 +229,10 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		label var suministro_agua "Last 3 months: Water supply (this survey)"		
 
 		*-- Label values
-		label def suministro_agua_en 1 "From pipeline" 2 "Pile or pond" ///
+		label def suministro_agua_eng 1 "From pipeline" 2 "Pile or pond" ///
 		3 "Distributed by water tanker truck"	4 "Connected to water pump"	5 "Connected but no water pump" ///
 		6 "Other"
-		label value suministro_agua suministro_agua_en
+		label value suministro_agua suministro_agua_eng
 		*/
 		
 		*Label variables
@@ -243,14 +242,14 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		label var sum_agua_pozobomb "Last 3 months: Water supply from water pump"
 		label var sum_agua_pozoprot "Last 3 months: Water supply from connected but no water pump"
 		label var sum_agua_otro 	"Last 3 months: Water supply from other sources"
-		label def sum_agua 1 "Most utilized" 2 "Second most utilized" 3 "Third most utilized"
+		label def sum_agua_eng 1 "Most utilized" 2 "Second most utilized" 3 "Third most utilized"
 		
-		label val sum_agua_acueduct sum_agua
-		label val sum_agua_pilaoest sum_agua
-		label val sum_agua_cisterna sum_agua
-		label val sum_agua_pozobomb sum_agua
-		label val sum_agua_pozoprot sum_agua
-		label val sum_agua_otro sum_agua
+		label val sum_agua_acueduct sum_agua_eng
+		label val sum_agua_pilaoest sum_agua_eng
+		label val sum_agua_cisterna sum_agua_eng
+		label val sum_agua_pozobomb sum_agua_eng
+		label val sum_agua_pozoprot sum_agua_eng
+		label val sum_agua_otro 	sum_agua_eng
 		
 		label var sum_agua_otro_esp	"Last 3 months: Water supply from other sources, specify"
 
@@ -274,10 +273,10 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		*-- Label variable
 		label var frecuencia_agua "Last 3 months: Frequency of water supply"
 		*-- Label values
-		label def frecuencia_agua_en 1 "Every day" 2 "Some days every week" ///
+		label def frecuencia_agua_eng 1 "Every day" 2 "Some days every week" ///
 		3 "Once a week"	4 "Once every two weeks" ///
 		5 "Never"
-		label val frecuencia_agua frecuencia_agua_en
+		label val frecuencia_agua frecuencia_agua_eng
 
 *** Electricity
 /* SERVICIO_ELECTRICO : En los ultimos 3 meses, el servicio electrico ha sido suministrado por?
@@ -294,12 +293,12 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		label var serv_elect_otro "Last 3 months, electricity supply: other"
 		*-- Label variable
 		label var  electricidad "Last 3 months, had access to electricity"
-		label def elec 1 "Yes" 0 "No"
+		label def elec_eng 1 "Yes" 0 "No"
 		
-		label val serv_elect_red_pub elec
-		label val serv_elect_planta_priv elec
-		label val serv_elect_otro elec
-		label val electricidad elec
+		label val serv_elect_red_pub 		elec_eng
+		label val serv_elect_planta_priv 	elec_eng
+		label val serv_elect_otro 			elec_eng
+		label val electricidad 				elec_eng
 		
 		label var serv_elect_otro_esp "Last 3 months, another electric service, specify" 
 		
@@ -338,12 +337,12 @@ label var	dia_ult_hijo	"Day your last son/daughter was born"
 		*-- Label variable
 		label var tipo_sanitario "Type of toilet (this survey)"
 		*-- Label values
-		label def tipo_sanitario 1 "Toilet with flush (connected to public sewerage system)" ///
+		label def tipo_sanitario_eng 1 "Toilet with flush (connected to public sewerage system)" ///
 		2 "Toilet with flush (connected to cesspit)" ///
 		3 "Toilet but not connected" ///
 		4 "Toilet without flush" ///
 		5 "Without toilet"
-		label val tipo_sanitario tipo_sanitario
+		label val tipo_sanitario tipo_sanitario_eng
 		
 		*-- Label variable
 		label var tipo_sanitario_comp "Type of toilet (harmonized)"
@@ -365,8 +364,8 @@ VAR: banio_con_ducha = s5q2*/
 		*-- Label variable
 		label var banio_con_ducha "Bath with shower"
 		*-- Label values
-		label def banio_con_ducha_en 1 "Yes" 0 "No"
-		label val banio_con_ducha banio_con_ducha_en
+		label def banio_con_ducha_eng 1 "Yes" 0 "No"
+		label val banio_con_ducha banio_con_ducha_eng
 		
 *** Number of bathrooms with shower
 /* NBANIOS (s5q3): cuantos banos con ducha o regadera?
@@ -390,7 +389,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var tenencia_vivienda "Housing tenure (this survey)"
 		*-- Label values
-		label def tenencia_vivienda_en 1 "Own housing (paid)" 2 "Own housing (paying)" ///
+		label def tenencia_vivienda_eng 1 "Own housing (paid)" 2 "Own housing (paying)" ///
 				3 "Rented housing" 4 "Rented part of the housing" ///
 				5 "Awarded-Social housing: Gran Mision Vivienda (paying)" /// 
 				6 "Awarded-Social housing: Gran Mision Vivienda" ///
@@ -398,14 +397,14 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 				8 "Borrowed by relative or friend" ///
 				9 "Taken over" ///
 			   10 "Other"
-		label val tenencia_vivienda tenencia_vivienda_en
+		label val tenencia_vivienda tenencia_vivienda_eng
 
 		*-- Label variable
 		label var tenencia_vivienda_comp "Housing tenure (harmonized)"
 		*-- Label values
-		label def tenencia_vivienda_comp_en 1 "Own housing (paid)" 2 "Own housing (paying)" ///
+		label def tenencia_vivienda_comp_eng 1 "Own housing (paid)" 2 "Own housing (paying)" ///
 		3 "Rented housing" 4 "Borrowed" 5 "Taken over" 6 "Social housing: Government program" 7 "Other"
-		label value tenencia_vivienda_comp tenencia_vivienda_comp_en
+		label value tenencia_vivienda_comp tenencia_vivienda_comp_eng
 
 		*** How much did you pay for rent or mortgage the last month?
 		*-- Label variable
@@ -419,27 +418,27 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var pago_alq_mutuo_m "In which month did you make the payment?"
 		*-- Label values
-		label def month 1 "January" 2 "February" 3 "March" 4 "April" ///
+		label def month_eng 1 "January" 2 "February" 3 "March" 4 "April" ///
 		5 "May" 6 "June" 7 "July" 8 "August" 9 "September" 10 "October" 11 "November" 12 "December"
-		label val pago_alq_mutuo_m month
+		label val pago_alq_mutuo_m month_eng
 		
 		*** During the last year, have you had arrears in payments?
 		*-- Label variable
 		label var atrasos_alq_mutuo "During the last year, have you had arrears in payments?"
 		*-- Label values
-		label def yesno 1 "Yes" 0 "No"
-		label val atrasos_alq_mutuo yesno
+		label def yesno_eng 1 "Yes" 0 "No"
+		label val atrasos_alq_mutuo yesno_eng
 		
 		*** What consequences did the arrears in payments had?
 		*-- Label variable
 		label var implicancias_nopago "What consequences did the arrears in payments had?"
 		*-- Label values
-		label def implicancias_nopago 1 "Sold assets from the household to cancel debt" ///
+		label def implicancias_nopago_eng 1 "Sold assets from the household to cancel debt" ///
 							          2 "Asked your relatives for help" ///
 									  3 "Sublease a room in the house" /// 
 									  4 "Looked for a second job" ///
                                       5 "Other"
-		label val implicancias_nopago implicancias_nopago
+		label val implicancias_nopago implicancias_nopago_eng
 
 		
 		label var implicancias_nopago_o "Others, specify"
@@ -456,11 +455,11 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var titulo_propiedad "What type of property title do you have?"
 		*-- Label values
-		label def titulo_propiedad 1 "Título supletorio" ///
+		label def titulo_propiedad_eng 1 "Título supletorio" ///
                     2 "Ownership certificate" ///                 
 					3 "Without certificate" ///
                     4 "Other"
-		label val titulo_propiedad titulo_propiedad 
+		label val titulo_propiedad titulo_propiedad_eng
 
 *** What are the main sources of drinking water in your household?
 		* Acueducto
@@ -489,43 +488,43 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		label var fagua_otro "Main drinking water source in your household? Other"
 
 		*-- Label values
-		label def aqua_en 0 "Other" 1 "First (1)" 2 "Second (2)" 3 "Third (3)" 
-		label val fagua_acueduc aqua_en
-		label val fagua_estanq aqua_en
-		label val fagua_cisterna aqua_en
-		label val fagua_bomba aqua_en
-		label val fagua_pozo aqua_en
-		label val fagua_manantial aqua_en
-		label val fagua_botella aqua_en
-		label val fagua_otro aqua_en
+		label def aqua_eng 0 "Other" 1 "First (1)" 2 "Second (2)" 3 "Third (3)" 
+		label val fagua_acueduc aqua_eng
+		label val fagua_estanq 	aqua_eng
+		label val fagua_cisterna aqua_eng
+		label val fagua_bomba 	aqua_eng
+		label val fagua_pozo 	aqua_eng
+		label val fagua_manantial aqua_eng
+		label val fagua_botella aqua_eng
+		label val fagua_otro 	aqua_eng
 
 		*** In your household, is the water treated to make it drinkable
 		*-- Label variable
 		label var tratamiento_agua "In your household, is the water treated to make it drinkable"
 		*-- Label values
-		label val tratamiento_agua yesno
+		label val tratamiento_agua yesno_eng
 		
 		*** How do you treat the water to make it more safe for drinking
 		*-- Label variable
 		label var tipo_tratamiento "How do you treat the water to make it more safe for drinking"
-		label def tipo_tratamiento 1 "Boil the water" 2 "Add bleach" ///
+		label def tipo_tratamiento_eng 1 "Boil the water" 2 "Add bleach" ///
 						   3 "Use a filter for water" 4 "Boil and filter" ///
 						   5 "Other"
-	    label val tipo_tratamiento tipo_tratamiento
+	    label val tipo_tratamiento tipo_tratamiento_eng
 		
 		*** Which type of fuel do you use for cooking?
 		*-- Label variable
 		label var comb_cocina "Which type of fuel do you use for cooking?"
 		*-- Label values
-		!label def comb_cocina 1 "Gas (direct)" 2 "Gas por bombona" 3 "Electricity" 4 "Wood" 5 "Other" 6 "Do not cook"
-		label val comb_cocina comb_cocina
+		!label def comb_cocina_eng 1 "Gas (direct)" 2 "Gas por bombona" 3 "Electricity" 4 "Wood" 5 "Other" 6 "Do not cook"
+		label val comb_cocina comb_cocina_eng
 
 *** Did you pay for the following utilities?
 * Water
 		*-- Label variable
 		label var pagua "Did you pay for the following utilities? Water"
 		*-- Label values
-		label val pagua yesno
+		label val pagua yesno_eng
 
 * Electricity
 		*-- Label variable
@@ -544,11 +543,11 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		label var ptelefono "Did you pay for the following utilities? Landline, internet and tv cable"
 		
 		*-- Label values
-		label val pelect yesno
-		label val pgas yesno
-		label val pcarbon yesno
-		label val pparafina yesno
-		label val ptelefono yesno
+		label val pelect 	yesno_eng
+		label val pgas 		yesno_eng
+		label val pcarbon 	yesno_eng
+		label val pparafina yesno_eng
+		label val ptelefono yesno_eng
 
 *** How much did you pay for the following utilities?
 		*-- Label variable
@@ -595,37 +594,37 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var pagua_m "In which month did you pay for the following utilities? Water"
 		*-- Label values
-		label val pagua_m month 
+		label val pagua_m month_eng 
 		* Electricity
 		*-- Label variable
 		label var pelect_m "In which month did you pay for the following utilities? Electricity"
 		*-- Label values
-		label val pelect_m month
+		label val pelect_m month_eng
 		* Gas
 		*-- Label variable
 		label var pgas_m "In which month did you pay for the following utilities? Gas"
 		*-- Label values
-		label val pgas month
+		label val pgas month_eng
 		* Carbon, wood
 		label var pcarbon_m "In which month did you pay for the following utilities? Carbon, wood"
 		*-- Label values
-		label val pcarbon_m month
+		label val pcarbon_m month_eng
 		* Paraffin
 		*-- Label variable
 		label var pparafina_m "In which month did you pay for the following utilities? Paraffin"
 		*-- Label values
-		label val pparafina_m month
+		label val pparafina_m month_eng
 		* Landline, internet and tv cable
 		*-- Label variable
 		label var ptelefono_m "In which month did you pay for the following utilities? Landline, internet and tv cable"
 		*-- Label values
-		label val ptelefono_m month
+		label val ptelefono_m month_eng
 
 *** In your household, have any home appliences damaged due to blackouts or voltage inestability?
 		*-- Label variable
 		label var danio_electrodom "In your household, have any home appliences damaged due to blackouts or voltage inestability?"
 		*-- Label values
-		label val danio_electrodom yesno
+		label val danio_electrodom yesno_eng
 
 	
 /*(************************************************************************************************************************************************* 
@@ -637,8 +636,8 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		cap label var auto "Dummy household owns cars"
 		*-- Label values
-		cap label def auto 1 "Yes" 0 "No"
-		cap label val auto auto
+		cap label def auto_eng 1 "Yes" 0 "No"
+		cap label val auto auto_eng
 
 *** Number of functioning cars in the household
 * NCARROS (s5q4a) : ¿De cuantos carros dispone este hogar que esten en funcionamiento?
@@ -655,24 +654,24 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var heladera "Does the household have fridge?"
 		*-- Label values
-		label def heladera 1 "Yes" 0 "No"
-		label val heladera heladera
+		label def heladera_eng 1 "Yes" 0 "No"
+		label val heladera heladera_eng
 
 *** Does the household have washing machine?
 * Lavarropas (s5q6__2): ¿Posee este hogar lavadora?
 		*-- Label variable
 		label var lavarropas "Does the household have washing machine?"
 		*-- Label values
-		label def lavarropas 1 "Yes" 0 "No"
-		label val lavarropas lavarropas
+		label def lavarropas_eng 1 "Yes" 0 "No"
+		label val lavarropas lavarropas_eng
 
 *** Does the household have dryer
 * Secadora (s5q6__3): ¿Posee este hogar secadora? 
 		*-- Label variable
 		label var secadora "Does the household have dryer"
 		*-- Label values
-		label def secadora 1 "Yes" 0 "No"
-		label val secadora secadora
+		label def secadora_eng 1 "Yes" 0 "No"
+		label val secadora secadora_eng
 
 
 *** Does the household have computer?
@@ -680,72 +679,72 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var computadora "Does the household have computer?"
 		*-- Label values
-		label def computadora 1 "Yes" 0 "No"
-		label val computadora computadora
+		label def computadora_eng 1 "Yes" 0 "No"
+		label val computadora computadora_eng
 		
 *** Does the household have internet?
 * Internet (s5q6__5): ¿Posee este hogar internet?
 		*-- Label variable
 		label var internet "Does the household have internet?"
 		*-- Label values
-		label def internet 1 "Yes" 0 "No"
-		label val internet internet
+		label def internet_eng 1 "Yes" 0 "No"
+		label val internet internet_eng
 
 *** Does the household have tv?
 * Televisor (s5q6__6): ¿Posee este hogar televisor?
 		*-- Label variable
 		label var televisor "Does the household have tv?"
 		*-- Label values
-		label def televisor 1 "Yes" 0 "No"
-		label val televisor televisor
+		label def televisor_eng 1 "Yes" 0 "No"
+		label val televisor televisor_eng
 
 *** Does the household have radio?
 * Radio (s5q6__7): ¿Posee este hogar radio? 
 		*-- Label variable
 		label var radio "Does the household have radio?"
 		*-- Label values
-		label def radio 1 "Yes" 0 "No"
-		label val radio radio
+		label def radio_eng 1 "Yes" 0 "No"
+		label val radio radio_eng
 
 *** Does the household have heater?
 * Calentador (s5q6__8): ¿Posee este hogar calentador? //NO COMPARABLE CON CALEFACCION FIJA
 		*-- Label variable
 		label var calentador "Does the household have heater?"
 		*-- Label values
-		label def calentador 1 "Yes" 0 "No"
-		label val calentador calentador
+		label def calentador_eng 1 "Yes" 0 "No"
+		label val calentador calentador_eng
 
 *** Does the household have air conditioner?
 * Aire acondicionado (s5q6__9): ¿Posee este hogar aire acondicionado?
 		*-- Label variable
 		label var aire "Does the household have air conditioner?"
 		*-- Label values
-		label def aire 1 "Yes" 0 "No"
-		label val aire aire
+		label def aire_eng 1 "Yes" 0 "No"
+		label val aire aire_eng
 
 *** Does the household have cable tv?
 * TV por cable o satelital (s5q6__10): ¿Posee este hogar TV por cable?
 		*-- Label variable
 		label var tv_cable "Does the household have cable tv?"
 		*-- Label values
-		label def tv_cable 1 "Yes" 0 "No"
-		label val tv_cable tv_cable
+		label def tv_cable_eng 1 "Yes" 0 "No"
+		label val tv_cable tv_cable_eng
 
 *** Does the household have microwave oven?
 * Horno microonada (s5q6__11): ¿Posee este hogar horno microonda?
 		*-- Label variable
 		label var microondas "Does the household have microwave oven?"
 		*-- Label values
-		label def microondas 1 "Yes" 0 "No"
-		label val microondas microondas
+		label def microondas_eng 1 "Yes" 0 "No"
+		label val microondas microondas_eng
 
 *** Does the household have landline telephone?
 * Teléfono fijo (s5q6__12): telefono_fijo
 		*-- Label variable
 		label var telefono_fijo "Does the household have landline telephone?"
 		*-- Label values
-		label def telefono_fijo 1 "Yes" 0 "No"
-		label val telefono_fijo telefono_fijo
+		label def telefono_fijo_eng 1 "Yes" 0 "No"
+		label val telefono_fijo telefono_fijo_eng
 		
 /*(************************************************************************************************************************************************* 
 *------------------------------------------------------ VII. EDUCATION / EDUCACIÓN -----------------------------------------------------------
@@ -755,14 +754,14 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var contesta_ind_e "Is the 'member' answering by himself/herself?"
 		*-- Label values
-		label def contesta_ind_e 1 "Yes" 0 "No"
-		label val contesta_ind_e contesta_ind
+		label def contesta_ind_e_eng 1 "Yes" 0 "No"
+		label val contesta_ind_e contesta_ind_e_eng
 		
 *** Who is answering instead of "member"?
 		*-- Label variable
 		label var quien_contesta_e "Who is answering instead of 'member'?"
 		*-- Label values
-		label def quien_contesta_e 1 "Head of the household" ///	
+		label def quien_contesta_e_eng 1 "Head of the household" ///	
 		02 "Spouse/partner" ///
 		03 "Son/daughter" ///
 		04 "Stepson/stepdaughter" ///
@@ -775,14 +774,14 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		11 "Other relative"  ///
 		12 "Other: non relative"  ///
 		13 "House maid"
-		label val quien_contesta_e quien_contesta_e
+		label val quien_contesta_e quien_contesta_e_eng
 
 *** Have you ever attended any educational center? //for age +3
 		*-- Label variable
 		label var asistio_educ "Have you ever attended any educational center? (for age +3)"
 		*-- Label values
-		label def asistio_educ 1 "Yes" 0 "No"
-		label val asistio_educ asistio_educ
+		label def asistio_educ_eng 1 "Yes" 0 "No"
+		label val asistio_educ asistio_educ_eng
 
 *** Reasons for never attending
 /* RAZONES_NOASIS (s7q2): Cual fue la principal razon por la que nunca asistio?
@@ -804,7 +803,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var razon_noasis "Reasons for never attending"
 		*-- Label values
-		label def razon_noasis 1 "Too young" ///
+		label def razon_noasis_eng 1 "Too young" ///
 		2 "The school is too far" ///
 		3 "The school is closed"  ///
 		4 "Strikes/teachers absences"  ///
@@ -818,7 +817,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		14 "Duties in the household"  ///
 		15 "Attending school is not important"  ///
 		16 "Other. Mention it"
-		label val razon_noasis razon_noasis
+		label val razon_noasis razon_noasis_eng
 
 		label var razon_noasis_o "Other reasons for never attending (specify)"
 		
@@ -826,8 +825,8 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var asiste "During the period 2019-2020 did you attend any educational center? (for age +3)"
 		*-- Label values
-		label def asiste 1 "Yes" 0 "No"
-		label val asiste asiste 
+		label def asiste_eng 1 "Yes" 0 "No"
+		label val asiste asiste_eng 
 
 *** Which is the educational level you are currently attending?
 /* NIVEL_EDUC_ACT (s7q4): ¿Cual fue el ultimo nivel educativo en el que aprobo un grado, ano, semetre, trimestre?  
@@ -842,14 +841,14 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var nivel_educ_act "During the period 2019-2020 did you attend any educational center? (for age +3)"
 		*-- Label values
-		label def nivel_educ_act_en 1 "None" ///		
+		label def nivel_educ_act_eng 1 "None" ///		
         2 "Kindergarten" ///
 		5 "Regimen actual: Primary(1-6)" ///
 		6 "Regimen actual: Media (1-6)" ///
 		7 "Tecnico (TSU)" ///		
 		8 "University" ///
 		9 "Postgraduated"	
-		label val nivel_educ_act nivel_educ_act_en
+		label val nivel_educ_act nivel_educ_act_eng
 
 
 *** Which grade are you currently attending
@@ -865,8 +864,8 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var regimen_act "Educational regimen (current): Annual, Biannual ot quarterly"
 		*-- Label values
-		label def regimen_act 1 "Annual" 2 "Biannual" 3 "Quarterly"
-		label val regimen_act regimen_act
+		label def regimen_act_eng 1 "Annual" 2 "Biannual" 3 "Quarterly"
+		label val regimen_act regimen_act_eng
 
 *** Which year are you currently attending	?	
 /* A_EDUC_ACT (s7q4c): ¿Cuál es el ano al que asiste? (variable definida para nivel educativo Primaria y Media)
@@ -907,85 +906,84 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		*label var tipo_centro_educ "The educational center is: (this survey)"
 		*-- Label values
-		*label def tipo_centro_educ 1 "Private" 2 "Public"
-		*label value tipo_centro_educ tipo_centro_educ
+		*label def tipo_centro_educ_eng 1 "Private" 2 "Public"
+		*label value tipo_centro_educ tipo_centro_educ_eng
 		
 		*-- Label variable
 		label var edu_pub "The educational center is:(harmonized)"
 		*-- Label values
-		label def edu_pub 0 "Private" 1 "Public"
-		label value edu_pub edu_pub
+		label def edu_pub_eng 0 "Private" 1 "Public"
+		label value edu_pub edu_pub_eng
 
 *** During this school period, did you stop attending the educational center where you regularly study due to:
 * Water failiures
 		*-- Label variable
 		label var fallas_agua "Ever stopped attending the education center where you regularly study due to: water failiures"
 		*-- Label values
-		label def fallas_agua 0 "No" 1 "Yes"
-		label value fallas_agua fallas_agua
+		label def fallas_agua_eng 0 "No" 1 "Yes"
+		label value fallas_agua fallas_agua_eng
 
 * Electricity failures
 		*-- Label variable
 		label var fallas_elect "Ever stopped attending the education center where you regularly study due to: electricity failiures"
 		*-- Label values
-		label def fallas_elect 0 "No" 1 "Yes"
-		label value fallas_elect fallas_elect
+		label def fallas_elect_eng 0 "No" 1 "Yes"
+		label value fallas_elect fallas_elect_eng
 
 * Teachers' strike
 		*-- Label variable
 		label var huelga_docente "Ever stopped attending the education center where you regularly study due to: teachers' strike"
 		*-- Label values
-		*-- Label values
-		label def huelga_docente 0 "No" 1 "Yes"
-		label value huelga_docente huelga_docente
+		label def huelga_docente_eng 0 "No" 1 "Yes"
+		label value huelga_docente huelga_docente_eng
 
 * Lack of means of transport
 		*-- Label variable
 		label var falta_transporte "Ever stopped attending the education center where you regularly study due to: lack of means of transport"
-		label def falta_transporte 0 "No" 1 "Yes"
-		label value falta_transporte falta_transporte
+		label def falta_transporte_eng 0 "No" 1 "Yes"
+		label value falta_transporte falta_transporte_eng
 
 * Lack of food in the household
 		*-- Label variable
 		label var falta_comida_hogar "Ever stopped attending the education center where you regularly study due to: lack of food in the household"
 		*-- Label values
-		label def falta_comida_hogar 0 "No" 1 "Yes"
-		label value falta_comida_hogar falta_comida_hogar
+		label def falta_comida_hogar_eng 0 "No" 1 "Yes"
+		label value falta_comida_hogar falta_comida_hogar_eng
 
 * Lack of food in the educational center
 		*-- Label variable
 		label var falta_comida_centro "Ever stopped attending the education center where you regularly study due to: lack of food in the educational center"
 		*-- Label values
-		label def falta_comida_centro 0 "No" 1 "Yes"
-		label value falta_comida_centro falta_comida_centro
+		label def falta_comida_centro_eng 0 "No" 1 "Yes"
+		label value falta_comida_centro falta_comida_centro_eng
 
 * Teachers's non-attendance
 		*-- Label variable
 		label var inasis_docente "Ever stopped attending the education center where you regularly study due to: teachers's non-attendance"
 		*-- Label values
-		label def inasis_docente 0 "No" 1 "Yes"
-		label value inasis_docente inasis_docente
+		label def inasis_docente_eng 0 "No" 1 "Yes"
+		label value inasis_docente inasis_docente_eng
 
 * Demonstrations or protests
 		*-- Label variable
 		label var protestas 	"Ever stopped attending the education center where you regularly study due to: demonstrations or protests"
 		*-- Label values
-		label def protestas 0 "No" 1 "Yes"
-		label value protestas protestas
+		label def protestas_eng 0 "No" 1 "Yes"
+		label value protestas protestas_eng
 
 * Never stopped attending 
 		*-- Label variable
 		label var nunca_deja_asistir "Ever stopped attending the education center where you regularly study due to: never stopped attending"
 		*-- Label values
-		label def nunca_deja_asistir 0 "No" 1 "Yes"
-		label value nunca_deja_asistir nunca_deja_asistir
+		label def nunca_deja_asistir_eng 0 "No" 1 "Yes"
+		label value nunca_deja_asistir nunca_deja_asistir_eng
 
 *** The educational center where you attend has PAE's schools feeding program?
 		*-- Label variable
 		label var pae 	"The education center where you attend has PAE's schools feeding program?"
 		*-- Label values
-		label def pae 0 "No" 1 "Yes"
-		label value pae pae
+		label def pae_eng 0 "No" 1 "Yes"
+		label value pae pae_eng
 
 *** In the educational center where you attend, PAE's schools feeding program is provided:
 /* 		1.Every day
@@ -995,90 +993,89 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		*-- Label variable
 		label var pae_frecuencia "In the education center where you attend, PAE's schools feeding program is provided:"
 		*-- Label values
-		label def pae_frecuencia 1 "Every day" ///
+		label def pae_frecuencia_eng 1 "Every day" ///
 		2 "Only few days" ///
 		3 "Hardly ever"
-		label value pae_frecuencia pae_frecuencia
+		label value pae_frecuencia pae_frecuencia_eng
 
 *** In the educational center where you attend, PAE's schools feeding program provides:
 	* Breakfast
 		*-- Label variable
 		label var pae_desayuno "In the education center where you attend, PAE's provides: breakfast"
 		*-- Label values
-		label def pae_desayuno 1 "Yes" 0 "No"
-		label value pae_desayuno pae_desayuno
+		label def pae_desayuno_eng 1 "Yes" 0 "No"
+		label value pae_desayuno pae_desayuno_eng
 
 	* Lunch
 		*-- Label variable
 		label var pae_almuerzo "In the education center where you attend, PAE's provides: lunch"
 		*-- Label values
-		label def pae_almuerzo 1 "Yes" 0 "No"
-		label value pae_almuerzo pae_almuerzo
+		label def pae_almuerzo_eng 1 "Yes" 0 "No"
+		label value pae_almuerzo pae_almuerzo_eng
 
 	* Snack in the morning (Merienda en la manana)
 		*-- Label variable
 		label var pae_meriman "In the education center where you attend, PAE's provides: snack in the morning"
 		*-- Label values
-		label def pae_meriman 1 "Yes" 0 "No"
-		label value pae_meriman pae_meriman
+		label def pae_meriman_eng 1 "Yes" 0 "No"
+		label value pae_meriman pae_meriman_eng
 
 	* Snack in the afternoon (Merienda en la tarde)
 		*-- Label variable
 		label var pae_meritard "In the education center where you attend, PAE's provides: snack in the afternoon"
 		*-- Label values
-		label def pae_meritard 1 "Yes" 0 "No"
-		label value pae_meritard pae_meritard
+		label def pae_meritard_eng 1 "Yes" 0 "No"
+		label value pae_meritard pae_meritard_eng
 
 	* Other
 		*-- Label variable
 		label var pae_otra "In the education center where you attend, PAE's provides: other"
 		*-- Label values
-		label def pae_otra 1 "Yes" 0 "No"
-		label value pae_otra pae_otra
+		label def pae_otra_eng 1 "Yes" 0 "No"
+		label value pae_otra pae_otra_eng
 
 *** During school year 2019-2020 did you pay for, obtain or receive donation of the following items?
 	* Registration fee (Cuota de inscripción)
 		*-- Label variable
 		label var cuota_insc "During 2019-2020 did you pay for, obtain or receive donation of: registration fee"
 		*-- Label values
-		label def cuota_insc 1 "Yes" 0 "No"
-		label value cuota_insc cuota_insc
+		label def cuota_insc_eng 1 "Yes" 0 "No"
+		label value cuota_insc cuota_insc_eng
 
 	* School supplies and books (Compra de útiles y libros escolares)
 		*-- Label variable
 		label var compra_utiles "During 2019-2020 did you pay for, obtain or receive donation of: school supplies and books"
 		*-- Label values
-		*-- Label values
-		label def compra_utiles 1 "Yes" 0 "No"
-		label value compra_utiles compra_utiles
+		label def compra_utiles_eng 1 "Yes" 0 "No"
+		label value compra_utiles compra_utiles_eng
 
 	* School uniforms and footwear
 		*-- Label variable
 		label var compra_uniforme "During 2019-2020 did you pay for, obtain or receive donation of: school uniforms and footwear"
 		*-- Label values
-		label def compra_uniforme 1 "Yes" 0 "No"
-		label value compra_uniforme compra_uniforme
+		label def compra_uniforme_eng 1 "Yes" 0 "No"
+		label value compra_uniforme compra_uniforme_eng
 
 	* Monthly fee (Costo de la mensualidad)
 		*-- Label variable
 		label var costo_men "During 2019-2020 did you pay for, obtain or receive donation of: monthly fee"
 		*-- Label values
-		label def costo_men 1 "Yes" 0 "No"
-		label value costo_men costo_men
+		label def costo_men_eng 1 "Yes" 0 "No"
+		label value costo_men costo_men_eng
 
 	* Public transport or school bus(Uso de transporte público o escolar)
 		*-- Label variable
 		label var costo_transp "During 2019-2020 did you pay for, obtain or receive donation of: public transport or school bus"
 		*-- Label values
-		label def costo_transp 1 "Yes" 0 "No"
-		label value costo_transp costo_transp
+		label def costo_transp_eng 1 "Yes" 0 "No"
+		label value costo_transp costo_transp_eng
 
 	* Other expenses
 		*-- Label variable
 		label var otros_gastos "During 2019-2020 did you pay for, obtain or receive donation of: other expenses"
 		*-- Label values
-		label def otros_gastos 1 "Yes"0 "No"
-		label value otros_gastos otros_gastos
+		label def otros_gastos_eng 1 "Yes"0 "No"
+		label value otros_gastos otros_gastos_eng
 
 *** Amount paid for each item
 	* Registration fee (Cuota de inscripción)
@@ -1170,7 +1167,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 	*-- Label variable
 	label var nivel_educ_en  "Education attained (this survey)"
 	*-- Label values 
-	label def nivel_educ_en 1 "None" ///		
+	label def nivel_educ_en_eng 1 "None" ///		
         2 "Kindergarten" ///
 		3 "Regimen anterior: Basica (1-9)" ///
 		4 "Regimen anterior: Media (1-3)" ///
@@ -1179,7 +1176,7 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 		7 "Tecnico (TSU)" ///		
 		8 "University" ///
 		9 "Postgraduated"
-	label values nivel_educ_en nivel_educ_en	
+	label values nivel_educ_en nivel_educ_en_eng	
 	
 /* NIVEL_EDUC: Comparable across years
 		1 = Ninguno		
@@ -1209,8 +1206,8 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 	*-- Label variable
 	label var regimen "Educational regimen (completed): Annual, Biannual ot quarterly"
 	*-- Label values
-	label def regimen 1 "Annual" 2 "Biannual" 3 "Quarterly"
-	label val regimen regimen
+	label def regimen_eng 1 "Annual" 2 "Biannual" 3 "Quarterly"
+	label val regimen regimen_eng
 
 *** Which was the last year you completed?
 /** A_EDUC (s7q4b): ¿Cuál es el último año que aprobó? (variable definida para nivel educativo Primaria y Media)
@@ -1245,8 +1242,8 @@ clonevar nbanios = s5q3 if banio_con_ducha==1 */
 	*-- Label variable
 	label var alfabeto "Literate: received at least two years of formal education"
 	*-- Label values
-	label def alfabeto 1 "Yes" 0 "No"
-	label val alfabeto alfabeto
+	label def alfabeto_eng 1 "Yes" 0 "No"
+	label val alfabeto alfabeto_eng
 
 /*
 *** Obtuvo el titulo respectivo //missing in database
@@ -1296,7 +1293,7 @@ gen titulo = s7q11e==1 if s7q1==1 & (s7q11>=7 & s7q11<=9)
 	*-- Label variable
 	label var razon_dejo_estudios "Main reason: left studies (this survey)"
 	*-- Label values	
-	label def razon_dejo_estudios 	1 "Completed studies" ///
+	label def razon_dejo_estudios_eng 	1 "Completed studies" ///
 		2 "The school was too far" ///
 		3 "The school closed" ///
 		4 "Strikes/teachers absences" ///
@@ -1312,7 +1309,7 @@ gen titulo = s7q11e==1 if s7q1==1 & (s7q11>=7 & s7q11<=9)
 		14 "Duties in the household" ///
 		15 "Attending school was not important" ///
 		16 "Other. Mention it"
-	label val razon_dejo_estudios razon_dejo_estudios 
+	label val razon_dejo_estudios razon_dejo_estudios_eng
 	
 
 	*-- Label variable
@@ -1342,89 +1339,89 @@ gen titulo = s7q11e==1 if s7q1==1 & (s7q11>=7 & s7q11<=9)
 
 label var	enfermo 		"Any health problem, illness, or accident in the last 30 days?"
 label var	enfermedad 		"Which was your main health problem?"
-label def	enfermedad 		1 "Fever / Malaria" 2 "Diarrhea" 3 "Accident / Injury" 4 "Dental problem" ///
+label def	enfermedad_eng 	1 "Fever / Malaria" 2 "Diarrhea" 3 "Accident / Injury" 4 "Dental problem" ///
 							5 "Skin problem" 6 "Eye disease" 7 "Tension problem" 8 "Typhoid fever" 9 "Stomach problem" ///
 							10 "Sore throat" 11 "Cough, cold, flu" 12 "Diabetes" 13 "Meningitis" 14 "Other"
-label values enfermedad enfermedad
+label values enfermedad enfermedad_eng
 label var	enfermedad_o 	"Which was your main health problem? Other"
 label var	visita 			"Have you gone to get healthcare in the last 30 days?"
-label def	visita			1 "Yes" 0 "No"
-label values visita visita
+label def	visita_eng		1 "Yes" 0 "No"
+label values visita visita_eng
 label var	razon_no_medico "Why didn't you try to consult to treat the sickness or accident?"
-label def	razon_no_medico 1 "Self-medicated, used home-made medicines" 2 "Doesn't have money to pay for consultation, exams, medicines" 3 "Didn't consider it necessary, didn't do anything" ///
+label def	razon_no_medico_eng 1 "Self-medicated, used home-made medicines" 2 "Doesn't have money to pay for consultation, exams, medicines" 3 "Didn't consider it necessary, didn't do anything" ///
 							4 "Consultation place is far from the household" 5 "Attention is not adecuate" 6 "Waiting time is too long" 7 "Didn't get attended" 8 "Other"
-label values razon_no_medico razon_no_medico
+label values razon_no_medico razon_no_medico_eng
 label var razon_no_medico_o "Why didn't you try to consult to treat the sickness or accident?(Other)"
 label var	medico_o_quien 	"Who did you mainly consult to treat the sickness or accident?"
-label def	medico_o_quien	1 "Doctor" 2 "Nurse or another paramedic assistant" 3 "Pharmacist" 4 "Healer, herbalist, or warlock" 5 "Other"
-label values medico_o_quien medico_o_quien
+label def	medico_o_quien_eng	1 "Doctor" 2 "Nurse or another paramedic assistant" 3 "Pharmacist" 4 "Healer, herbalist, or warlock" 5 "Other"
+label values medico_o_quien medico_o_quien_eng
 label var	medico_o_quien_o	"Who did you mainly consult to treat the sickness or accident? Other"
 label var	lugar_consulta 		"Where did you go for healthcare attention?"
-label def	lugar_consulta		1 "Outpatient clinic / popular clinic / CDI" 2 "Public hospital or of the social security" 3 "Private service without hospitalization" 4 "Private clinique" ///
+label def	lugar_consulta_eng		1 "Outpatient clinic / popular clinic / CDI" 2 "Public hospital or of the social security" 3 "Private service without hospitalization" 4 "Private clinique" ///
 								5 "Private health center non-for-profit" 6 "Health service in the work station" 7 "Pharmacy" 8 "Other"
-label values lugar_consulta lugar_consulta
+label values lugar_consulta lugar_consulta_eng
 label var	lugar_consulta_o 	"Where did you go for healthcare attention? Other"
 label var	pago_consulta 		"Did you pay for consultation or healthcare attention?"
-label def 	pago_consulta		1 "Yes" 0 "No"
-label values pago_consulta pago_consulta
+label def 	pago_consulta_eng		1 "Yes" 0 "No"
+label values pago_consulta pago_consulta_eng
 label var	cant_pago_consulta 	"How much did you pay?"
 label var	mone_pago_consulta 	"In which month did you pay?"
-label def	mone_pago_consulta	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-label values mone_pago_consulta mone_pago_consulta
+label def	mone_pago_consulta_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+label values mone_pago_consulta mone_pago_consulta_eng
 label var	mes_pago_consulta 	"In which month did you pay?"
-label def 	mes_pago_consulta 	1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
-label values mes_pago_consulta mes_pago_consulta
+label def 	mes_pago_consulta_eng 	1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
+label values mes_pago_consulta mes_pago_consulta_eng
 label var	receto_remedio 		"Did you get any medicine prescribed for the illness of accident?"
-label def 	receto_remedio		1 "Yes" 0 "No"
-label values receto_remedio receto_remedio
+label def 	receto_remedio_eng		1 "Yes" 0 "No"
+label values receto_remedio receto_remedio_eng
 label var	recibio_remedio		"How did you get the medicines?"
-label def	recibio_remedio		1 "Received all for free" 2 "Received some for free and others bought" 3 "Bought all" 4 "Bought some" 5 "Received some for free and others couldn't buy" 6 "Could not obtain any"
-label values recibio_remedio recibio_remedio
+label def	recibio_remedio_eng		1 "Received all for free" 2 "Received some for free and others bought" 3 "Bought all" 4 "Bought some" 5 "Received some for free and others couldn't buy" 6 "Could not obtain any"
+label values recibio_remedio recibio_remedio_eng
 label var	donde_remedio 		"Where did you buy the medicines?"
-label def	donde_remedio		1 "Popular drugstores or pharmacies" 2 "Other commercial pharmacies" 3 "Institutes of Social Welfare or other foundations (IPAS-ME, IPSFA, others)" 4 "Other"
-label values donde_remedio donde_remedio
+label def	donde_remedio_eng		1 "Popular drugstores or pharmacies" 2 "Other commercial pharmacies" 3 "Institutes of Social Welfare or other foundations (IPAS-ME, IPSFA, others)" 4 "Other"
+label values donde_remedio donde_remedio_eng
 label var	donde_remedio_o		"Where did you buy the medicines? Other"
 label var	pago_remedio 		"How much did you pay for the medicines?"
 label var	mone_pago_remedio 	"In which currency did you payfor the medicines?"
-label def	mone_pago_remedio	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-label values mone_pago_remedio mone_pago_remedio
+label def	mone_pago_remedio_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+label values mone_pago_remedio mone_pago_remedio_eng
 label var	mes_pago_remedio 	"In which month did you pay for the medicines?"
-label def	mes_pago_remedio	1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
-label values mes_pago_remedio mes_pago_remedio
+label def	mes_pago_remedio_eng	1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
+label values mes_pago_remedio mes_pago_remedio_eng
 label var	pago_examen 		"Did you pay for Xrays, lab exams or similar?"
-label def	pago_examen			1 "Yes" 0 "No"
-label values pago_examen pago_examen
+label def	pago_examen_eng		1 "Yes" 0 "No"
+label values pago_examen pago_examen_eng
 label var	cant_pago_examen 	"How much did you pay for Xrays, lab exams or similar?"
 label var	mone_pago_examen 	"In which currency did you pay for Xrays, lab exams or similar?"
-label def	mone_pago_examen	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-label values mone_pago_examen mone_pago_examen
+label def	mone_pago_examen_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+label values mone_pago_examen mone_pago_examen_eng
 label var	mes_pago_examen 	"In which month did you pay for Xrays, lab exams or similar?"
-label def	mes_pago_examen		1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
-label values mes_pago_examen mes_pago_examen
+label def	mes_pago_examen_eng		1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
+label values mes_pago_examen mes_pago_examen_eng
 label var	remedio_tresmeses 	"Spent money in medicines in the last 3 months?"
 label var	cant_remedio_tresmeses 	"How much did you pay for medicines in the last 3 months?"
 label var	mone_remedio_tresmeses 	"In which currency did you pay for medicines in the last 3 months?"
 label var	mes_remedio_tresmeses 	"In which month did you pay for medicines in the last 3 months?"
 label var	seguro_salud 		"Affiliated to health insurance?"
-label def	seguro_salud		1 "Yes" 0 "No"
-label values seguro_salud seguro_salud
+label def	seguro_salud_eng		1 "Yes" 0 "No"
+label values seguro_salud seguro_salud_eng
 label var	afiliado_segsalud 	"Main health insurance affiliated to"
-label def 	afiliado_segsalud	1 "Venezuelan institute of Social Insurance (IVSS)" 2 "Public social welfare institute (IPASME, IPSFA, others)" 3 "Medical insurance contracted by a public institution" 4 "Medical insurance contracted by a private institution" 5 "Private health insurance contracted individually" 
-label values afiliado_segsalud afiliado_segsalud
+label def 	afiliado_segsalud_eng	1 "Venezuelan institute of Social Insurance (IVSS)" 2 "Public social welfare institute (IPASME, IPSFA, others)" 3 "Medical insurance contracted by a public institution" 4 "Medical insurance contracted by a private institution" 5 "Private health insurance contracted individually" 
+label values afiliado_segsalud afiliado_segsalud_eng
 label var	pagosegsalud 		"Did you pay for health insurance?"
-label def	pagosegsalud		1 "Yes" 0 "No"
-label values pagosegsalud pagosegsalud
+label def	pagosegsalud_eng		1 "Yes" 0 "No"
+label values pagosegsalud pagosegsalud_eng
 label var	quien_pagosegsalud 	"Who paid for the health insurance?"
-label def 	quien_pagosegsalud	1 "Labor benefit" 2 "Family member abroad" 3 "Another household member" 4 "Other"
-label values quien_pagosegsalud quien_pagosegsalud
+label def 	quien_pagosegsalud_eng	1 "Labor benefit" 2 "Family member abroad" 3 "Another household member" 4 "Other"
+label values quien_pagosegsalud quien_pagosegsalud_eng
 *label var  	quien_pagosegsalud_o "Who paid for the health insurance? Other"
 label var	cant_pagosegsalud 	"How much did you pay for the health insurance?"
 label var	mone_pagosegsalud 	"In which currency did you pay for the health insurance?"
-label def	mone_pagosegsalud	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-label values mone_pagosegsalud mone_pagosegsalud
+label def	mone_pagosegsalud_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+label values mone_pagosegsalud mone_pagosegsalud_eng
 label var	mes_pagosegsalud	"In which month did you pay for the health insurance?"
-label def	mes_pagosegsalud	1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
-label values mes_pagosegsalud mes_pagosegsalud
+label def	mes_pagosegsalud_eng	1 "Jan" 2 "Feb" 3 "Mar" 4 "Apr" 5 "May" 6 "Jun" 7 "Jul" 8 "Aug" 9 "Sep" 10 "Oct" 11 "Nov" 12 "Dec"
+label values mes_pagosegsalud mes_pagosegsalud_eng
 
 
 /*(************************************************************************************************************************************************* 
@@ -1432,49 +1429,49 @@ label values mes_pagosegsalud mes_pagosegsalud
 *************************************************************************************************************************************************)*/
 
 label var    pea             "Dummy for activity status: economically active"
-label define pea 			 0 "Inactive" 1 "Active"
-label values pea pea
+label define pea_eng 		 0 "Inactive" 1 "Active"
+label values pea pea_eng
 
 label var    ocupado         "Dummy for activity status: employed"
-label define ocupado 		 0 "Not employed" 1 "Employed"
-label values ocupado ocupado
+label define ocupado_eng 	 0 "Not employed" 1 "Employed"
+label values ocupado ocupado_eng
 
 label var    desocupa        "Dummy for activity status: unemployed"
-label define desocupa 		 0 "Not unemployed" 1 "Unemployed"
-label values desocupa desocupa 
+label define desocupa_eng 		 0 "Not unemployed" 1 "Unemployed"
+label values desocupa desocupa_eng 
 
 label var    relab           	"Type of employment in the main occupation (harmonized)"
-label define relab 			 	1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
-label values relab relab
+label define relab_eng 			 	1 "Employer" 2 "Salaried worker" 3 "Self-employed" 4 "Without salary" 5 "Unemployed"
+label values relab relab_eng
 
 label var  	trabajo_semana  	"Did you work at least one hour last week?"
-label def	trabajo_semana		1 "Yes" 0 "No"
-label values trabajo_semana trabajo_semana 
+label def	trabajo_semana_eng		1 "Yes" 0 "No"
+label values trabajo_semana trabajo_semana_eng 
 label var  	trabajo_semana_2  	"Did you dedicate last week at least one hour to..."
-label def	trabajo_semana_2	1 "Perform an activity that provided you income" ///
+label def	trabajo_semana_2_eng	1 "Perform an activity that provided you income" ///
 								2 "Helped in lands or business from family or another person" ///
 								3 "Did not work last week"			
-label values trabajo_semana_2 trabajo_semana_2
+label values trabajo_semana_2 trabajo_semana_2_eng
 label var  	trabajo_independiente  	"Do you have any job, business, or do you do any activity on your own?"
-label def	trabajo_independiente	1 "Yes" 0 "No"
-label values trabajo_independiente trabajo_independiente
+label def	trabajo_independiente_eng	1 "Yes" 0 "No"
+label values trabajo_independiente trabajo_independiente_eng
 label var  	razon_no_trabajo  	"Main reason for not working last week"
-label def 	razon_no_trabajo 	1 "Was sick" 2 "Vacations" 3 "Permit" 4 "Labor conflicts" 5 "Reparation of equipment, machinery or vehicle" 7 "Does not want to work" 8 "Lack of work, clients or orders" /// 
+label def 	razon_no_trabajo_eng 	1 "Was sick" 2 "Vacations" 3 "Permit" 4 "Labor conflicts" 5 "Reparation of equipment, machinery or vehicle" 7 "Does not want to work" 8 "Lack of work, clients or orders" /// 
 								9 "Impediment of municipal or national authorities" 11 "Will start new employment in 30 days" 12 "Seasonal factors" 16 "Other"		
-label values razon_no_trabajo razon_no_trabajo
+label values razon_no_trabajo razon_no_trabajo_eng
 label var  	razon_no_trabajo_o 	"Other reason for not working last week"
 label var  	sueldo_semana 		"Last week did you receive wages or benefits?"
-label def	sueldo_semana		1 "Yes" 0 "No"
-label values sueldo_semana 
+label def	sueldo_semana_eng		1 "Yes" 0 "No"
+label values sueldo_semana sueldo_semana_eng 
 label var  	busco_trabajo 	"Did you do anything to look for a paid job in the last 4 weeks?"
-label def	busco_trabajo	1 "Yes" 0 "No"
-label values busco_trabajo busco_trabajo
+label def	busco_trabajo_eng	1 "Yes" 0 "No"
+label values busco_trabajo busco_trabajo_eng
 label var  	empezo_negocio  "Did you do anything to start a business in the last 4 weeks?"
-label def	empezo_negocio	1 "Yes" 0 "No"
-label values empezo_negocio empezo_negocio
+label def	empezo_negocio_eng	1 "Yes" 0 "No"
+label values empezo_negocio empezo_negocio_eng
 label var  	cuando_buscotr 	"Last time you did something to find a job or start a business jointly or alone?"
-label def	cuando_buscotr	1 "Last 2 months" 2 "Last 12 months" 3 "More than a year" 4 "Have not done anything"
-label values cuando_buscotr
+label def	cuando_buscotr_eng	1 "Last 2 months" 2 "Last 12 months" 3 "More than a year" 4 "Have not done anything"
+label values cuando_buscotr cuando_buscotr_eng
 
 label var  	dili_agencia 	"Have you consulted an employment agency in the last 4 weeks?" 
 label var  	dili_aviso  	"Have you published or answered work ads in the last 4 weeks?"
@@ -1487,40 +1484,40 @@ label var  	dili_contacto  	"Have you contacted staff in the last 4 weeks?"
 label var  	como_busco_semana 	"Have you carried out any of these proceedings in that period? (4 weeks)"
 
 foreach i of varlist dili_agencia dili_aviso dili_planilla dili_credito dili_tramite dili_compra dili_contacto /*dili_otro*/ {
-	label def	`i'	1 "Yes" 0 "No"
-	label values `i' `i'
+	label def	`i'_eng	1 "Yes" 0 "No"
+	label values `i' `i'_eng
 	}
 	
 label var  	razon_no_busca 	"Why aren't you currently looking for a job?"
-label def	razon_no_busca 	1 "Tired of looking for a job" 2 "Doesn't find the appropriate job" 3 "Thinks that can't find job" ///
+label def	razon_no_busca_eng 	1 "Tired of looking for a job" 2 "Doesn't find the appropriate job" 3 "Thinks that can't find job" ///
 							4 "Doesn't know how nor where to look for a job" 5 "Thinks that won't be given a job due to age" ///
 							6 "No job adapts to his/her capacities" 7 "Doesn't have someone to take care of the children" 8 "Sick/Health motives" ///
 							9 "Other motives, specify"
-label values razon_no_busca razon_no_busca
+label values razon_no_busca razon_no_busca_eng
 label var razon_no_busca_o "Why aren't you currently looking for a job? (Other reasons)"
 label var  	actividades_inactivos 	"What are you doing right now? (only for those who did not work)"
-label def	actividades_inactivos 	1 "Studying" 2 "Training" 3 "Household activities or family responsibilities" 4 "Working on land for family use" ///
+label def	actividades_inactivos_eng 	1 "Studying" 2 "Training" 3 "Household activities or family responsibilities" 4 "Working on land for family use" ///
 									6 "Retired or pensione" 7 "Long-term illness" 8 "Disability" 9 "Voluntary work" 10 "Charity work" 11 "Cultural or leisure activities"
-label values  actividades_inactivos actividades_inactivos
+label values  actividades_inactivos actividades_inactivos_eng
 label var  	tarea 	"What is your position at your main occupation?"
-label def	tarea	1 "Director or manager" 2 "Scientific or intellectual professional" 3 "Technician or mid-level professional" 4 "Administrative support staff" ///
+label def	tarea_eng	1 "Director or manager" 2 "Scientific or intellectual professional" 3 "Technician or mid-level professional" 4 "Administrative support staff" ///
 					5 "Service worker or seller of shops and markets" 6 "Farmer or skilled agricultural, forestry or fishing worker" ///
 					7 "Official, operator or craftsman of mechanical arts and other trades" 8 "Operator of fixed installations and machines and machinery" ///
 					9 "Elementary occupations" 10 "Military occupations"
-label values  tarea tarea
+label values  tarea tarea_eng
 label var  	sector_encuesta 	"What does the business, institution or firm in which you work do?"
-label def	sector_encuesta		1 "Agriculture, livestock, fishing, hunting and related service activities" 2 "Mining and quarrying" 3 "Manufacturing industry" 4 "Installation / supply / distribution of electricity, gas or water" 5 "Construction" ///
+label def	sector_encuesta_eng	1 "Agriculture, livestock, fishing, hunting and related service activities" 2 "Mining and quarrying" 3 "Manufacturing industry" 4 "Installation / supply / distribution of electricity, gas or water" 5 "Construction" ///
 								6 "Wholesale and retail trade; repair of motor vehicles and motorcycles" 7 "Transportation, storage, lodging and food service, communications and computer services" 8 "Financial and insurance, real estate, professional, scientific and technical entities; and administrative support services" ///
 								9 "Public administration and defense, education, health, social assistance, art, entertainment, embassies" 10 "Other service activities such as repairs, cleaning, hairdressing, funeral and domestic service"
-label values  sector_encuesta sector_encuesta
+label values  sector_encuesta sector_encuesta_eng
 label var  	categ_ocu  	"In your work you work as..."
-label def	categ_ocu	1 "Employee or worker in the public sector" 3 "Employee or worker in a private company" 5 "Employer" ///
+label def	categ_ocu_eng	1 "Employee or worker in the public sector" 3 "Employee or worker in a private company" 5 "Employer" ///
 						6 "Self-employed worker" 7 "Member of cooperatives" 8 "Paid / unpaid family helper" 9 "Domestic service"
-label values categ_ocu categ_ocu
+label values categ_ocu categ_ocu_eng
 label var  	hstr_ppal  			"How many hours did you work last week in your main occupation?"
 label var  	trabajo_secundario  "Besides your main occupation, did you do any other activity through which you received income, such as selling things, contracted work, etc?"
-label def	trabajo_secundario 	1 "Yes" 0 "No"
-label values trabajo_secundario trabajo_secundario
+label def	trabajo_secundario_eng 	1 "Yes" 0 "No"
+label values trabajo_secundario trabajo_secundario_eng
 label var  	hstr_todos 		"How many hours do you normally work weekly in all your jobs or businesses? (for those with more than 1 job)"
 
 label var  	im_sueldo  		"Received income in your job/business for wages & salaries last month?"
@@ -1547,12 +1544,12 @@ label var  	c_otro 	"Contributions from your employer to social security for oth
 foreach i of varlist ///
 im_sueldo im_hsextra im_propina im_comision im_ticket im_guarderia im_beca im_hijos im_antiguedad im_transporte im_rendimiento im_otro ///
 c_sso c_rpv c_spf c_aca c_sps c_otro {
-	label def	`i'			1 "Yes" 0 "No"
-	label values `i' `i'
+	label def	`i'_eng			1 "Yes" 0 "No"
+	label values `i' `i'_eng
 	label var  `i'_cant		"Amount" 
 	label var  	`i'_mone	"Currency" 
-	label def	`i'_mone	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-	label values `i' `i'
+	label def	`i'_mone_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+	label values `i'_mone `i'_mone_eng
 	}
 	
 label var  	inm_comida  	"Received this benefit in your work last month?: food"
@@ -1566,12 +1563,12 @@ label var  	inm_guarderia  	"Received this benefit in your work last month?: day
 label var  	inm_otro  		"Received this benefit in your work last month?: other benefits"
 
 foreach i of varlist inm_comida inm_productos inm_transporte inm_vehiculo inm_estaciona inm_telefono inm_servicios inm_guarderia inm_otro  {
-	label def	`i'			1 "Yes" 0 "No"
-	label values `i' `i'
+	label def	`i'_eng			1 "Yes" 0 "No"
+	label values `i' `i'_eng
 	label var  	`i'_cant	"Amount received, or estimation of how much they would have paid for the benefit" 
 	label var  	`i'_mone	"Currency" 
-	label def	`i'_mone	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-	label values `i' `i'
+	label def	`i'_mone_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+	label values `i'_mone `i'_mone_eng
 	}
 	
 label var  	d_sso  	"Discounted from your monthly labor income for compulsory social security last month?"
@@ -1583,12 +1580,12 @@ label var  	d_rpv  	"Discounted from your monthly labor income for housing and H
 label var  	d_otro  "Discounted from your monthly labor income for others last month?"
 
 foreach i of varlist d_sso d_spf d_isr d_cah d_cpr d_rpv d_otro  {
-	label def	`i'			1 "Yes" 0 "No"
-	label values `i' `i'
+	label def	`i'_eng			1 "Yes" 0 "No"
+	label values `i' `i'_eng
 	label var  	`i'_cant		"Amount discounted" 
 	label var  	`i'_mone	"Currency" 
-	label def	`i'_mone	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-	label values `i' `i'
+	label def	`i'_mone_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+	label values `i'_mone `i'_mone_eng
 	}
 
 label var  	im_patron  	"Received money due to the selling of products, goods, or services from your business or activity last month?"
@@ -1597,23 +1594,23 @@ label var  	im_indep  	"Received money or net benefits derived from your busines
 label var  	i_indep_mes  "Received income from your activity for own expenses or from your household last month?"
 
 foreach i of varlist im_patron inm_patron im_indep i_indep_mes {
-	label def	`i'			1 "Yes" 0 "No"
-	label values `i' `i'
+	label def	`i'_eng			1 "Yes" 0 "No"
+	label values `i' `i'_eng
 	label var  	`i'_cant	"Amount" 
 	label var  	`i'_mone	"Currency" 
 	label def	`i'_mone	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-	label values `i' `i'
+	label values `i'_mone `i'_mone_eng
 	}
 
 label var  	g_indep_mes_cant  	"How much money did you spend to generate income (e.g. office renting, transport expenditures, cleaning products) last month?"
 label var  	g_indep_mes_mone	"Currency" 
-label def	g_indep_mes_mone	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-label values g_indep_mes_mone g_indep_mes_mone
+label def	g_indep_mes_mone_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+label values g_indep_mes_mone g_indep_mes_mone_eng
 
 label var  	razon_menoshs  	"Why did you work less than 35 hours a week last week in all your jobs?"
-label def	razon_menoshs 	1 "Work part time" 2 "Labor conflict (strike, protest, unemployment)" 3 "Illness, leave, vacation" ///
+label def	razon_menoshs_eng 	1 "Work part time" 2 "Labor conflict (strike, protest, unemployment)" 3 "Illness, leave, vacation" ///
 							4 "Lack of work" 5 "Shortage of materials or equipment under repair" 6 "Other (Specify)"
-label values razon_menoshs razon_menoshs
+label values razon_menoshs razon_menoshs_eng
 
 label var  	razon_menoshs_o	"Why did you work less than 35 hours a week last week in all your jobs? Other, specify"
 
@@ -1621,18 +1618,18 @@ label var  	deseamashs  	"Would you prefer to work more than 35 hs per week?"
 label var  	buscamashs  	"Have you done something to work more hours?"
 
 label var  	razon_nobusca  	"Why haven't you done something to work additional hours?"
-label def	razon_nobusca 	1 "Believe there is no work" 2 "Tired of looking for a job" 3 "Can't find a job" 4 "Can't find suitable job" ///
+label def	razon_nobusca_eng 	1 "Believe there is no work" 2 "Tired of looking for a job" 3 "Can't find a job" 4 "Can't find suitable job" ///
 							5 "You are waiting for work or business" 6 "Difficulty in processing permits" 7 "Does not get credits or financing" ///
 							8 "Is a student" 9 "Take care of the home" 10 "Illness or disability" 11 "Other (Specify)"
-label values razon_nobusca razon_nobusca
+label values razon_nobusca razon_nobusca_eng
 label var  	razon_nobusca_o	"Other reason why not done something to work additional hours"
 
 label var  	cambiotr  	"Have you changed jobs in the last 12 months?"
 label var  	razon_cambiotr  "Main reason why you changed jobs?"	
-label def	razon_cambiotr	1 "Get higher income" 2 "Have a more suitable job" 3 "Termination of contract or employment" ///
+label def	razon_cambiotr_eng	1 "Get higher income" 2 "Have a more suitable job" 3 "Termination of contract or employment" ///
 							4 "Difficulties with the company (dismissal, reduction of personnel, closure of the company)" ///
 							5 "Economic difficulties (lack of materials and supplies to work)" 6 "Other (Specify)"
-label values razon_cambiotr razon_cambiotr
+label values razon_cambiotr razon_cambiotr_eng
 label var  	razon_cambiotr_o	"Main reason why you changed jobs? Other"
 
 label var  	aporta_pension  "Do you make contributions to any pension fund?"
@@ -1643,19 +1640,19 @@ label var  	pension_otro  	"To another pension fund?"
 
 
 foreach i of varlist deseamashs buscamashs cambiotr aporta_pension pension_IVSS pension_publi pension_priv pension_otro {
-	label def	`i'			1 "Yes" 0 "No"
-	label values `i' `i'
+	label def	`i'_eng			1 "Yes" 0 "No"
+	label values `i' `i'_eng
 	}
 
 label var  	aporte_pension  "Do you make contributions to any pension fund? To which? (harmonized)"
-label def	aporte_pension 	1 "Si, para el IVSS" 2 "Si, para otra institucion o empresa publica" ///
+label def	aporte_pension_eng 	1 "Si, para el IVSS" 2 "Si, para otra institucion o empresa publica" ///
 							3 "Si, para institucion o empresa privada" 4 "Si, para otra" 5 "No"
-label values aporte_pension aporte_pension
+label values aporte_pension aporte_pension_eng
 
 label var  	cant_aporta_pension  	"How much did you pay last month for pension funds?"
 label var  	mone_aporta_pension		"Currency" 
-	label def	mone_aporta_pension	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
-	label values mone_aporta_pension mone_aporta_pension
+	label def	mone_aporta_pension_eng	1 "Bolivares" 2 "US dollars" 3 "Euros" 4 "Colombian pesos"
+	label values mone_aporta_pension mone_aporta_pension_eng
 	
 
 /*(*********************************************************************************************************************************************** 
@@ -1689,16 +1686,16 @@ label var  iext_alquil "Rentals (vehicles, land or land, residential property or
 	foreach i in pens_soi pens_vss jubi_emp pens_dsa beca_pub beca_pri ayuda_pu ayuda_pr ayuda_fa asig_men otros {
 		label var  inla_`i'_cant	"s9q28a. Amount" 
 		label var  	inla_`i'_mone	"s9q28b. Currency" 
-		label def	inla_`i'_mone	1 "Bolivares" 2 "USD" 3 "Euros" 4 "Colombian pesos"
-		label values inla_`i'_mone inla_`i'_mone
+		label def	inla_`i'_mone_eng	1 "Bolivares" 2 "USD" 3 "Euros" 4 "Colombian pesos"
+		label values inla_`i'_mone inla_`i'_mone_eng
 	}
 	
 	*s9q29
 	foreach i in sueldo ingnet indemn remesa penjub intdiv becaes extrao alquil {
 		label var  iext_`i'_cant	"s9q29a. Amount" 
 		label var  	iext_`i'_mone	"s9q29b. Currency" 
-		label def	iext_`i'_mone	1 "Bolivares" 2 "USD" 3 "Euros" 4 "Colombian pesos"
-		label values iext_`i'_mone iext_`i'_mone
+		label def	iext_`i'_mone_eng	1 "Bolivares" 2 "USD" 3 "Euros" 4 "Colombian pesos"
+		label values iext_`i'_mone iext_`i'_mone_eng
 	}
 
 /*(*********************************************************************************************************************************************** 
@@ -3082,23 +3079,23 @@ label var clap_cuando "When was the last time that the 'Bolsa-Caja' CLAP arrived
 	
 	*** Poverty identifier
 	label var pobre "Poverty identifier"
-	label define pobre 		 	 0 "Not poor" 1 "Poor"
-	label values pobre pobre
+	label define pobre_eng 		 	 0 "Not poor" 1 "Poor"
+	label values pobre pobre_eng
 	
 	*** Extreme poverty identifier
 	label var pobre_extremo "Extreme poverty identifier"
-	label define pobre_extremo 		 	 0 "Not extreme poor" 1 "Extreme poor"
-	label values pobre_extremo pobre_extremo
+	label define pobre_extremo_eng 		 	 0 "Not extreme poor" 1 "Extreme poor"
+	label values pobre_extremo pobre_extremo_eng
 	
 	label variable pobre_19 "Poverty identifier: income less that 1.9usd a day ppp2011"
-	label define pobre_19 		 	 0 "Not poor (1.9 line)" 1 "Poor (1.9 line)"
-	label values pobre_19 pobre_19
+	label define pobre_19_eng		 	 0 "Not poor (1.9 line)" 1 "Poor (1.9 line)"
+	label values pobre_19 pobre_19_eng
 	label variable pobre_32 "Poverty identifier: income less that 3.2usd a day ppp2011"
-	label define pobre_32 		 	 0 "Not poor (3.2 line)" 1 "Poor (3.2 line)"
-	label values pobre_32 pobre_32
+	label define pobre_32_eng 		 	 0 "Not poor (3.2 line)" 1 "Poor (3.2 line)"
+	label values pobre_32 pobre_32_eng
 	label variable pobre_55 "Poverty identifier: income less that 5.5usd a day ppp2011"
-	label define pobre_55 		 	 0 "Not poor (5.5 line)" 1 "Poor (5.5 line)"
-	label values pobre_55 pobre_55
+	label define pobre_55_eng		 	 0 "Not poor (5.5 line)" 1 "Poor (5.5 line)"
+	label values pobre_55 pobre_55_eng
 
 
 /*(************************************************************************************************************************************************ 
@@ -3227,7 +3224,7 @@ cap label var    ipcf_ppp11	     "Per capita household income (2011 dollars)"
 *** Random
 
 	label var    hogarsec        	 "Member of secondary household"
-	label define hogarsec 		 	 0 "No" 1 "Yes"
-	label values hogarsec hogarsec
+	label define hogarsec_eng 		 	 0 "No" 1 "Yes"
+	label values hogarsec hogarsec_eng
 
 	cap label var 	quest 	"Questionnaire (ENCOVI admin use)"

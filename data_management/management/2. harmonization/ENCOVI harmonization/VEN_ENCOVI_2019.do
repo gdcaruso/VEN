@@ -3926,7 +3926,7 @@ c_sso_cant_bolfeb c_rpv_cant_bolfeb c_spf_cant_bolfeb c_aca_cant_bolfeb c_sps_ca
 		}
 
 	local incomevar29 _1 _2 _3 _4 _5 _6 _7 _8 _9
-	foreach i of local incomevar21 {
+	foreach i of local incomevar29 {
 		* Bolívares
 			gen s9q29b`i'_bolfeb = s9q29b`i'					* `deflactor11'	if interview_month==11 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a
 			replace s9q29b`i'_bolfeb = s9q29b`i'				* `deflactor12'	if interview_month==12 & s9q29c`i'==1 & s9q29b`i'!=. & s9q29b`i'!=.a

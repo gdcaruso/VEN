@@ -244,7 +244,7 @@ egen itranp_m = rsum(rem itranp_o_m), missing
 
 * Ingreso por Transferencias Estatales
 egen itrane   = rsum(cct itrane_o_m itrane_o_nm itrane_ns), missing
-egen itrane_m = rsum(cct itrane_o_m), missing
+egen itrane_m = rsum(cct itrane_o_m), missing // MA: CORREGIR? Aquí creo que debería estar agregago itrane_ns
 
 * Ingresos por Transferencias Totales
 egen itran   = rsum(itrane   itranp), missing

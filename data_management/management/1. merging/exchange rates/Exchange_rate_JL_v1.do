@@ -27,13 +27,16 @@ in the exchange rates
 		global trini 0
 		
 		* User 2: Julieta
-		global juli   1
+		global juli   0
 		
 		* User 3: Lautaro
 		global lauta   0
 		
 		* User 4: Malena
 		global male   0
+		
+		* User 5: Britta
+		global britta 1
 			
 			
 		if $juli {
@@ -54,6 +57,13 @@ in the exchange rates
 				global rootpath "C:\Users\wb550905\Github\VEN\data_management\management\1. merging\exchange rates"
 				global dataout "$rootpath\"
 		}
+		
+		if $britta   {
+				global rootpath "F:\Working with Github\WB\VEN\data_management\management\1. merging\exchange rates"
+				global dataout "$rootpath\"
+		}
+				
+		
 		
 *********************************************************************************
 *--- Import official data of exchange rates
@@ -115,21 +125,21 @@ in the exchange rates
 
 	// Save as temporal file
 	save `exch1', replace
-	clear
+	clear*/
 
 *--------------- 2T 2019		
 *--------------- Set the dates of the exchange rate as a local 
-* These are the names of the excel spreadsheet which contain daily data for each trimester	
+*These are the names of the excel spreadsheet which contain daily data for each trimester	
 	local fechas_T2_2019 28062019 27062019 26062019 25062019 21062019 20062019 ///
 	19062019 18062019 14062019 13062019 12062019 11062019 10062019 07062019 06062019 ///
-	05062019 04062019 31052019 30052019 29052019 28052019 27052019 24052019 27082019 26082019 ///
-	23082019 22082019 21082019 20082019 16082019 15082019 14082019 13082019 12082019 09082019 ///
-	08082019 07082019 06082019 05082019 
+	05062019 04062019 31052019 30052019 29052019 28052019 27052019 24052019 23052019 22052019 ///
+	21052019 20052019 17052019 16052019 15052019 14052019 13052019 10052019 09052019 08052019 ///
+	07052019 06052019 03052019 02052019 
 	
 	foreach k of local fechas_T2_2019 {
-			  cap import excel using "$rootpath\2_1_2b19.xls", sheet(`k') cellrange(B9:G47) firstrow clear
-		gen date="`k'"
-		if `k'==30092019 {
+			  cap import excel using "$rootpath\2_1_2b19.xls", sheet(`k') cellrange(B9:G47) firstrow clear 
+		gen date="`k'"		
+		if `k'==28062019 {
 		tempfile exch2
 		save `exch2'
 		}
@@ -173,7 +183,9 @@ in the exchange rates
 
 	// Save as temporal file
 	save `exch2', replace
-	clear */
+	clear
+	
+	
 *--------------- 3T 2019		
 *--------------- Set the dates of the exchange rate as a local 
 * These are the names of the excel spreadsheet which contain daily data for each trimester	
@@ -411,7 +423,7 @@ encode COD_moneda, gen(COD_moneda_e)
 *---  Append both databases
 ********************************************************************************
 //append using `exch1', force
-//append using `exch2', force
+append using `exch2', force
 append using `exch3', force
 append using `exch4', force
 append using `exch5', force
@@ -441,7 +453,7 @@ append using `exch5', force
 *--- Save exchange rates dataset
 *********************************************************************************
 	 
-	save "$dataout\exchenge_rate_sum", replace
+	save "$dataout\exchenge_rate_sum_with2019T2", replace
 
 *********************************************************************************
 *--- Generate dataset to merge with prices
@@ -466,4 +478,9 @@ append using `exch5', force
 *--- Save exchange rates dataset to merge with prices
 *********************************************************************************
 	
-	save "$dataout\exchenge_rate_price", replace
+	save "$dataout\exchenge_rate_price_with2019T2", replace
+	
+	
+	
+	
+	

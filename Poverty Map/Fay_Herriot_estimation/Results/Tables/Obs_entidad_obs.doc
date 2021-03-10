@@ -1,0 +1,114 @@
+{\rtf1\ansi\deff0 {\fonttbl{\f0\fnil Garamond;}}
+{\info {\author .}{\company .}{\title .}}
+\deflang1033\plain\fs22
+{\footer\pard\qc\plain\f0\fs22\chpgn\par}
+{
+{
+{\b\qc\line Number of observations - entidad }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3200\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx4700\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx6200
+\ql {\b Federal entity}\cell
+\qr {\b Freq.}\cell
+\qr {\b Percent}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx3200\cellx4700\cellx6200
+\ql {Distrito Capital}\cell
+\qr {654}\cell
+\qr {1.98}\cell
+\row
+\ql {Anzoategui}\cell
+\qr {2303}\cell
+\qr {6.96}\cell
+\row
+\ql {Apure}\cell
+\qr {1088}\cell
+\qr {3.29}\cell
+\row
+\ql {Aragua}\cell
+\qr {1711}\cell
+\qr {5.17}\cell
+\row
+\ql {Barinas}\cell
+\qr {1594}\cell
+\qr {4.82}\cell
+\row
+\ql {Bolivar}\cell
+\qr {1985}\cell
+\qr {6.00}\cell
+\row
+\ql {Carabobo}\cell
+\qr {750}\cell
+\qr {2.27}\cell
+\row
+\ql {Cojedes}\cell
+\qr {843}\cell
+\qr {2.55}\cell
+\row
+\ql {Falcon}\cell
+\qr {1921}\cell
+\qr {5.81}\cell
+\row
+\ql {Guarico}\cell
+\qr {634}\cell
+\qr {1.92}\cell
+\row
+\ql {Lara}\cell
+\qr {1001}\cell
+\qr {3.03}\cell
+\row
+\ql {Merida}\cell
+\qr {909}\cell
+\qr {2.75}\cell
+\row
+\ql {Miranda}\cell
+\qr {1501}\cell
+\qr {4.54}\cell
+\row
+\ql {Monagas}\cell
+\qr {2017}\cell
+\qr {6.10}\cell
+\row
+\ql {Nueva Esparta}\cell
+\qr {2035}\cell
+\qr {6.15}\cell
+\row
+\ql {Portuguesa}\cell
+\qr {1122}\cell
+\qr {3.39}\cell
+\row
+\ql {Sucre}\cell
+\qr {2828}\cell
+\qr {8.55}\cell
+\row
+\ql {Tachira}\cell
+\qr {1613}\cell
+\qr {4.88}\cell
+\row
+\ql {Trujillo}\cell
+\qr {2403}\cell
+\qr {7.26}\cell
+\row
+\ql {Yaracuy}\cell
+\qr {1218}\cell
+\qr {3.68}\cell
+\row
+\ql {Zulia}\cell
+\qr {2153}\cell
+\qr {6.51}\cell
+\row
+\ql {Vargas}\cell
+\qr {803}\cell
+\qr {2.43}\cell
+\row
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs\cellx3200\clbrdrt\brdrw10\brdrs\cellx4700\clbrdrt\brdrw10\brdrs\cellx6200
+\ql {Total}\cell
+\qr {33086}\cell
+\qr {100.00}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx6200\cell
+\row}
+
+
+\writepositionforappend
+}}

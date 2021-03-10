@@ -1,0 +1,80 @@
+{\rtf1\ansi\deff0 {\fonttbl{\f0\fnil Garamond;}}
+{\info {\author .}{\company .}{\title .}}
+\deflang1033\plain\fs22
+{\footer\pard\qc\plain\f0\fs22\chpgn\par}
+{
+{\fs22\b\qc\line Summary of poverty indicators and their standard deviation by municipality }{\par}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs  \cellx5203
+\fs22\pard\intbl\qr { }\cell
+\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs  \cellx6302
+\fs22\pard\intbl\qr {{\b N}}\cell
+\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs  \cellx7402
+\fs22\pard\intbl\qr {{\b Mean}}\cell
+\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs  \cellx8501
+\fs22\pard\intbl\qr {{\b min}}\cell
+\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs  \cellx9601
+\fs22\pard\intbl\qr {{\b max}}\cell
+\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs  \cellx10700
+\fs22\pard\intbl\qr {{\b Std. Dev.}}\cell
+\row}
+{\trowd\trgaph108\trleft-108
+\cellx5203
+\fs22\pard\intbl\ql {{ Income (direct estimator)}}\cell
+\cellx6302
+\qr {{210}}\cell
+\cellx7402
+\qr {{1714894.5}}\cell
+\cellx8501
+\qr {{378884.9}}\cell
+\cellx9601
+\qr {{5159204.5}}\cell
+\cellx10700
+\qr {{858564.2}}\cell
+\row}
+{\trowd\trgaph108\trleft-108
+\cellx5203
+\fs22\pard\intbl\ql {{ Extreme Poverty Rate (direct estimator)}}\cell
+\cellx6302
+\qr {{210}}\cell
+\cellx7402
+\qr {{.8}}\cell
+\cellx8501
+\qr {{0}}\cell
+\cellx9601
+\qr {{1}}\cell
+\cellx10700
+\qr {{.2}}\cell
+\row}
+{\trowd\trgaph108\trleft-108
+\cellx5203
+\fs22\pard\intbl\ql {{ Extreme Poverty Gap (direct estimator)}}\cell
+\cellx6302
+\qr {{210}}\cell
+\cellx7402
+\qr {{.5}}\cell
+\cellx8501
+\qr {{0}}\cell
+\cellx9601
+\qr {{.8}}\cell
+\cellx10700
+\qr {{.2}}\cell
+\row}
+{\trowd\trgaph108\trleft-108
+\clbrdrb\brdrw15\brdrs\cellx5203
+\fs22\pard\intbl\ql {{ Extreme Poverty Severity (direct estimator)}}\cell
+\clbrdrb\brdrw15\brdrs\cellx6302
+\qr {{210}}\cell
+\clbrdrb\brdrw15\brdrs\cellx7402
+\qr {{.3}}\cell
+\clbrdrb\brdrw15\brdrs\cellx8501
+\qr {{0}}\cell
+\clbrdrb\brdrw15\brdrs\cellx9601
+\qr {{.7}}\cell
+\clbrdrb\brdrw15\brdrs\cellx10700
+\qr {{.1}}\cell
+\row}
+
+
+\writepositionforappend
+}}

@@ -1,0 +1,54 @@
+{\rtf1\ansi\deff0 {\fonttbl{\f0\fnil Garamond;}}
+{\info {\author .}{\company .}{\title .}}
+\deflang1033\plain\fs22
+{\footer\pard\qc\plain\f0\fs22\chpgn\par}
+{
+{
+{\b\qc\line Number of observations - region_est1 }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx2400\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3900\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx5400
+\ql {\b Region}\cell
+\qr {\b Freq.}\cell
+\qr {\b Percent}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx2400\cellx3900\cellx5400
+\ql {Central}\cell
+\qr {3462}\cell
+\qr {10.46}\cell
+\row
+\ql {Llanera}\cell
+\qr {3316}\cell
+\qr {10.02}\cell
+\row
+\ql {Occidental}\cell
+\qr {5104}\cell
+\qr {15.43}\cell
+\row
+\ql {Zuliana}\cell
+\qr {2153}\cell
+\qr {6.51}\cell
+\row
+\ql {Andina}\cell
+\qr {4925}\cell
+\qr {14.89}\cell
+\row
+\ql {Nor-Oriental}\cell
+\qr {11168}\cell
+\qr {33.75}\cell
+\row
+\ql {Capital}\cell
+\qr {2958}\cell
+\qr {8.94}\cell
+\row
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs\cellx2400\clbrdrt\brdrw10\brdrs\cellx3900\clbrdrt\brdrw10\brdrs\cellx5400
+\ql {Total}\cell
+\qr {33086}\cell
+\qr {100.00}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx5400\cell
+\row}
+
+
+\writepositionforappend
+}}

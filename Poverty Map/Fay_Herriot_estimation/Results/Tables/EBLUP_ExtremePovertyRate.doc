@@ -1,0 +1,319 @@
+{\rtf1\ansi\deff0 {\fonttbl{\f0\fnil Garamond;}}
+{\info {\author .}{\company .}{\title .}}
+\deflang1033\plain\fs22
+{\footer\pard\qc\plain\f0\fs22\chpgn\par}
+{
+{
+{\b\qc\line FH Model - Extreme Poverty Rate (2019/20 }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3800\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx5200\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx6600\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx8000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx9400
+\ql { \b{Variable}}\cell
+\qr { \b{Obs}}\cell
+\qr { \b{Mean}}\cell
+\qr { \b{Std. Dev.}}\cell
+\qr { \b{Min}}\cell
+\qr { \b{Max}}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx3000\cellx3800\cellx5200\cellx6600\cellx8000\cellx9400
+\ql { {Direct estimator}}\cell
+\qr {{210}}\cell
+\qr {{.78}}\cell
+\qr {{.18}}\cell
+\qr {{0}}\cell
+\qr {{1}}\cell
+\row
+\ql { {CV (Direct estimator)}}\cell
+\qr {{209}}\cell
+\qr {{6.84}}\cell
+\qr {{9.5}}\cell
+\qr {{0}}\cell
+\qr {{70.25}}\cell
+\row
+\ql { {EBLUP estimator}}\cell
+\qr {{316}}\cell
+\qr {{.78}}\cell
+\qr {{.17}}\cell
+\qr {{0}}\cell
+\qr {{1.27}}\cell
+\row
+\ql { {CV (FH Model)}}\cell
+\qr {{315}}\cell
+\qr {{12.66}}\cell
+\qr {{11.81}}\cell
+\qr {{0}}\cell
+\qr {{63.19}}\cell
+\row
+\ql { {MSE EBLUP}}\cell
+\qr {{316}}\cell
+\qr {{.01}}\cell
+\qr {{.02}}\cell
+\qr {{0}}\cell
+\qr {{.2}}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx9400{}\cell
+\row}
+
+
+{
+{\b\qc\line FH Model with ampl estimation - Extreme Poverty Rate (2019/20 }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3800\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx5200\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx6600\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx8000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx9400
+\ql { \b{Variable}}\cell
+\qr { \b{Obs}}\cell
+\qr { \b{Mean}}\cell
+\qr { \b{Std. Dev.}}\cell
+\qr { \b{Min}}\cell
+\qr { \b{Max}}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx3000\cellx3800\cellx5200\cellx6600\cellx8000\cellx9400
+\ql { {Direct estimator}}\cell
+\qr {{210}}\cell
+\qr {{.78}}\cell
+\qr {{.18}}\cell
+\qr {{0}}\cell
+\qr {{1}}\cell
+\row
+\ql { {CV (Direct estimator)}}\cell
+\qr {{209}}\cell
+\qr {{6.84}}\cell
+\qr {{9.5}}\cell
+\qr {{0}}\cell
+\qr {{70.25}}\cell
+\row
+\ql { {EBLUP estimator}}\cell
+\qr {{316}}\cell
+\qr {{.78}}\cell
+\qr {{.17}}\cell
+\qr {{0}}\cell
+\qr {{1.28}}\cell
+\row
+\ql { {CV (FH Model)}}\cell
+\qr {{315}}\cell
+\qr {{11.74}}\cell
+\qr {{10.61}}\cell
+\qr {{0}}\cell
+\qr {{57.6}}\cell
+\row
+\ql { {MSE EBLUP}}\cell
+\qr {{316}}\cell
+\qr {{.01}}\cell
+\qr {{.02}}\cell
+\qr {{0}}\cell
+\qr {{.16}}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx9400{}\cell
+\row}
+
+
+{
+{\b\qc\line FH Model with aryl estimation - Extreme Poverty Rate (2019/20 }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3800\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx5200\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx6600\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx8000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx9400
+\ql { \b{Variable}}\cell
+\qr { \b{Obs}}\cell
+\qr { \b{Mean}}\cell
+\qr { \b{Std. Dev.}}\cell
+\qr { \b{Min}}\cell
+\qr { \b{Max}}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx3000\cellx3800\cellx5200\cellx6600\cellx8000\cellx9400
+\ql { {Direct estimator}}\cell
+\qr {{210}}\cell
+\qr {{.78}}\cell
+\qr {{.18}}\cell
+\qr {{0}}\cell
+\qr {{1}}\cell
+\row
+\ql { {CV (Direct estimator)}}\cell
+\qr {{209}}\cell
+\qr {{6.84}}\cell
+\qr {{9.5}}\cell
+\qr {{0}}\cell
+\qr {{70.25}}\cell
+\row
+\ql { {EBLUP estimator}}\cell
+\qr {{316}}\cell
+\qr {{.78}}\cell
+\qr {{.17}}\cell
+\qr {{0}}\cell
+\qr {{1.27}}\cell
+\row
+\ql { {CV (FH Model)}}\cell
+\qr {{315}}\cell
+\qr {{12.66}}\cell
+\qr {{11.81}}\cell
+\qr {{0}}\cell
+\qr {{63.19}}\cell
+\row
+\ql { {MSE EBLUP}}\cell
+\qr {{316}}\cell
+\qr {{.01}}\cell
+\qr {{.02}}\cell
+\qr {{0}}\cell
+\qr {{.2}}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx9400{}\cell
+\row}
+
+
+{
+{\b\qc\line FH Log-Transformed Model - Extreme Poverty Rate (2019/20 }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3800\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx5200\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx6600\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx8000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx9400
+\ql { \b{Variable}}\cell
+\qr { \b{Obs}}\cell
+\qr { \b{Mean}}\cell
+\qr { \b{Std. Dev.}}\cell
+\qr { \b{Min}}\cell
+\qr { \b{Max}}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx3000\cellx3800\cellx5200\cellx6600\cellx8000\cellx9400
+\ql { {Direct estimator}}\cell
+\qr {{210}}\cell
+\qr {{.78}}\cell
+\qr {{.18}}\cell
+\qr {{0}}\cell
+\qr {{1}}\cell
+\row
+\ql { {CV (Direct estimator)}}\cell
+\qr {{209}}\cell
+\qr {{6.84}}\cell
+\qr {{9.5}}\cell
+\qr {{0}}\cell
+\qr {{70.25}}\cell
+\row
+\ql { {EBLUP estimator}}\cell
+\qr {{203}}\cell
+\qr {{.8}}\cell
+\qr {{.16}}\cell
+\qr {{.25}}\cell
+\qr {{1.04}}\cell
+\row
+\ql { {CV (FH Model)}}\cell
+\qr {{203}}\cell
+\qr {{5.81}}\cell
+\qr {{6.01}}\cell
+\qr {{0}}\cell
+\qr {{27.94}}\cell
+\row
+\ql { {MSE EBLUP}}\cell
+\qr {{203}}\cell
+\qr {{0}}\cell
+\qr {{.01}}\cell
+\qr {{0}}\cell
+\qr {{.06}}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx9400{}\cell
+\row}
+
+
+{
+{\b\qc\line FH Log-Transformed Model with crude back-transformation - Extreme Poverty Rate (2019/20 }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3800\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx5200\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx6600\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx8000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx9400
+\ql { \b{Variable}}\cell
+\qr { \b{Obs}}\cell
+\qr { \b{Mean}}\cell
+\qr { \b{Std. Dev.}}\cell
+\qr { \b{Min}}\cell
+\qr { \b{Max}}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx3000\cellx3800\cellx5200\cellx6600\cellx8000\cellx9400
+\ql { {Direct estimator}}\cell
+\qr {{210}}\cell
+\qr {{.78}}\cell
+\qr {{.18}}\cell
+\qr {{0}}\cell
+\qr {{1}}\cell
+\row
+\ql { {CV (Direct estimator)}}\cell
+\qr {{209}}\cell
+\qr {{6.84}}\cell
+\qr {{9.5}}\cell
+\qr {{0}}\cell
+\qr {{70.25}}\cell
+\row
+\ql { {EBLUP estimator}}\cell
+\qr {{316}}\cell
+\qr {{.79}}\cell
+\qr {{.16}}\cell
+\qr {{.24}}\cell
+\qr {{1.26}}\cell
+\row
+\ql { {CV (FH Model)}}\cell
+\qr {{316}}\cell
+\qr {{15.14}}\cell
+\qr {{14.85}}\cell
+\qr {{0}}\cell
+\qr {{62.45}}\cell
+\row
+\ql { {MSE EBLUP}}\cell
+\qr {{316}}\cell
+\qr {{.02}}\cell
+\qr {{.03}}\cell
+\qr {{0}}\cell
+\qr {{.4}}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx9400{}\cell
+\row}
+
+
+{
+{\b\qc\line FH Model with ampl estimation - Extreme Poverty Rate (2019/20 }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx3800\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx5200\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx6600\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx8000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx9400
+\ql { \b{Variable}}\cell
+\qr { \b{Obs}}\cell
+\qr { \b{Mean}}\cell
+\qr { \b{Std. Dev.}}\cell
+\qr { \b{Min}}\cell
+\qr { \b{Max}}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx3000\cellx3800\cellx5200\cellx6600\cellx8000\cellx9400
+\ql { {Direct estimator}}\cell
+\qr {{210}}\cell
+\qr {{.78}}\cell
+\qr {{.18}}\cell
+\qr {{0}}\cell
+\qr {{1}}\cell
+\row
+\ql { {CV (Direct estimator)}}\cell
+\qr {{209}}\cell
+\qr {{6.84}}\cell
+\qr {{9.5}}\cell
+\qr {{0}}\cell
+\qr {{70.25}}\cell
+\row
+\ql { {EBLUP estimator}}\cell
+\qr {{316}}\cell
+\qr {{.78}}\cell
+\qr {{.17}}\cell
+\qr {{0}}\cell
+\qr {{1.28}}\cell
+\row
+\ql { {CV (FH Model)}}\cell
+\qr {{315}}\cell
+\qr {{11.74}}\cell
+\qr {{10.61}}\cell
+\qr {{0}}\cell
+\qr {{57.6}}\cell
+\row
+\ql { {MSE EBLUP}}\cell
+\qr {{316}}\cell
+\qr {{.01}}\cell
+\qr {{.02}}\cell
+\qr {{0}}\cell
+\qr {{.16}}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx9400{}\cell
+\row}
+
+
+\writepositionforappend
+}}

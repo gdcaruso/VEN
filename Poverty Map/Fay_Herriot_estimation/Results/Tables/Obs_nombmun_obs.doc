@@ -1,0 +1,714 @@
+{\rtf1\ansi\deff0 {\fonttbl{\f0\fnil Garamond;}}
+{\info {\author .}{\company .}{\title .}}
+\deflang1033\plain\fs22
+{\footer\pard\qc\plain\f0\fs22\chpgn\par}
+{
+{
+{\b\qc\line Number of observations - nombmun }{\par}
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx5000\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx6500\clbrdrt\brdrw10\brdrs \clbrdrb\brdrw25\brdrs\cellx8000
+\ql {\b Municipality's name}\cell
+\qr {\b Freq.}\cell
+\qr {\b Percent}\cell
+\row
+\trowd\trgaph108\trleft-108\cellx5000\cellx6500\cellx8000
+\ql {Acevedo}\cell
+\qr {137}\cell
+\qr {0.41}\cell
+\row
+\ql {Achaguas}\cell
+\qr {95}\cell
+\qr {0.29}\cell
+\row
+\ql {Acosta}\cell
+\qr {150}\cell
+\qr {0.45}\cell
+\row
+\ql {Aguasay}\cell
+\qr {6}\cell
+\qr {0.02}\cell
+\row
+\ql {Alberto Adriani}\cell
+\qr {19}\cell
+\qr {0.06}\cell
+\row
+\ql {Alberto Arvelo Torrealba}\cell
+\qr {15}\cell
+\qr {0.05}\cell
+\row
+\ql {Anaco}\cell
+\qr {350}\cell
+\qr {1.06}\cell
+\row
+\ql {Andres Bello}\cell
+\qr {56}\cell
+\qr {0.17}\cell
+\row
+\ql {Andres Eloy Blanco}\cell
+\qr {92}\cell
+\qr {0.28}\cell
+\row
+\ql {Andres Mata}\cell
+\qr {187}\cell
+\qr {0.57}\cell
+\row
+\ql {Antolin del Campo}\cell
+\qr {170}\cell
+\qr {0.51}\cell
+\row
+\ql {Antonio Jose de Sucre}\cell
+\qr {108}\cell
+\qr {0.33}\cell
+\row
+\ql {Antonio Pinto Salinas}\cell
+\qr {6}\cell
+\qr {0.02}\cell
+\row
+\ql {Antonio Romulo Costa}\cell
+\qr {26}\cell
+\qr {0.08}\cell
+\row
+\ql {Anzoategui}\cell
+\qr {11}\cell
+\qr {0.03}\cell
+\row
+\ql {Aragua}\cell
+\qr {26}\cell
+\qr {0.08}\cell
+\row
+\ql {Arismendi}\cell
+\qr {172}\cell
+\qr {0.52}\cell
+\row
+\ql {Aristides Bastidas}\cell
+\qr {80}\cell
+\qr {0.24}\cell
+\row
+\ql {Barinas}\cell
+\qr {959}\cell
+\qr {2.90}\cell
+\row
+\ql {Baruta}\cell
+\qr {110}\cell
+\qr {0.33}\cell
+\row
+\ql {Bejuma}\cell
+\qr {14}\cell
+\qr {0.04}\cell
+\row
+\ql {Benitez}\cell
+\qr {91}\cell
+\qr {0.28}\cell
+\row
+\ql {Bermudez}\cell
+\qr {579}\cell
+\qr {1.75}\cell
+\row
+\ql {Biruaca}\cell
+\qr {150}\cell
+\qr {0.45}\cell
+\row
+\ql {Bocono}\cell
+\qr {116}\cell
+\qr {0.35}\cell
+\row
+\ql {Bolivar}\cell
+\qr {633}\cell
+\qr {1.91}\cell
+\row
+\ql {Bolivariano Libertador}\cell
+\qr {654}\cell
+\qr {1.98}\cell
+\row
+\ql {Bruzual}\cell
+\qr {238}\cell
+\qr {0.72}\cell
+\row
+\ql {Buroz}\cell
+\qr {64}\cell
+\qr {0.19}\cell
+\row
+\ql {Cabimas}\cell
+\qr {252}\cell
+\qr {0.76}\cell
+\row
+\ql {Cajigal}\cell
+\qr {23}\cell
+\qr {0.07}\cell
+\row
+\ql {Campo Elias}\cell
+\qr {315}\cell
+\qr {0.95}\cell
+\row
+\ql {Candelaria}\cell
+\qr {65}\cell
+\qr {0.20}\cell
+\row
+\ql {Caracciolo Parra Olmedo}\cell
+\qr {12}\cell
+\qr {0.04}\cell
+\row
+\ql {Carache}\cell
+\qr {53}\cell
+\qr {0.16}\cell
+\row
+\ql {Cardenas}\cell
+\qr {148}\cell
+\qr {0.45}\cell
+\row
+\ql {Caripe}\cell
+\qr {77}\cell
+\qr {0.23}\cell
+\row
+\ql {Carirubana}\cell
+\qr {507}\cell
+\qr {1.53}\cell
+\row
+\ql {Carlos Arvelo}\cell
+\qr {18}\cell
+\qr {0.05}\cell
+\row
+\ql {Caroni}\cell
+\qr {1175}\cell
+\qr {3.55}\cell
+\row
+\ql {Chacao}\cell
+\qr {1}\cell
+\qr {0.00}\cell
+\row
+\ql {Cocorote}\cell
+\qr {113}\cell
+\qr {0.34}\cell
+\row
+\ql {Colina}\cell
+\qr {146}\cell
+\qr {0.44}\cell
+\row
+\ql {Cordoba}\cell
+\qr {167}\cell
+\qr {0.50}\cell
+\row
+\ql {Cristobal Rojas}\cell
+\qr {116}\cell
+\qr {0.35}\cell
+\row
+\ql {Cruz Paredes}\cell
+\qr {9}\cell
+\qr {0.03}\cell
+\row
+\ql {Cruz Salmeron Acosta}\cell
+\qr {135}\cell
+\qr {0.41}\cell
+\row
+\ql {Dabajuro}\cell
+\qr {22}\cell
+\qr {0.07}\cell
+\row
+\ql {Diaz}\cell
+\qr {331}\cell
+\qr {1.00}\cell
+\row
+\ql {Diego Ibarra}\cell
+\qr {9}\cell
+\qr {0.03}\cell
+\row
+\ql {El Hatillo}\cell
+\qr {21}\cell
+\qr {0.06}\cell
+\row
+\ql {Escuque}\cell
+\qr {14}\cell
+\qr {0.04}\cell
+\row
+\ql {Esteller}\cell
+\qr {152}\cell
+\qr {0.46}\cell
+\row
+\ql {Ezequiel Zamora}\cell
+\qr {229}\cell
+\qr {0.69}\cell
+\row
+\ql {Falcon}\cell
+\qr {557}\cell
+\qr {1.68}\cell
+\row
+\ql {Federacion}\cell
+\qr {22}\cell
+\qr {0.07}\cell
+\row
+\ql {Fernando de Pe√±alver}\cell
+\qr {117}\cell
+\qr {0.35}\cell
+\row
+\ql {Francisco Linares Alcantara}\cell
+\qr {164}\cell
+\qr {0.50}\cell
+\row
+\ql {Francisco de Miranda}\cell
+\qr {55}\cell
+\qr {0.17}\cell
+\row
+\ql {Garcia}\cell
+\qr {286}\cell
+\qr {0.86}\cell
+\row
+\ql {Garcia de Hevia}\cell
+\qr {165}\cell
+\qr {0.50}\cell
+\row
+\ql {Girardot}\cell
+\qr {536}\cell
+\qr {1.62}\cell
+\row
+\ql {Gomez}\cell
+\qr {189}\cell
+\qr {0.57}\cell
+\row
+\ql {Guacara}\cell
+\qr {157}\cell
+\qr {0.47}\cell
+\row
+\ql {Guaicaipuro}\cell
+\qr {96}\cell
+\qr {0.29}\cell
+\row
+\ql {Guanare}\cell
+\qr {636}\cell
+\qr {1.92}\cell
+\row
+\ql {Guanarito}\cell
+\qr {5}\cell
+\qr {0.02}\cell
+\row
+\ql {Guanta}\cell
+\qr {64}\cell
+\qr {0.19}\cell
+\row
+\ql {Guasimos}\cell
+\qr {119}\cell
+\qr {0.36}\cell
+\row
+\ql {Heres}\cell
+\qr {722}\cell
+\qr {2.18}\cell
+\row
+\ql {Independencia}\cell
+\qr {313}\cell
+\qr {0.95}\cell
+\row
+\ql {Iribarren}\cell
+\qr {674}\cell
+\qr {2.04}\cell
+\row
+\ql {Jauregui}\cell
+\qr {98}\cell
+\qr {0.30}\cell
+\row
+\ql {Jimenez}\cell
+\qr {58}\cell
+\qr {0.18}\cell
+\row
+\ql {Jose Angel Lamas}\cell
+\qr {27}\cell
+\qr {0.08}\cell
+\row
+\ql {Jose Antonio Paez}\cell
+\qr {70}\cell
+\qr {0.21}\cell
+\row
+\ql {Jose Felix Ribas}\cell
+\qr {173}\cell
+\qr {0.52}\cell
+\row
+\ql {Jose Rafael Revenga}\cell
+\qr {54}\cell
+\qr {0.16}\cell
+\row
+\ql {Juan Antonio Sotillo}\cell
+\qr {531}\cell
+\qr {1.60}\cell
+\row
+\ql {Juan German Roscio}\cell
+\qr {364}\cell
+\qr {1.10}\cell
+\row
+\ql {Junin}\cell
+\qr {76}\cell
+\qr {0.23}\cell
+\row
+\ql {La Ca√±ada De Urdaneta}\cell
+\qr {37}\cell
+\qr {0.11}\cell
+\row
+\ql {La Ceiba}\cell
+\qr {64}\cell
+\qr {0.19}\cell
+\row
+\ql {La Trinidad}\cell
+\qr {69}\cell
+\qr {0.21}\cell
+\row
+\ql {Lagunillas}\cell
+\qr {91}\cell
+\qr {0.28}\cell
+\row
+\ql {Lander}\cell
+\qr {161}\cell
+\qr {0.49}\cell
+\row
+\ql {Libertad}\cell
+\qr {98}\cell
+\qr {0.30}\cell
+\row
+\ql {Libertador}\cell
+\qr {867}\cell
+\qr {2.62}\cell
+\row
+\ql {Los Guayos}\cell
+\qr {63}\cell
+\qr {0.19}\cell
+\row
+\ql {Los Salias}\cell
+\qr {32}\cell
+\qr {0.10}\cell
+\row
+\ql {Los Taques}\cell
+\qr {32}\cell
+\qr {0.10}\cell
+\row
+\ql {Maneiro}\cell
+\qr {161}\cell
+\qr {0.49}\cell
+\row
+\ql {Manuel Ezequiel Bruzual}\cell
+\qr {75}\cell
+\qr {0.23}\cell
+\row
+\ql {Mara}\cell
+\qr {107}\cell
+\qr {0.32}\cell
+\row
+\ql {Maracaibo}\cell
+\qr {1181}\cell
+\qr {3.57}\cell
+\row
+\ql {Marcano}\cell
+\qr {201}\cell
+\qr {0.61}\cell
+\row
+\ql {Marino}\cell
+\qr {384}\cell
+\qr {1.16}\cell
+\row
+\ql {Mario Briceno Iragorry}\cell
+\qr {88}\cell
+\qr {0.27}\cell
+\row
+\ql {Maturin}\cell
+\qr {1304}\cell
+\qr {3.94}\cell
+\row
+\ql {Mauroa}\cell
+\qr {25}\cell
+\qr {0.08}\cell
+\row
+\ql {Mejia}\cell
+\qr {47}\cell
+\qr {0.14}\cell
+\row
+\ql {Michelena}\cell
+\qr {102}\cell
+\qr {0.31}\cell
+\row
+\ql {Miranda}\cell
+\qr {712}\cell
+\qr {2.15}\cell
+\row
+\ql {Monsenor Iturriza}\cell
+\qr {13}\cell
+\qr {0.04}\cell
+\row
+\ql {Monsenor Jose Vicente de Unda}\cell
+\qr {22}\cell
+\qr {0.07}\cell
+\row
+\ql {Monte Carmelo}\cell
+\qr {20}\cell
+\qr {0.06}\cell
+\row
+\ql {Montes}\cell
+\qr {149}\cell
+\qr {0.45}\cell
+\row
+\ql {Motatan}\cell
+\qr {156}\cell
+\qr {0.47}\cell
+\row
+\ql {Mu√±oz}\cell
+\qr {25}\cell
+\qr {0.08}\cell
+\row
+\ql {Naguanagua}\cell
+\qr {58}\cell
+\qr {0.18}\cell
+\row
+\ql {Nirgua}\cell
+\qr {16}\cell
+\qr {0.05}\cell
+\row
+\ql {Obispos}\cell
+\qr {113}\cell
+\qr {0.34}\cell
+\row
+\ql {Padre Noguera}\cell
+\qr {3}\cell
+\qr {0.01}\cell
+\row
+\ql {Paez}\cell
+\qr {431}\cell
+\qr {1.30}\cell
+\row
+\ql {Palavecino}\cell
+\qr {86}\cell
+\qr {0.26}\cell
+\row
+\ql {Pampan}\cell
+\qr {155}\cell
+\qr {0.47}\cell
+\row
+\ql {Pampanito}\cell
+\qr {67}\cell
+\qr {0.20}\cell
+\row
+\ql {Panamericano}\cell
+\qr {30}\cell
+\qr {0.09}\cell
+\row
+\ql {Pao de San Juan Bautista}\cell
+\qr {9}\cell
+\qr {0.03}\cell
+\row
+\ql {Paz Castillo}\cell
+\qr {43}\cell
+\qr {0.13}\cell
+\row
+\ql {Pedraza}\cell
+\qr {31}\cell
+\qr {0.09}\cell
+\row
+\ql {Pedro Camejo}\cell
+\qr {32}\cell
+\qr {0.10}\cell
+\row
+\ql {Pedro Gual}\cell
+\qr {29}\cell
+\qr {0.09}\cell
+\row
+\ql {Pedro Maria Freites}\cell
+\qr {58}\cell
+\qr {0.18}\cell
+\row
+\ql {Pedro Zaraza}\cell
+\qr {149}\cell
+\qr {0.45}\cell
+\row
+\ql {Pena}\cell
+\qr {204}\cell
+\qr {0.62}\cell
+\row
+\ql {Peninsula de Macanao}\cell
+\qr {111}\cell
+\qr {0.34}\cell
+\row
+\ql {Petit}\cell
+\qr {47}\cell
+\qr {0.14}\cell
+\row
+\ql {Piar}\cell
+\qr {219}\cell
+\qr {0.66}\cell
+\row
+\ql {Piritu}\cell
+\qr {79}\cell
+\qr {0.24}\cell
+\row
+\ql {Plaza}\cell
+\qr {101}\cell
+\qr {0.31}\cell
+\row
+\ql {Rafael Rangel}\cell
+\qr {39}\cell
+\qr {0.12}\cell
+\row
+\ql {Ribero}\cell
+\qr {317}\cell
+\qr {0.96}\cell
+\row
+\ql {Ricaurte}\cell
+\qr {6}\cell
+\qr {0.02}\cell
+\row
+\ql {Rojas}\cell
+\qr {8}\cell
+\qr {0.02}\cell
+\row
+\ql {Romulo Gallegos}\cell
+\qr {108}\cell
+\qr {0.33}\cell
+\row
+\ql {San Carlos}\cell
+\qr {346}\cell
+\qr {1.05}\cell
+\row
+\ql {San Casimiro}\cell
+\qr {12}\cell
+\qr {0.04}\cell
+\row
+\ql {San Cristobal}\cell
+\qr {388}\cell
+\qr {1.17}\cell
+\row
+\ql {San Diego}\cell
+\qr {14}\cell
+\qr {0.04}\cell
+\row
+\ql {San Felipe}\cell
+\qr {181}\cell
+\qr {0.55}\cell
+\row
+\ql {San Fernando}\cell
+\qr {345}\cell
+\qr {1.04}\cell
+\row
+\ql {San Francisco}\cell
+\qr {433}\cell
+\qr {1.31}\cell
+\row
+\ql {San Genaro de Boconoito}\cell
+\qr {15}\cell
+\qr {0.05}\cell
+\row
+\ql {San Jose de Guanipa}\cell
+\qr {49}\cell
+\qr {0.15}\cell
+\row
+\ql {San Rafael de Carvajal}\cell
+\qr {424}\cell
+\qr {1.28}\cell
+\row
+\ql {Santa Ana}\cell
+\qr {42}\cell
+\qr {0.13}\cell
+\row
+\ql {Santa Barbara}\cell
+\qr {18}\cell
+\qr {0.05}\cell
+\row
+\ql {Santa Rita}\cell
+\qr {32}\cell
+\qr {0.10}\cell
+\row
+\ql {Santiago Marino}\cell
+\qr {281}\cell
+\qr {0.85}\cell
+\row
+\ql {Silva}\cell
+\qr {82}\cell
+\qr {0.25}\cell
+\row
+\ql {Simon Bolivar}\cell
+\qr {797}\cell
+\qr {2.41}\cell
+\row
+\ql {Simon Planas}\cell
+\qr {73}\cell
+\qr {0.22}\cell
+\row
+\ql {Simon Rodriguez}\cell
+\qr {99}\cell
+\qr {0.30}\cell
+\row
+\ql {Sosa}\cell
+\qr {4}\cell
+\qr {0.01}\cell
+\row
+\ql {Sucre}\cell
+\qr {1673}\cell
+\qr {5.06}\cell
+\row
+\ql {Tinaco}\cell
+\qr {18}\cell
+\qr {0.05}\cell
+\row
+\ql {Torbes}\cell
+\qr {72}\cell
+\qr {0.22}\cell
+\row
+\ql {Torres}\cell
+\qr {80}\cell
+\qr {0.24}\cell
+\row
+\ql {Tovar}\cell
+\qr {2}\cell
+\qr {0.01}\cell
+\row
+\ql {Trujillo}\cell
+\qr {154}\cell
+\qr {0.47}\cell
+\row
+\ql {Tubores}\cell
+\qr {127}\cell
+\qr {0.38}\cell
+\row
+\ql {Turen}\cell
+\qr {187}\cell
+\qr {0.57}\cell
+\row
+\ql {Urachiche}\cell
+\qr {37}\cell
+\qr {0.11}\cell
+\row
+\ql {Urdaneta}\cell
+\qr {213}\cell
+\qr {0.64}\cell
+\row
+\ql {Urumaco}\cell
+\qr {67}\cell
+\qr {0.20}\cell
+\row
+\ql {Valencia}\cell
+\qr {374}\cell
+\qr {1.13}\cell
+\row
+\ql {Valera}\cell
+\qr {569}\cell
+\qr {1.72}\cell
+\row
+\ql {Valle De La Pascua}\cell
+\qr {121}\cell
+\qr {0.37}\cell
+\row
+\ql {Vargas}\cell
+\qr {803}\cell
+\qr {2.43}\cell
+\row
+\ql {Veroes}\cell
+\qr {72}\cell
+\qr {0.22}\cell
+\row
+\ql {Zamora}\cell
+\qr {295}\cell
+\qr {0.89}\cell
+\row
+\trowd\trgaph108\trleft-108\clbrdrt\brdrw10\brdrs\cellx5000\clbrdrt\brdrw10\brdrs\cellx6500\clbrdrt\brdrw10\brdrs\cellx8000
+\ql {Total}\cell
+\qr {33086}\cell
+\qr {100.00}\cell
+\row
+}
+{\trowd\trgaph108\trleft-108
+\clbrdrt\brdrw15\brdrs\cellx8000\cell
+\row}
+
+
+\writepositionforappend
+}}

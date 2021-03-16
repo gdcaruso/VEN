@@ -131,8 +131,6 @@ replace wage=Mwage4 if wage==. & categ_ocu!=5 & categ_ocu!=6
 drop Mwage Mwage2 Mwage3 Mwage4
 
 
-
-
 ********************************************************************************
 *Define different scenarios
 
@@ -140,7 +138,7 @@ drop Mwage Mwage2 Mwage3 Mwage4
 local sigma=5  // OWE= -0.5 (baseline)
 
 ***Wage Scenario
-local sc=1 
+local sc=3 
 //Scenario 1 = Extreme poverty level wage of 165 2011-PPP-$
 //Scenario 2 = Half of extreme poverty-level wage of 82.5 2011-PPP-$
 //Scenario 3 = 75 percent of extreme poverty-levle wage (123.75 2011-PPP-$)
@@ -148,6 +146,9 @@ local sc=1
 
 ***New minimum wage
 g newminwage=newminwage`sc'          //scenario of the Policy
+
+
+
 
 
 ********************************************************************************
@@ -163,17 +164,17 @@ replace wage=. if categ_ocu==5 | categ_ocu==6 //Do not consider employers and se
 ***Wage below the minimum: 
 gen wagelowold=wage<minwage 
 replace wagelowold=. if wage==. | minwage==.
-sum  wagelowold [fw=pondera] //14.9 percent earn below old min wage 
+sum  wagelowold [fw=pondera]  
 
 ***Wage below the new minimum and obove the minimum (potentially affected)
-gen wagelownew=wage>=minwage & wage<newminwage 
+gen wagelownew= wage<newminwage & wage>=minwage // -> try-out including below min-wage earners 
 replace wagelownew=. if wage==. | minwage==.
-sum  wagelownew [fw=pondera] //75.8 percent earn above old and below new min wage 
+sum  wagelownew [fw=pondera]  
 
 ***Wage above new min wage 
 gen wagehigh=wage>=newminwage 
 replace wagehigh=. if wage==. | minwage==.
-sum  wagehigh [fw=pondera] //9.4 percent earn above new min wage 
+sum  wagehigh [fw=pondera] 
 
 ***Compute expected wage as a result of the policy:
 gen expwage=newminwage if wagelownew==1  // if potentally affected then expected wage = new min wage
@@ -191,6 +192,8 @@ lab var wagechange "Expected increase in wage, 2011-PPP-U$"
 
 
 
+
+
 ********************************************************************************
 *Create different types of elasticities
 ********************************************************************************
@@ -200,7 +203,7 @@ lab var wagechange "Expected increase in wage, 2011-PPP-U$"
 g sigma=-0.`sigma'        // elasticity for skilled in the short-run
 g sigma_us=sigma-0.7      // elasticity for unskilled in the short-run
 g sigmalr=sigma-0.8       // elasticity for skilled in the long-run
-g sigma_uslr=sigma_us-0.3 // elasticity for unskilled in the long-run
+g sigma_uslr=-1 // elasticity for unskilled in the long-run
 
 
 ***Create a variable for short- and long-run elasticity:
@@ -219,22 +222,22 @@ g sigma_lr=sigmalr*high_skilled+sigma_uslr*(1-high_skilled)
 //Do not include sample weights here yet
 
 
-**Compute average wage by age, skill-level, occupation, sector, formal/informal
+**Compute average wage by age, gender, educ level, skill-level, occupation, sector, formal/informal, breadwinner
 tempfile temptest 
 save `temptest', emptyok
 
 preserve
 collapse (mean) wage [fw=pondera] if wagelownew==1, ///
-by(gedad1 high_skilled categ_ocu part_time sector_encuesta formal_ss_pension)
+by(gedad1 hombre educ_level high_skilled categ_ocu part_time sector_encuesta formal_ss_pension breadwinner)
 rename wage Mwage
 save `temptest', replace
 restore
 
-merge m:1 gedad1 high_skilled categ_ocu part_time sector_encuesta formal_ss_pension using `temptest'  
+merge m:1 gedad1 hombre educ_level high_skilled categ_ocu part_time sector_encuesta formal_ss_pension breadwinner using `temptest'  
 drop _merge
 
 
-***Compute expected wage change by age, skill-level, occupation, sector, formal/informal
+**Compute expected wage by age, gender, educ level, skill-level, occupation, sector, formal/informal, breadwinner
 tempfile temptest 
 save `temptest', emptyok
 
@@ -400,9 +403,9 @@ replace educ_string="Primary education or less" if nivel_educ<3
 replace educ_string="Secondary education" if nivel_educ>2 & nivel_educ<7
 replace educ_string="Post-secondary education" if nivel_educ>6
 
-g Primaryorless = (nivel_educ<3) if !missing(nivel_educ)
-g Secondary = (nivel_educ>2 & nivel_educ<7) if !missing(nivel_educ)
-g PostSecondary = (nivel_educ>6) if !missing(nivel_educ)
+g Primaryorless = (nivel_educ<4) if !missing(nivel_educ)
+g Secondary = (nivel_educ>3 & nivel_educ<6) if !missing(nivel_educ)
+g PostSecondary = (nivel_educ>5) if !missing(nivel_educ)
 
 gen sex_string=""
 replace sex_string="Female" if hombre==0

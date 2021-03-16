@@ -118,9 +118,17 @@ label var ipcf_11 "IPCF PPP (dollars)"
 ********************************************************************************
 *Dummy for people earning below the poverty-level wage
 gen targetgroup = (ila_ppp<165) if !missing(ila_ppp)
-tab targetgroup [fw=pondera]
+tab targetgroup [fw=pondera] if edad>13 & edad<65
 
 label var targetgroup "Below poverty-level earners"
+
+gen targetgroup2 = (ila_ppp<165 & ila_ppp>20.62) if !missing(ila_ppp)
+tab targetgroup2 [fw=pondera] if edad>13 & edad<65
+
+label var targetgroup2 "Below poverty-level and above min. wage earners"
+
+gen targetgroup3 = (ila_ppp<20.62) if !missing(ila_ppp)
+tab targetgroup3 [fw=pondera]  if edad>13 & edad<65
 
 ********************************************************************************
 *Generate informality indicator
@@ -148,7 +156,7 @@ gen formal_ss_pension = .
 replace formal_ss_pension = 0 if (formal_ss==0 | aporta_pension==0) & inlist(categ_ocu,1,2,3,4,7,8,9) // contestó a alguna de las dos 0 y no tiene 1 en la otra y es empleado
 replace formal_ss_pension = 1 if (formal_ss==1 | aporta_pension==1) & inlist(categ_ocu,1,2,3,4,7,8,9)
 
-tab formal_ss_pension [fw=pondera]
+tab formal_ss_pension [fw=pondera] if edad>13 & edad<65
 
 label var formal_ss_pension "Formal worker"
 
@@ -157,14 +165,19 @@ label var formal_ss_pension "Formal worker"
 *Education Level 
 
 ***Educational levels (dummies)
-g low_educated = (nivel_educ<3) if !missing(nivel_educ)
-g middle_educated = (nivel_educ>2 & nivel_educ<7) if !missing(nivel_educ)
-g high_educated = (nivel_educ>6) if !missing(nivel_educ)
+g low_educated = (nivel_educ<4) if !missing(nivel_educ)
+g middle_educated = (nivel_educ==4 | nivel_educ==5) if !missing(nivel_educ)
+g high_educated = (nivel_educ>5) if !missing(nivel_educ)
 
-label var low_educated "Low-skilled"
-label var middle_educated "Middle-skilled"
-label var high_educated "High-skilled"
+label var low_educated "Low-educated"
+label var middle_educated "Middle-educated"
+label var high_educated "High-educated"
 
+g educ_level = .
+replace educ_level = 1 if nivel_educ<4
+replace educ_level = 2 if nivel_educ>3 & nivel_educ<6
+replace educ_level = 3 if nivel_educ>5 
+tab educ_level [fw=pondera]
 
 ********************************************************************************
 *Skill Level 
@@ -176,7 +189,7 @@ lab val skill_level skill_level
 tab skill_level
 
 //Skilled if have skilled occupation and/or post-secondary education
-gen high_skilled = (nivel_educ>6 | skill_level==3) if !missing(skill_level, nivel_educ)
+gen high_skilled = (nivel_educ>5 | skill_level==3) if !missing(skill_level, nivel_educ)
 tab high_skilled [fw=pondera]
 label var high_skilled "High-Skilled"
 
@@ -263,7 +276,7 @@ keep if edad>13 & edad<65		//10,994 observations deleted)
 count							//22,092 interviewed people
 
 
-		tab targetgroup if categ_ocu==5 | categ_ocu==6 [fw=pondera]
+tab targetgroup if categ_ocu==5 | categ_ocu==6 [fw=pondera]
 ********************************************************************************
 *Count potentially employed people 
 
@@ -276,23 +289,157 @@ Description of potentiall affected workers
 ==============================================================================*/
 
 *Who are they?
-local varlist edad low_educated middle_educated high_educated high_skilled salaryworker self_employed public_employee part_time pobre ///
+local varlist edad hombre low_educated middle_educated high_educated high_skilled salaryworker self_employed public_employee part_time pobre ///
 pobre_extremo breadwinner formal_ss_pension
-asdoc sum `varlist' [fw=pondera] if targetgroup==1, replace nocf dec(2) stat(mean sd p50) fhc(\b) label ///
-save($tables\summarystat.doc) title(Descriptive statistic of below poverty-level wage earners)
+*asdoc sum `varlist' [fw=pondera] if targetgroup2==1, replace nocf dec(2) stat(mean sd p50) fhc(\b) label ///
+*save($tables\summarystat.doc) title(Descriptive statistic of below poverty-level wage earners)
+
+estpost sum `varlist' [fw=pondera] if targetgroup2==1
+esttab using "$tables\summarystat.csv", cells((mean(fmt(%9.4f) label(Mean)))) ///
+label nonumber noobs ///
+title(Descriptive statistics of the potentially affected population) replace 
+
 
 
 *Percentage of affected group in different categories 
-local varlist edad low_educated middle_educated high_educated high_skilled rest_skilled salaryworker self_employed public_employee ///
+local varlist gedad1 hombre low_educated middle_educated high_educated high_skilled rest_skilled salaryworker self_employed public_employee ///
 part_time pobre pobre_extremo breadwinner formal_ss_pension
 foreach x in `varlist'{
-estpost tab `x' targetgroup [fw=pondera_hh], label
-esttab using "$tables/`x'_targetgroup.csv", cells("rowpct") collabels("Row-Percent") label unstack ///
+estpost tab `x' targetgroup2 [fw=pondera_hh], label
+esttab using "$tables/`x'_targetgroup2.csv", cells("rowpct") collabels("Row-Percent") label unstack ///
 varlabels(`e(labels)') eqlabels(`e(eqlabels)') ///
 title(Above and below poverty-level earner `x' - National (ENCOVI 2019/20)) replace
 }
 
 
+
+********************************************************************************
+*Potential Target Groups
+
+***How many people are targeted
+tab targetgroup2 [fw=pondera] if pobre_extremo==1
+tab targetgroup2 [fw=pondera] if pobre_extremo==1 & ocupado==1
+tab targetgroup2 [fw=pondera] if pobre==1 & ocupado==1
+
+*Wage earners below the extreme poverty-level wage
+tab targetgroup [fw=pondera] if edad>13 & edad<65
+
+*Workers below the extreme poverty-level wage
+tab targetgroup [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6
+
+*Workers below the extreme poverty-level wage (formal)
+tab targetgroup [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6 & formal_ss_pension==1
+
+*Self-employed and employer below the extreme poverty-level wage 
+tab targetgroup [fw=pondera] if edad>13 & edad<65 & (categ_ocu==5 | categ_ocu==6)
+
+*Workers between poverty-level wage and current min wage 
+tab targetgroup2 [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6
+
+*Wage-earners below current min wage 
+tab targetgroup3 [fw=pondera] if edad>35 & edad<65
+
+*Workers below current min wage
+tab targetgroup3 [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6
+
+*Extremely poor unemployed
+tab desocu [fw=pondera] if pobre_extremo==1
+
+*Extremely poor inactive
+tab ocupado [fw=pondera] if pobre_extremo==1
+
+*Public employees
+tab targetgroup2 [fw=pondera] if public_employee==1 & edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6
+
+********************************************************************************
+*Current average wage
+
+***All, also part-time
+sum ila_ppp [fw=pondera] if edad>13 & edad<65, d
+
+***All worker 
+sum ila_ppp [fw=pondera] if edad>13 & edad<65 & part_time==0, d
+
+***Young worker 
+sum ila_ppp [fw=pondera] if edad>14 & edad<36 & part_time==0, d
+
+***Older worker 
+sum ila_ppp [fw=pondera] if edad>35 & edad<65 & part_time==0, d
+
+***Wage of potentially affected groups
+sum ila_ppp [fw=pondera] if targetgroup2==1 & edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6, d
+bysort hombre: sum ila_ppp if targetgroup2==1 [fw=pondera]
+bysort educ_level: sum ila_ppp if targetgroup2==1 [fw=pondera]
+bysort breadwinner: sum ila_ppp if targetgroup2==1 [fw=pondera]
+bysort sector_encuesta: sum ila_ppp if targetgroup2==1 [fw=pondera]
+bysort categ_ocu: sum ila_ppp if targetgroup2==1 [fw=pondera]
+
+***Wage of public employees potentially affected
+sum ila_ppp if public_employee==1 & targetgroup2==1 [fw=pondera]
+
+
+********************************************************************************
+*Poverty
+
+tab pobre targetgroup [fw=pondera], column
+
+tab pobre targetgroup2 [fw=pondera], column
+
+tab pobre_extremo targetgroup [fw=pondera], column
+
+tab pobre_extremo targetgroup2 [fw=pondera], column
+
+
+********************************************************************************
+*Informality
+
+tab formal_ss_pension [fw=pondera] if edad>13 & edad<65
+
+***Young worker 
+tab formal_ss_pension [fw=pondera] if edad>14 & edad<36
+
+***Old worker
+tab formal_ss_pension [fw=pondera] if edad>35 & edad<65
+
+***Not highly skilled 
+tab formal_ss_pension [fw=pondera] if edad>13 & edad<65 & rest_skilled==1
+
+
+
+********************************************************************************
+*Potentially affected public sector worker 
+
+tab public_employee [fw=pondera] if targetgroup2==1
+
+
+********************************************************************************
+* Construct active labor force 
+
+gen active_lf = (ocupad==1 | desocu==1)
+tab active_lf [fw=pondera]
+
+***Activity by age group
+tab gedad1 active_lf [fw=pondera], row
+
+***Activity by education 
+tab educ_level active_lf [fw=pondera], row
+
+***Activity by gender
+tab hombre active_lf [w=pondera], row
+
+*Extremely poor inactive
+tab active_lf [fw=pondera] if pobre_extremo==1
+
+
+
+
+********************************************************************************
+*B) Construct unemployment rate
+
+tab desocu if active_lf==1 [fw=pondera]
+tab gedad1 desocu if active_lf==1 [fw=pondera], row
+tab educ_level desocu if active_lf==1 [fw=pondera], row
+tab hombre desocu if active_lf==1 [fw=pondera], row
 
 
 

@@ -12,8 +12,9 @@ Description: 		This do-file generates input for the Poverty Section of the RPBA 
 Output:			    Simulation of extreme poverty-level wage 
 
 =============================================================================*/
+
 ********************************************************************************
-*Prepare 
+*Prepare simulations
 ********************************************************************************
 
 ***Current min wage
@@ -55,12 +56,6 @@ tab neet
 
 ***Average income of employed earning below the poverty level wage
 sum wage if wage<165 & categ_ocu!=5 & categ_ocu!=6 [fw=pondera]
-
-***Number of people below poverty-level wage
-tab targetgroup [fw=pondera] //89.97 
-tab targetgroup if categ_ocu!=5 & categ_ocu!=6 [fw=pondera] //90.53 - 5,149,740 
-tab targetgroup if categ_ocu!=5 & categ_ocu!=6 & formal_ss_pension==1 [fw=pondera] //89.01
-
 
 
 ********************************************************************************
@@ -137,8 +132,6 @@ replace wage=Mwage4 if wage==. & categ_ocu!=5 & categ_ocu!=6
 drop Mwage Mwage2 Mwage3 Mwage4
 
 
-
-
 ********************************************************************************
 *Define different scenarios
 
@@ -156,6 +149,9 @@ local sc=1
 g newminwage=newminwage`sc'          //scenario of the Policy
 
 
+
+
+
 ********************************************************************************
 *Only consider employees
 replace wage=. if categ_ocu==5 | categ_ocu==6 //Do not consider employers and self-employed
@@ -169,17 +165,17 @@ replace wage=. if categ_ocu==5 | categ_ocu==6 //Do not consider employers and se
 ***Wage below the minimum: 
 gen wagelowold=wage<minwage 
 replace wagelowold=. if wage==. | minwage==.
-sum  wagelowold [fw=pondera] //14.9 percent earn below old min wage 
+sum  wagelowold [fw=pondera]  
 
 ***Wage below the new minimum and obove the minimum (potentially affected)
-gen wagelownew=wage>=minwage & wage<newminwage 
+gen wagelownew= wage<newminwage & wage>=minwage // -> try-out including below min-wage earners 
 replace wagelownew=. if wage==. | minwage==.
-sum  wagelownew [fw=pondera] //75.8 percent earn above old and below new min wage 
+sum  wagelownew [fw=pondera]  
 
 ***Wage above new min wage 
 gen wagehigh=wage>=newminwage 
 replace wagehigh=. if wage==. | minwage==.
-sum  wagehigh [fw=pondera] //9.4 percent earn above new min wage 
+sum  wagehigh [fw=pondera] 
 
 ***Compute expected wage as a result of the policy:
 gen expwage=newminwage if wagelownew==1  // if potentally affected then expected wage = new min wage
@@ -197,6 +193,8 @@ lab var wagechange "Expected increase in wage, 2011-PPP-U$"
 
 
 
+
+
 ********************************************************************************
 *Create different types of elasticities
 ********************************************************************************
@@ -206,7 +204,7 @@ lab var wagechange "Expected increase in wage, 2011-PPP-U$"
 g sigma=-0.`sigma'        // elasticity for skilled in the short-run
 g sigma_us=sigma-0.7      // elasticity for unskilled in the short-run
 g sigmalr=sigma-0.8       // elasticity for skilled in the long-run
-g sigma_uslr=sigma_us-0.3 // elasticity for unskilled in the long-run
+g sigma_uslr=-1 // elasticity for unskilled in the long-run
 
 
 ***Create a variable for short- and long-run elasticity:
@@ -225,22 +223,22 @@ g sigma_lr=sigmalr*high_skilled+sigma_uslr*(1-high_skilled)
 //Do not include sample weights here yet
 
 
-**Compute average wage by age, skill-level, occupation, sector, formal/informal
+**Compute average wage by age, gender, educ level, skill-level, occupation, sector, formal/informal, breadwinner
 tempfile temptest 
 save `temptest', emptyok
 
 preserve
 collapse (mean) wage [fw=pondera] if wagelownew==1, ///
-by(gedad1 high_skilled categ_ocu part_time sector_encuesta formal_ss_pension)
+by(gedad1 hombre educ_level high_skilled categ_ocu part_time sector_encuesta formal_ss_pension breadwinner)
 rename wage Mwage
 save `temptest', replace
 restore
 
-merge m:1 gedad1 high_skilled categ_ocu part_time sector_encuesta formal_ss_pension using `temptest'  
+merge m:1 gedad1 hombre educ_level high_skilled categ_ocu part_time sector_encuesta formal_ss_pension breadwinner using `temptest'  
 drop _merge
 
 
-***Compute expected wage change by age, skill-level, occupation, sector, formal/informal
+**Compute expected wage by age, gender, educ level, skill-level, occupation, sector, formal/informal, breadwinner
 tempfile temptest 
 save `temptest', emptyok
 
@@ -371,6 +369,7 @@ lab var Mneet_lr "Simulated percent of NEETs. Long-run %"
 *Calculate new income per capita 
 ********************************************************************************
 
+drop ipcf_sr //from encovi data preparation 
 
 foreach r in sr lr {
 * Ingreso individual total Monetario

@@ -21,12 +21,12 @@ g minwage=20.62
 label var minwage "Current minimum wage (in 2011-PPP-$)"
 
 ***Create minimum wages
-g newminwage1 = 165 // Extreme poverty-level wage
-label var newminwage1 "Extreme poverty-level wage (165 2011-PPP-$)" 
-g newminwage2 = 82.5 //Half of extreme poverty-level wage
-label var newminwage2 "50 percent of extreme povert-level wage (82.5 2011-PPP-$)"
-g newminwage3 = 123.75 //Two-thirds of extreme poverty-level wage
-label var newminwage3 "75 percent of extreme poverty-levle wage (123.75 2011-PPP-$)"
+g newminwage1 = 27.56 // Minimum wage ratio of 0.4
+label var newminwage1 "Minimum wage ratio of 0.4" 
+g newminwage2 = 41.34 // Minimum wage ratio of 0.6 
+label var newminwage2 "Minimum wage ratio of 0.6 "
+*g newminwage3 = 123.75 //Two-thirds of extreme poverty-level wage
+*label var newminwage3 "75 percent of extreme poverty-levle wage (123.75 2011-PPP-$)"
 
 ***Young worker 
 tab gedad1 //2 = age group 15-24
@@ -138,11 +138,7 @@ drop Mwage Mwage2 Mwage3 Mwage4
 local sigma=5  // OWE= -0.5 (baseline)
 
 ***Wage Scenario
-local sc=3 
-//Scenario 1 = Extreme poverty level wage of 165 2011-PPP-$
-//Scenario 2 = Half of extreme poverty-level wage of 82.5 2011-PPP-$
-//Scenario 3 = 75 percent of extreme poverty-levle wage (123.75 2011-PPP-$)
-
+local sc=2
 
 ***New minimum wage
 g newminwage=newminwage`sc'          //scenario of the Policy

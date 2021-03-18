@@ -351,8 +351,12 @@ tab ocupado [fw=pondera] if pobre_extremo==1
 *Public employees
 tab targetgroup2 [fw=pondera] if public_employee==1 & edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6
 
+*Public employees below gradual minimum wage
+tab public_employee [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6 & ila_ppp<27.56
+tab public_employee [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6 & ila_ppp<41.34
+
 ********************************************************************************
-*Current average wage
+*Current average/median wage
 
 ***All, also part-time
 sum ila_ppp [fw=pondera] if edad>13 & edad<65, d

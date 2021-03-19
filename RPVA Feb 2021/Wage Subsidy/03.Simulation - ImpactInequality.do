@@ -441,7 +441,7 @@ local lb`var': variable label `var'
 foreach var in $group {
 
 preserve 
-collapse (p10) $outcome [fw=pondera] if `var'==1
+collapse (p66) $outcome [fw=pondera] if `var'==1
 
 
 

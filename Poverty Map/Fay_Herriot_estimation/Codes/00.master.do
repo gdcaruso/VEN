@@ -78,4 +78,4 @@ do "${root}/dofiles/03.process_survey.do"
 do "${root}/dofiles/04.fay_herriot_estimation_census2011.do"
 
 * Graph maps
-do "${root}/dofiles/05.maps_census.do"
+do "${root}/dofiles/05.graph_map.do"

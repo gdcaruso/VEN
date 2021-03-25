@@ -130,6 +130,9 @@ label var targetgroup2 "Below poverty-level and above min. wage earners"
 gen targetgroup3 = (ila_ppp<20.62) if !missing(ila_ppp)
 tab targetgroup3 [fw=pondera]  if edad>13 & edad<65
 
+gen targetgroup4 = (ila_ppp>20.6 & ila_ppp<55) if !missing(ila_ppp)
+tab targetgroup4 [fw=pondera] if edad>13 & edad<65
+
 ********************************************************************************
 *Generate informality indicator
 
@@ -355,6 +358,10 @@ tab targetgroup2 [fw=pondera] if public_employee==1 & edad>13 & edad<65 & categ_
 tab public_employee [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6 & ila_ppp<27.56
 tab public_employee [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6 & ila_ppp<41.34
 
+*Public employees below scenario 4 
+tab public_employee [fw=pondera] if edad>13 & edad<65 & categ_ocu!=5 & categ_ocu!=6 & ila_ppp<55
+
+
 ********************************************************************************
 *Current average/median wage
 
@@ -380,6 +387,11 @@ bysort categ_ocu: sum ila_ppp if targetgroup2==1 [fw=pondera]
 
 ***Wage of public employees potentially affected
 sum ila_ppp if public_employee==1 & targetgroup2==1 [fw=pondera]
+sum ila_ppp if public_employee==1 & targetgroup4==1 [fw=pondera]
+
+
+***Wage of PAP under 33 percent poverty-level wage
+sum ila_ppp [fw=pondera] if edad>35 & edad<65 & ila_ppp>20.6 & ila_ppp<55, d
 
 
 ********************************************************************************
@@ -393,6 +405,13 @@ tab pobre_extremo targetgroup [fw=pondera], column
 
 tab pobre_extremo targetgroup2 [fw=pondera], column
 
+tab targetgroup4 pobre_extremo [fw=pondera], column
+
+tab targetgroup4 pobre_extremo [fw=pondera] if categ_ocu!=5 & categ_ocu!=6, column
+
+tab pobre_extremo targetgroup4 [fw=pondera] if categ_ocu!=5 & categ_ocu!=6, column
+
+tab pobre targetgroup4 [fw=pondera] if categ_ocu!=5 & categ_ocu!=6, column
 
 ********************************************************************************
 *Informality

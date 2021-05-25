@@ -237,6 +237,7 @@ label var part_time "Part-time worker"
 
 ********************************************************************************
 *Change label of sector_encuesta
+
 label define industry 1 "Agriculture/ livestock/ fishing/ huntin" 2 "Mining and quarrying" 3 "Manufacturing industry" 4 ///
 "Installation / supply / distribution of" 5 "Construction" 6 "Wholesale and retail trade/ repair of motor vehicles and motorcycles" ///
 7 "Transportation/ storage/ lodging/ food services/communication/computer services" ///
@@ -465,9 +466,14 @@ tab educ_level desocu if active_lf==1 [fw=pondera], row
 tab hombre desocu if active_lf==1 [fw=pondera], row
 
 
+********************************************************************************
+*C) Minimum wage for certain regions 
 
+tab region_est1 pobre_extremo [fw=pondera], row
 
-
+tab sector pobre_extremo [fw=pondera], row
+tab sector [fw=pondera] if pobre_extremo==1
+tab sector [fw=pondera] if pobre==1
 
 
 

@@ -57,7 +57,7 @@ graph export "$figures/histogram_income_munid.png", replace
 
 
 /*==============================================================================
-Conduct different versions of model for differenet poverty indicators
+Conduct different versions of model for different poverty indicators
 ===============================================================================*/
 
 

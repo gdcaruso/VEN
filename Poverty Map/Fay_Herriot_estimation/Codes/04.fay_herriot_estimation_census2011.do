@@ -11,10 +11,10 @@ Only uses census data (Census 2011) as explanatory variables
 *******************************************************************************
 *Define variables for estimation
 
-global directestimators ipcf_munid ipcf_var_munid pobre_extremo_munid pobre_extremo_var_munid poverty_gap_munid poverty_gap_var_munid ///
-poverty_severity_munid poverty_severity_var_munid simple_mean_poverty_severity simple_var_poverty_severity ///
-samplesize simple_mean_ipcf simple_mean_pobre_extremo simple_mean_poverty_gap simple_var_ipcf simple_var_pobre_extremo simple_var_poverty_gap
-global vivvars ownviv auto heladera dormi banio lavsec tvradio calentac nhogviv techo pared piso acue freqagua poceac elecpub  
+global directestimators simple_mean_ipcf_ppp simple_mean_poor simple_mean_poverty_gap simple_mean_poverty_severity ///
+simple_var_ipcf_ppp simple_var_poor simple_var_poverty_gap simple_var_poverty_severity samplesize ///
+poor_munid poor_var_munid ipcf_ppp11_munid ipcf_ppp11_var_munid poverty_gap_munid poverty_gap_var_munid ///
+poverty_severity_munid poverty_severity_var_munid
 *global headvars h_age h_fem h_single h_primaria h_secundaria h_educ h_ocupado h_desocup h_selfemp h_entrepreneur h_publicsect
 global headvars h_fem h_primaria
 global hhvars miembros shchild shoccadult notsch
